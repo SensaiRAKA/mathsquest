@@ -466,7 +466,7 @@ function intlGroup(n) {
 
 /* Roman numerals (1..39 is plenty for class 4) */
 function toRoman(n) {
-  var map = [[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+  var map = [[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
   var out = "";
   for (var i = 0; i < map.length; i++) {
     while (n >= map[i][0]) { out += map[i][1]; n -= map[i][0]; }
@@ -494,11 +494,14 @@ function threeWords(n) {
 }
 function toWords(n) {
   if (n === 0) return "zero";
-  var th = Math.floor(n / 1000);
-  var rest = n % 1000;
+  var lakh = Math.floor(n / 100000);
+  var rest = n % 100000;
+  var th = Math.floor(rest / 1000);
+  var rem = rest % 1000;
   var parts = [];
+  if (lakh) parts.push(twoWords(lakh) + " lakh");
   if (th) parts.push((th < 100 ? twoWords(th) : threeWords(th)) + " thousand");
-  if (rest) parts.push(threeWords(rest));
+  if (rem) parts.push(threeWords(rem));
   return parts.join(" ");
 }
 function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
@@ -521,8 +524,31 @@ function buildChoices(correct, candidates, maxOptions) {
 /* ---------- question generators ----------
    each returns: { cat, prompt, answer (string), mode:'type'|'choice', choices?, rule, paper? }
 */
-var PLACES = ["ones","tens","hundreds","thousands"];
-var PLACE_VALUE = [1, 10, 100, 1000];
+var ALL_PLACES = ["ones","tens","hundreds","thousands","ten-thousands","lakhs"];
+var ALL_PV     = [1, 10, 100, 1000, 10000, 100000];
+
+/* pick a number (4–6 digit) and a position where the digit is non-zero AND unique */
+function pickNumberAndPos() {
+  var n, s, len, validPos, tries = 0;
+  do {
+    var r = Math.random();
+    n = r < 0.35 ? randInt(1000, 9999) : (r < 0.70 ? randInt(10000, 99999) : randInt(100000, 999999));
+    s = String(n);
+    len = s.length;
+    validPos = [];
+    for (var i = 0; i < len; i++) {
+      if (s[i] === "0") continue;
+      var count = 0;
+      for (var j = 0; j < len; j++) { if (s[j] === s[i]) count++; }
+      if (count === 1) validPos.push(len - 1 - i);  // pos from right (0=ones)
+    }
+    tries++;
+  } while (validPos.length === 0 && tries < 50);
+  if (validPos.length === 0) { n = 1234; s = "1234"; len = 4; validPos = [0, 1, 2, 3]; }
+  var pos = pick(validPos);
+  var digit = parseInt(s[len - 1 - pos], 10);
+  return { n:n, s:s, len:len, pos:pos, digit:digit, pv: digit * ALL_PV[pos], placeName: ALL_PLACES[pos] };
+}
 
 function gAdd() {
   var a = randInt(1000, 8999), b = randInt(1000, 8999);
@@ -552,45 +578,41 @@ function gDiv() {
     rule:"Ask: how many " + d + "s make " + dividend + "? Use long division \u2014 divide, multiply, subtract, bring down." };
 }
 function gSuccessor() {
+  /* include boundary numbers where carry propagates — 999, 9999, 99999 */
+  var boundaries = [999, 1999, 4999, 9999, 10999, 49999, 99999];
+  var n = Math.random() < 0.25 ? pick(boundaries) : (Math.random() < 0.5 ? randInt(1000, 9998) : randInt(10000, 99998));
   if (Math.random() < 0.5) {
-    var n = randInt(1000, 9998);
     return { cat:"Successor", mode:"type", paper:false,
       prompt:"What comes just after " + n + "?", answer:String(n + 1),
-      rule:"The successor is the next number. Just add 1." };
+      rule:"The successor is the next number: " + n + " + 1 = " + (n + 1) + "." };
   } else {
-    var m = randInt(1001, 9999);
+    var m = Math.random() < 0.25 ? pick([1000, 5000, 10000, 50000, 100000]) : (Math.random() < 0.5 ? randInt(1001, 9999) : randInt(10001, 99999));
     return { cat:"Predecessor", mode:"type", paper:false,
       prompt:"What comes just before " + m + "?", answer:String(m - 1),
-      rule:"The predecessor is the number just before. Subtract 1." };
+      rule:"The predecessor is the number just before: " + m + " - 1 = " + (m - 1) + "." };
   }
 }
-function nonZeroPos(s) {
-  var spots = [];
-  for (var i = 0; i < 4; i++) { if (s[3 - i] !== "0") spots.push(i); }
-  return spots[Math.floor(Math.random() * spots.length)];
-}
 function gPlaceValue() {
-  var n = randInt(1000, 9999);
-  var s = String(n);
-  var pos = nonZeroPos(s);
-  var digit = parseInt(s[3 - pos], 10);
-  var pv = digit * PLACE_VALUE[pos];
-  var candidates = [digit, digit * 10, digit * 100, digit * 1000, parseInt(s[0],10) * 1000];
+  var p = pickNumberAndPos();
+  var candidates = [];
+  for (var i = 0; i < p.len; i++) {
+    var d = parseInt(p.s[i], 10);
+    if (d !== 0) candidates.push(d * ALL_PV[p.len - 1 - i]);
+  }
+  candidates.push(p.digit);
+  if (p.pos < 5) candidates.push(p.digit * ALL_PV[p.pos + 1]);
   return { cat:"Place value", mode:"choice",
-    prompt:"What is the PLACE VALUE of " + digit + " in " + n + "?",
-    answer:String(pv), choices: buildChoices(pv, candidates),
-    rule:"Place value = the digit multiplied by where it sits. " + digit + " is in the " + PLACES[pos] + " place, so its place value is " + digit + " \u00d7 " + PLACE_VALUE[pos] + " = " + pv + "." };
+    prompt:"In " + indianGroup(p.n) + ", what is the PLACE VALUE of " + p.digit + "?",
+    answer: String(p.pv), choices: buildChoices(p.pv, candidates),
+    rule: p.digit + " is in the " + p.placeName + " place in " + indianGroup(p.n) + ", so its place value is " + p.digit + " \u00d7 " + ALL_PV[p.pos] + " = " + p.pv + "." };
 }
 function gFaceValue() {
-  var n = randInt(1000, 9999);
-  var s = String(n);
-  var pos = nonZeroPos(s);
-  var digit = parseInt(s[3 - pos], 10);
-  var candidates = [digit * PLACE_VALUE[pos], digit * 10, digit * 100, parseInt(s[0],10)];
+  var p = pickNumberAndPos();
+  var candidates = [p.pv, p.digit * 10, p.digit * 100, parseInt(p.s[0], 10)];
   return { cat:"Face value", mode:"choice",
-    prompt:"What is the FACE VALUE of " + digit + " in " + n + "?",
-    answer:String(digit), choices: buildChoices(digit, candidates),
-    rule:"Face value is simply the digit itself, wherever it sits. The face value of " + digit + " is " + digit + ". (Place value changes with position \u2014 face value never does.)" };
+    prompt:"In " + indianGroup(p.n) + ", what is the FACE VALUE of " + p.digit + "?",
+    answer: String(p.digit), choices: buildChoices(p.digit, candidates),
+    rule:"Face value is just the digit itself: " + p.digit + ". (Its place value is " + p.pv + ", but face value never changes with position.)" };
 }
 function gIndianComma() {
   var n = randInt(10000, 999999);
@@ -611,39 +633,54 @@ function gIntlComma() {
     rule:"International system: place a comma after every 3 digits from the right. So " + n + " becomes " + correct + "." };
 }
 function gExpanded() {
-  var n = randInt(1000, 9999);
+  var r = Math.random();
+  var n = r < 0.35 ? randInt(1000, 9999) : (r < 0.70 ? randInt(10000, 99999) : randInt(100000, 999999));
   var s = String(n);
+  var len = s.length;
   var terms = [];
-  for (var i = 0; i < 4; i++) {
+  for (var i = 0; i < len; i++) {
     var d = parseInt(s[i], 10);
-    if (d !== 0) terms.push(String(d * PLACE_VALUE[3 - i]));
+    if (d !== 0) terms.push(String(d * ALL_PV[len - 1 - i]));
   }
   var correct = terms.join(" + ");
+  /* distractor: include 0-value terms */
   var withZero = [];
-  for (var j = 0; j < 4; j++) withZero.push(String(parseInt(s[j],10) * PLACE_VALUE[3 - j]));
+  for (var j = 0; j < len; j++) withZero.push(String(parseInt(s[j],10) * ALL_PV[len - 1 - j]));
+  /* distractor: just the digits joined */
   var candidates = [withZero.join(" + "), s.split("").join(" + ")];
   return { cat:"Expanded form", mode:"choice",
-    prompt:"Which is the expanded form of " + n + "?",
+    prompt:"Which is the expanded form of " + indianGroup(n) + "?",
     answer: correct, choices: buildChoices(correct, candidates),
-    rule:"Break the number by place value and drop any zeros: " + n + " = " + correct + "." };
+    rule:"Break by place value, skip any zeros: " + indianGroup(n) + " = " + correct + "." };
 }
 function gCompare() {
-  var a = randInt(1000, 9999);
-  var b;
-  var r = Math.random();
-  if (r < 0.4) b = a;
-  else if (r < 0.7) b = randInt(1000, a - 1);
-  else b = randInt(a + 1, 10000);
+  var a, b, r = Math.random();
+  if (r < 0.25) {
+    /* different digit counts — classic Class 4 question */
+    a = randInt(1000, 9999); b = randInt(10000, 99999);
+    if (Math.random() < 0.5) { var t = a; a = b; b = t; }
+  } else if (r < 0.55) {
+    a = randInt(1000, 9999);
+    b = Math.random() < 0.35 ? a : (Math.random() < 0.5 ? randInt(1000, a - 1) : randInt(a + 1, 9999));
+  } else {
+    a = randInt(10000, 99999);
+    b = Math.random() < 0.35 ? a : (Math.random() < 0.5 ? randInt(10000, a - 1) : randInt(a + 1, 99999));
+  }
   var correct = a > b ? ">" : (a < b ? "<" : "=");
+  var tip = String(a).length !== String(b).length
+    ? "More digits means a bigger number: " + indianGroup(a) + " has " + String(a).length + " digits, " + indianGroup(b) + " has " + String(b).length + "."
+    : "Same number of digits — compare from the left. " + indianGroup(a) + " " + correct + " " + indianGroup(b) + ".";
   return { cat:"Compare", mode:"choice", symbols:true,
-    prompt:"Which sign goes here?  " + a + "  __  " + b,
+    prompt:"Which sign goes here?  " + indianGroup(a) + "  __  " + indianGroup(b),
     answer: correct, choices: ["<", ">", "="],
-    rule:"Compare from the left, digit by digit. The first place where they differ decides it. " + a + " " + correct + " " + b + "." };
+    rule: tip };
 }
 function gOrdering() {
-  var nums = [];
+  var nums = [], useMixed = Math.random() < 0.35, fixedLen = Math.random() < 0.5 ? 4 : 5;
   while (nums.length < 4) {
-    var n = randInt(1000, 9999);
+    var n = useMixed
+      ? (Math.random() < 0.5 ? randInt(1000, 9999) : randInt(10000, 99999))
+      : (fixedLen === 4 ? randInt(1000, 9999) : randInt(10000, 99999));
     if (nums.indexOf(n) === -1) nums.push(n);
   }
   var ascending = Math.random() < 0.5;
@@ -651,30 +688,32 @@ function gOrdering() {
   var correct = ascending ? sorted[0] : sorted[sorted.length - 1];
   var word = ascending ? "smallest" : "greatest";
   return { cat:"Ordering", mode:"choice",
-    prompt:"Which is the " + word.toUpperCase() + "?  " + nums.join(",  "),
-    answer: String(correct), choices: buildChoices(correct, nums),
-    rule:"Compare by number of digits first, then from the left. The " + word + " here is " + correct + "." };
+    prompt:"Which is the " + word.toUpperCase() + "?  " + nums.map(indianGroup).join(",  "),
+    answer: indianGroup(correct), choices: shuffle(nums.map(indianGroup)),
+    rule:"More digits = larger number. Same digits: compare from the left. The " + word + " here is " + indianGroup(correct) + "." };
 }
 function gGreatestSmallest() {
-  var digits = distinctDigits(4);
+  var use5 = Math.random() < 0.4;
+  var digits = distinctDigits(use5 ? 5 : 4);
   var greatest = digits.slice().sort(function(a,b){ return b - a; });
   var smallest = digits.slice().sort(function(a,b){ return a - b; });
   if (smallest[0] === 0) {
     var k = 1;
-    while (smallest[k] === 0) k++;
+    while (k < smallest.length && smallest[k] === 0) k++;
     var tmp = smallest[0]; smallest[0] = smallest[k]; smallest[k] = tmp;
   }
   var wantGreatest = Math.random() < 0.5;
   var correctArr = wantGreatest ? greatest : smallest;
   var otherArr = wantGreatest ? smallest : greatest;
   var correct = correctArr.join("");
+  var dlen = digits.length;
   var candidates = [otherArr.join(""), digits.join(""), shuffle(digits).join("")];
   return { cat:"Form a number", mode:"choice",
-    prompt:"Make the " + (wantGreatest ? "GREATEST" : "SMALLEST") + " 4-digit number using " + digits.join(", ") + ":",
+    prompt:"Make the " + (wantGreatest ? "GREATEST" : "SMALLEST") + " " + dlen + "-digit number using " + digits.join(", ") + ":",
     answer: correct, choices: buildChoices(correct, candidates),
     rule: wantGreatest
-      ? "For the greatest number, put the biggest digit first: " + correct + "."
-      : "For the smallest number, put the smallest digit first \u2014 but a number can't start with 0, so the next smallest goes first: " + correct + "." };
+      ? "For the greatest number, arrange digits from biggest to smallest: " + correct + "."
+      : "For the smallest number, put the smallest non-zero digit first, then the rest in ascending order: " + correct + "." };
 }
 function gRomanToNum() {
   var n = randInt(1, 39);
@@ -695,16 +734,18 @@ function gNumToRoman() {
     rule:"Build from large to small using I, V, X. Use subtraction for 4 and 9 (IV, IX). So " + n + " = " + roman + "." };
 }
 function gNumberName() {
-  var n = randInt(1000, 99999);
+  var r = Math.random();
+  var n = r < 0.3 ? randInt(1000, 9999) : (r < 0.65 ? randInt(10000, 99999) : randInt(100000, 999999));
   var correct = cap(toWords(n));
-  var d1 = n + (n % 10 < 5 ? 3 : -3);
-  var d2 = n + (Math.floor(n / 10) % 10 < 5 ? 20 : -20);
-  var d3 = n + 100;
-  var candidates = [cap(toWords(Math.abs(d1))), cap(toWords(Math.abs(d2))), cap(toWords(Math.abs(d3)))];
+  /* distractors: tweak by small amounts to produce plausible wrong answers */
+  var d1 = Math.max(1000, n + (n % 10 < 5 ? 3 : -3));
+  var d2 = Math.max(1000, n + (Math.floor(n / 10) % 10 < 5 ? 200 : -200));
+  var d3 = Math.max(1000, n + (n >= 100000 ? 10000 : (n >= 10000 ? 1000 : 100)));
+  var candidates = [cap(toWords(d1)), cap(toWords(d2)), cap(toWords(d3))];
   return { cat:"Number names", mode:"choice",
     prompt:"How do we write " + indianGroup(n) + " in words?",
     answer: correct, choices: buildChoices(correct, candidates),
-    rule:"Read it group by group using the Indian system. " + indianGroup(n) + " = " + correct + "." };
+    rule:"Read it group by group. " + indianGroup(n) + " = " + correct + "." };
 }
 
 function gDivRemainder() {
