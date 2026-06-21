@@ -122,6 +122,56 @@
   }
   .hint.paper { color: var(--emerald); }
 
+  .help-row {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .help-btn {
+    display: inline-block;
+    background: #fef9c3;
+    color: #854d0e;
+    border: none;
+    font-weight: 800;
+    font-size: 13px;
+    padding: 8px 14px;
+    border-radius: 99px;
+    cursor: pointer;
+    font-family: inherit;
+    text-decoration: none;
+    transition: transform 0.08s ease;
+  }
+  .help-btn:active { transform: scale(0.96); }
+  .help-btn.video { background: #dbeafe; color: #1e3a8a; }
+  .hint-panel {
+    display: none;
+    text-align: left;
+    background: #fffbeb;
+    border: 2px solid #fde68a;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #854d0e;
+    line-height: 1.4;
+  }
+  .hint-panel.show { display: block; }
+  .stuck-nudge {
+    display: none;
+    text-align: center;
+    background: #ede9fe;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--indigo);
+  }
+  .stuck-nudge.show { display: block; }
+
   input[type="text"] {
     font-size: 30px;
     font-weight: 800;
@@ -336,6 +386,13 @@
     <div class="question" id="questionText">Loading...</div>
     <div class="hint" id="hint"></div>
 
+    <div class="help-row">
+      <button class="help-btn" id="hintToggleBtn" type="button">💡 Need a hint?</button>
+      <a class="help-btn video" id="videoLinkBtn" href="#" target="_blank" rel="noopener">🎬 Watch a video</a>
+    </div>
+    <div class="hint-panel" id="hintPanel"></div>
+    <div class="stuck-nudge" id="stuckNudge"></div>
+
     <div id="typeArea">
       <input type="text" inputmode="numeric" id="answerInput" placeholder="?" autocomplete="off">
       <br>
@@ -404,7 +461,9 @@ function loadState() {
     today: s.today || "",
     todayProgress: s.todayProgress || 0,
     goalCelebrated: s.goalCelebrated || false,
-    mistakes: s.mistakes || []
+    mistakes: s.mistakes || [],
+    diff: s.diff || {},
+    diffStreak: s.diffStreak || {}
   };
 }
 function saveState() {
@@ -446,6 +505,29 @@ function shuffle(arr) {
 function distinctDigits(count) {
   var pool = shuffle([0,1,2,3,4,5,6,7,8,9]);
   return pool.slice(0, count);
+}
+function randForLen(len) {
+  var lo = Math.pow(10, len - 1), hi = Math.pow(10, len) - 1;
+  return randInt(lo, hi);
+}
+
+/* ---------- rule-based difficulty (no AI; per-category level 1-3, default 2) ---------- */
+function levelOf(cat) {
+  var lv = state.diff[cat];
+  return (lv === 1 || lv === 2 || lv === 3) ? lv : 2;
+}
+function bumpDifficulty(cat, ok) {
+  var lv = levelOf(cat);
+  var streak = state.diffStreak[cat] || 0;
+  if (ok) {
+    streak += 1;
+    if (streak >= 3 && lv < 3) { lv += 1; streak = 0; }
+  } else {
+    streak = 0;
+    if (lv > 1) lv -= 1;
+  }
+  state.diff[cat] = lv;
+  state.diffStreak[cat] = streak;
 }
 
 /* Indian comma grouping: last 3 digits, then groups of 2 */
@@ -527,12 +609,19 @@ function buildChoices(correct, candidates, maxOptions) {
 var ALL_PLACES = ["ones","tens","hundreds","thousands","ten-thousands","lakhs"];
 var ALL_PV     = [1, 10, 100, 1000, 10000, 100000];
 
-/* pick a number (4–6 digit) and a position where the digit is non-zero AND unique */
-function pickNumberAndPos() {
+/* pick a number (3–6 digit, scaled by difficulty level) and a position where the digit is non-zero AND unique */
+function pickNumberAndPos(level) {
+  var lv = level || 2;
   var n, s, len, validPos, tries = 0;
   do {
     var r = Math.random();
-    n = r < 0.35 ? randInt(1000, 9999) : (r < 0.70 ? randInt(10000, 99999) : randInt(100000, 999999));
+    if (lv === 1) {
+      n = r < 0.5 ? randInt(100, 999) : randInt(1000, 9999);
+    } else if (lv === 3) {
+      n = r < 0.4 ? randInt(10000, 99999) : randInt(100000, 999999);
+    } else {
+      n = r < 0.35 ? randInt(1000, 9999) : (r < 0.70 ? randInt(10000, 99999) : randInt(100000, 999999));
+    }
     s = String(n);
     len = s.length;
     validPos = [];
@@ -551,27 +640,48 @@ function pickNumberAndPos() {
 }
 
 function gAdd() {
-  var a = randInt(1000, 8999), b = randInt(1000, 8999);
+  var lv = levelOf("Addition"), lo, hi;
+  if (lv === 1) { lo = 10; hi = 999; }
+  else if (lv === 3) { lo = 10000; hi = 89999; }
+  else { lo = 1000; hi = 8999; }
+  var a = randInt(lo, hi), b = randInt(lo, hi);
   return { cat:"Addition", mode:"type", paper:true,
     prompt: a + " + " + b + " = ?", answer: String(a + b),
     rule:"Line up ones, tens, hundreds and thousands. If a column adds to 10 or more, carry 1 to the next column." };
 }
 function gSub() {
-  var a = randInt(4000, 9000), b = randInt(1000, a - 1000);
+  var lv = levelOf("Subtraction"), lo, hi, bMin;
+  if (lv === 1) { lo = 100; hi = 999; bMin = 10; }
+  else if (lv === 3) { lo = 40000; hi = 90000; bMin = 10000; }
+  else { lo = 4000; hi = 9000; bMin = 1000; }
+  var a = randInt(lo, hi), b = randInt(bMin, a - bMin);
   return { cat:"Subtraction", mode:"type", paper:true,
     prompt: a + " - " + b + " = ?", answer: String(a - b),
     rule:"Subtract column by column from the right. If the top digit is smaller, borrow 1 from the next column on the left." };
 }
 function gMul() {
+  var lv = levelOf("Multiplication");
   var a, b;
-  if (Math.random() < 0.5) { a = randInt(12, 99); b = randInt(3, 9); }
-  else { a = randInt(101, 499); b = randInt(2, 6); }
+  if (lv === 1) {
+    if (Math.random() < 0.5) { a = randInt(2, 20); b = randInt(2, 5); }
+    else { a = randInt(10, 50); b = randInt(2, 4); }
+  } else if (lv === 3) {
+    if (Math.random() < 0.5) { a = randInt(101, 999); b = randInt(4, 12); }
+    else { a = randInt(12, 99); b = randInt(11, 20); }
+  } else {
+    if (Math.random() < 0.5) { a = randInt(12, 99); b = randInt(3, 9); }
+    else { a = randInt(101, 499); b = randInt(2, 6); }
+  }
   return { cat:"Multiplication", mode:"type", paper:true,
     prompt: a + " \u00d7 " + b + " = ?", answer: String(a * b),
     rule:"Multiply each digit of " + a + " by " + b + ", starting from the ones. Carry over when a product is 10 or more, then add the carries." };
 }
 function gDiv() {
-  var d = randInt(2, 9), q = randInt(11, 40);
+  var lv = levelOf("Division");
+  var d, q;
+  if (lv === 1) { d = randInt(2, 5); q = randInt(2, 10); }
+  else if (lv === 3) { d = randInt(2, 9); q = randInt(41, 80); }
+  else { d = randInt(2, 9); q = randInt(11, 40); }
   var dividend = d * q;
   return { cat:"Division", mode:"type", paper:true,
     prompt: dividend + " \u00f7 " + d + " = ?", answer: String(q),
@@ -579,21 +689,36 @@ function gDiv() {
 }
 function gSuccessor() {
   /* include boundary numbers where carry propagates — 999, 9999, 99999 */
-  var boundaries = [999, 1999, 4999, 9999, 10999, 49999, 99999];
-  var n = Math.random() < 0.25 ? pick(boundaries) : (Math.random() < 0.5 ? randInt(1000, 9998) : randInt(10000, 99998));
   if (Math.random() < 0.5) {
+    var lv = levelOf("Successor");
+    var n;
+    if (lv === 1) {
+      n = Math.random() < 0.25 ? pick([99, 199, 499, 999]) : randInt(10, 998);
+    } else if (lv === 3) {
+      n = Math.random() < 0.25 ? pick([99999, 199999, 499999, 999999]) : randInt(100000, 999998);
+    } else {
+      n = Math.random() < 0.25 ? pick([999, 1999, 4999, 9999, 10999, 49999, 99999]) : (Math.random() < 0.5 ? randInt(1000, 9998) : randInt(10000, 99998));
+    }
     return { cat:"Successor", mode:"type", paper:false,
       prompt:"What comes just after " + n + "?", answer:String(n + 1),
       rule:"The successor is the next number: " + n + " + 1 = " + (n + 1) + "." };
   } else {
-    var m = Math.random() < 0.25 ? pick([1000, 5000, 10000, 50000, 100000]) : (Math.random() < 0.5 ? randInt(1001, 9999) : randInt(10001, 99999));
+    var lv2 = levelOf("Predecessor");
+    var m;
+    if (lv2 === 1) {
+      m = Math.random() < 0.25 ? pick([100, 200, 500, 1000]) : randInt(11, 999);
+    } else if (lv2 === 3) {
+      m = Math.random() < 0.25 ? pick([100000, 200000, 500000, 1000000]) : randInt(100001, 999999);
+    } else {
+      m = Math.random() < 0.25 ? pick([1000, 5000, 10000, 50000, 100000]) : (Math.random() < 0.5 ? randInt(1001, 9999) : randInt(10001, 99999));
+    }
     return { cat:"Predecessor", mode:"type", paper:false,
       prompt:"What comes just before " + m + "?", answer:String(m - 1),
       rule:"The predecessor is the number just before: " + m + " - 1 = " + (m - 1) + "." };
   }
 }
 function gPlaceValue() {
-  var p = pickNumberAndPos();
+  var p = pickNumberAndPos(levelOf("Place value"));
   var candidates = [];
   for (var i = 0; i < p.len; i++) {
     var d = parseInt(p.s[i], 10);
@@ -607,7 +732,7 @@ function gPlaceValue() {
     rule: p.digit + " is in the " + p.placeName + " place in " + indianGroup(p.n) + ", so its place value is " + p.digit + " \u00d7 " + ALL_PV[p.pos] + " = " + p.pv + "." };
 }
 function gFaceValue() {
-  var p = pickNumberAndPos();
+  var p = pickNumberAndPos(levelOf("Face value"));
   var candidates = [p.pv, p.digit * 10, p.digit * 100, parseInt(p.s[0], 10)];
   return { cat:"Face value", mode:"choice",
     prompt:"In " + indianGroup(p.n) + ", what is the FACE VALUE of " + p.digit + "?",
@@ -615,7 +740,8 @@ function gFaceValue() {
     rule:"Face value is just the digit itself: " + p.digit + ". (Its place value is " + p.pv + ", but face value never changes with position.)" };
 }
 function gIndianComma() {
-  var n = randInt(10000, 999999);
+  var lv = levelOf("Indian system");
+  var n = lv === 1 ? randInt(1000, 9999) : (lv === 3 ? randInt(100000, 999999) : randInt(10000, 999999));
   var correct = indianGroup(n);
   var candidates = [intlGroup(n), String(n), indianGroup(n).replace(/,/g, " ")];
   return { cat:"Indian system", mode:"choice",
@@ -624,7 +750,8 @@ function gIndianComma() {
     rule:"Indian system: put the first comma after 3 digits from the right, then after every 2 digits. So " + n + " becomes " + correct + "." };
 }
 function gIntlComma() {
-  var n = randInt(10000, 999999);
+  var lv = levelOf("International system");
+  var n = lv === 1 ? randInt(1000, 9999) : (lv === 3 ? randInt(100000, 999999) : randInt(10000, 999999));
   var correct = intlGroup(n);
   var candidates = [indianGroup(n), String(n)];
   return { cat:"International system", mode:"choice",
@@ -633,8 +760,12 @@ function gIntlComma() {
     rule:"International system: place a comma after every 3 digits from the right. So " + n + " becomes " + correct + "." };
 }
 function gExpanded() {
+  var lv = levelOf("Expanded form");
   var r = Math.random();
-  var n = r < 0.35 ? randInt(1000, 9999) : (r < 0.70 ? randInt(10000, 99999) : randInt(100000, 999999));
+  var n;
+  if (lv === 1) n = r < 0.5 ? randInt(100, 999) : randInt(1000, 9999);
+  else if (lv === 3) n = r < 0.4 ? randInt(10000, 99999) : randInt(100000, 999999);
+  else n = r < 0.35 ? randInt(1000, 9999) : (r < 0.70 ? randInt(10000, 99999) : randInt(100000, 999999));
   var s = String(n);
   var len = s.length;
   var terms = [];
@@ -654,8 +785,25 @@ function gExpanded() {
     rule:"Break by place value, skip any zeros: " + indianGroup(n) + " = " + correct + "." };
 }
 function gCompare() {
+  var lv = levelOf("Compare");
   var a, b, r = Math.random();
-  if (r < 0.25) {
+  if (lv === 1) {
+    if (r < 0.3) {
+      a = randInt(10, 99); b = randInt(100, 999);
+      if (Math.random() < 0.5) { var t1 = a; a = b; b = t1; }
+    } else {
+      a = randInt(10, 998);
+      b = Math.random() < 0.35 ? a : (Math.random() < 0.5 ? randInt(10, a) : randInt(a, 999));
+    }
+  } else if (lv === 3) {
+    if (r < 0.15) {
+      a = randInt(10000, 99999); b = randInt(100000, 999999);
+      if (Math.random() < 0.5) { var t3 = a; a = b; b = t3; }
+    } else {
+      a = randInt(100000, 999998);
+      b = Math.random() < 0.3 ? a : (Math.random() < 0.5 ? randInt(100000, a - 1) : randInt(a + 1, 999999));
+    }
+  } else if (r < 0.25) {
     /* different digit counts — classic Class 4 question */
     a = randInt(1000, 9999); b = randInt(10000, 99999);
     if (Math.random() < 0.5) { var t = a; a = b; b = t; }
@@ -676,11 +824,11 @@ function gCompare() {
     rule: tip };
 }
 function gOrdering() {
-  var nums = [], useMixed = Math.random() < 0.35, fixedLen = Math.random() < 0.5 ? 4 : 5;
+  var lv = levelOf("Ordering");
+  var lens = lv === 1 ? [3, 4] : (lv === 3 ? [5, 6] : [4, 5]);
+  var nums = [], useMixed = Math.random() < 0.35, fixedLen = pick(lens);
   while (nums.length < 4) {
-    var n = useMixed
-      ? (Math.random() < 0.5 ? randInt(1000, 9999) : randInt(10000, 99999))
-      : (fixedLen === 4 ? randInt(1000, 9999) : randInt(10000, 99999));
+    var n = useMixed ? randForLen(pick(lens)) : randForLen(fixedLen);
     if (nums.indexOf(n) === -1) nums.push(n);
   }
   var ascending = Math.random() < 0.5;
@@ -693,8 +841,12 @@ function gOrdering() {
     rule:"More digits = larger number. Same digits: compare from the left. The " + word + " here is " + indianGroup(correct) + "." };
 }
 function gGreatestSmallest() {
-  var use5 = Math.random() < 0.4;
-  var digits = distinctDigits(use5 ? 5 : 4);
+  var lv = levelOf("Form a number");
+  var dcount;
+  if (lv === 1) dcount = Math.random() < 0.7 ? 3 : 4;
+  else if (lv === 3) dcount = Math.random() < 0.5 ? 5 : 6;
+  else dcount = Math.random() < 0.6 ? 4 : 5;
+  var digits = distinctDigits(dcount);
   var greatest = digits.slice().sort(function(a,b){ return b - a; });
   var smallest = digits.slice().sort(function(a,b){ return a - b; });
   if (smallest[0] === 0) {
@@ -716,7 +868,9 @@ function gGreatestSmallest() {
       : "For the smallest number, put the smallest non-zero digit first, then the rest in ascending order: " + correct + "." };
 }
 function gRomanToNum() {
-  var n = randInt(1, 39);
+  var lv = levelOf("Roman numerals");
+  var maxN = lv === 1 ? 20 : (lv === 3 ? 49 : 39);
+  var n = randInt(1, maxN);
   var roman = toRoman(n);
   var candidates = [n + 1, n - 1, n + 5, Math.max(1, n - 5)];
   return { cat:"Roman numerals", mode:"choice",
@@ -725,22 +879,28 @@ function gRomanToNum() {
     rule:"I=1, V=5, X=10. A smaller value before a bigger one means subtract (IV=4, IX=9). So " + roman + " = " + n + "." };
 }
 function gNumToRoman() {
-  var n = randInt(1, 39);
+  var lv = levelOf("Roman numerals");
+  var maxN = lv === 1 ? 20 : (lv === 3 ? 49 : 39);
+  var n = randInt(1, maxN);
   var roman = toRoman(n);
-  var candidates = [toRoman(n + 1), toRoman(Math.max(1, n - 1)), toRoman(n % 39 + 1)];
+  var candidates = [toRoman(n + 1), toRoman(Math.max(1, n - 1)), toRoman(n % maxN + 1)];
   return { cat:"Roman numerals", mode:"choice",
     prompt:"Write " + n + " in Roman numerals:",
     answer: roman, choices: buildChoices(roman, candidates),
     rule:"Build from large to small using I, V, X. Use subtraction for 4 and 9 (IV, IX). So " + n + " = " + roman + "." };
 }
 function gNumberName() {
+  var lv = levelOf("Number names");
   var r = Math.random();
-  var n = r < 0.3 ? randInt(1000, 9999) : (r < 0.65 ? randInt(10000, 99999) : randInt(100000, 999999));
+  var n;
+  if (lv === 1) n = r < 0.5 ? randInt(100, 999) : randInt(1000, 9999);
+  else if (lv === 3) n = r < 0.4 ? randInt(10000, 99999) : randInt(100000, 999999);
+  else n = r < 0.3 ? randInt(1000, 9999) : (r < 0.65 ? randInt(10000, 99999) : randInt(100000, 999999));
   var correct = cap(toWords(n));
   /* distractors: tweak by small amounts to produce plausible wrong answers */
-  var d1 = Math.max(1000, n + (n % 10 < 5 ? 3 : -3));
-  var d2 = Math.max(1000, n + (Math.floor(n / 10) % 10 < 5 ? 200 : -200));
-  var d3 = Math.max(1000, n + (n >= 100000 ? 10000 : (n >= 10000 ? 1000 : 100)));
+  var d1 = Math.max(1, n + (n % 10 < 5 ? 3 : -3));
+  var d2 = Math.max(1, n + (Math.floor(n / 10) % 10 < 5 ? 200 : -200));
+  var d3 = Math.max(1, n + (n >= 100000 ? 10000 : (n >= 10000 ? 1000 : 100)));
   var candidates = [cap(toWords(d1)), cap(toWords(d2)), cap(toWords(d3))];
   return { cat:"Number names", mode:"choice",
     prompt:"How do we write " + indianGroup(n) + " in words?",
@@ -749,7 +909,12 @@ function gNumberName() {
 }
 
 function gDivRemainder() {
-  var d = randInt(3, 9), q = randInt(4, 30), r = randInt(1, d - 1);
+  var lv = levelOf("Division (remainder)");
+  var d, q;
+  if (lv === 1) { d = randInt(3, 6); q = randInt(2, 10); }
+  else if (lv === 3) { d = randInt(3, 9); q = randInt(31, 60); }
+  else { d = randInt(3, 9); q = randInt(4, 30); }
+  var r = randInt(1, d - 1);
   var dividend = d * q + r;
   return { cat:"Division (remainder)", mode:"divrem", paper:true,
     prompt: dividend + " \u00f7 " + d + " = ?  (give the quotient and the remainder)",
@@ -764,71 +929,99 @@ function aName() { return pick(NAMES); }
 function anItem() { return pick(ITEMS); }
 
 var WORD_TEMPLATES = [
-  function() { // addition - total
-    var item = anItem(), a = randInt(150, 4800), b = randInt(150, 4800);
+  function(lv) { // addition - total
+    var item = anItem();
+    var lo = lv === 1 ? 20 : (lv === 3 ? 3000 : 150), hi = lv === 1 ? 300 : (lv === 3 ? 9000 : 4800);
+    var a = randInt(lo, hi), b = randInt(lo, hi);
     return { text:"A shopkeeper sold " + a + " " + item + " in the morning and " + b + " in the evening. How many " + item + " did he sell in total?",
       answer: a + b, rule:"\u201cIn total\u201d means add: " + a + " + " + b + " = " + (a + b) + "." };
   },
-  function() { // addition - measurement
-    var a = randInt(150, 3800), b = randInt(150, 3800);
+  function(lv) { // addition - measurement
+    var lo = lv === 1 ? 20 : (lv === 3 ? 2500 : 150), hi = lv === 1 ? 300 : (lv === 3 ? 7500 : 3800);
+    var a = randInt(lo, hi), b = randInt(lo, hi);
     return { text:"A farmer harvested " + a + " kg of potatoes and " + b + " kg of onions. What is the total weight of vegetables (in kg)?",
       answer: a + b, rule:"\u201cTotal weight\u201d means add the two weights: " + a + " + " + b + " = " + (a + b) + " kg." };
   },
-  function() { // subtraction - left
-    var item = anItem(), a = randInt(400, 5000), b = randInt(50, a - 50);
+  function(lv) { // subtraction - left
+    var item = anItem();
+    var lo = lv === 1 ? 50 : (lv === 3 ? 4000 : 400), hi = lv === 1 ? 400 : (lv === 3 ? 9500 : 5000);
+    var a = randInt(lo, hi), b = randInt(10, a - 10);
     return { text:"A store had " + a + " " + item + ". " + b + " were sold. How many " + item + " are left?",
       answer: a - b, rule:"\u201cLeft\u201d means subtract: " + a + " - " + b + " = " + (a - b) + "." };
   },
-  function() { // subtraction - difference
-    var n1 = aName(), n2 = aName(), a = randInt(1500, 6000), b = randInt(500, 1499);
+  function(lv) { // subtraction - difference
+    var n1 = aName(), n2 = aName();
+    var lo = lv === 1 ? 60 : (lv === 3 ? 4500 : 1500), hi = lv === 1 ? 500 : (lv === 3 ? 9000 : 6000);
+    var a = randInt(lo, hi), b = randInt(10, a - 10);
     return { text:n1 + " scored " + a + " points and " + n2 + " scored " + b + " points. What is the difference in their scores?",
       answer: a - b, rule:"\u201cDifference\u201d means subtract the smaller from the bigger: " + a + " - " + b + " = " + (a - b) + "." };
   },
-  function() { // subtraction - money
-    var name = aName(), a = randInt(300, 2000), b = randInt(50, a - 50);
+  function(lv) { // subtraction - money
+    var name = aName();
+    var lo = lv === 1 ? 50 : (lv === 3 ? 2500 : 300), hi = lv === 1 ? 300 : (lv === 3 ? 8000 : 2000);
+    var a = randInt(lo, hi), b = randInt(10, a - 10);
     return { text:name + " had \u20b9" + a + ". She spent \u20b9" + b + " on a story book. How much money is left?",
       answer: a - b, rule:"Money spent is taken away, so subtract: " + a + " - " + b + " = \u20b9" + (a - b) + "." };
   },
-  function() { // multiplication - groups (each)
-    var item = anItem(), a = randInt(6, 25), b = randInt(3, 12);
+  function(lv) { // multiplication - groups (each)
+    var item = anItem();
+    var aLo = lv === 1 ? 2 : (lv === 3 ? 15 : 6), aHi = lv === 1 ? 9 : (lv === 3 ? 60 : 25);
+    var bLo = lv === 1 ? 2 : (lv === 3 ? 5 : 3), bHi = lv === 1 ? 5 : (lv === 3 ? 15 : 12);
+    var a = randInt(aLo, aHi), b = randInt(bLo, bHi);
     return { text:"One box holds " + a + " " + item + ". How many " + item + " are there in " + b + " such boxes?",
       answer: a * b, rule:"\u201cEach box\u201d with equal groups means multiply: " + a + " \u00d7 " + b + " = " + (a * b) + "." };
   },
-  function() { // multiplication - money
-    var name = aName(), a = randInt(8, 95), b = randInt(3, 12);
+  function(lv) { // multiplication - money
+    var name = aName();
+    var aLo = lv === 1 ? 2 : (lv === 3 ? 50 : 8), aHi = lv === 1 ? 20 : (lv === 3 ? 200 : 95);
+    var bLo = lv === 1 ? 2 : (lv === 3 ? 6 : 3), bHi = lv === 1 ? 5 : (lv === 3 ? 15 : 12);
+    var a = randInt(aLo, aHi), b = randInt(bLo, bHi);
     return { text:"One notebook costs \u20b9" + a + ". " + name + " buys " + b + " notebooks. What is the total cost?",
       answer: a * b, rule:"Equal cost for each item means multiply: " + a + " \u00d7 " + b + " = \u20b9" + (a * b) + "." };
   },
-  function() { // multiplication - production
-    var a = randInt(20, 300), b = randInt(3, 12);
+  function(lv) { // multiplication - production
+    var aLo = lv === 1 ? 3 : (lv === 3 ? 80 : 20), aHi = lv === 1 ? 15 : (lv === 3 ? 400 : 300);
+    var bLo = lv === 1 ? 2 : (lv === 3 ? 6 : 3), bHi = lv === 1 ? 5 : (lv === 3 ? 15 : 12);
+    var a = randInt(aLo, aHi), b = randInt(bLo, bHi);
     return { text:"A machine makes " + a + " bottles every day. How many bottles will it make in " + b + " days?",
       answer: a * b, rule:"Same amount repeated each day means multiply: " + a + " \u00d7 " + b + " = " + (a * b) + "." };
   },
-  function() { // division - shared equally
-    var item = anItem(), b = randInt(3, 9), q = randInt(4, 30), a = b * q;
+  function(lv) { // division - shared equally
+    var item = anItem();
+    var bLo = lv === 1 ? 2 : (lv === 3 ? 5 : 3), bHi = lv === 1 ? 5 : (lv === 3 ? 12 : 9);
+    var qLo = lv === 1 ? 2 : (lv === 3 ? 30 : 4), qHi = lv === 1 ? 10 : (lv === 3 ? 60 : 30);
+    var b = randInt(bLo, bHi), q = randInt(qLo, qHi), a = b * q;
     return { text:a + " " + item + " are shared equally among " + b + " children. How many " + item + " does each child get?",
       answer: q, rule:"\u201cShared equally\u201d means divide: " + a + " \u00f7 " + b + " = " + q + "." };
   },
-  function() { // division - grouping
-    var b = randInt(3, 9), q = randInt(4, 30), a = b * q;
+  function(lv) { // division - grouping
+    var bLo = lv === 1 ? 2 : (lv === 3 ? 5 : 3), bHi = lv === 1 ? 5 : (lv === 3 ? 12 : 9);
+    var qLo = lv === 1 ? 2 : (lv === 3 ? 30 : 4), qHi = lv === 1 ? 10 : (lv === 3 ? 60 : 30);
+    var b = randInt(bLo, bHi), q = randInt(qLo, qHi), a = b * q;
     return { text:a + " students are seated in rows of " + b + ". How many rows are formed?",
       answer: q, rule:"To find how many equal groups, divide: " + a + " \u00f7 " + b + " = " + q + "." };
   },
-  function() { // two-step - money (subtract twice)
+  function(lv) { // two-step - money (subtract twice)
     var name = aName(), a, b, c;
-    do { a = randInt(2000, 5000); b = randInt(300, 1800); c = randInt(300, 1800); } while (a - b - c <= 0);
+    var aLo = lv === 1 ? 200 : (lv === 3 ? 3000 : 2000), aHi = lv === 1 ? 1000 : (lv === 3 ? 8000 : 5000);
+    var bcLo = lv === 1 ? 30 : (lv === 3 ? 400 : 300), bcHi = lv === 1 ? 300 : (lv === 3 ? 2500 : 1800);
+    do { a = randInt(aLo, aHi); b = randInt(bcLo, bcHi); c = randInt(bcLo, bcHi); } while (a - b - c <= 0);
     return { text:name + " had \u20b9" + a + ". She bought a dress for \u20b9" + b + " and shoes for \u20b9" + c + ". How much money is left?",
       answer: a - b - c, rule:"Two steps: add what she spent (" + b + " + " + c + " = " + (b + c) + "), then subtract from " + a + " = \u20b9" + (a - b - c) + "." };
   },
-  function() { // two-step - multiply then subtract
-    var name = aName(), item = anItem(), a = randInt(6, 15), b = randInt(3, 8);
+  function(lv) { // two-step - multiply then subtract
+    var name = aName(), item = anItem();
+    var aLo = lv === 1 ? 3 : (lv === 3 ? 10 : 6), aHi = lv === 1 ? 8 : (lv === 3 ? 25 : 15);
+    var bLo = lv === 1 ? 2 : (lv === 3 ? 5 : 3), bHi = lv === 1 ? 4 : (lv === 3 ? 12 : 8);
+    var a = randInt(aLo, aHi), b = randInt(bLo, bHi);
     var total = a * b, c = randInt(2, total - 1);
     return { text:"Each packet has " + a + " " + item + ". " + name + " bought " + b + " packets and gave away " + c + " " + item + ". How many are left?",
       answer: total - c, rule:"Two steps: first multiply (" + a + " \u00d7 " + b + " = " + total + "), then subtract " + c + " = " + (total - c) + "." };
   }
 ];
 function gWord() {
-  var t = pick(WORD_TEMPLATES)();
+  var lv = levelOf("Word problem");
+  var t = pick(WORD_TEMPLATES)(lv);
   return { cat:"Word problem", mode:"type", paper:true,
     hint:"\ud83d\udcd6 Read carefully, then solve in your notebook",
     prompt: t.text, answer: String(t.answer), rule: t.rule };
@@ -872,8 +1065,39 @@ var el = {
   nextBtn: document.getElementById("nextBtn"),
   mistakesList: document.getElementById("mistakesList"),
   clearBtn: document.getElementById("clearBtn"),
-  resetBtn: document.getElementById("resetBtn")
+  resetBtn: document.getElementById("resetBtn"),
+  hintToggleBtn: document.getElementById("hintToggleBtn"),
+  hintPanel: document.getElementById("hintPanel"),
+  videoLinkBtn: document.getElementById("videoLinkBtn"),
+  stuckNudge: document.getElementById("stuckNudge")
 };
+
+/* ---------- stuck help: non-spoiler hints + video search link ---------- */
+var HINTS = {
+  "Addition": "Line up the numbers by place value (ones under ones, tens under tens...). Add from the right. If a column totals 10 or more, carry 1 to the next column.",
+  "Subtraction": "Line up the numbers by place value. Subtract from the right. If the top digit is smaller than the bottom digit, borrow 1 from the next column.",
+  "Multiplication": "Multiply the ones digit first, then the tens, then the hundreds. Carry over any extra tens just like in addition.",
+  "Division": "Think: how many times does the small number fit into the big number? Try multiplying the small number by different numbers to get close.",
+  "Division (remainder)": "Find the biggest multiple of the divisor that is still less than or equal to the number. That gives the quotient — whatever is left over is the remainder.",
+  "Successor": "The successor of a number is just one more than it. Add 1.",
+  "Predecessor": "The predecessor of a number is just one less than it. Subtract 1.",
+  "Word problem": "Read the question slowly and underline the numbers. Decide: are things being put together (add), taken away (subtract), shared (divide), or repeated in equal groups (multiply)?",
+  "Place value": "Find the digit, then look at its position from the right: ones, tens, hundreds, thousands... Place value = digit × the value of that position.",
+  "Face value": "Face value is simply the digit itself — it never changes, no matter where it sits in the number.",
+  "Indian system": "In the Indian system, the first comma comes after 3 digits from the right, then a comma after every 2 digits.",
+  "International system": "In the International system, a comma comes after every 3 digits, counting from the right.",
+  "Expanded form": "Write each digit multiplied by its place value, and add them together. Skip any digit that is 0.",
+  "Compare": "First compare the number of digits — more digits means a bigger number. If the digit count is the same, compare digit by digit starting from the left.",
+  "Ordering": "Compare the numbers the same way you compare two numbers — more digits is bigger; if equal digits, compare from the left.",
+  "Form a number": "For the greatest number, arrange the digits from biggest to smallest. For the smallest number, put the smallest non-zero digit first, then the rest from smallest to biggest.",
+  "Roman numerals": "Remember: I=1, V=5, X=10, L=50. A smaller numeral before a bigger one means subtract (like IV=4); after means add (like VI=6).",
+  "Number names": "Break the number into groups — lakhs, thousands, and the last three digits — then read each group separately."
+};
+function videoSearchUrl(cat) {
+  return "https://www.youtube.com/results?search_query=" + encodeURIComponent(cat + " CBSE class 4 maths explained");
+}
+var hintOpen = false;
+var wrongStreak = 0;
 
 /* ---------- daily reset ---------- */
 function dailyReset() {
@@ -953,6 +1177,9 @@ function nextQuestion() {
   el.explain.textContent = "";
   el.explain.classList.remove("show");
   el.nextBtn.style.display = "none";
+  hintOpen = false;
+  el.hintPanel.classList.remove("show");
+  el.hintToggleBtn.textContent = "💡 Need a hint?";
 
   var gen, q, tries = 0;
   do {
@@ -962,6 +1189,7 @@ function nextQuestion() {
   } while (q.cat === lastCat && tries < 6);
   lastCat = q.cat;
   current = q;
+  el.videoLinkBtn.href = videoSearchUrl(q.cat);
 
   el.catTag.textContent = q.cat;
   el.question.textContent = q.prompt;
@@ -1053,7 +1281,10 @@ function handleChoice(val, btnEl) {
 
 function resolve(ok, given) {
   bumpStreakForToday();
+  bumpDifficulty(current.cat, ok);
   if (ok) {
+    wrongStreak = 0;
+    el.stuckNudge.classList.remove("show");
     state.stars += 1;
     state.todayProgress += 1;
     saveState();
@@ -1067,6 +1298,11 @@ function resolve(ok, given) {
     }
     setTimeout(nextQuestion, 1100);
   } else {
+    wrongStreak += 1;
+    if (wrongStreak >= 2) {
+      el.stuckNudge.textContent = "\ud83e\udd14 Stuck? Tap \u201cNeed a hint?\u201d above, or watch a quick video on this topic.";
+      el.stuckNudge.classList.add("show");
+    }
     el.feedback.textContent = "\u274c Not quite \u2014 saved to your Mistakes Bank";
     el.feedback.className = "feedback incorrect";
     el.explain.textContent = "Correct answer: " + current.answer + ".  " + current.rule;
@@ -1096,6 +1332,17 @@ function starBurst() {
 }
 
 /* ---------- events ---------- */
+el.hintToggleBtn.onclick = function() {
+  hintOpen = !hintOpen;
+  if (hintOpen) {
+    el.hintPanel.textContent = "💡 " + (HINTS[current.cat] || "Take your time — re-read the question and break it into smaller steps.");
+    el.hintPanel.classList.add("show");
+    el.hintToggleBtn.textContent = "Hide hint";
+  } else {
+    el.hintPanel.classList.remove("show");
+    el.hintToggleBtn.textContent = "💡 Need a hint?";
+  }
+};
 el.checkBtn.onclick = handleTypeSubmit;
 el.input.addEventListener("keydown", function(e) {
   if (e.key === "Enter") handleTypeSubmit();
@@ -1143,7 +1390,7 @@ el.resetBtn.onclick = function() {
   } else {
     resetConfirmPending = false;
     el.resetBtn.textContent = "Reset all progress";
-    state = { stars:0, streak:0, lastPlayed:"", today:"", todayProgress:0, goalCelebrated:false, mistakes:[] };
+    state = { stars:0, streak:0, lastPlayed:"", today:"", todayProgress:0, goalCelebrated:false, mistakes:[], diff:{}, diffStreak:{} };
     saveState();
     dailyReset();
     renderStats();
@@ -1166,7 +1413,8 @@ document.getElementById("restoreBtn").onclick = function() {
       stars: restored.stars || 0, streak: restored.streak || 0,
       lastPlayed: restored.lastPlayed || "", today: restored.today || "",
       todayProgress: restored.todayProgress || 0, goalCelebrated: restored.goalCelebrated || false,
-      mistakes: restored.mistakes || []
+      mistakes: restored.mistakes || [],
+      diff: restored.diff || {}, diffStreak: restored.diffStreak || {}
     };
     saveState();
     dailyReset();
