@@ -380,6 +380,9 @@
 /* ---------- config ---------- */
 var DAILY_GOAL = 12;
 var STORAGE_KEY = "mathsQuest_v1";
+/* Paste your Apps Script Web App URL here to enable the daily summary email.
+   Leave blank to keep everything purely local (no sync). See apps-script/Code.gs. */
+var SYNC_URL = "";
 
 /* ---------- storage (degrades gracefully if blocked) ---------- */
 var memoryFallback = null;
@@ -868,6 +871,19 @@ function renderStats() {
   }
 }
 
+/* ---------- progress sync (fire-and-forget, never blocks gameplay) ---------- */
+function syncEvent(payload) {
+  if (!SYNC_URL) return;
+  try {
+    fetch(SYNC_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+  } catch (e) { /* offline or blocked - ignore, this must never affect the game */ }
+}
+
 /* ---------- mistakes ---------- */
 function renderMistakes() {
   if (!state.mistakes.length) {
@@ -1039,6 +1055,10 @@ function resolve(ok, given) {
     renderMistakes();
     el.nextBtn.style.display = "inline-block";
   }
+  syncEvent({
+    date: todayKey(), cat: current.cat, correct: ok,
+    stars: state.stars, streak: state.streak, todayProgress: state.todayProgress
+  });
 }
 
 function starBurst() {
