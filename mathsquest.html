@@ -572,10 +572,27 @@ function nonZeroPos(s) {
   for (var i = 0; i < 4; i++) { if (s[3 - i] !== "0") spots.push(i); }
   return spots[Math.floor(Math.random() * spots.length)];
 }
+/* a position whose digit is non-zero AND appears nowhere else in s —
+   otherwise "the place value of 7" is ambiguous when 7 shows up twice */
+function nonZeroUniquePos(s) {
+  var counts = {};
+  for (var i = 0; i < 4; i++) counts[s[i]] = (counts[s[i]] || 0) + 1;
+  var spots = [];
+  for (var i = 0; i < 4; i++) {
+    var ch = s[3 - i];
+    if (ch !== "0" && counts[ch] === 1) spots.push(i);
+  }
+  return spots.length ? spots[Math.floor(Math.random() * spots.length)] : -1;
+}
 function gPlaceValue() {
-  var n = randInt(1000, 9999);
-  var s = String(n);
-  var pos = nonZeroPos(s);
+  var n, s, pos, tries = 0;
+  do {
+    n = randInt(1000, 9999);
+    s = String(n);
+    pos = nonZeroUniquePos(s);
+    tries++;
+  } while (pos === -1 && tries < 30);
+  if (pos === -1) pos = 3; // all four digits identical (e.g. 7777) — thousands digit is always non-zero
   var digit = parseInt(s[3 - pos], 10);
   var pv = digit * PLACE_VALUE[pos];
   var candidates = [digit, digit * 10, digit * 100, digit * 1000, parseInt(s[0],10) * 1000];
