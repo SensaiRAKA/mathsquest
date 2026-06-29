@@ -613,7 +613,8 @@ function gFaceValue() {
     rule:"Face value is simply the digit itself, wherever it sits. The face value of " + digit + " is " + digit + ". (Place value changes with position \u2014 face value never does.)" };
 }
 function gIndianComma() {
-  var n = randInt(10000, 999999);
+  /* must be 6-digit: for 5-digit numbers indian===international, making the question meaningless */
+  var n = randInt(100000, 999999);
   var correct = indianGroup(n);
   var candidates = [intlGroup(n), String(n), indianGroup(n).replace(/,/g, " ")];
   return { cat:"Indian system", mode:"choice",
@@ -622,9 +623,10 @@ function gIndianComma() {
     rule:"Indian system: put the first comma after 3 digits from the right, then after every 2 digits. So " + n + " becomes " + correct + "." };
 }
 function gIntlComma() {
-  var n = randInt(10000, 999999);
+  /* must be 6-digit: for 5-digit numbers indian===international, leaving only 2 choices */
+  var n = randInt(100000, 999999);
   var correct = intlGroup(n);
-  var candidates = [indianGroup(n), String(n)];
+  var candidates = [indianGroup(n), String(n), intlGroup(n).replace(/,/g, " ")];
   return { cat:"International system", mode:"choice",
     prompt:"Place commas in " + n + " using the INTERNATIONAL system:",
     answer: correct, choices: buildChoices(correct, candidates),
@@ -639,9 +641,12 @@ function gExpanded() {
     if (d !== 0) terms.push(String(d * PLACE_VALUE[3 - i]));
   }
   var correct = terms.join(" + ");
+  /* withZero equals correct whenever n has no zero digits (~73% of 4-digit numbers),
+     leaving only 2 choices; replace it with String(n) which is always different */
   var withZero = [];
   for (var j = 0; j < 4; j++) withZero.push(String(parseInt(s[j],10) * PLACE_VALUE[3 - j]));
-  var candidates = [withZero.join(" + "), s.split("").join(" + ")];
+  var withZeroStr = withZero.join(" + ");
+  var candidates = [withZeroStr === correct ? String(n) : withZeroStr, s.split("").join(" + "), String(n)];
   return { cat:"Expanded form", mode:"choice",
     prompt:"Which is the expanded form of " + n + "?",
     answer: correct, choices: buildChoices(correct, candidates),
