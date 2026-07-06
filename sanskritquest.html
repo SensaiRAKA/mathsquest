@@ -1,0 +1,1266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="author" content="Rakesh Kumar">
+<title>Sanskrit Quest</title>
+<style>
+  :root {
+    --indigo: #5b21b6;
+    --indigo-dark: #4c1d95;
+    --amber: #f59e0b;
+    --emerald: #059669;
+    --emerald-soft: #d1fae5;
+    --rose: #e11d48;
+    --rose-soft: #ffe4e6;
+    --ink: #1e293b;
+    --muted: #64748b;
+    --line: #e2e8f0;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: ui-rounded, "Segoe UI Rounded", "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(160deg, #ffedd5 0%, #f0fdf4 60%, #ede9fe 100%);
+    min-height: 100vh;
+    color: var(--ink);
+    padding: 16px;
+  }
+  #jsWarning {
+    background: #fbbf24;
+    color: #7c2d12;
+    font-weight: 800;
+    text-align: center;
+    padding: 14px 16px;
+    border-radius: 14px;
+    max-width: 640px;
+    margin: 0 auto 14px;
+    font-size: 15px;
+    line-height: 1.4;
+  }
+
+  .wrap { max-width: 640px; margin: 0 auto; }
+
+  header { text-align: center; margin-bottom: 12px; }
+  h1 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--indigo);
+  }
+  .tagline { margin: 4px 0 0; color: var(--muted); font-weight: 700; font-size: 15px; }
+
+  .home-link { display: block; text-align: center; margin-bottom: 10px; }
+  .home-link a { color: var(--muted); font-weight: 700; font-size: 13px; text-decoration: none; }
+  .home-link a:hover { text-decoration: underline; }
+
+  /* mode switcher */
+  .modes { display: flex; gap: 8px; margin-bottom: 12px; }
+  .mode-btn {
+    flex: 1;
+    background: #fff;
+    border: 3px solid var(--line);
+    border-radius: 14px;
+    padding: 10px 4px;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+    transition: transform 0.08s ease;
+  }
+  .mode-btn:active { transform: scale(0.97); }
+  .mode-btn.active { background: var(--indigo); border-color: var(--indigo); color: #fff; }
+  .mode-btn .badge {
+    display: inline-block;
+    background: var(--rose);
+    color: #fff;
+    border-radius: 99px;
+    font-size: 12px;
+    padding: 1px 7px;
+    margin-left: 4px;
+    vertical-align: 1px;
+  }
+  .mode-btn.active .badge { background: #fff; color: var(--rose); }
+
+  .stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat {
+    flex: 1;
+    background: #fff;
+    border-radius: 16px;
+    padding: 12px 8px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(91,33,182,0.08);
+  }
+  .stat .num { font-size: 26px; font-weight: 900; line-height: 1; }
+  .stat .lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat.stars .num { color: var(--amber); }
+  .stat.streak .num { color: var(--rose); }
+  .stat.goal .num { color: var(--indigo); }
+
+  .progress-track {
+    height: 14px;
+    background: #ede9fe;
+    border-radius: 99px;
+    overflow: hidden;
+    margin-bottom: 18px;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--indigo), #8b5cf6);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .card {
+    background: #fff;
+    border-radius: 22px;
+    padding: 24px 20px 28px;
+    box-shadow: 0 8px 24px rgba(91,33,182,0.12);
+    text-align: center;
+  }
+  .tag {
+    display: inline-block;
+    background: #ede9fe;
+    color: var(--indigo);
+    font-weight: 800;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+  }
+  .pic { font-size: 64px; line-height: 1.1; margin: 14px 0 0; }
+  .question {
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--ink);
+    margin: 18px 0 6px;
+    line-height: 1.3;
+    word-wrap: break-word;
+  }
+  .spk {
+    border: none;
+    background: #ede9fe;
+    color: var(--indigo);
+    border-radius: 99px;
+    padding: 7px 16px;
+    font-size: 18px;
+    cursor: pointer;
+    font-family: inherit;
+    margin: 2px 0 6px;
+  }
+  .spk:active { transform: scale(0.95); }
+  body.no-tts .spk { display: none; }
+  .hint {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 16px;
+    min-height: 20px;
+  }
+
+  .choices {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 6px;
+  }
+  .choices.three { grid-template-columns: 1fr; }
+  .choice {
+    min-height: 64px;
+    font-size: 20px;
+    font-weight: 800;
+    border: 3px solid var(--line);
+    background: #fff;
+    border-radius: 16px;
+    color: var(--ink);
+    cursor: pointer;
+    font-family: inherit;
+    padding: 10px;
+    transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
+    word-break: break-word;
+  }
+  .choice:active { transform: scale(0.97); }
+  .choice.pick-correct { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); }
+  .choice.pick-wrong { border-color: var(--rose); background: var(--rose-soft); color: var(--rose); }
+  .choice.reveal { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); }
+  .choice[disabled] { cursor: default; }
+
+  .btn {
+    display: inline-block;
+    background: var(--indigo);
+    color: #fff;
+    border: none;
+    padding: 16px 28px;
+    font-size: 19px;
+    font-weight: 800;
+    border-radius: 14px;
+    cursor: pointer;
+    margin-top: 16px;
+    font-family: inherit;
+    min-width: 200px;
+    transition: transform 0.08s ease, background 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn.next { background: var(--emerald); }
+
+  .feedback {
+    margin-top: 18px;
+    font-weight: 900;
+    font-size: 22px;
+    min-height: 28px;
+  }
+  .feedback.correct { color: var(--emerald); }
+  .feedback.incorrect { color: var(--rose); }
+  .explain {
+    margin-top: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--muted);
+    line-height: 1.45;
+    text-align: left;
+    background: #f8fafc;
+    border-radius: 12px;
+    padding: 14px;
+    display: none;
+  }
+  .explain.show { display: block; }
+
+  /* ---- learn mode ---- */
+  #learnView { display: none; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 14px; }
+  .chip {
+    border: 2px solid var(--line);
+    background: #fff;
+    border-radius: 99px;
+    padding: 8px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip.active { background: var(--amber); border-color: var(--amber); color: #fff; }
+  .flashcard {
+    background: #fff;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(91,33,182,0.12);
+    min-height: 240px;
+    padding: 26px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .fc-emo { font-size: 46px; line-height: 1.1; margin-bottom: 8px; }
+  .fc-front { font-size: 38px; font-weight: 900; color: var(--indigo); line-height: 1.25; word-break: break-word; }
+  .fc-back-line { font-size: 19px; font-weight: 700; color: var(--ink); margin: 5px 0; line-height: 1.4; }
+  .fc-back-line.sub { font-size: 15px; color: var(--muted); font-weight: 600; }
+  .fc-flip-hint { margin-top: 14px; font-size: 13px; font-weight: 700; color: var(--muted); }
+  .fc-nav { display: flex; gap: 10px; justify-content: center; align-items: center; margin-top: 14px; }
+  .fc-nav .btn { margin-top: 0; min-width: 110px; padding: 13px 18px; }
+  .fc-count { font-weight: 900; color: var(--muted); font-size: 15px; min-width: 64px; }
+
+  .burst {
+    position: fixed;
+    pointer-events: none;
+    font-size: 28px;
+    animation: floatUp 1s ease-out forwards;
+    z-index: 50;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-90px) scale(1.6); }
+  }
+
+  .banner {
+    background: linear-gradient(135deg, #fde68a, #fbbf24);
+    color: #7c2d12;
+    border-radius: 16px;
+    padding: 14px;
+    font-weight: 800;
+    font-size: 16px;
+    margin-bottom: 14px;
+    text-align: center;
+    display: none;
+  }
+  .banner.show { display: block; }
+
+  .mistakes { margin-top: 26px; }
+  .mistakes-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .mistakes-head h2 { margin: 0; color: var(--rose); font-size: 20px; font-weight: 900; }
+  .clear-btn {
+    background: none;
+    border: 2px solid var(--line);
+    color: var(--muted);
+    font-weight: 700;
+    font-size: 13px;
+    padding: 6px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px; }
+  .mistake-item {
+    background: #fff1f2;
+    border-left: 5px solid var(--rose);
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: left;
+  }
+  .mistake-item .q { font-weight: 800; color: var(--ink); }
+  .mistake-item .ans { margin-top: 6px; }
+  .mistake-item .rule { margin-top: 8px; font-style: italic; color: var(--muted); }
+  .mistake-item .wins { margin-top: 6px; font-size: 13px; font-weight: 800; color: var(--emerald); }
+  .yours { color: var(--rose); font-weight: 800; }
+  .right { color: var(--emerald); font-weight: 800; }
+
+  .dismiss-btn {
+    float: right;
+    background: none;
+    border: none;
+    color: var(--rose);
+    font-size: 18px;
+    font-weight: 900;
+    cursor: pointer;
+    padding: 0 0 4px 10px;
+    line-height: 1;
+    font-family: inherit;
+  }
+  .clear-btn.danger {
+    border-color: var(--rose);
+    color: var(--rose);
+    font-weight: 800;
+  }
+
+  footer { text-align: center; margin: 22px 0 8px; }
+  .reset-btn {
+    background: none; border: none; color: var(--muted);
+    font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit;
+    text-decoration: underline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+  @media (min-width: 520px) {
+    .question { font-size: 32px; }
+    .fc-front { font-size: 44px; }
+  }
+</style>
+</head>
+<body>
+<div id="jsWarning">&#9888;&#65039; Please open this file in <b>Chrome</b> or another web browser. It will not run inside a file viewer.</div>
+<div class="wrap">
+  <div class="home-link"><a href="index.html">&larr; All quests</a></div>
+  <header>
+    <h1>Sanskrit Quest</h1>
+    <p class="tagline">&#2360;&#2306;&#2360;&#2381;&#2325;&#2371;&#2340; &#2360;&#2368;&#2326;&#2375;&#2306; &#8226; Class 4, Unit 1</p>
+  </header>
+
+  <div class="modes">
+    <button class="mode-btn" id="modeLearn">&#128214; सीखें</button>
+    <button class="mode-btn" id="modeQuiz">&#9999;&#65039; अभ्यास</button>
+    <button class="mode-btn" id="modeFix">&#128260; Mistakes<span class="badge" id="fixBadge">0</span></button>
+  </div>
+
+  <div class="stats">
+    <div class="stat stars"><div class="num" id="starsNum">0</div><div class="lbl">Stars</div></div>
+    <div class="stat streak"><div class="num" id="streakNum">0</div><div class="lbl">Day streak</div></div>
+    <div class="stat goal"><div class="num" id="goalNum">0/15</div><div class="lbl">Today</div></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="banner" id="banner"></div>
+
+  <!-- LEARN MODE -->
+  <div id="learnView">
+    <div class="chips" id="chips"></div>
+    <div class="flashcard" id="flashcard"></div>
+    <div class="fc-nav">
+      <button class="btn" id="fcPrev">&larr; पीछे</button>
+      <div class="fc-count" id="fcCount">1/1</div>
+      <button class="btn" id="fcNext">आगे &rarr;</button>
+    </div>
+  </div>
+
+  <!-- QUIZ / FIX MODE -->
+  <div class="card" id="quizCard">
+    <span class="tag" id="catTag">Question</span>
+    <div class="pic" id="picBox" style="display:none;"></div>
+    <div class="question" id="questionText">Loading...</div>
+    <button class="spk" id="spkBtn" style="display:none;">&#128266; सुनो</button>
+    <div class="hint" id="hint"></div>
+
+    <div class="choices" id="choicesArea" style="display:none;"></div>
+
+    <div class="feedback" id="feedback"></div>
+    <div class="explain" id="explain"></div>
+    <button class="btn next" id="nextBtn" style="display:none;">Next question</button>
+  </div>
+
+  <div class="mistakes" id="mistakesSection">
+    <div class="mistakes-head">
+      <h2>Mistakes Bank</h2>
+      <button class="clear-btn" id="clearBtn">Clear</button>
+    </div>
+    <div id="mistakesList"><div class="empty">No mistakes yet. Off to a great start!</div></div>
+  </div>
+
+  <footer>
+    <button class="reset-btn" id="backupBtn">Backup progress</button>
+    &nbsp;&middot;&nbsp;
+    <button class="reset-btn" id="restoreBtn">Restore progress</button>
+    &nbsp;&middot;&nbsp;
+    <button class="reset-btn" id="resetBtn">Reset all progress</button>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- config ---------- */
+var DAILY_GOAL = 15;
+var STORAGE_KEY = "sanskritQuest_v1";
+
+/* ---------- helpers (pure) ---------- */
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function buildChoices(correct, candidates, maxOptions) {
+  var max = maxOptions || 4;
+  var seen = {};
+  seen[String(correct)] = true;
+  var opts = [];
+  var pool = shuffle(candidates);
+  for (var i = 0; i < pool.length && opts.length < max - 1; i++) {
+    var c = String(pool[i]);
+    if (!seen[c]) { seen[c] = true; opts.push(c); }
+  }
+  opts.push(String(correct));
+  return shuffle(opts);
+}
+
+/* ---------- vocabulary (Class 4, Unit-1 2026-27 worksheet) ----------
+   Genders use the exam's exact labels: पुल्लिंगम् / स्त्रीलिंगम् / नपुंसकलिंगम् */
+var PU = "पुल्लिंगम्", STRI = "स्त्रीलिंगम्", NA = "नपुंसकलिंगम्";
+
+var MASC = [
+  {sa:"बालकः", hi:"लड़का", en:"boy", emo:"👦"},
+  {sa:"छात्रः", hi:"विद्यार्थी", en:"student", emo:"🎒"},
+  {sa:"नृपः", hi:"राजा", en:"king", emo:"👑"},
+  {sa:"सूर्यः", hi:"सूरज", en:"sun", emo:"☀️"},
+  {sa:"वृक्षः", hi:"पेड़", en:"tree", emo:"🌳"},
+  {sa:"देवः", hi:"देवता", en:"god"},
+  {sa:"पर्वतः", hi:"पहाड़", en:"mountain", emo:"⛰️"},
+  {sa:"जनकः", hi:"पिता", en:"father", emo:"👨"},
+  {sa:"रामः", hi:"राम", en:"Ram (name)"}
+];
+var FEM = [
+  {sa:"बालिका", hi:"लड़की", en:"girl", emo:"👧"},
+  {sa:"महिला", hi:"औरत", en:"woman", emo:"👩"},
+  {sa:"नौका", hi:"नाव", en:"boat", emo:"⛵"},
+  {sa:"पाठशाला", hi:"विद्यालय", en:"school", emo:"🏫"},
+  {sa:"घटिका", hi:"घड़ी", en:"clock", emo:"⏰"},
+  {sa:"मूषिका", hi:"चुहिया", en:"female mouse"},
+  {sa:"रमा", hi:"रमा", en:"Rama (name)"},
+  {sa:"राधा", hi:"राधा", en:"Radha (name)"}
+];
+var NEUT = [
+  {sa:"पत्रम्", hi:"पत्ता / पत्र", en:"leaf / letter", emo:"🍃"},
+  {sa:"फलम्", hi:"फल", en:"fruit", emo:"🍎"},
+  {sa:"उद्यानम्", hi:"बगीचा", en:"garden"},
+  {sa:"वनम्", hi:"जंगल", en:"forest"},
+  {sa:"कमलम्", hi:"कमल", en:"lotus", emo:"🪷"},
+  {sa:"पुस्तकम्", hi:"किताब", en:"book", emo:"📖"},
+  {sa:"उपवनम्", hi:"छोटा बगीचा", en:"grove"}
+];
+var ANIMALS = [
+  {sa:"गौः", hi:"गाय", en:"cow", emo:"🐄", g:STRI, tip:"गौः स्त्रीलिंग है — विसर्ग (ः) होते हुए भी! यह अपवाद याद रखो।"},
+  {sa:"अजा", hi:"बकरी", en:"goat", emo:"🐐", g:STRI},
+  {sa:"महिषी", hi:"भैंस", en:"buffalo", emo:"🐃", g:STRI},
+  {sa:"अश्वः", hi:"घोड़ा", en:"horse", emo:"🐴", g:PU},
+  {sa:"बिडालः", hi:"बिल्ली", en:"cat", emo:"🐈", g:PU},
+  {sa:"मूषकः", hi:"चूहा", en:"mouse", emo:"🐭", g:PU},
+  {sa:"शशकः", hi:"खरगोश", en:"rabbit", emo:"🐇", g:PU},
+  {sa:"कुक्कुरः", hi:"कुत्ता", en:"dog", emo:"🐕", g:PU}
+];
+var OBJECTS = [
+  {sa:"भ्रमरः", hi:"भौंरा", en:"bee", emo:"🐝", g:PU},
+  {sa:"यानम्", hi:"गाड़ी", en:"vehicle/car", emo:"🚗", g:NA},
+  {sa:"ध्वजा", hi:"झंडा", en:"flag", emo:"🚩", g:STRI},
+  {sa:"पुष्पम्", hi:"फूल", en:"flower", emo:"🌸", g:NA},
+  {sa:"वानरः", hi:"बंदर", en:"monkey", emo:"🐵", g:PU},
+  {sa:"धरा", hi:"पृथ्वी", en:"earth", emo:"🌍", g:STRI},
+  {sa:"पुस्तकम्", hi:"किताब", en:"book", emo:"📖", g:NA}
+];
+var VERBS = [
+  {sa:"पश्यति", hi:"देखता है", en:"sees", emo:"👀"},
+  {sa:"हसति", hi:"हंसता है", en:"laughs", emo:"😄"},
+  {sa:"मिलति", hi:"मिलता है", en:"meets", emo:"🤝"},
+  {sa:"सन्ति", hi:"हैं (बहुत)", en:"are (many)"},
+  {sa:"कूजति", hi:"चहचहाता है", en:"chirps", emo:"🐦"},
+  {sa:"तरति", hi:"तैरता है", en:"swims", emo:"🏊"},
+  {sa:"गायति", hi:"गाता है", en:"sings", emo:"🎤"},
+  {sa:"धावति", hi:"दौड़ता है", en:"runs", emo:"🏃"},
+  {sa:"चलति", hi:"चलता है", en:"walks", emo:"🚶"},
+  {sa:"यच्छति", hi:"देता है", en:"gives", emo:"🎁"},
+  {sa:"वहति", hi:"बहता है", en:"flows", emo:"🌊"},
+  {sa:"पतति", hi:"गिरता है", en:"falls", emo:"🍂"},
+  {sa:"छिनत्ति", hi:"काटता है", en:"cuts", emo:"✂️"}
+];
+var DAYS = [
+  {sa:"सोमवासरः", hi:"सोमवार", en:"Monday"},
+  {sa:"मंगलवासरः", hi:"मंगलवार", en:"Tuesday"},
+  {sa:"बुधवासरः", hi:"बुधवार", en:"Wednesday"},
+  {sa:"गुरुवासरः", alt:"वीरवासरः", hi:"गुरुवार", en:"Thursday"},
+  {sa:"शुक्रवासरः", hi:"शुक्रवार", en:"Friday"},
+  {sa:"शनिवासरः", hi:"शनिवार", en:"Saturday"},
+  {sa:"रविवासरः", hi:"रविवार", en:"Sunday"}
+];
+/* वचन — worksheet Q13 word families, full singular/dual/plural triples */
+var EK = "एकवचनम्", DVI = "द्विवचनम्", BAHU = "बहुवचनम्";
+var VACHAN_POOL = [
+  {sa:"नरः", hi:"एक आदमी", tag:EK}, {sa:"नरौ", hi:"दो आदमी", tag:DVI}, {sa:"नराः", hi:"बहुत आदमी", tag:BAHU},
+  {sa:"जनकः", hi:"एक पिता", tag:EK}, {sa:"जनकौ", hi:"दो पिता", tag:DVI}, {sa:"जनकाः", hi:"बहुत पिता", tag:BAHU},
+  {sa:"कन्या", hi:"एक लड़की", tag:EK}, {sa:"कन्ये", hi:"दो लड़कियाँ", tag:DVI}, {sa:"कन्याः", hi:"बहुत लड़कियाँ", tag:BAHU},
+  {sa:"छात्रः", hi:"एक विद्यार्थी", tag:EK}, {sa:"छात्रौ", hi:"दो विद्यार्थी", tag:DVI}, {sa:"छात्राः", hi:"बहुत विद्यार्थी", tag:BAHU},
+  {sa:"मूषकः", hi:"एक चूहा", tag:EK}, {sa:"मूषकौ", hi:"दो चूहे", tag:DVI}, {sa:"मूषकाः", hi:"बहुत चूहे", tag:BAHU},
+  {sa:"मयूरः", hi:"एक मोर", tag:EK}, {sa:"मयूरौ", hi:"दो मोर", tag:DVI}, {sa:"मयूराः", hi:"बहुत मोर", tag:BAHU},
+  {sa:"जनः", hi:"एक व्यक्ति", tag:EK}, {sa:"जनौ", hi:"दो व्यक्ति", tag:DVI}, {sa:"जनाः", hi:"बहुत लोग", tag:BAHU},
+  {sa:"कमलम्", hi:"एक कमल", tag:EK}, {sa:"कमले", hi:"दो कमल", tag:DVI}, {sa:"कमलानि", hi:"बहुत कमल", tag:BAHU}
+];
+
+/* ---------- derived pools ---------- */
+function withG(list, g) {
+  return list.map(function (w) {
+    return { sa: w.sa, hi: w.hi, en: w.en, emo: w.emo, g: g, tip: w.tip };
+  });
+}
+function dedupeBySa(list) {
+  var seen = {}, out = [];
+  for (var i = 0; i < list.length; i++) {
+    if (!seen[list[i].sa]) { seen[list[i].sa] = true; out.push(list[i]); }
+  }
+  return out;
+}
+var GENDER_ALL = dedupeBySa(
+  withG(MASC, PU).concat(withG(FEM, STRI)).concat(withG(NEUT, NA))
+    .concat(ANIMALS.map(function (w) { return withG([w], w.g)[0]; }))
+    .concat(OBJECTS.map(function (w) { return withG([w], w.g)[0]; }))
+);
+/* picture pool: everything with an emoji; src separates nouns from verbs */
+var EXCLUDE_PAIRS = [["मूषकः", "मूषिका"]];
+function excluded(a, b) {
+  for (var i = 0; i < EXCLUDE_PAIRS.length; i++) {
+    var p = EXCLUDE_PAIRS[i];
+    if ((p[0] === a && p[1] === b) || (p[1] === a && p[0] === b)) return true;
+  }
+  return false;
+}
+var PIC_POOL = [];
+(function () {
+  var nouns = GENDER_ALL, i;
+  for (i = 0; i < nouns.length; i++) {
+    if (nouns[i].emo) PIC_POOL.push({ sa: nouns[i].sa, hi: nouns[i].hi, emo: nouns[i].emo, src: "n" });
+  }
+  for (i = 0; i < VERBS.length; i++) {
+    if (VERBS[i].emo) PIC_POOL.push({ sa: VERBS[i].sa, hi: VERBS[i].hi, emo: VERBS[i].emo, src: "v" });
+  }
+})();
+
+/* ---------- rules ---------- */
+function genderRule(w) {
+  if (w.tip) return w.sa + " = " + w.hi + "। " + w.tip;
+  var base = w.sa + " = " + w.hi + (w.en ? " (" + w.en + ")" : "") + "। ";
+  if (w.g === PU) return base + "पुल्लिंग शब्द प्रायः 'अः' पर समाप्त होते हैं (छात्रः, वृक्षः)।";
+  if (w.g === STRI) return base + "स्त्रीलिंग शब्द प्रायः 'आ' या 'ई' पर समाप्त होते हैं (बालिका, महिषी)।";
+  return base + "नपुंसकलिंग शब्द प्रायः 'म्' पर समाप्त होते हैं (पत्रम्, फलम्)।";
+}
+function vachanRule(tag) {
+  if (tag === EK) return "एकवचनम् = एक। अंत प्रायः: ः / आ / म् (छात्रः, कन्या, कमलम्)।";
+  if (tag === DVI) return "द्विवचनम् = ठीक दो! अंत: औ / ए (छात्रौ, कन्ये, कमले)। हिंदी में यह नहीं होता — संस्कृत की खास बात!";
+  return "बहुवचनम् = तीन या ज़्यादा। अंत: आः / आनि (छात्राः, जनाः, कमलानि)।";
+}
+
+/* ---------- question generators (each accepts an optional fixed word) ---------- */
+function gGender(fixed) {
+  var w = fixed || pick(GENDER_ALL);
+  return { gid: "g", key: w.sa, cat: "लिंग (Gender)", three: true, speak: w.sa,
+    prompt: "\u201C" + w.sa + "\u201D — यह कौन सा लिंग है?",
+    answer: w.g, choices: shuffle([PU, STRI, NA]),
+    rule: genderRule(w) };
+}
+function gVachan(fixed) {
+  var w = fixed || pick(VACHAN_POOL);
+  return { gid: "v", key: w.sa, cat: "वचन (Number)", three: true, speak: w.sa,
+    prompt: "\u201C" + w.sa + "\u201D — यह कौन सा वचन है?",
+    answer: w.tag, choices: shuffle([EK, DVI, BAHU]),
+    rule: w.sa + " = " + w.hi + "। " + vachanRule(w.tag) };
+}
+function dayForms(w) { return w.alt ? w.sa + " / " + w.alt + " (दोनों सही)" : w.sa; }
+function makeMeaning(pool, catName, gid) {
+  return function (fixed) {
+    var w = fixed || pick(pool);
+    var shown = (w.alt && Math.random() < 0.5) ? w.alt : w.sa;
+    var distractors = pool.filter(function (x) { return x.sa !== w.sa; }).map(function (x) { return x.hi; });
+    return { gid: gid, key: w.sa, cat: catName, speak: shown,
+      prompt: "\u201C" + shown + "\u201D — इसका हिंदी अर्थ क्या है?",
+      answer: w.hi, choices: buildChoices(w.hi, distractors, 4),
+      rule: (w.alt ? dayForms(w) : w.sa) + " = " + w.hi + (w.en ? " (" + w.en + ")" : "") };
+  };
+}
+function makeReverse(pool, catName, gid) {
+  return function (fixed) {
+    var w = fixed || pick(pool);
+    var correct = (w.alt && Math.random() < 0.5) ? w.alt : w.sa;
+    var distractors = pool.filter(function (x) { return x.sa !== w.sa; }).map(function (x) { return x.sa; });
+    return { gid: gid, key: w.sa, cat: catName, speak: null,
+      prompt: "\u201C" + w.hi + "\u201D — इसे संस्कृत में क्या कहते हैं?",
+      answer: correct, choices: buildChoices(correct, distractors, 4),
+      rule: w.hi + " = " + (w.alt ? dayForms(w) : w.sa) + (w.en ? " (" + w.en + ")" : "") };
+  };
+}
+function gPic(fixed) {
+  var w = fixed || pick(PIC_POOL);
+  var distractors = PIC_POOL.filter(function (x) {
+    return x.src === w.src && x.sa !== w.sa && !excluded(x.sa, w.sa);
+  }).map(function (x) { return x.sa; });
+  return { gid: "p", key: w.sa, cat: "चित्रम् (Picture)", pic: w.emo, speak: null,
+    prompt: w.src === "v" ? "यह क्रिया संस्कृत में क्या है?" : "इसे संस्कृत में क्या कहते हैं?",
+    answer: w.sa, choices: buildChoices(w.sa, distractors, 4),
+    rule: w.emo + " " + w.sa + " = " + w.hi };
+}
+var gDayMeaning = makeMeaning(DAYS, "वासराः (Days)", "md");
+var gDayReverse = makeReverse(DAYS, "वासराः (Days)", "rd");
+var gAnimalMeaning = makeMeaning(ANIMALS, "गृहपशवः (Animals)", "ma");
+var gAnimalReverse = makeReverse(ANIMALS, "गृहपशवः (Animals)", "ra");
+var gVerbMeaning = makeMeaning(VERBS, "क्रियाः (Verbs)", "mv");
+var gVerbReverse = makeReverse(VERBS, "क्रियाः (Verbs)", "rv");
+var gObjectMeaning = makeMeaning(OBJECTS, "शब्दाः (Vocabulary)", "mo");
+var gObjectReverse = makeReverse(OBJECTS, "शब्दाः (Vocabulary)", "ro");
+var gGenderReverse = makeReverse(GENDER_ALL, "शब्दभंडार (Vocabulary)", "rg");
+
+var GENERATORS = [
+  gGender, gGender, gGender,
+  gVachan, gVachan, gVachan,
+  gPic, gPic,
+  gDayMeaning, gDayReverse,
+  gAnimalMeaning, gAnimalReverse,
+  gVerbMeaning, gVerbReverse,
+  gObjectMeaning, gObjectReverse,
+  gGenderReverse
+];
+
+/* rebuild a fresh question for a saved mistake */
+var GID_MAP = {
+  g:  { pool: GENDER_ALL, fn: gGender },
+  v:  { pool: VACHAN_POOL, fn: gVachan },
+  p:  { pool: PIC_POOL, fn: gPic },
+  md: { pool: DAYS, fn: gDayMeaning }, rd: { pool: DAYS, fn: gDayReverse },
+  ma: { pool: ANIMALS, fn: gAnimalMeaning }, ra: { pool: ANIMALS, fn: gAnimalReverse },
+  mv: { pool: VERBS, fn: gVerbMeaning }, rv: { pool: VERBS, fn: gVerbReverse },
+  mo: { pool: OBJECTS, fn: gObjectMeaning }, ro: { pool: OBJECTS, fn: gObjectReverse },
+  rg: { pool: GENDER_ALL, fn: gGenderReverse }
+};
+function regenFromMistake(m) {
+  var e = GID_MAP[m.gid];
+  if (!e) return null;
+  for (var i = 0; i < e.pool.length; i++) {
+    if (e.pool[i].sa === m.key) return e.fn(e.pool[i]);
+  }
+  return null;
+}
+
+/* ---------- learn-mode cards ---------- */
+function cardsFrom(list, backFn) {
+  return list.map(function (w) {
+    return { emo: w.emo || "", front: w.sa, back: backFn(w), speak: w.sa };
+  });
+}
+var LEARN_CATS = [
+  { name: "सप्ताह के दिन", cards: DAYS.map(function (w) {
+      return { emo: "", front: w.alt ? w.sa + " / " + w.alt : w.sa,
+        back: [w.hi, w.en + (w.alt ? " — दोनों रूप सही हैं" : "")], speak: w.sa };
+    }) },
+  { name: "घरेलू पशु", cards: cardsFrom(ANIMALS, function (w) {
+      var b = [w.hi + " (" + w.en + ")", "लिंग: " + w.g];
+      if (w.tip) b.push(w.tip);
+      return b;
+    }) },
+  { name: "क्रियाएँ", cards: cardsFrom(VERBS, function (w) { return [w.hi, w.en]; }) },
+  { name: "पुल्लिंग", cards: cardsFrom(GENDER_ALL.filter(function (w) { return w.g === PU; }),
+      function (w) { return [w.hi + (w.en ? " (" + w.en + ")" : ""), "लिंग: पुल्लिंगम् — अंत 'अः'"]; }) },
+  { name: "स्त्रीलिंग", cards: cardsFrom(GENDER_ALL.filter(function (w) { return w.g === STRI; }),
+      function (w) { return [w.hi + (w.en ? " (" + w.en + ")" : ""), w.tip ? w.tip : "लिंग: स्त्रीलिंगम् — अंत 'आ' / 'ई'"]; }) },
+  { name: "नपुंसकलिंग", cards: cardsFrom(GENDER_ALL.filter(function (w) { return w.g === NA; }),
+      function (w) { return [w.hi + (w.en ? " (" + w.en + ")" : ""), "लिंग: नपुंसकलिंगम् — अंत 'म्'"]; }) },
+  { name: "वचन", cards: [
+      { emo: "🔑", front: "ः → औ → आः", back: ["एक → दो → बहुत", "छात्रः → छात्रौ → छात्राः", "कन्या → कन्ये → कन्याः", "कमलम् → कमले → कमलानि"], speak: null }
+    ].concat(VACHAN_POOL.map(function (w) {
+      return { emo: "", front: w.sa, back: [w.hi, w.tag], speak: w.sa };
+    })) }
+];
+
+/* ======== UI LAYER (browser only below this line) ======== */
+
+/* ---------- storage (degrades gracefully if blocked) ---------- */
+var memoryFallback = null;
+function setCookie(name, val) {
+  try { document.cookie = name + "=" + encodeURIComponent(val) + ";path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
+}
+function getCookie(name) {
+  try {
+    var m = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+    return m ? decodeURIComponent(m.pop()) : null;
+  } catch (e) { return null; }
+}
+function loadState() {
+  var raw = null;
+  try { raw = window.localStorage.getItem(STORAGE_KEY); } catch (e) { raw = memoryFallback; }
+  if (!raw) raw = getCookie(STORAGE_KEY) || memoryFallback;
+  var s = raw ? JSON.parse(raw) : {};
+  return {
+    stars: s.stars || 0,
+    streak: s.streak || 0,
+    lastPlayed: s.lastPlayed || "",
+    today: s.today || "",
+    todayProgress: s.todayProgress || 0,
+    goalCelebrated: s.goalCelebrated || false,
+    mistakes: s.mistakes || []
+  };
+}
+function saveState() {
+  var json = JSON.stringify(state);
+  try { window.localStorage.setItem(STORAGE_KEY, json); } catch (e) { memoryFallback = json; }
+  var core = JSON.stringify({
+    stars: state.stars, streak: state.streak, lastPlayed: state.lastPlayed,
+    today: state.today, todayProgress: state.todayProgress, goalCelebrated: state.goalCelebrated, mistakes: []
+  });
+  setCookie(STORAGE_KEY, core);
+}
+
+/* ---------- date helpers ---------- */
+function dateKey(d) {
+  var y = d.getFullYear();
+  var m = ("0" + (d.getMonth() + 1)).slice(-2);
+  var day = ("0" + d.getDate()).slice(-2);
+  return y + "-" + m + "-" + day;
+}
+function todayKey() { return dateKey(new Date()); }
+function yesterdayKey() {
+  var d = new Date();
+  d.setDate(d.getDate() - 1);
+  return dateKey(d);
+}
+
+/* ---------- app state ---------- */
+var state = loadState();
+var current = null;
+var locked = false;
+var lastCat = "";
+var clearConfirmPending = false;
+var mode = "quiz";           /* learn | quiz | fix */
+var fixQueue = [];
+var pendingTimer = null;
+var learnCat = 0, learnCard = 0, learnFlipped = false;
+
+/* ---------- DOM ---------- */
+var el = {
+  stars: document.getElementById("starsNum"),
+  streak: document.getElementById("streakNum"),
+  goal: document.getElementById("goalNum"),
+  fill: document.getElementById("progressFill"),
+  banner: document.getElementById("banner"),
+  catTag: document.getElementById("catTag"),
+  pic: document.getElementById("picBox"),
+  question: document.getElementById("questionText"),
+  spk: document.getElementById("spkBtn"),
+  hint: document.getElementById("hint"),
+  choicesArea: document.getElementById("choicesArea"),
+  feedback: document.getElementById("feedback"),
+  explain: document.getElementById("explain"),
+  nextBtn: document.getElementById("nextBtn"),
+  mistakesList: document.getElementById("mistakesList"),
+  clearBtn: document.getElementById("clearBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+  modeLearn: document.getElementById("modeLearn"),
+  modeQuiz: document.getElementById("modeQuiz"),
+  modeFix: document.getElementById("modeFix"),
+  fixBadge: document.getElementById("fixBadge"),
+  learnView: document.getElementById("learnView"),
+  quizCard: document.getElementById("quizCard"),
+  chips: document.getElementById("chips"),
+  flashcard: document.getElementById("flashcard"),
+  fcPrev: document.getElementById("fcPrev"),
+  fcNext: document.getElementById("fcNext"),
+  fcCount: document.getElementById("fcCount")
+};
+
+/* ---------- text-to-speech ---------- */
+var ttsVoice = null;
+function initTTS() {
+  if (!window.speechSynthesis) { document.body.className += " no-tts"; return; }
+  function chooseVoice() {
+    try {
+      var vs = window.speechSynthesis.getVoices();
+      for (var i = 0; i < vs.length; i++) {
+        var l = (vs[i].lang || "").toLowerCase();
+        if (l.indexOf("hi") === 0) { ttsVoice = vs[i]; return; }
+      }
+      for (var j = 0; j < vs.length; j++) {
+        if ((vs[j].lang || "").toUpperCase().indexOf("IN") >= 0) { ttsVoice = vs[j]; return; }
+      }
+    } catch (e) {}
+  }
+  chooseVoice();
+  if (window.speechSynthesis.onvoiceschanged !== undefined) {
+    window.speechSynthesis.onvoiceschanged = chooseVoice;
+  }
+}
+function speak(text) {
+  if (!window.speechSynthesis || !text) return;
+  try {
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = "hi-IN";
+    if (ttsVoice) u.voice = ttsVoice;
+    u.rate = 0.75;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
+
+/* ---------- daily reset & streak ---------- */
+function dailyReset() {
+  var t = todayKey();
+  if (state.today !== t) {
+    state.today = t;
+    state.todayProgress = 0;
+    state.goalCelebrated = false;
+    saveState();
+  }
+}
+function bumpStreakForToday() {
+  var t = todayKey();
+  if (state.lastPlayed === t) return;
+  if (state.lastPlayed === yesterdayKey()) state.streak += 1;
+  else state.streak = 1;
+  state.lastPlayed = t;
+  saveState();
+}
+
+/* ---------- render stats ---------- */
+function renderStats() {
+  el.stars.textContent = state.stars;
+  el.streak.textContent = state.streak;
+  el.goal.textContent = Math.min(state.todayProgress, DAILY_GOAL) + "/" + DAILY_GOAL;
+  var pct = Math.min(100, (state.todayProgress / DAILY_GOAL) * 100);
+  el.fill.style.width = pct + "%";
+  if (state.todayProgress >= DAILY_GOAL) {
+    el.banner.textContent = "🎉 Daily goal done! " + state.todayProgress + " correct today. Keep going or come back tomorrow!";
+    el.banner.classList.add("show");
+  } else {
+    el.banner.classList.remove("show");
+  }
+}
+
+/* ---------- mistakes ---------- */
+function eligibleMistakes() {
+  return state.mistakes.filter(function (m) { return m.gid && GID_MAP[m.gid]; });
+}
+function renderMistakes() {
+  el.fixBadge.textContent = state.mistakes.length;
+  if (!state.mistakes.length) {
+    el.mistakesList.innerHTML = '<div class="empty">No mistakes yet. Off to a great start!</div>';
+    el.clearBtn.textContent = "Clear";
+    el.clearBtn.classList.remove("danger");
+    clearConfirmPending = false;
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < state.mistakes.length; i++) {
+    var m = state.mistakes[i];
+    html += '<div class="mistake-item">' +
+      '<button class="dismiss-btn" data-idx="' + i + '">✕</button>' +
+      '<div class="q">' + escapeHtml(m.cat) + ": " + escapeHtml(m.prompt) + '</div>' +
+      '<div class="ans">Her answer: <span class="yours">' + escapeHtml(m.your) + '</span>' +
+      '&nbsp;&nbsp; Correct: <span class="right">' + escapeHtml(m.answer) + '</span></div>' +
+      '<div class="rule">' + escapeHtml(m.rule) + '</div>' +
+      (m.wins ? '<div class="wins">Practice: ' + m.wins + '/2 correct — one more to clear it!</div>' : '') +
+    '</div>';
+  }
+  el.mistakesList.innerHTML = html;
+  var dismissBtns = el.mistakesList.querySelectorAll(".dismiss-btn");
+  for (var j = 0; j < dismissBtns.length; j++) {
+    dismissBtns[j].onclick = (function (idx) {
+      return function () {
+        state.mistakes.splice(idx, 1);
+        saveState();
+        renderMistakes();
+      };
+    })(parseInt(dismissBtns[j].getAttribute("data-idx"), 10));
+  }
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+/* ---------- mode switching ---------- */
+function setMode(m) {
+  if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+  if (m === "fix" && !eligibleMistakes().length) {
+    el.banner.textContent = "Mistakes Bank खाली है — पहले अभ्यास करो! 🎉";
+    el.banner.classList.add("show");
+    setTimeout(function () { renderStats(); }, 2200);
+    return;
+  }
+  mode = m;
+  el.modeLearn.className = "mode-btn" + (m === "learn" ? " active" : "");
+  el.modeQuiz.className = "mode-btn" + (m === "quiz" ? " active" : "");
+  el.modeFix.className = "mode-btn" + (m === "fix" ? " active" : "");
+  el.learnView.style.display = m === "learn" ? "block" : "none";
+  el.quizCard.style.display = m === "learn" ? "none" : "block";
+  if (m === "learn") { renderChips(); renderCard(); }
+  if (m === "quiz") nextQuestion();
+  if (m === "fix") { fixQueue = []; nextQuestion(); }
+}
+
+/* ---------- learn mode ---------- */
+function renderChips() {
+  el.chips.innerHTML = "";
+  for (var i = 0; i < LEARN_CATS.length; i++) {
+    (function (idx) {
+      var b = document.createElement("button");
+      b.className = "chip" + (idx === learnCat ? " active" : "");
+      b.textContent = LEARN_CATS[idx].name;
+      b.onclick = function () { learnCat = idx; learnCard = 0; learnFlipped = false; renderChips(); renderCard(); };
+      el.chips.appendChild(b);
+    })(i);
+  }
+}
+function renderCard() {
+  var cards = LEARN_CATS[learnCat].cards;
+  var c = cards[learnCard];
+  el.fcCount.textContent = (learnCard + 1) + "/" + cards.length;
+  el.flashcard.innerHTML = "";
+  if (!learnFlipped) {
+    if (c.emo) {
+      var e = document.createElement("div");
+      e.className = "fc-emo";
+      e.textContent = c.emo;
+      el.flashcard.appendChild(e);
+    }
+    var f = document.createElement("div");
+    f.className = "fc-front";
+    f.textContent = c.front;
+    el.flashcard.appendChild(f);
+    if (c.speak && window.speechSynthesis) {
+      var s = document.createElement("button");
+      s.className = "spk";
+      s.textContent = "🔊 सुनो";
+      s.onclick = function (ev) { ev.stopPropagation(); speak(c.speak); };
+      s.style.marginTop = "12px";
+      el.flashcard.appendChild(s);
+    }
+    var h = document.createElement("div");
+    h.className = "fc-flip-hint";
+    h.textContent = "अर्थ देखने के लिए टैप करो 👆";
+    el.flashcard.appendChild(h);
+  } else {
+    var t = document.createElement("div");
+    t.className = "fc-front";
+    t.style.fontSize = "26px";
+    t.textContent = c.front;
+    el.flashcard.appendChild(t);
+    for (var i = 0; i < c.back.length; i++) {
+      var line = document.createElement("div");
+      line.className = "fc-back-line" + (i > 0 ? " sub" : "");
+      line.textContent = c.back[i];
+      el.flashcard.appendChild(line);
+    }
+    var h2 = document.createElement("div");
+    h2.className = "fc-flip-hint";
+    h2.textContent = "वापस पलटने के लिए टैप करो";
+    el.flashcard.appendChild(h2);
+  }
+}
+el.flashcard.onclick = function () { learnFlipped = !learnFlipped; renderCard(); };
+el.fcPrev.onclick = function () {
+  var n = LEARN_CATS[learnCat].cards.length;
+  learnCard = (learnCard - 1 + n) % n;
+  learnFlipped = false;
+  renderCard();
+};
+el.fcNext.onclick = function () {
+  var n = LEARN_CATS[learnCat].cards.length;
+  learnCard = (learnCard + 1) % n;
+  learnFlipped = false;
+  renderCard();
+};
+
+/* ---------- question flow ---------- */
+function nextQuestion() {
+  if (pendingTimer) { clearTimeout(pendingTimer); pendingTimer = null; }
+  locked = false;
+  el.feedback.textContent = "";
+  el.feedback.className = "feedback";
+  el.explain.textContent = "";
+  el.explain.classList.remove("show");
+  el.nextBtn.style.display = "none";
+
+  var q = null;
+  if (mode === "fix") {
+    if (!fixQueue.length) {
+      var elig = eligibleMistakes();
+      if (!elig.length) {
+        el.banner.textContent = "🎉 Mistakes Bank साफ़! शाबाश!";
+        el.banner.classList.add("show");
+        setMode("quiz");
+        return;
+      }
+      fixQueue = shuffle(elig);
+    }
+    var item = fixQueue.shift();
+    if (state.mistakes.indexOf(item) < 0) { nextQuestion(); return; }
+    q = regenFromMistake(item);
+    if (!q) { nextQuestion(); return; }
+    q._mref = item;
+  } else {
+    var gen, tries = 0;
+    do {
+      gen = pick(GENERATORS);
+      q = gen();
+      tries++;
+    } while (q.cat === lastCat && tries < 6);
+    lastCat = q.cat;
+  }
+  current = q;
+
+  el.catTag.textContent = (mode === "fix" ? "🔁 " : "") + q.cat;
+  if (q.pic) {
+    el.pic.textContent = q.pic;
+    el.pic.style.display = "block";
+  } else {
+    el.pic.style.display = "none";
+  }
+  el.question.textContent = q.prompt;
+  if (q.speak && window.speechSynthesis) {
+    el.spk.style.display = "inline-block";
+    el.spk.onclick = function () { speak(q.speak); };
+  } else {
+    el.spk.style.display = "none";
+  }
+  el.hint.textContent = "सही उत्तर पर टैप करें (Tap the correct answer)";
+
+  el.choicesArea.style.display = "grid";
+  el.choicesArea.className = q.three ? "choices three" : "choices";
+  el.choicesArea.innerHTML = "";
+  for (var i = 0; i < q.choices.length; i++) {
+    (function (choiceVal) {
+      var b = document.createElement("button");
+      b.className = "choice";
+      b.textContent = choiceVal;
+      b.onclick = function () { handleChoice(choiceVal, b); };
+      el.choicesArea.appendChild(b);
+    })(q.choices[i]);
+  }
+}
+
+function normalize(s) {
+  return String(s).trim().replace(/\s+/g, "").toLowerCase();
+}
+
+function handleChoice(val, btnEl) {
+  if (locked) return;
+  locked = true;
+  var buttons = el.choicesArea.querySelectorAll("button");
+  for (var i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+  var ok = normalize(val) === normalize(current.answer);
+  if (ok) {
+    btnEl.classList.add("pick-correct");
+  } else {
+    btnEl.classList.add("pick-wrong");
+    for (var j = 0; j < buttons.length; j++) {
+      if (normalize(buttons[j].textContent) === normalize(current.answer)) buttons[j].classList.add("reveal");
+    }
+  }
+  resolve(ok, val);
+}
+
+function resolve(ok, given) {
+  bumpStreakForToday();
+  if (ok) {
+    state.stars += 1;
+    state.todayProgress += 1;
+    var cleared = false;
+    if (mode === "fix" && current._mref) {
+      var m = current._mref;
+      m.wins = (m.wins || 0) + 1;
+      if (m.wins >= 2) {
+        var idx = state.mistakes.indexOf(m);
+        if (idx >= 0) state.mistakes.splice(idx, 1);
+        cleared = true;
+      }
+    }
+    saveState();
+    renderStats();
+    renderMistakes();
+    el.feedback.textContent = cleared ? "🏆 Cleared from Mistakes Bank!" :
+      pick(["⭐ Correct!", "🌟 Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
+    el.feedback.className = "feedback correct";
+    el.explain.textContent = current.rule;
+    el.explain.classList.add("show");
+    starBurst();
+    if (state.todayProgress === DAILY_GOAL && !state.goalCelebrated) {
+      state.goalCelebrated = true;
+      saveState();
+    }
+    pendingTimer = setTimeout(nextQuestion, 1700);
+  } else {
+    if (mode === "fix" && current._mref) {
+      current._mref.wins = 0;
+      saveState();
+    } else if (mode === "quiz") {
+      state.mistakes.unshift({
+        gid: current.gid, key: current.key,
+        cat: current.cat, prompt: current.prompt,
+        your: given, answer: current.answer, rule: current.rule, wins: 0
+      });
+      if (state.mistakes.length > 40) state.mistakes.pop();
+      saveState();
+    }
+    el.feedback.textContent = mode === "fix" ? "❌ Not quite — try this one again later" : "❌ Not quite — saved to your Mistakes Bank";
+    el.feedback.className = "feedback incorrect";
+    el.explain.textContent = "Correct answer: " + current.answer + ".  " + current.rule;
+    el.explain.classList.add("show");
+    renderMistakes();
+    el.nextBtn.style.display = "inline-block";
+  }
+}
+
+function starBurst() {
+  var emojis = ["⭐", "🌟", "✨"];
+  for (var i = 0; i < 5; i++) {
+    var s = document.createElement("div");
+    s.className = "burst";
+    s.textContent = pick(emojis);
+    s.style.left = (40 + Math.random() * 20) + "%";
+    s.style.top = "45%";
+    document.body.appendChild(s);
+    (function (node) { setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1000); })(s);
+  }
+}
+
+/* ---------- events ---------- */
+el.nextBtn.onclick = nextQuestion;
+el.modeLearn.onclick = function () { setMode("learn"); };
+el.modeQuiz.onclick = function () { setMode("quiz"); };
+el.modeFix.onclick = function () { setMode("fix"); };
+el.clearBtn.onclick = function () {
+  if (!state.mistakes.length) return;
+  if (!clearConfirmPending) {
+    clearConfirmPending = true;
+    el.clearBtn.textContent = "Tap again to clear all";
+    el.clearBtn.classList.add("danger");
+    setTimeout(function () {
+      clearConfirmPending = false;
+      el.clearBtn.textContent = "Clear";
+      el.clearBtn.classList.remove("danger");
+    }, 3000);
+  } else {
+    clearConfirmPending = false;
+    el.clearBtn.textContent = "Clear";
+    el.clearBtn.classList.remove("danger");
+    state.mistakes = [];
+    saveState();
+    renderMistakes();
+  }
+};
+var resetConfirmPending = false;
+el.resetBtn.onclick = function () {
+  if (!resetConfirmPending) {
+    resetConfirmPending = true;
+    el.resetBtn.textContent = "Tap again to confirm reset";
+    setTimeout(function () {
+      resetConfirmPending = false;
+      el.resetBtn.textContent = "Reset all progress";
+    }, 3000);
+  } else {
+    resetConfirmPending = false;
+    el.resetBtn.textContent = "Reset all progress";
+    state = { stars: 0, streak: 0, lastPlayed: "", today: "", todayProgress: 0, goalCelebrated: false, mistakes: [] };
+    saveState();
+    dailyReset();
+    renderStats();
+    renderMistakes();
+    if (mode !== "learn") nextQuestion();
+  }
+};
+document.getElementById("backupBtn").onclick = function () {
+  var code = "";
+  try { code = btoa(unescape(encodeURIComponent(JSON.stringify(state)))); } catch (e) { code = ""; }
+  window.prompt("Backup code — copy and keep this somewhere safe. Paste it into 'Restore progress' to bring stars and streak back:", code);
+};
+document.getElementById("restoreBtn").onclick = function () {
+  var code = window.prompt("Paste a backup code to restore progress:");
+  if (!code) return;
+  try {
+    var restored = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    if (typeof restored.stars !== "number") throw new Error("bad code");
+    state = {
+      stars: restored.stars || 0, streak: restored.streak || 0,
+      lastPlayed: restored.lastPlayed || "", today: restored.today || "",
+      todayProgress: restored.todayProgress || 0, goalCelebrated: restored.goalCelebrated || false,
+      mistakes: restored.mistakes || []
+    };
+    saveState();
+    dailyReset();
+    renderStats();
+    renderMistakes();
+    window.alert("Progress restored! Stars: " + state.stars + ", streak: " + state.streak + ".");
+  } catch (e) {
+    window.alert("Sorry, that backup code could not be read. Check it was copied in full.");
+  }
+};
+
+/* ---------- init ---------- */
+var jsWarn = document.getElementById("jsWarning");
+if (jsWarn) jsWarn.style.display = "none";
+initTTS();
+dailyReset();
+renderStats();
+renderMistakes();
+/* first-time visitors land in Learn mode; returning players go straight to quiz */
+setMode(state.stars > 0 ? "quiz" : "learn");
+</script>
+</body>
+</html>
