@@ -52,6 +52,10 @@
   }
   .tagline { margin: 4px 0 0; color: var(--muted); font-weight: 700; font-size: 15px; }
 
+  .home-link { display: block; text-align: center; margin-bottom: 10px; }
+  .home-link a { color: var(--muted); font-weight: 700; font-size: 13px; text-decoration: none; }
+  .home-link a:hover { text-decoration: underline; }
+
   .stats {
     display: flex;
     gap: 10px;
@@ -317,6 +321,7 @@
 <body>
 <div id="jsWarning">&#9888;&#65039; Please open this file in <b>Chrome</b> or another web browser. It will not run inside a file viewer.</div>
 <div class="wrap">
+  <div class="home-link"><a href="index.html">&larr; All quests</a></div>
   <header>
     <h1>Maths Quest</h1>
     <p class="tagline">Solve in your notebook, check it here</p>
