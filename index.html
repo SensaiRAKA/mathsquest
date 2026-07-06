@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="author" content="Rakesh Kumar">
+<title>Study Quest</title>
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: ui-rounded, "Segoe UI Rounded", "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(160deg, #ede9fe 0%, #f0fdf4 50%, #fef9c3 100%);
+    min-height: 100vh;
+    color: #1e293b;
+    padding: 16px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { text-align: center; margin: 10px 0 24px; }
+  h1 { margin: 0; font-size: 36px; font-weight: 900; letter-spacing: -0.5px; color: #5b21b6; }
+  .tagline { margin: 6px 0 0; color: #64748b; font-weight: 700; font-size: 15px; }
+
+  .quest-grid { display: grid; gap: 16px; }
+  .quest-card {
+    display: block;
+    background: #fff;
+    border-radius: 22px;
+    padding: 22px 20px;
+    box-shadow: 0 8px 24px rgba(91,33,182,0.12);
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.1s ease;
+  }
+  .quest-card:active { transform: scale(0.98); }
+  .quest-emoji { font-size: 40px; line-height: 1; margin-bottom: 8px; }
+  .quest-title { font-size: 22px; font-weight: 900; margin: 0 0 4px; }
+  .quest-desc { font-size: 14px; font-weight: 600; color: #64748b; margin: 0; line-height: 1.4; }
+  .quest-card.math .quest-title { color: #5b21b6; }
+  .quest-card.sanskrit .quest-title { color: #b85e10; }
+
+  .coming-soon {
+    border: 3px dashed #e2e8f0;
+    border-radius: 22px;
+    padding: 22px 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-weight: 700;
+  }
+
+  footer { text-align: center; margin: 26px 0 8px; color: #94a3b8; font-size: 12px; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎯 Study Quest</h1>
+    <p class="tagline">Pick a quest and start earning stars!</p>
+  </header>
+
+  <div class="quest-grid">
+    <a class="quest-card math" href="mathsquest.html">
+      <div class="quest-emoji">🔢</div>
+      <div class="quest-title">Maths Quest</div>
+      <p class="quest-desc">Addition, subtraction, multiplication, division, place value and word problems &mdash; Class 4 style.</p>
+    </a>
+
+    <a class="quest-card sanskrit" href="sanskritquest.html">
+      <div class="quest-emoji">📜</div>
+      <div class="quest-title">Sanskrit Quest</div>
+      <p class="quest-desc">&#2354;&#2367;&#2306;&#2327;, &#2357;&#2330;&#2344;, &#2342;&#2367;&#2344;, &#2346;&#2358;&#2369; &#2324;&#2352; &#2325;&#2381;&#2352;&#2367;&#2351;&#2366;&#2319;&#2305; &mdash; Class 4, Unit 1.</p>
+    </a>
+
+    <div class="coming-soon">More quests coming soon&hellip;</div>
+  </div>
+
+  <footer>Progress for each quest is saved separately on this device.</footer>
+</div>
+</body>
+</html>
