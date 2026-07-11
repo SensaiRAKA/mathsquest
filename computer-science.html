@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Computer Adventure - Class 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FDF6EC; --card:#FFFFFF; --ink:#2E2A3B;
+  --teal:#0FA3A3; --teal-dark:#0B7C7C;
+  --orange:#FF8C42; --orange-dark:#E56E22;
+  --berry:#C94F7C; --lilac:#9B8CFF;
+  --good:#3BB273; --bad:#E4572E;
+  --shadow:0 4px 0 rgba(46,42,59,.14);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(15,163,163,.08) 0 90px, transparent 91px),
+  radial-gradient(circle at 88% 20%, rgba(255,140,66,.10) 0 70px, transparent 71px),
+  radial-gradient(circle at 20% 90%, rgba(155,140,255,.09) 0 80px, transparent 81px);}
+h1,h2,h3,.disp{font-family:'Baloo 2',cursive}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 90px}
+header{display:flex;align-items:center;gap:10px;padding:10px 4px}
+.mascot{font-size:38px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.12));transition:transform .3s}
+.mascot.happy{transform:rotate(-8deg) scale(1.15)}
+.mascot.sad{transform:rotate(8deg) scale(.95)}
+.title-block h1{font-size:24px;color:var(--teal-dark);line-height:1.05}
+.title-block .sub{font-size:12px;font-weight:700;color:var(--berry)}
+.statbar{display:flex;gap:8px;margin:6px 0 14px}
+.stat{flex:1;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:8px;text-align:center}
+.stat .n{font-family:'Baloo 2';font-size:20px;font-weight:800;color:var(--orange-dark)}
+.stat .l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8A8496}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+button{font-family:'Nunito';font-weight:800;border:none;cursor:pointer}
+.big-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);
+  border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:12px;font-size:16px;color:var(--ink);
+  transition:transform .1s}
+.big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(46,42,59,.14)}
+.big-btn .ico{font-size:30px}
+.big-btn .desc{font-size:12px;font-weight:700;color:#8A8496;display:block}
+.pill{display:inline-block;background:var(--lilac);color:#fff;font-size:11px;font-weight:800;border-radius:99px;padding:2px 10px}
+.pill.o{background:var(--orange)}
+.pill.t{background:var(--teal)}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.opt{display:block;width:100%;text-align:left;background:#F5F1FA;border:3px solid transparent;border-radius:14px;
+  padding:12px 14px;margin-bottom:10px;font-size:16px;font-weight:700;color:var(--ink)}
+.opt:active{transform:scale(.99)}
+.opt.correct{background:#E4F6EC;border-color:var(--good)}
+.opt.wrong{background:#FBE9E2;border-color:var(--bad)}
+.opt.locked{pointer-events:none;opacity:.85}
+.qtext{font-size:18px;font-weight:800;margin-bottom:14px;line-height:1.35}
+.qtag{font-size:11px;font-weight:800;color:#fff;background:var(--berry);display:inline-block;border-radius:99px;padding:3px 10px;margin-bottom:10px}
+input[type=text]{width:100%;font-family:'Nunito';font-size:18px;font-weight:700;padding:12px;border:3px solid #E3DDF0;
+  border-radius:14px;outline:none;background:#FBFAFE}
+input[type=text]:focus{border-color:var(--teal)}
+.action{width:100%;background:var(--teal);color:#fff;font-size:17px;padding:14px;border-radius:14px;margin-top:12px;
+  box-shadow:0 4px 0 var(--teal-dark)}
+.action:active{transform:translateY(3px);box-shadow:none}
+.action.orange{background:var(--orange);box-shadow:0 4px 0 var(--orange-dark)}
+.action.ghost{background:#EFEAF7;color:var(--ink);box-shadow:0 4px 0 #D8D0E8}
+.feedback{border-radius:14px;padding:12px 14px;margin-top:12px;font-weight:700;font-size:15px;display:none}
+.feedback.show{display:block}
+.feedback.good{background:#E4F6EC;color:#1E6B44}
+.feedback.bad{background:#FBE9E2;color:#9C3B1E}
+.wordbank{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.wordbank .wb{background:#FFF3E6;border:2px dashed var(--orange);color:var(--orange-dark);font-weight:800;
+  border-radius:10px;padding:6px 12px;font-size:14px}
+.pair-col{display:flex;gap:10px}
+.pair-col>div{flex:1;display:flex;flex-direction:column;gap:8px}
+.pair-item{background:#F5F1FA;border:3px solid transparent;border-radius:12px;padding:10px;font-weight:700;
+  font-size:14px;text-align:center;min-height:52px;display:flex;align-items:center;justify-content:center}
+.pair-item.sel{border-color:var(--lilac);background:#EFEBFF}
+.pair-item.done{background:#E4F6EC;border-color:var(--good);pointer-events:none}
+.pair-item.flash{background:#FBE9E2;border-color:var(--bad)}
+.bucket-zone{display:flex;gap:10px;margin-top:12px}
+.bucket{flex:1;border:3px dashed #C9C2DB;border-radius:14px;min-height:90px;padding:8px;text-align:center}
+.bucket h4{font-family:'Baloo 2';font-size:14px;margin-bottom:6px}
+.bucket .b-items{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.bucket .b-items span{background:#E4F6EC;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800}
+.bucket .b-items span.wrongdrop{background:#FBE9E2}
+.sort-item{display:inline-block;background:#FFF3E6;border:3px solid var(--orange);border-radius:12px;
+  padding:10px 16px;font-weight:800;font-size:16px;margin:0 4px}
+.order-list{display:flex;flex-direction:column;gap:8px}
+.order-item{background:#F5F1FA;border:3px solid transparent;border-radius:12px;padding:12px;font-weight:700;font-size:15px;
+  display:flex;align-items:center;gap:10px}
+.order-item .num{background:var(--teal);color:#fff;border-radius:99px;width:26px;height:26px;display:flex;
+  align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.order-item.sel{border-color:var(--lilac);background:#EFEBFF}
+.progressbar{height:12px;background:#EFEAF7;border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progressbar .fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--lilac));border-radius:99px;transition:width .3s}
+.learn-card{background:linear-gradient(145deg,#FFFDF8,#F3FBFB);border:3px solid #DCEFEF;border-radius:20px;padding:20px;min-height:230px;
+  display:flex;flex-direction:column;justify-content:center;text-align:center;margin-bottom:14px}
+.learn-card .emo{font-size:52px;margin-bottom:8px}
+.learn-card h3{font-size:22px;color:var(--teal-dark);margin-bottom:8px}
+.learn-card p{font-size:16px;font-weight:700;line-height:1.5}
+.learn-card .fact{margin-top:10px;background:#FFF3E6;border-radius:12px;padding:8px 12px;font-size:13px;font-weight:800;color:var(--orange-dark)}
+.nav-row{display:flex;gap:10px}
+.nav-row .action{flex:1;margin-top:0}
+.mistake-entry{border-left:5px solid var(--berry);background:#FDF3F7;border-radius:0 14px 14px 0;padding:12px;margin-bottom:10px}
+.mistake-entry .q{font-weight:800;font-size:14px}
+.mistake-entry .a{font-size:13px;font-weight:700;color:#1E6B44;margin-top:4px}
+.mistake-entry .why{font-size:12px;font-weight:600;color:#6B6478;margin-top:4px}
+.mistake-entry .dismiss{margin-top:8px;background:#EFEAF7;border-radius:10px;padding:6px 12px;font-size:12px}
+.back{background:none;font-size:14px;font-weight:800;color:var(--teal-dark);padding:6px 0;margin-bottom:8px}
+.confirm-inline{display:none;gap:8px;margin-top:8px}
+.confirm-inline.show{display:flex}
+.confirm-inline button{flex:1;padding:10px;border-radius:12px;font-size:14px}
+.confirm-yes{background:var(--bad);color:#fff}
+.confirm-no{background:#EFEAF7}
+.celebrate{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.confetti{position:absolute;top:-20px;font-size:22px;animation:fall 1.6s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+.hidden{display:none!important}
+code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;border-radius:12px;
+  font-size:13px;word-break:break-all;margin-top:10px;user-select:all}
+.footer-note{text-align:center;font-size:11px;font-weight:700;color:#A79FB8;margin-top:16px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mascot" id="mascot">🤖</div>
+    <div class="title-block">
+      <h1>Computer Adventure</h1>
+      <div class="sub">Class 4 · Unit 1 · with Pixel the Robot</div>
+    </div>
+  </header>
+
+  <div class="statbar">
+    <div class="stat"><div class="n" id="stStars">0</div><div class="l">⭐ Stars</div></div>
+    <div class="stat"><div class="n" id="stStreak">0</div><div class="l">🔥 Streak</div></div>
+    <div class="stat"><div class="n" id="stToday">0/15</div><div class="l">🎯 Today</div></div>
+  </div>
+
+  <!-- ============ HOME ============ -->
+  <div id="scrHome">
+    <div class="card" style="text-align:center">
+      <div class="disp" style="font-size:17px;font-weight:800" id="greeting">Hi Diksha! Ready to become a Computer Champion? 💪</div>
+    </div>
+    <button class="big-btn" onclick="openLearn(1)"><span class="ico">📖</span><span><b>Learn: Computer System</b><span class="desc">Flip cards about input, output &amp; CPU</span></span></button>
+    <button class="big-btn" onclick="openLearn(2)"><span class="ico">🐱</span><span><b>Learn: Scratch Coding</b><span class="desc">Sprites, blocks and the stage</span></span></button>
+    <button class="big-btn" onclick="startQuiz(1)"><span class="ico">💻</span><span><b>Quiz: Computer System</b><span class="desc">Chapter 1 practice — all question types</span></span></button>
+    <button class="big-btn" onclick="startQuiz(2)"><span class="ico">🚩</span><span><b>Quiz: Scratch Coding</b><span class="desc">Chapter 6 practice — all question types</span></span></button>
+    <button class="big-btn" onclick="startQuiz(0)"><span class="ico">🏆</span><span><b>Big Test Practice</b><span class="desc">Mixed questions from both chapters, like the real test!</span></span></button>
+    <button class="big-btn" onclick="showMistakes()"><span class="ico">🔁</span><span><b>My Tricky Questions</b><span class="desc" id="mbCount">Questions to try again</span></span></button>
+    <button class="big-btn" onclick="showSettings()"><span class="ico">⚙️</span><span><b>My Progress &amp; Backup</b><span class="desc">Save code, daily goal, reset</span></span></button>
+    <div class="footer-note">Made with ❤️ for Diksha · Test: Monday</div>
+  </div>
+
+  <!-- ============ LEARN ============ -->
+  <div id="scrLearn" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="progressbar"><div class="fill" id="learnFill"></div></div>
+    <div class="learn-card" id="learnCard"></div>
+    <div class="nav-row">
+      <button class="action ghost" onclick="learnNav(-1)">← Back</button>
+      <button class="action" onclick="learnNav(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div id="scrQuiz" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="progressbar"><div class="fill" id="quizFill"></div></div>
+    <div class="card" id="quizCard"></div>
+  </div>
+
+  <!-- ============ MISTAKES ============ -->
+  <div id="scrMistakes" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <h2 style="margin-bottom:10px">🔁 My Tricky Questions</h2>
+    <div id="mistakeList"></div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div id="scrSettings" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="card">
+      <h3>💾 Backup my progress</h3>
+      <p style="font-size:13px;font-weight:700;color:#6B6478">Copy this code and keep it safe. You can paste it on another device to restore stars and streaks.</p>
+      <code class="progress-code" id="backupCode"></code>
+      <h3 style="margin-top:16px">📥 Restore from a code</h3>
+      <input type="text" id="restoreInput" placeholder="Paste your code here">
+      <button class="action" onclick="restoreProgress()">Restore</button>
+      <div class="feedback" id="restoreFb"></div>
+    </div>
+    <div class="card">
+      <h3>🧹 Start fresh</h3>
+      <p style="font-size:13px;font-weight:700;color:#6B6478">This erases all stars, streaks and tricky questions.</p>
+      <button class="action ghost" onclick="askReset()">Reset everything</button>
+      <div class="confirm-inline" id="resetConfirm">
+        <button class="confirm-yes" onclick="doReset()">Yes, erase all</button>
+        <button class="confirm-no" onclick="hideReset()">No, keep it</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="celebrate" id="celebrate"></div>
+
+<script>
+"use strict";
+/* =====================================================
+   STATE + PERSISTENCE (localStorage with cookie mirror)
+===================================================== */
+const LS_KEY = "diksha_cs_v1";
+const DAILY_GOAL = 15;
+let S = { stars:0, streak:0, lastDay:"", todayCount:0, mistakes:[] };
+
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function saveState(){
+  const raw = JSON.stringify(S);
+  try{ localStorage.setItem(LS_KEY, raw); }catch(e){}
+  try{ document.cookie = LS_KEY+"="+encodeURIComponent(btoa(raw))+";max-age=31536000;path=/;SameSite=Lax"; }catch(e){}
+}
+function loadState(){
+  let raw=null;
+  try{ raw = localStorage.getItem(LS_KEY); }catch(e){}
+  if(!raw){
+    const m=document.cookie.match(new RegExp(LS_KEY+"=([^;]+)"));
+    if(m){ try{ raw=atob(decodeURIComponent(m[1])); }catch(e){} }
+  }
+  if(raw){ try{ S=Object.assign(S,JSON.parse(raw)); }catch(e){} }
+  const t=todayStr();
+  if(S.lastDay!==t){
+    const y=new Date(); y.setDate(y.getDate()-1);
+    const yStr=y.getFullYear()+"-"+(y.getMonth()+1)+"-"+y.getDate();
+    if(S.lastDay!==yStr && S.lastDay!=="") S.streak=0;
+    S.todayCount=0; S.lastDay=t;
+  }
+  saveState();
+}
+function bumpProgress(correct){
+  if(correct){
+    S.stars++;
+    S.todayCount++;
+    if(S.todayCount===DAILY_GOAL){ S.streak++; burst("🎉"); }
+  }
+  saveState(); renderStats();
+}
+function renderStats(){
+  document.getElementById("stStars").textContent=S.stars;
+  document.getElementById("stStreak").textContent=S.streak;
+  document.getElementById("stToday").textContent=Math.min(S.todayCount,DAILY_GOAL)+"/"+DAILY_GOAL;
+  document.getElementById("mbCount").textContent = S.mistakes.length ? (S.mistakes.length+" waiting for you!") : "No tricky ones — great job!";
+}
+function addMistake(q, correctText, why){
+  if(S.mistakes.some(m=>m.q===q)) return;
+  S.mistakes.push({q:q, a:correctText, why:why||""});
+  if(S.mistakes.length>40) S.mistakes.shift();
+  saveState();
+}
+
+/* =====================================================
+   LEARN CARDS
+===================================================== */
+const LEARN = {
+1:[
+ {e:"🔄",t:"The IPO Cycle",p:"A computer works in 3 steps: INPUT → PROCESS → OUTPUT. We give it data, the CPU processes it, and we get information back. It can also STORE data.",f:"IPO = Input, Process, Output"},
+ {e:"🧮",t:"Data vs Information",p:"DATA is the raw facts we give the computer (like marks: 15, 18, 20). INFORMATION is the useful result we get back (like: most students scored above 15!).",f:"Data goes in, information comes out"},
+ {e:"⌨️",t:"Keyboard",p:"The most common input device for TEXT. A standard keyboard has 104 keys with letters, numbers and symbols.",f:"104 keys on a standard keyboard!"},
+ {e:"🖱️",t:"Mouse",p:"A small handheld POINTING device. It moves the pointer on the screen and has two buttons plus a scroll wheel. Wireless mice use Bluetooth to connect without cables.",f:"Keyboard + mouse = most used input devices"},
+ {e:"🎤",t:"Microphone",p:"An input device for SOUND. When you speak into it, it turns your voice into digital data the computer understands.",f:"Mic = sound INPUT. Speakers = sound OUTPUT."},
+ {e:"📄",t:"Scanner",p:"Reads pictures or pages from paper into the computer. Two types: FLATBED (flat, like a photocopier) and HANDHELD (used in shops for barcodes).",f:"Shops use handheld scanners for barcodes"},
+ {e:"📷",t:"Digicam vs Webcam",p:"Both capture photos and videos. A DIGICAM stores them in its OWN memory first, then transfers them. A WEBCAM stores directly into the computer.",f:"Digicam = own memory. Webcam = straight to computer."},
+ {e:"🖊️",t:"Light Pen, Touchpad, Touchscreen, Joystick",p:"Light pen: draw and select right ON the screen. Touchpad: the flat pad on laptops. Touchscreen: a screen that senses your finger. Joystick: a rod with buttons for games!",f:"All four are INPUT devices"},
+ {e:"🖥️",t:"Monitor (VDU)",p:"The main output device — also called Visual Display Unit. What you see on it is SOFT output (it keeps changing). Types: CRT (old &amp; bulky), LCD and LED (thin, bright &amp; clear).",f:"CRT monitors are mostly replaced by flat screens"},
+ {e:"🖨️",t:"Printers",p:"Printers give HARD output (on paper). DOT MATRIX: strikes pins on an inked ribbon, single colour. INKJET: sprays ink dots, high quality. LASER: fastest, uses laser light.",f:"Printer speed: CPS and PPM"},
+ {e:"🔊",t:"Speakers, Headphones &amp; Plotter",p:"Speakers give LOUD sound for everyone. Headphones give private, in-ear sound. A PLOTTER prints big, high-quality engineering drawings.",f:"Engineers &amp; designers use plotters"},
+ {e:"🧠",t:"CPU — the computer's brain",p:"The CPU sits on the MOTHERBOARD (the main circuit board). It has 3 parts: ALU does the actual processing, CU controls everything, MU stores things for a short time.",f:"ALU = Arithmetic &amp; Logical Unit — it does the processing! (Not CU!)"},
+ {e:"⭐",t:"Quick facts to remember",p:"Intel is the largest maker of CPU chips. Webcam is an INPUT device. Plotter is an OUTPUT device. Monitor shows SOFT output, printer gives HARD output.",f:"These exact facts appear in the test!"}
+],
+2:[
+ {e:"🐱",t:"What is Scratch?",p:"Scratch is a fun coding language for children aged 8 to 16. It was made by the Lifelong Kindergarten Group at MIT Media Lab, by Mitchel Resnick in 2003. You connect colourful BLOCKS instead of typing!",f:"Made at MIT in 2003"},
+ {e:"🎭",t:"Sprite",p:"A SPRITE is the character or object that performs actions in your project. The orange CAT is the default sprite. You can choose one from the library or paint your own!",f:"Cat = default sprite"},
+ {e:"🎪",t:"Stage",p:"The STAGE is the area where your sprite moves and performs actions, following your instructions. The sprite starts in the centre of the stage.",f:"Sprite performs ON the stage"},
+ {e:"🧩",t:"Script &amp; Blocks",p:"A SCRIPT is a set of command blocks joined in order to do a task. You drag blocks from the BLOCK PALETTE into the CODING AREA and snap them together.",f:"Every script starts with a HAT block"},
+ {e:"🗂️",t:"Block Categories",p:"Blocks come in colour-coded groups: MOTION (move, turn), LOOKS (say, size, colour), EVENTS (when green flag clicked), CONTROL (wait). Colours make blocks easy to find!",f:"Move = Motion, Say = Looks, Wait = Control, Flag = Events"},
+ {e:"🚶",t:"Moving a Sprite",p:"The MOVE block moves your sprite by steps. Move 10 steps goes forward. A MINUS number like -20 moves it BACKWARD! The GLIDE block moves it smoothly across the stage.",f:"Minus sign = backward!"},
+ {e:"💬",t:"Say Block",p:"The SAY block (in Looks) makes a speech bubble appear near your sprite. You can also change the sprite's SIZE and COLOUR with Looks blocks.",f:"Say = speech balloon"},
+ {e:"🚩",t:"Green Flag &amp; Wait",p:"Clicking the GREEN FLAG (Go button) runs all your scripts. The sprite will NOT move on its own without it! The WAIT block makes the sprite pause before the next action.",f:"Wait 3 seconds before moving? Use the Wait block!"},
+ {e:"🏜️",t:"Backdrops",p:"The BACKDROP is the stage's background picture. Use 'Choose a Backdrop' or the 'switch backdrop to' block to change scenes — like desert to farm!",f:"Backdrops make stories colourful and easy to understand"},
+ {e:"💾",t:"Saving &amp; Opening",p:"To save: File → 'Save to your computer'. To open later: File → 'Load from your computer'. Saved projects CAN be opened again anytime!",f:"To add your own picture as a sprite: Upload Sprite"}
+]};
+
+let learnDeck=[], learnIdx=0;
+function openLearn(ch){
+  learnDeck=LEARN[ch]; learnIdx=0;
+  showScreen("scrLearn"); renderLearn();
+}
+function renderLearn(){
+  const c=learnDeck[learnIdx];
+  document.getElementById("learnCard").innerHTML =
+    '<div class="emo">'+c.e+'</div><h3>'+c.t+'</h3><p>'+c.p+'</p><div class="fact">💡 '+c.f+'</div>';
+  document.getElementById("learnFill").style.width=((learnIdx+1)/learnDeck.length*100)+"%";
+}
+function learnNav(d){
+  learnIdx+=d;
+  if(learnIdx<0) learnIdx=0;
+  if(learnIdx>=learnDeck.length){ burst("🌟"); goHome(); return; }
+  renderLearn();
+}
+
+/* =====================================================
+   QUESTION BANK
+   type: mcq | tf | fill | oneword | subj | pair | bucket | order
+===================================================== */
+const Q1=[
+{t:"mcq",q:"A smart assistant listens to your voice and gives an answer. Which step is the PROCESS?",o:["You speak the voice command","The assistant understands and analyzes the command","The assistant shows the result on screen"],a:1,why:"Process = the thinking step, done by the CPU."},
+{t:"mcq",q:"You want to turn handwritten homework into a digital file. Best input device?",o:["Mouse","Scanner","Monitor"],a:1,why:"A scanner reads images from paper into the computer."},
+{t:"mcq",q:"How do a wireless keyboard and mouse work with a computer?",o:["They send output to the user","They receive information from the computer","They send input using Bluetooth"],a:2,why:"They are input devices, connected wirelessly by Bluetooth."},
+{t:"mcq",q:"Which device prints digital drawings as large graphics for engineers?",o:["Speaker","Headphones","Plotter"],a:2,why:"Plotters print big, high-quality engineering drawings."},
+{t:"mcq",q:"Pick the correctly matched pair:",o:["Headphones — hear sound without disturbing others","Speakers — hear sound privately","Printer — used for audio output"],a:0,why:"Headphones = private/in-ear sound. Speakers = loud. Printer = paper!"},
+{t:"mcq",q:"What is the working principle of a computer system?",o:["CPU","IPO","IOP"],a:1,why:"Input → Process → Output."},
+{t:"mcq",q:"Which step of the IPO cycle is done by the CPU?",o:["Input","Output","Processing"],a:2,why:"The CPU is the processing device."},
+{t:"mcq",q:"Which input device records audio (sound)?",o:["Microphone","Speakers","Headphones"],a:0,why:"Mic = sound INPUT. Speakers and headphones are OUTPUT."},
+{t:"mcq",q:"Which one of these is an OUTPUT device?",o:["Webcam","Plotter","Both of these"],a:1,why:"Careful! Webcam is an INPUT device (it captures). Only the plotter is output. ⚠️ This one tricks many students!"},
+{t:"mcq",q:"Which part of the CPU performs the data processing?",o:["ALU","CU","MU"],a:0,why:"ALU (Arithmetic & Logical Unit) is the main processing area. CU only CONTROLS the flow. ⚠️ Tricky one!"},
+{t:"mcq",q:"Who is the largest manufacturer of CPU chips?",o:["Samsung","Intel","Sony"],a:1,why:"Knowledge Corner fact: Intel."},
+{t:"mcq",q:"Which printer prints by striking pins against an inked ribbon?",o:["Inkjet","Laser","Dot Matrix"],a:2,why:"Dot matrix = pins + inked ribbon, single colour, used for bulk printing."},
+{t:"mcq",q:"Which printer sprays tiny ink dots on paper for high quality printing?",o:["Inkjet","Dot Matrix","Plotter"],a:0,why:"Inkjet sprays ink droplets."},
+{t:"mcq",q:"Which printer is the FASTEST?",o:["Dot Matrix","Inkjet","Laser"],a:2,why:"Laser printers are much faster than dot matrix or inkjet."},
+{t:"fill",q:"________ monitors are now mostly replaced by flat-screen monitors.",a:["crt"],bank:["CRT","LED","LCD"],why:"CRT (Cathode Ray Tube) monitors are heavy and bulky."},
+{t:"fill",q:"A ________ is the flat, touch-sensitive pad on a laptop that moves the pointer.",a:["touchpad","touch pad"],bank:["Touchpad","Touchscreen","Mouse"],why:"Touchpad is found on laptops."},
+{t:"fill",q:"A ________ printer prints characters by striking pins against an inked ribbon.",a:["dot matrix","dotmatrix"],bank:["Dot Matrix","Inkjet","Laser"],why:"Dot Matrix printer."},
+{t:"fill",q:"In the IPO cycle, data is given to the computer during the ________ step.",a:["input"],bank:["Input","Process","Output"],why:"Input is where data goes in."},
+{t:"fill",q:"The ________ is the main circuit board inside the CPU box.",a:["motherboard","mother board"],bank:["Motherboard","ALU","Monitor"],why:"The motherboard connects and controls all parts."},
+{t:"fill",q:"Processed results we get from the computer are called ________.",a:["information"],bank:["information","data","input"],why:"Data in → information out."},
+{t:"fill",q:"The output we see on the monitor is called ________ output.",a:["soft"],bank:["soft","hard","loud"],why:"Monitor = soft output (it keeps changing)."},
+{t:"fill",q:"The output we get on paper is called ________ output.",a:["hard"],bank:["hard","soft","paper"],why:"Printer = hard output (permanent, on paper)."},
+{t:"tf",q:"Input devices help the computer to show results.",a:false,why:"False — OUTPUT devices show results. Input devices give data IN."},
+{t:"tf",q:"Speakers are used to give visual output.",a:false,why:"False — speakers give AUDIO output. Monitors give visual output."},
+{t:"tf",q:"The IPO cycle explains how a computer works step by step.",a:true,why:"True — Input, Process, Output."},
+{t:"tf",q:"Intel is the largest manufacturer of CPU chips.",a:true,why:"True — Knowledge Corner fact."},
+{t:"tf",q:"LED monitors show bright and clear pictures.",a:true,why:"True — LED monitors are thin, light, bright and clear."},
+{t:"tf",q:"A light pen is an example of an output device.",a:false,why:"False — a light pen is an INPUT device used to draw on the screen."},
+{t:"tf",q:"A digicam stores images directly in the computer's memory.",a:false,why:"False — a digicam stores in its OWN memory first. A WEBCAM stores directly in the computer."},
+{t:"tf",q:"A touchpad is found in laptops and notebook computers.",a:true,why:"True."},
+{t:"tf",q:"The computer needs our instructions to process data.",a:true,why:"True — we give data AND instructions."},
+{t:"oneword",q:"Which input device has a movable handheld rod with buttons, used for arcade and computer games?",a:["joystick","joy stick"],why:"Joystick!"},
+{t:"oneword",q:"Which input/output device lets you control apps by touching the screen directly?",a:["touchscreen","touch screen"],why:"Touchscreen."},
+{t:"oneword",q:"Which device takes pictures and videos digitally and sends them to a computer or memory card?",a:["digicam","digi cam","digital camera"],why:"Digicam."},
+{t:"oneword",q:"Which type of scanner is used in shops and libraries to quickly read barcodes?",a:["handheld scanner","handheld","hand held scanner"],why:"Handheld scanner."},
+{t:"oneword",q:"VDU stands for Visual Display ________?",a:["unit"],why:"VDU = Visual Display Unit (the monitor)."},
+{t:"oneword",q:"ALU stands for Arithmetic and Logical ________?",a:["unit"],why:"ALU = Arithmetic and Logical Unit."},
+{t:"oneword",q:"CRT stands for Cathode Ray ________?",a:["tube"],why:"CRT = Cathode Ray Tube."},
+{t:"subj",q:"What is the use of a Light Pen? (Write one sentence)",k:[["draw","write","select","point"],["screen","monitor"]],model:"It is an input device used to draw, write and select objects directly on the computer screen.",why:"Key idea: draws/selects + directly on screen."},
+{t:"subj",q:"What is DATA? Give the idea in your own words.",k:[["raw","fact","facts","give","input"]],model:"Data is the raw facts we give to the computer as input.",why:"Key idea: raw facts given as input."},
+{t:"pair",q:"Match each device to what it does!",pairs:[["Webcam","Captures &amp; stores images directly in the computer"],["Control Unit","Controls the working of computer parts"],["Touchscreen","Senses the touch of a finger"],["Mouse","A handheld pointing device"],["Joystick","Used to play games on the computer"]],why:"From the Activity Adventure matching exercise."},
+{t:"pair",q:"Match the CPU part to its job!",pairs:[["ALU","Does the actual data processing"],["CU","Controls flow of data, input to output"],["MU","Stores information for a short time"]],why:"ALU processes, CU controls, MU remembers (temporarily)."},
+{t:"bucket",q:"Sort each device: is it INPUT or OUTPUT?",b1:"INPUT ⬅️",b2:"OUTPUT ➡️",items:[["Keyboard",1],["Printer",2],["Scanner",1],["Monitor",2],["Joystick",1],["Speakers",2],["Light Pen",1],["Plotter",2],["Microphone",1],["Headphones",2],["Webcam",1],["Digicam",1]],why:"Input = gives data TO the computer. Output = shows results FROM it. Remember: webcam and digicam are INPUT!"},
+{t:"order",q:"Put the computer's working steps in the correct order!",items:["Input — give data to the computer","Process — CPU works on the data","Output — get the information back"],why:"I → P → O."}
+];
+
+const Q2=[
+{t:"mcq",q:"Which options can be used to add a new sprite in Scratch?",o:["Choose a sprite from library","Paint a new sprite","Both of these"],a:2,why:"You can pick from the library OR paint your own."},
+{t:"mcq",q:"What does the 'turn 15 degrees' block (with the clockwise arrow) do?",o:["Moves the sprite forward 15 steps","Rotates the sprite clockwise by 15 degrees","Rotates the sprite anti-clockwise by 15 degrees"],a:1,why:"Turn = rotate. The arrow shows the direction."},
+{t:"mcq",q:"A duck sprite must move SMOOTHLY from bottom-left to top-right of the stage. Which block?",o:["Say 'Hi' for 2 secs","Glide to x,y","Move 10 steps"],a:1,why:"GLIDE moves smoothly across the stage. Move jumps in steps."},
+{t:"mcq",q:"The backdrop needs to change from a desert to a farm. Which block?",o:["switch backdrop to (Farm)","next costume","switch costume to (Farm)"],a:0,why:"Backdrop = stage background. Costume = sprite's look."},
+{t:"mcq",q:"Which blocks move the sprite 10 steps forward and then say 'Hello!'?",o:["move 10 steps + say Hello","move 10 steps + next costume","say Hello + glide"],a:0,why:"Move block (Motion) + Say block (Looks)."},
+{t:"mcq",q:"Scratch is a ________.",o:["coding language","car game","typing test"],a:0,why:"Scratch is a coding language for children aged 8–16."},
+{t:"mcq",q:"Scratch can be used for making ________.",o:["games","animated stories","both of these"],a:2,why:"Games AND animated stories!"},
+{t:"mcq",q:"Which of these is the default Scratch sprite?",o:["Cat","Dog","Tiger"],a:0,why:"The orange cat!"},
+{t:"mcq",q:"The Move command block belongs to which block category?",o:["Looks","Motion","Control"],a:1,why:"Move = Motion (blue blocks)."},
+{t:"mcq",q:"Which command block adds a delay (pause) to motion?",o:["Wait","Stop","Delay"],a:0,why:"The Wait block, from the Control category."},
+{t:"mcq",q:"Who developed Scratch, and when?",o:["Mitchel Resnick, 2003","Bill Gates, 1995","Sundar Pichai, 2010"],a:0,why:"Mitchel Resnick at MIT Media Lab, 2003."},
+{t:"fill",q:"To make a sprite appear on the stage, we use the ________ block.",a:["show"],bank:["show","hide","say"],why:"Show block makes the sprite visible."},
+{t:"fill",q:"To move a sprite 20 steps BACKWARD, the move block value should be ________.",a:["-20","minus 20","move -20 steps","-20 steps"],bank:["-20","20","0"],why:"A minus number moves the sprite backward!"},
+{t:"fill",q:"Every script starts with a ________ block.",a:["hat"],bank:["Hat","Move","Say"],why:"The Hat block (like 'when green flag clicked') begins every script."},
+{t:"fill",q:"To remove a sprite from the stage, select it and click the ________ icon.",a:["delete","dustbin","bin"],bank:["delete","save","copy"],why:"The delete (dustbin) icon."},
+{t:"fill",q:"To run all scripts at the same time, click the ________ button.",a:["green flag","go","go button","greenflag"],bank:["Green Flag","Stop","Save"],why:"Green Flag = Go button."},
+{t:"fill",q:"________ is an object that performs actions in a Scratch project.",a:["sprite"],bank:["Sprite","Stage","Script"],why:"Sprite = the performer."},
+{t:"fill",q:"The area where the sprite performs its actions is called the ________.",a:["stage"],bank:["stage","palette","menu"],why:"The Stage."},
+{t:"fill",q:"A ________ is a set of sequentially arranged command blocks.",a:["script"],bank:["script","sprite","stage"],why:"Script = blocks joined in order."},
+{t:"tf",q:"Scratch projects can include sound, graphics and interactive animations.",a:true,why:"True — that's what makes it fun!"},
+{t:"tf",q:"A sprite can talk and move at the same time using say and move blocks together.",a:true,why:"True."},
+{t:"tf",q:"Saved Scratch projects cannot be opened later.",a:false,why:"False — File → 'Load from your computer' opens them again."},
+{t:"tf",q:"When a sprite says something, it disappears after speaking automatically.",a:false,why:"False — the sprite stays on the stage."},
+{t:"tf",q:"A sprite will start moving on its own even if you don't click the Green Flag.",a:false,why:"False — nothing runs until you click the Green Flag (Go)."},
+{t:"tf",q:"A Scratch program can be created without typing commands.",a:true,why:"True — you drag and connect blocks!"},
+{t:"tf",q:"More than one sprite cannot be added to a Scratch project.",a:false,why:"False — you can add many sprites."},
+{t:"tf",q:"Every script starts with a Move block.",a:false,why:"False — every script starts with a HAT block."},
+{t:"tf",q:"A sprite cannot be moved in the backward direction.",a:false,why:"False — use a minus number like -50 in the Move block."},
+{t:"oneword",q:"A sprite should wait 3 seconds before moving. Which block will you use?",a:["wait"],why:"The Wait block (Control category)."},
+{t:"oneword",q:"Which option adds a sprite that is saved on your computer to the stage?",a:["upload sprite","upload"],why:"Upload Sprite."},
+{t:"oneword",q:"Which Event block helps a sprite respond when the mouse clicks on it?",a:["when the sprite clicked","when sprite clicked","when this sprite clicked","sprite clicked"],why:"'When this sprite clicked'."},
+{t:"oneword",q:"Which company/lab created Scratch? M.I.T. Media ________?",a:["lab"],why:"MIT Media Lab (Lifelong Kindergarten Group)."},
+{t:"subj",q:"Define the STAGE in one sentence.",k:[["sprite"],["move","moves","perform","performs","action","actions"]],model:"The stage is the area where the sprite moves and performs actions as per the user's instructions.",why:"Key idea: area where sprite moves/performs actions."},
+{t:"subj",q:"Why are backdrops important in Scratch stories and games?",k:[["colourful","colorful","scene","scenes","background","change"]],model:"Backdrops make the project colourful and help change scenes, making stories easier to understand.",why:"Key idea: colourful + change scenes."},
+{t:"subj",q:"What is a SPRITE? One sentence.",k:[["object","character"],["action","actions","perform","performs","instruction","instructions"]],model:"A sprite is an object that performs actions based on the given instructions.",why:"Key idea: object that performs actions."},
+{t:"pair",q:"Match the block to its job!",pairs:[["Move 10 steps","Moves sprite forward or backward"],["When Green Flag clicked","Hat block — start of script"],["Say 'Hello!'","Shows a speech balloon"],["Change colour effect","Changes sprite's colour"],["Change size by 50","Changes sprite's size"]],why:"From the block-matching activity."},
+{t:"pair",q:"Match the Scratch word to its meaning!",pairs:[["Sprite","The object that performs actions"],["Stage","Where the sprite performs"],["Script","Blocks joined in a sequence"],["Block Palette","Shows blocks of the chosen category"]],why:"Scratch vocabulary."},
+{t:"bucket",q:"Sort each block into its category!",b1:"MOTION 🏃",b2:"LOOKS 👀",items:[["Move 10 steps",1],["Say Hello",2],["Turn 15 degrees",1],["Change size by 50",2],["Glide to x,y",1],["Change colour effect",2],["Next costume",2]],why:"Motion = moving/turning. Looks = say, size, colour, costume."},
+{t:"bucket",q:"Sort: which category do these belong to?",b1:"EVENTS 🚩",b2:"CONTROL ⏱️",items:[["When green flag clicked",1],["Wait 2 seconds",2],["When sprite clicked",1],["When space key pressed",1]],why:"Events = 'when' hat blocks that start things. Control = wait/repeat."},
+{t:"order",q:"Read like a script! Put this sprite's actions in the order they happen: it greets, then walks, then pauses, then turns.",items:["Say 'Hello! I am a Sprite' for 2 seconds","Move 10 steps","Wait 1 second","Turn 15 degrees"],why:"This is the script-reading question from your assignment — the sprite speaks FIRST, then moves, stops, and turns."}
+];
+
+/* =====================================================
+   QUIZ ENGINE
+===================================================== */
+let quiz=[], qi=0, qDone=false;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startQuiz(ch){
+  let pool = ch===1?Q1.slice(): ch===2?Q2.slice(): Q1.concat(Q2);
+  quiz = shuffle(pool).slice(0, ch===0?20:12);
+  qi=0; showScreen("scrQuiz"); renderQ();
+}
+function mascotReact(good){
+  const m=document.getElementById("mascot");
+  m.textContent = good ? "🤖" : "🤖";
+  m.className = "mascot " + (good?"happy":"sad");
+  setTimeout(()=>{m.className="mascot";}, 700);
+}
+function esc(s){return s.replace(/</g,"&lt;");}
+function tagFor(t){return {mcq:"Choose one",tf:"True or False?",fill:"Fill the blank",oneword:"One word answer",subj:"Write it!",pair:"Match the pairs",bucket:"Sort it!",order:"Put in order"}[t];}
+
+function renderQ(){
+  if(qi>=quiz.length){ finishQuiz(); return; }
+  qDone=false;
+  const q=quiz[qi], el=document.getElementById("quizCard");
+  document.getElementById("quizFill").style.width=(qi/quiz.length*100)+"%";
+  let h='<div class="qtag">'+tagFor(q.t)+' · '+(qi+1)+'/'+quiz.length+'</div><div class="qtext">'+q.q+'</div>';
+
+  if(q.t==="mcq"){
+    q.o.forEach((o,i)=>{h+='<button class="opt" onclick="ansMcq(this,'+i+')">'+o+'</button>';});
+  }
+  else if(q.t==="tf"){
+    h+='<button class="opt" onclick="ansTf(this,true)">✅ True</button><button class="opt" onclick="ansTf(this,false)">❌ False</button>';
+  }
+  else if(q.t==="fill"||q.t==="oneword"){
+    if(q.bank){h+='<div class="wordbank">'+q.bank.map(w=>'<span class="wb">'+w+'</span>').join('')+'</div>';}
+    h+='<input type="text" id="txtAns" autocomplete="off" placeholder="Type your answer..."><button class="action" onclick="ansText()">Check ✔</button>';
+  }
+  else if(q.t==="subj"){
+    h+='<input type="text" id="txtAns" autocomplete="off" placeholder="Write your answer in your own words..."><button class="action" onclick="ansSubj()">Check ✔</button>';
+  }
+  else if(q.t==="pair"){
+    const L=q.pairs.map((p,i)=>({txt:p[0],id:i})), R=shuffle(q.pairs.map((p,i)=>({txt:p[1],id:i})));
+    h+='<div class="pair-col"><div>'+L.map(x=>'<button class="pair-item" data-side="L" data-id="'+x.id+'" onclick="pairTap(this)">'+x.txt+'</button>').join('')+'</div>'+
+       '<div>'+R.map(x=>'<button class="pair-item" data-side="R" data-id="'+x.id+'" onclick="pairTap(this)">'+x.txt+'</button>').join('')+'</div></div>';
+  }
+  else if(q.t==="bucket"){
+    h+='<div style="text-align:center;margin:10px 0"><span class="sort-item" id="sortCurrent"></span></div>';
+    h+='<div class="bucket-zone">'+
+      '<button class="bucket" onclick="bucketTap(1)"><h4>'+q.b1+'</h4><div class="b-items" id="bk1"></div></button>'+
+      '<button class="bucket" onclick="bucketTap(2)"><h4>'+q.b2+'</h4><div class="b-items" id="bk2"></div></button></div>';
+  }
+  else if(q.t==="order"){
+    const items=shuffle(q.items.map((x,i)=>({txt:x,id:i})));
+    h+='<p style="font-size:13px;font-weight:700;color:#8A8496;margin-bottom:8px">Tap the steps in the correct order — first step first!</p>';
+    h+='<div class="order-list">'+items.map(x=>'<button class="order-item" data-id="'+x.id+'" onclick="orderTap(this)"><span class="num">?</span><span>'+x.txt+'</span></button>').join('')+'</div>';
+  }
+  h+='<div class="feedback" id="fb"></div><button class="action orange hidden" id="nextBtn" onclick="nextQ()">Next question →</button>';
+  el.innerHTML=h;
+
+  if(q.t==="bucket"){ bucketState={idx:0,items:shuffle(q.items.slice()),wrong:0}; showSortItem(); }
+  if(q.t==="pair") pairState={sel:null,done:0,wrong:0};
+  if(q.t==="order") orderState={next:0,wrong:0};
+  const txt=document.getElementById("txtAns"); if(txt) txt.focus();
+}
+
+function markDone(good,customMsg){
+  qDone=true;
+  const q=quiz[qi], fb=document.getElementById("fb");
+  fb.className="feedback show "+(good?"good":"bad");
+  fb.innerHTML=(good?"🎉 Correct! ":"💪 Not quite. ")+(customMsg||q.why||"");
+  document.getElementById("nextBtn").classList.remove("hidden");
+  mascotReact(good);
+  if(good) burstSmall();
+  else{
+    let correctText="";
+    if(q.t==="mcq") correctText=q.o[q.a];
+    else if(q.t==="tf") correctText=q.a?"True":"False";
+    else if(q.t==="fill"||q.t==="oneword") correctText=q.a[0];
+    else if(q.t==="subj") correctText=q.model;
+    else correctText="See explanation";
+    addMistake(q.q,correctText,q.why);
+  }
+  bumpProgress(good);
+}
+function nextQ(){ qi++; renderQ(); }
+function finishQuiz(){
+  const el=document.getElementById("quizCard");
+  document.getElementById("quizFill").style.width="100%";
+  el.innerHTML='<div style="text-align:center"><div style="font-size:56px">🏅</div><h2>Quiz finished!</h2>'+
+  '<p style="font-weight:700;margin:8px 0">Pixel is proud of you, Diksha!</p>'+
+  '<button class="action" onclick="goHome()">Back home</button>'+
+  (S.mistakes.length?'<button class="action ghost" onclick="showMistakes()">See my tricky questions ('+S.mistakes.length+')</button>':'')+'</div>';
+  burst("⭐");
+}
+
+/* ---- answer handlers ---- */
+function ansMcq(btn,i){
+  if(qDone)return;
+  const q=quiz[qi], opts=document.querySelectorAll(".opt");
+  opts.forEach(o=>o.classList.add("locked"));
+  if(i===q.a){btn.classList.add("correct");markDone(true);}
+  else{btn.classList.add("wrong");opts[q.a].classList.add("correct");markDone(false);}
+}
+function ansTf(btn,v){
+  if(qDone)return;
+  const q=quiz[qi], opts=document.querySelectorAll(".opt");
+  opts.forEach(o=>o.classList.add("locked"));
+  if(v===q.a){btn.classList.add("correct");markDone(true);}
+  else{btn.classList.add("wrong");opts[q.a?0:1].classList.add("correct");markDone(false);}
+}
+function norm(s){return s.toLowerCase().replace(/[^a-z0-9 -]/g,"").replace(/\s+/g," ").trim();}
+function ansText(){
+  if(qDone)return;
+  const q=quiz[qi], v=norm(document.getElementById("txtAns").value);
+  if(!v)return;
+  const ok=q.a.some(a=>norm(a)===v || (v.length>3 && norm(a).indexOf(v)===0));
+  markDone(ok, ok?null:("The answer is: <b>"+q.a[0]+"</b>. "+(q.why||"")));
+}
+function ansSubj(){
+  if(qDone)return;
+  const q=quiz[qi], v=norm(document.getElementById("txtAns").value);
+  if(!v)return;
+  const ok=q.k.every(group=>group.some(kw=>v.includes(kw)));
+  markDone(ok, ok?("Great sentence! A model answer: <i>"+q.model+"</i>")
+               :("Good try! A model answer: <i>"+q.model+"</i>"));
+}
+/* pair */
+let pairState=null;
+function pairTap(el){
+  if(qDone||el.classList.contains("done"))return;
+  if(!pairState.sel){pairState.sel=el;el.classList.add("sel");return;}
+  if(pairState.sel===el){el.classList.remove("sel");pairState.sel=null;return;}
+  const a=pairState.sel,b=el;
+  if(a.dataset.side===b.dataset.side){a.classList.remove("sel");b.classList.add("sel");pairState.sel=b;return;}
+  if(a.dataset.id===b.dataset.id){
+    a.classList.remove("sel");a.classList.add("done");b.classList.add("done");
+    pairState.sel=null;pairState.done++;
+    if(pairState.done===quiz[qi].pairs.length) markDone(pairState.wrong===0, pairState.wrong===0?null:("You matched them all — but with "+pairState.wrong+" wrong tries. "+(quiz[qi].why||"")));
+  }else{
+    pairState.wrong++;
+    a.classList.remove("sel");a.classList.add("flash");b.classList.add("flash");
+    setTimeout(()=>{a.classList.remove("flash");b.classList.remove("flash");},450);
+    pairState.sel=null;
+  }
+}
+/* bucket */
+let bucketState=null;
+function showSortItem(){
+  const c=document.getElementById("sortCurrent");
+  if(bucketState.idx>=bucketState.items.length){
+    markDone(bucketState.wrong===0, bucketState.wrong===0?null:("All sorted — with "+bucketState.wrong+" slip"+(bucketState.wrong>1?"s":"")+". "+(quiz[qi].why||"")));
+    c.textContent="Done! 🎉";return;
+  }
+  c.textContent=bucketState.items[bucketState.idx][0];
+}
+function bucketTap(z){
+  if(qDone||bucketState.idx>=bucketState.items.length)return;
+  const item=bucketState.items[bucketState.idx], ok=item[1]===z;
+  const zone=document.getElementById("bk"+item[1]);
+  const s=document.createElement("span");s.textContent=item[0];
+  if(!ok){bucketState.wrong++;s.classList.add("wrongdrop");mascotReact(false);}
+  zone.appendChild(s);
+  bucketState.idx++;showSortItem();
+}
+/* order */
+let orderState=null;
+function orderTap(el){
+  if(qDone||el.classList.contains("sel"))return;
+  const id=+el.dataset.id;
+  if(id===orderState.next){
+    el.classList.add("sel");el.querySelector(".num").textContent=orderState.next+1;
+    orderState.next++;
+    if(orderState.next===quiz[qi].items.length) markDone(orderState.wrong===0, orderState.wrong===0?null:("Finished — with "+orderState.wrong+" wrong taps. "+(quiz[qi].why||"")));
+  }else{
+    orderState.wrong++;
+    el.style.borderColor="var(--bad)";setTimeout(()=>{el.style.borderColor="";},400);
+    mascotReact(false);
+  }
+}
+
+/* =====================================================
+   MISTAKES / SETTINGS / NAV
+===================================================== */
+function showMistakes(){
+  showScreen("scrMistakes");
+  const el=document.getElementById("mistakeList");
+  if(!S.mistakes.length){el.innerHTML='<div class="card" style="text-align:center"><div style="font-size:44px">🌈</div><b>No tricky questions right now. Amazing work!</b></div>';return;}
+  el.innerHTML=S.mistakes.map((m,i)=>
+    '<div class="mistake-entry"><div class="q">'+m.q+'</div><div class="a">✔ '+m.a+'</div>'+
+    (m.why?'<div class="why">'+m.why+'</div>':'')+
+    '<button class="dismiss" onclick="dismissMistake('+i+')">Got it! Remove ✔</button></div>').join('');
+}
+function dismissMistake(i){S.mistakes.splice(i,1);saveState();renderStats();showMistakes();}
+function showSettings(){
+  showScreen("scrSettings");
+  document.getElementById("backupCode").textContent=btoa(JSON.stringify(S));
+  document.getElementById("restoreFb").className="feedback";
+  hideReset();
+}
+function restoreProgress(){
+  const fb=document.getElementById("restoreFb");
+  try{
+    const obj=JSON.parse(atob(document.getElementById("restoreInput").value.trim()));
+    if(typeof obj.stars!=="number")throw 0;
+    S=Object.assign({stars:0,streak:0,lastDay:"",todayCount:0,mistakes:[]},obj);
+    saveState();renderStats();
+    fb.className="feedback show good";fb.textContent="Progress restored! 🎉";
+  }catch(e){fb.className="feedback show bad";fb.textContent="That code doesn't look right. Check and try again.";}
+}
+function askReset(){document.getElementById("resetConfirm").classList.add("show");}
+function hideReset(){document.getElementById("resetConfirm").classList.remove("show");}
+function doReset(){
+  S={stars:0,streak:0,lastDay:todayStr(),todayCount:0,mistakes:[]};
+  saveState();renderStats();hideReset();goHome();
+}
+function showScreen(id){
+  ["scrHome","scrLearn","scrQuiz","scrMistakes","scrSettings"].forEach(s=>document.getElementById(s).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+function goHome(){showScreen("scrHome");renderStats();}
+
+/* confetti */
+function burst(emo){
+  const c=document.getElementById("celebrate");
+  for(let i=0;i<18;i++){
+    const s=document.createElement("div");s.className="confetti";
+    s.textContent=[emo,"✨","🎈","⭐"][i%4];
+    s.style.left=(Math.random()*100)+"%";s.style.animationDelay=(Math.random()*0.4)+"s";
+    c.appendChild(s);setTimeout(()=>s.remove(),2100);
+  }
+}
+function burstSmall(){
+  const c=document.getElementById("celebrate");
+  for(let i=0;i<5;i++){
+    const s=document.createElement("div");s.className="confetti";s.textContent="✨";
+    s.style.left=(30+Math.random()*40)+"%";c.appendChild(s);setTimeout(()=>s.remove(),1800);
+  }
+}
+
+/* boot */
+loadState();renderStats();
+const hr=new Date().getHours();
+document.getElementById("greeting").textContent =
+  hr<12?"Good morning Diksha! ☀️ Ready to become a Computer Champion?":
+  hr<17?"Hi Diksha! 🌤️ Let's practise for Monday's test!":
+  "Good evening Diksha! 🌙 A little practice before bed?";
+</script>
+</body>
+</html>
