@@ -17,10 +17,11 @@
    the Firestore security rules, not by hiding this file.
    ===================================================================== */
 window.DIKSHA_FIREBASE_CONFIG = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyCj8YX2cT7ZzXy9ZOghRn4Zr8DKxwUvbNw",
+  authDomain: "sync-project-ffd96.firebaseapp.com",
+  projectId: "sync-project-ffd96",
+  storageBucket: "sync-project-ffd96.firebasestorage.app",
+  messagingSenderId: "1009105227988",
+  appId: "1:1009105227988:web:95293fede121bf86bcab41",
+  measurementId: "G-RQKNJKXZZ9"
 };
