@@ -27,6 +27,7 @@ a.subject .ico{font-size:34px}
 a.subject b{font-family:'Baloo 2';font-size:18px}
 a.subject .d{font-size:12px;font-weight:700;color:#8A8496;display:block}
 a.subject.maths{border-left-color:var(--orange)}
+a.subject.special{border-left-color:var(--berry)}
 a.subject.soon{border-left-color:#C9C2DB;opacity:.6;pointer-events:none}
 .test{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
 .test .date{background:var(--lilac);color:#fff;border-radius:12px;padding:8px 10px;text-align:center;min-width:64px;flex-shrink:0}
@@ -52,6 +53,9 @@ footer{text-align:center;font-size:11px;font-weight:700;color:#A79FB8;margin-top
 <h2>📚 My Subjects</h2>
 <div id="subjects"></div>
 
+<h2>🏫 Special Classes</h2>
+<div id="special"></div>
+
 <h2>🗓️ Upcoming Tests</h2>
 <div id="tests"></div>
 
@@ -72,6 +76,10 @@ const SUBJECTS = [
   { icon:"🔢", name:"Mathematics", desc:"Addition, subtraction, multiplication, division, place value & word problems", href:"mathsquest.html", cls:"maths" },
   { icon:"📜", name:"Sanskrit", desc:"लिंग, वचन, दिन, पशु और क्रियाएँ — Class 4, Unit 1", href:"sanskritquest.html", cls:"" }
 ];
+const SPECIAL_CLASSES = [
+  { icon:"🏫", name:"Maths", desc:"July special class: big numbers, factors & multiples, Roman numerals, BODMAS", href:"special-classes-maths.html", cls:"special" },
+  { icon:"🔬", name:"Science", desc:"Coming soon", href:"", cls:"" }
+];
 const TESTS = [
   { date:"2026-07-13", subject:"Computer Science", topic:"Unit 1: Computer System & Scratch Coding" }
   /* add more like:
@@ -85,6 +93,12 @@ const DATE_FMT_OPTS={weekday:"long"};
 
 const subEl=document.getElementById("subjects");
 subEl.innerHTML=SUBJECTS.map(s=>{
+  const cls="subject "+s.cls+(s.href?"":" soon");
+  return '<a class="'+cls+'" href="'+(s.href||"#")+'"><span class="ico">'+s.icon+'</span><span><b>'+s.name+'</b><span class="d">'+s.desc+'</span></span></a>';
+}).join("");
+
+const specEl=document.getElementById("special");
+specEl.innerHTML=SPECIAL_CLASSES.map(s=>{
   const cls="subject "+s.cls+(s.href?"":" soon");
   return '<a class="'+cls+'" href="'+(s.href||"#")+'"><span class="ico">'+s.icon+'</span><span><b>'+s.name+'</b><span class="d">'+s.desc+'</span></span></a>';
 }).join("");
