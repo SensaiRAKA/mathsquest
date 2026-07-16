@@ -88,7 +88,7 @@
   .learn-wrap h2 { margin-top: 0; color: var(--indigo); font-size: 22px; }
   .learn-wrap h4 { margin: 18px 0 6px; color: var(--indigo-dark); font-size: 15px; }
   .learn-wrap p, .learn-wrap li { font-size: 14px; line-height: 1.55; }
-  .learn-wrap table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  .learn-wrap table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; display: block; overflow-x: auto; }
   .learn-wrap th, .learn-wrap td { border: 1px solid var(--line); padding: 5px; text-align: center; }
   .learn-wrap th { background: #ede9fe; }
   .example-box { background: #f0fdf4; border-left: 4px solid var(--emerald); border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-size: 14px; font-weight: 600; }
@@ -451,7 +451,7 @@ function gRoundOff() {
   var placeNames = ["10", "100", "1,000", "1 lakh"];
   var idx = randInt(0, 3);
   var place = places[idx];
-  var n = Math.min(randInt(place * 2, place * 4000), 99999999);
+  var n = randInt(place * 2, Math.min(place * 4000, 99999999));
   var correct = roundTo(n, place);
   var candidates = [correct + place, Math.max(0, correct - place), n];
   return { cat:"Rounding off", mode:"choice",
@@ -463,13 +463,13 @@ function gPredSuccBig() {
   if (Math.random() < 0.5) {
     var n = randInt(1000000, 99999997);
     return { cat:"Successor", mode:"type", paper:false,
-      prompt:"What comes just after " + indianGroup(n) + "? (type the number, no commas)",
+      prompt:"What comes just after " + indianGroup(n) + "? (type the number)",
       answer:String(n + 1),
       rule:"The successor is the next number. Add 1: " + indianGroup(n) + " + 1 = " + indianGroup(n + 1) + "." };
   } else {
     var m = randInt(1000001, 99999999);
     return { cat:"Predecessor", mode:"type", paper:false,
-      prompt:"What comes just before " + indianGroup(m) + "? (type the number, no commas)",
+      prompt:"What comes just before " + indianGroup(m) + "? (type the number)",
       answer:String(m - 1),
       rule:"The predecessor is the number just before. Subtract 1: " + indianGroup(m) + " - 1 = " + indianGroup(m - 1) + "." };
   }
@@ -1108,6 +1108,11 @@ function nextQuestion() {
 function normalize(s) {
   return String(s).trim().replace(/\s+/g, "").toUpperCase();
 }
+/* typed answers additionally ignore commas (e.g. she may type 1,64,90,403) —
+   choice answers must NOT, since the comma-placement questions differ only by commas */
+function normalizeTyped(s) {
+  return normalize(s).replace(/,/g, "");
+}
 
 function handleTypeSubmit() {
   if (locked) return;
@@ -1116,7 +1121,7 @@ function handleTypeSubmit() {
   locked = true;
   el.input.disabled = true;
   el.checkBtn.disabled = true;
-  var ok = normalize(val) === normalize(current.answer);
+  var ok = normalizeTyped(val) === normalizeTyped(current.answer);
   resolve(ok, val);
 }
 
