@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="author" content="Rakesh Kumar">
+<title>Special Class: Maths</title>
+<style>
+  :root {
+    --indigo: #5b21b6;
+    --indigo-dark: #4c1d95;
+    --amber: #f59e0b;
+    --emerald: #059669;
+    --emerald-soft: #d1fae5;
+    --rose: #e11d48;
+    --rose-soft: #ffe4e6;
+    --berry: #c2410c;
+    --berry-soft: #fff1e6;
+    --ink: #1e293b;
+    --muted: #64748b;
+    --line: #e2e8f0;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: ui-rounded, "Segoe UI Rounded", "SF Pro Rounded", "Nunito", "Segoe UI", system-ui, sans-serif;
+    background: linear-gradient(160deg, #ede9fe 0%, #f0fdf4 60%, #fef9c3 100%);
+    min-height: 100vh;
+    color: var(--ink);
+    padding: 16px;
+  }
+  #jsWarning {
+    background: #fbbf24; color: #7c2d12; font-weight: 800; text-align: center;
+    padding: 14px 16px; border-radius: 14px; max-width: 640px; margin: 0 auto 14px;
+    font-size: 15px; line-height: 1.4;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  header { text-align: center; margin-bottom: 10px; }
+  .badge-special {
+    display: inline-block; background: var(--berry-soft); color: var(--berry);
+    font-weight: 800; font-size: 12px; padding: 4px 12px; border-radius: 99px; margin-bottom: 8px;
+  }
+  h1 { margin: 0; font-size: 30px; font-weight: 900; letter-spacing: -0.5px; color: var(--indigo); }
+  .tagline { margin: 4px 0 0; color: var(--muted); font-weight: 700; font-size: 14px; }
+  .home-link { display: block; text-align: center; margin-bottom: 10px; }
+  .home-link a { color: var(--muted); font-weight: 700; font-size: 13px; text-decoration: none; }
+  .home-link a:hover { text-decoration: underline; }
+
+  .stats { display: flex; gap: 10px; margin-bottom: 14px; }
+  .stat { flex: 1; background: #fff; border-radius: 16px; padding: 12px 8px; text-align: center; box-shadow: 0 2px 8px rgba(91,33,182,0.08); }
+  .stat .num { font-size: 26px; font-weight: 900; line-height: 1; }
+  .stat .lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat.stars .num { color: var(--amber); }
+  .stat.streak .num { color: var(--rose); }
+  .stat.goal .num { color: var(--indigo); }
+
+  .progress-track { height: 14px; background: #ede9fe; border-radius: 99px; overflow: hidden; margin-bottom: 18px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--indigo), #8b5cf6); border-radius: 99px; transition: width 0.4s ease; }
+
+  .banner {
+    background: linear-gradient(135deg, #fde68a, #fbbf24); color: #7c2d12; border-radius: 16px;
+    padding: 14px; font-weight: 800; font-size: 16px; margin-bottom: 14px; text-align: center; display: none;
+  }
+  .banner.show { display: block; }
+
+  /* ---------- topic list ---------- */
+  .topics-grid { display: grid; gap: 12px; margin-bottom: 22px; }
+  .topic-card { background: #fff; border-radius: 20px; padding: 18px; box-shadow: 0 6px 18px rgba(91,33,182,0.10); text-align: left; }
+  .topic-card .ico { font-size: 30px; }
+  .topic-card h3 { margin: 8px 0 2px; font-size: 19px; color: var(--ink); }
+  .topic-card p { margin: 0 0 10px; color: var(--muted); font-size: 13px; font-weight: 600; line-height: 1.4; }
+  .topic-card .solved { font-size: 12px; font-weight: 800; color: var(--emerald); margin-bottom: 10px; }
+  .topic-actions { display: flex; gap: 8px; }
+  .topic-actions button {
+    flex: 1; padding: 11px; border-radius: 12px; font-weight: 800; font-size: 13px;
+    border: 2px solid var(--line); background: #fff; color: var(--indigo); cursor: pointer; font-family: inherit;
+  }
+  .topic-actions button.primary { background: var(--indigo); color: #fff; border-color: var(--indigo); }
+  .topic-actions button:active { transform: scale(0.97); }
+  .topic-card.mixed { background: linear-gradient(135deg,#ede9fe,#fef9c3); border: 2px solid var(--amber); }
+
+  /* ---------- learn screen ---------- */
+  .back-link {
+    display: inline-block; margin-bottom: 12px; color: var(--muted); font-weight: 700; font-size: 13px;
+    text-decoration: none; cursor: pointer; background: none; border: none; font-family: inherit; padding: 0;
+  }
+  .learn-wrap { background: #fff; border-radius: 20px; padding: 20px; box-shadow: 0 6px 18px rgba(91,33,182,0.10); margin-bottom: 16px; }
+  .learn-wrap h2 { margin-top: 0; color: var(--indigo); font-size: 22px; }
+  .learn-wrap h4 { margin: 18px 0 6px; color: var(--indigo-dark); font-size: 15px; }
+  .learn-wrap p, .learn-wrap li { font-size: 14px; line-height: 1.55; }
+  .learn-wrap table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 12px; }
+  .learn-wrap th, .learn-wrap td { border: 1px solid var(--line); padding: 5px; text-align: center; }
+  .learn-wrap th { background: #ede9fe; }
+  .example-box { background: #f0fdf4; border-left: 4px solid var(--emerald); border-radius: 8px; padding: 10px 12px; margin: 8px 0; font-size: 14px; font-weight: 600; }
+  .rule-list { padding-left: 20px; }
+
+  /* ---------- quiz card (shared with practice engine) ---------- */
+  .quiz-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .quiz-topbar .lbl { font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .card { background: #fff; border-radius: 22px; padding: 24px 20px 28px; box-shadow: 0 8px 24px rgba(91,33,182,0.12); text-align: center; }
+  .tag { display: inline-block; background: #ede9fe; color: var(--indigo); font-weight: 800; font-size: 13px; padding: 6px 14px; border-radius: 99px; text-transform: uppercase; letter-spacing: 0.6px; }
+  .question { font-size: 26px; font-weight: 900; color: var(--ink); margin: 20px 0 6px; line-height: 1.3; word-wrap: break-word; }
+  .question.long { font-size: 19px; font-weight: 800; line-height: 1.4; }
+  .hint { font-size: 14px; font-weight: 700; color: var(--muted); margin-bottom: 18px; min-height: 20px; }
+  .hint.paper { color: var(--emerald); }
+
+  input[type="text"] {
+    font-size: 28px; font-weight: 800; padding: 14px; width: 100%; max-width: 260px; text-align: center;
+    border: 3px solid var(--line); border-radius: 14px; outline: none; font-family: inherit; color: var(--ink);
+  }
+  input[type="text"]:focus { border-color: var(--indigo); }
+
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 6px; }
+  .choice {
+    min-height: 60px; font-size: 17px; font-weight: 800; border: 3px solid var(--line); background: #fff;
+    border-radius: 16px; color: var(--ink); cursor: pointer; font-family: inherit; padding: 10px;
+    transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease; word-break: break-word;
+  }
+  .choice:active { transform: scale(0.97); }
+  .choice.pick-correct { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); }
+  .choice.pick-wrong { border-color: var(--rose); background: var(--rose-soft); color: var(--rose); }
+  .choice.reveal { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); }
+  .choice[disabled] { cursor: default; }
+
+  .btn {
+    display: inline-block; background: var(--indigo); color: #fff; border: none; padding: 16px 28px;
+    font-size: 19px; font-weight: 800; border-radius: 14px; cursor: pointer; margin-top: 16px;
+    font-family: inherit; min-width: 200px; transition: transform 0.08s ease, background 0.15s ease;
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn.next { background: var(--emerald); }
+  .btn.wide { width: 100%; }
+  .btn.ghost { background: #fff; color: var(--indigo); border: 2px solid var(--indigo); }
+
+  .feedback { margin-top: 18px; font-weight: 900; font-size: 22px; min-height: 28px; }
+  .feedback.correct { color: var(--emerald); }
+  .feedback.incorrect { color: var(--rose); }
+  .explain { margin-top: 10px; font-size: 15px; font-weight: 600; color: var(--muted); line-height: 1.45; text-align: left; background: #f8fafc; border-radius: 12px; padding: 14px; display: none; }
+  .explain.show { display: block; }
+
+  .burst { position: fixed; pointer-events: none; font-size: 28px; animation: floatUp 1s ease-out forwards; z-index: 50; }
+  @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-90px) scale(1.6); } }
+
+  .mistakes { margin-top: 26px; }
+  .mistakes-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .mistakes-head h2 { margin: 0; color: var(--rose); font-size: 20px; font-weight: 900; }
+  .clear-btn { background: none; border: 2px solid var(--line); color: var(--muted); font-weight: 700; font-size: 13px; padding: 6px 12px; border-radius: 10px; cursor: pointer; font-family: inherit; }
+  .empty { color: var(--muted); font-weight: 700; text-align: center; padding: 14px; }
+  .mistake-item { background: #fff1f2; border-left: 5px solid var(--rose); padding: 14px; margin-bottom: 12px; border-radius: 10px; font-size: 15px; line-height: 1.5; text-align: left; }
+  .mistake-item .q { font-weight: 800; color: var(--ink); }
+  .mistake-item .ans { margin-top: 6px; }
+  .mistake-item .rule { margin-top: 8px; font-style: italic; color: var(--muted); }
+  .yours { color: var(--rose); font-weight: 800; }
+  .right { color: var(--emerald); font-weight: 800; }
+  .dismiss-btn { float: right; background: none; border: none; color: var(--rose); font-size: 18px; font-weight: 900; cursor: pointer; padding: 0 0 4px 10px; line-height: 1; font-family: inherit; }
+  .clear-btn.danger { border-color: var(--rose); color: var(--rose); font-weight: 800; }
+
+  footer { text-align: center; margin: 22px 0 8px; }
+  .reset-btn { background: none; border: none; color: var(--muted); font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; text-decoration: underline; }
+
+  .screen { display: none; }
+  .screen.on { display: block; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+  @media (min-width: 520px) { .question { font-size: 30px; } }
+</style>
+</head>
+<body>
+<div id="jsWarning">&#9888;&#65039; Please open this file in <b>Chrome</b> or another web browser. It will not run inside a file viewer.</div>
+<div class="wrap">
+  <div class="home-link"><a href="index.html">&larr; All quests</a></div>
+  <header>
+    <div class="badge-special">&#127979; Special Class &middot; July</div>
+    <h1>Maths: Special Class</h1>
+    <p class="tagline">Big numbers, factors &amp; multiples, Roman numerals, BODMAS</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat stars"><div class="num" id="starsNum">0</div><div class="lbl">Stars</div></div>
+    <div class="stat streak"><div class="num" id="streakNum">0</div><div class="lbl">Day streak</div></div>
+    <div class="stat goal"><div class="num" id="goalNum">0/12</div><div class="lbl">Today</div></div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="banner" id="banner"></div>
+
+  <!-- ================= TOPIC LIST ================= -->
+  <div class="screen on" id="screen-topics">
+    <div class="topics-grid" id="topicsGrid"></div>
+
+    <div class="mistakes">
+      <div class="mistakes-head">
+        <h2>Mistakes Bank</h2>
+        <button class="clear-btn" id="clearBtn">Clear</button>
+      </div>
+      <div id="mistakesList"><div class="empty">No mistakes yet. Off to a great start!</div></div>
+    </div>
+  </div>
+
+  <!-- ================= LEARN ================= -->
+  <div class="screen" id="screen-learn">
+    <button class="back-link" id="learnBack">&larr; Back to topics</button>
+    <div class="learn-wrap" id="learnContent"></div>
+    <button class="btn wide" id="learnStartBtn">&#9654; Start practice</button>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div class="screen" id="screen-quiz">
+    <div class="quiz-topbar">
+      <button class="back-link" id="quizBack">&larr; Topics</button>
+      <span class="lbl" id="quizTopicLbl"></span>
+    </div>
+    <div class="card">
+      <span class="tag" id="catTag">Question</span>
+      <div class="question" id="questionText">Loading...</div>
+      <div class="hint" id="hint"></div>
+
+      <div id="typeArea">
+        <input type="text" inputmode="text" id="answerInput" placeholder="?" autocomplete="off">
+        <br>
+        <button class="btn" id="checkBtn">Check answer</button>
+      </div>
+
+      <div class="choices" id="choicesArea" style="display:none;"></div>
+
+      <div class="feedback" id="feedback"></div>
+      <div class="explain" id="explain"></div>
+      <button class="btn next" id="nextBtn" style="display:none;">Next question</button>
+    </div>
+  </div>
+
+  <footer>
+    <button class="reset-btn" id="backupBtn">Backup progress</button>
+    &nbsp;&middot;&nbsp;
+    <button class="reset-btn" id="restoreBtn">Restore progress</button>
+    &nbsp;&middot;&nbsp;
+    <button class="reset-btn" id="resetBtn">Reset all progress</button>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* ---------- config ---------- */
+var DAILY_GOAL = 12;
+var STORAGE_KEY = "specialMathsJuly_v1";
+
+/* ---------- storage (degrades gracefully if blocked) ---------- */
+var memoryFallback = null;
+function setCookie(name, val) {
+  try { document.cookie = name + "=" + encodeURIComponent(val) + ";path=/;max-age=31536000;SameSite=Lax"; } catch (e) {}
+}
+function getCookie(name) {
+  try {
+    var m = document.cookie.match("(^|;)\\s*" + name + "\\s*=\\s*([^;]+)");
+    return m ? decodeURIComponent(m.pop()) : null;
+  } catch (e) { return null; }
+}
+function loadState() {
+  var raw = null;
+  try { raw = window.localStorage.getItem(STORAGE_KEY); } catch (e) { raw = memoryFallback; }
+  if (!raw) raw = getCookie(STORAGE_KEY) || memoryFallback;
+  var s = raw ? JSON.parse(raw) : {};
+  return {
+    stars: s.stars || 0,
+    streak: s.streak || 0,
+    lastPlayed: s.lastPlayed || "",
+    today: s.today || "",
+    todayProgress: s.todayProgress || 0,
+    goalCelebrated: s.goalCelebrated || false,
+    mistakes: s.mistakes || [],
+    topicCounts: s.topicCounts || {}
+  };
+}
+function saveState() {
+  var json = JSON.stringify(state);
+  try { window.localStorage.setItem(STORAGE_KEY, json); } catch (e) { memoryFallback = json; }
+  var core = JSON.stringify({
+    stars: state.stars, streak: state.streak, lastPlayed: state.lastPlayed,
+    today: state.today, todayProgress: state.todayProgress, goalCelebrated: state.goalCelebrated,
+    mistakes: [], topicCounts: state.topicCounts
+  });
+  setCookie(STORAGE_KEY, core);
+}
+
+/* ---------- date helpers ---------- */
+function dateKey(d) {
+  var y = d.getFullYear();
+  var m = ("0" + (d.getMonth() + 1)).slice(-2);
+  var day = ("0" + d.getDate()).slice(-2);
+  return y + "-" + m + "-" + day;
+}
+function todayKey() { return dateKey(new Date()); }
+function yesterdayKey() {
+  var d = new Date();
+  d.setDate(d.getDate() - 1);
+  return dateKey(d);
+}
+
+/* ---------- number helpers ---------- */
+function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var t = a[i]; a[i] = a[j]; a[j] = t;
+  }
+  return a;
+}
+function distinctDigits(count) {
+  var pool = shuffle([0,1,2,3,4,5,6,7,8,9]);
+  return pool.slice(0, count);
+}
+function indianGroup(n) {
+  var s = String(n);
+  if (s.length <= 3) return s;
+  var last3 = s.slice(-3);
+  var rest = s.slice(0, -3);
+  var parts = [];
+  while (rest.length > 2) { parts.unshift(rest.slice(-2)); rest = rest.slice(0, -2); }
+  if (rest.length) parts.unshift(rest);
+  return parts.join(",") + "," + last3;
+}
+function intlGroup(n) {
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+function escapeHtml(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function buildChoices(correct, candidates, maxOptions) {
+  var max = maxOptions || 4;
+  var seen = {};
+  seen[String(correct)] = true;
+  var opts = [];
+  var pool = shuffle(candidates);
+  for (var i = 0; i < pool.length && opts.length < max - 1; i++) {
+    var c = String(pool[i]);
+    if (!seen[c]) { seen[c] = true; opts.push(c); }
+  }
+  opts.push(String(correct));
+  return shuffle(opts);
+}
+
+/* =====================================================================
+   TOPIC 1: BIG NUMBERS & PLACE VALUE
+   ===================================================================== */
+var INDIAN_PLACE_NAMES = ["Ones","Tens","Hundreds","Thousands","Ten Thousands","Lakhs","Ten Lakhs","Crores","Ten Crores"];
+var INDIAN_PLACE_VALUES = [1,10,100,1000,10000,100000,1000000,10000000,100000000];
+
+function nonZeroPosGeneric(s) {
+  var spots = [];
+  for (var i = 0; i < s.length; i++) { if (s[s.length - 1 - i] !== "0") spots.push(i); }
+  return spots.length ? spots[Math.floor(Math.random() * spots.length)] : 0;
+}
+
+function gPlaceValueBig() {
+  var n = randInt(1000000, 99999999);
+  var s = String(n);
+  var pos = nonZeroPosGeneric(s);
+  var digit = parseInt(s[s.length - 1 - pos], 10);
+  var pv = digit * INDIAN_PLACE_VALUES[pos];
+  var candidates = [digit, digit * 10, digit * 100, digit * 1000, Math.floor(pv / 10), pv * 10];
+  return { cat:"Place value", mode:"choice",
+    prompt:"What is the PLACE VALUE of " + digit + " in " + indianGroup(n) + "?",
+    answer:String(pv), choices: buildChoices(pv, candidates),
+    rule: digit + " is in the " + INDIAN_PLACE_NAMES[pos] + " place, so its place value is " + digit + " × " + INDIAN_PLACE_VALUES[pos] + " = " + pv + "." };
+}
+function gFaceValueBig() {
+  var n = randInt(1000000, 99999999);
+  var s = String(n);
+  var pos = nonZeroPosGeneric(s);
+  var digit = parseInt(s[s.length - 1 - pos], 10);
+  var candidates = [digit * INDIAN_PLACE_VALUES[pos], digit * 10, digit * 100, parseInt(s[0], 10)];
+  return { cat:"Face value", mode:"choice",
+    prompt:"What is the FACE VALUE of " + digit + " in " + indianGroup(n) + "?",
+    answer:String(digit), choices: buildChoices(digit, candidates),
+    rule:"Face value is just the digit itself, wherever it sits. The face value of " + digit + " is " + digit + ". (Place value changes with position — face value never does.)" };
+}
+function gExpandedBig() {
+  var n = randInt(1000000, 99999999);
+  var s = String(n);
+  var terms = [];
+  for (var i = 0; i < s.length; i++) {
+    var d = parseInt(s[i], 10);
+    var placeIdx = s.length - 1 - i;
+    if (d !== 0) terms.push(String(d * INDIAN_PLACE_VALUES[placeIdx]));
+  }
+  var correct = terms.join(" + ");
+  var withZero = [];
+  for (var j = 0; j < s.length; j++) {
+    var placeIdx2 = s.length - 1 - j;
+    withZero.push(String(parseInt(s[j], 10) * INDIAN_PLACE_VALUES[placeIdx2]));
+  }
+  var candidates = [withZero.join(" + "), s.split("").join(" + ")];
+  return { cat:"Expanded form", mode:"choice",
+    prompt:"Which is the expanded form of " + indianGroup(n) + "?",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Break the number by place value and drop any zeros: " + indianGroup(n) + " = " + correct + "." };
+}
+function gCompareBig() {
+  var a = randInt(100000, 99999999);
+  var b;
+  var r = Math.random();
+  if (r < 0.35) b = a;
+  else if (r < 0.68) b = randInt(100000, a - 1 || 100000);
+  else b = randInt(a + 1, 100000000);
+  var correct = a > b ? ">" : (a < b ? "<" : "=");
+  return { cat:"Compare", mode:"choice", symbols:true,
+    prompt:"Which sign goes here?  " + indianGroup(a) + "  __  " + indianGroup(b),
+    answer: correct, choices: ["<", ">", "="],
+    rule:"Compare digit count first, then digit by digit from the left. " + indianGroup(a) + " " + correct + " " + indianGroup(b) + "." };
+}
+function gIndianCommaBig() {
+  var n = randInt(1000000, 99999999);
+  var correct = indianGroup(n);
+  var candidates = [intlGroup(n), String(n), indianGroup(n).replace(/,/g, " ")];
+  return { cat:"Indian system", mode:"choice",
+    prompt:"Place commas in " + n + " using the INDIAN system:",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Indian system: the first comma comes after 3 digits from the right, then every 2 digits after that. So " + n + " becomes " + correct + "." };
+}
+function gIntlCommaBig() {
+  var n = randInt(1000000, 99999999);
+  var correct = intlGroup(n);
+  var candidates = [indianGroup(n), String(n)];
+  return { cat:"International system", mode:"choice",
+    prompt:"Place commas in " + n + " using the INTERNATIONAL system:",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"International system: a comma after every 3 digits from the right. So " + n + " becomes " + correct + "." };
+}
+var PERIOD_FACTS = [
+  { q:"1 lakh = ____ thousand", a:100, opts:[10,1000,10000] },
+  { q:"1 crore = ____ lakh", a:100, opts:[10,1000,10] },
+  { q:"10 lakh = ____ million", a:1, opts:[10,100,1000] },
+  { q:"1 crore = ____ million", a:10, opts:[1,100,1000] },
+  { q:"1 million = ____ lakh", a:10, opts:[1,100,1000] },
+  { q:"10 crore = ____ million", a:100, opts:[10,1000,1] },
+  { q:"100 lakh = ____ crore", a:1, opts:[10,100,1000] },
+  { q:"1 crore = ____ thousand", a:10000, opts:[1000,100000,100] }
+];
+function gPeriods() {
+  var f = pick(PERIOD_FACTS);
+  return { cat:"Periods & systems", mode:"choice",
+    prompt: f.q, answer: String(f.a), choices: buildChoices(f.a, f.opts),
+    rule:"Remember: " + f.q.replace("____", String(f.a)) + "." };
+}
+function roundTo(n, place) { return Math.round(n / place) * place; }
+function gRoundOff() {
+  var places = [10, 100, 1000, 100000];
+  var placeNames = ["10", "100", "1,000", "1 lakh"];
+  var idx = randInt(0, 3);
+  var place = places[idx];
+  var n = Math.min(randInt(place * 2, place * 4000), 99999999);
+  var correct = roundTo(n, place);
+  var candidates = [correct + place, Math.max(0, correct - place), n];
+  return { cat:"Rounding off", mode:"choice",
+    prompt:"Round off " + indianGroup(n) + " to the nearest " + placeNames[idx] + ":",
+    answer: String(correct), choices: buildChoices(correct, candidates),
+    rule:"Look at the digit just to the right of the " + placeNames[idx] + " place. 5 or more rounds up, less than 5 rounds down. " + indianGroup(n) + " rounds to " + indianGroup(correct) + "." };
+}
+function gPredSuccBig() {
+  if (Math.random() < 0.5) {
+    var n = randInt(1000000, 99999997);
+    return { cat:"Successor", mode:"type", paper:false,
+      prompt:"What comes just after " + indianGroup(n) + "? (type the number, no commas)",
+      answer:String(n + 1),
+      rule:"The successor is the next number. Add 1: " + indianGroup(n) + " + 1 = " + indianGroup(n + 1) + "." };
+  } else {
+    var m = randInt(1000001, 99999999);
+    return { cat:"Predecessor", mode:"type", paper:false,
+      prompt:"What comes just before " + indianGroup(m) + "? (type the number, no commas)",
+      answer:String(m - 1),
+      rule:"The predecessor is the number just before. Subtract 1: " + indianGroup(m) + " - 1 = " + indianGroup(m - 1) + "." };
+  }
+}
+function gGreatestSmallestBig() {
+  var digits = distinctDigits(6);
+  var greatest = digits.slice().sort(function(a,b){ return b - a; });
+  var smallest = digits.slice().sort(function(a,b){ return a - b; });
+  if (smallest[0] === 0) {
+    var k = 1;
+    while (smallest[k] === 0) k++;
+    var tmp = smallest[0]; smallest[0] = smallest[k]; smallest[k] = tmp;
+  }
+  var wantGreatest = Math.random() < 0.5;
+  var correctArr = wantGreatest ? greatest : smallest;
+  var otherArr = wantGreatest ? smallest : greatest;
+  var correct = correctArr.join("");
+  var candidates = [otherArr.join(""), digits.join(""), shuffle(digits).join("")];
+  return { cat:"Form a number", mode:"choice",
+    prompt:"Make the " + (wantGreatest ? "GREATEST" : "SMALLEST") + " 6-digit number using " + digits.join(", ") + ":",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule: wantGreatest
+      ? "For the greatest number, put digits from biggest to smallest: " + correct + "."
+      : "For the smallest number, put digits from smallest to biggest — but it can't start with 0, so swap in the next smallest: " + correct + "." };
+}
+
+/* =====================================================================
+   TOPIC 2: FACTORS & MULTIPLES
+   ===================================================================== */
+function isPrime(n) {
+  if (n < 2) return false;
+  for (var i = 2; i * i <= n; i++) { if (n % i === 0) return false; }
+  return true;
+}
+function gcdOf(a, b) { while (b) { var t = b; b = a % b; a = t; } return a; }
+function digitSum(n) {
+  return String(n).split("").reduce(function(acc, d) { return acc + parseInt(d, 10); }, 0);
+}
+function divRuleExplain(divisor, n) {
+  switch (divisor) {
+    case 2: return "A number is divisible by 2 if its ones digit is 0, 2, 4, 6 or 8. " + n + " ends in " + (n % 10) + ", so it " + (n % 2 === 0 ? "IS" : "is NOT") + " divisible by 2.";
+    case 3: var s3 = digitSum(n); return "Add the digits of " + n + ": digit sum = " + s3 + ". " + s3 + " is " + (s3 % 3 === 0 ? "" : "not ") + "divisible by 3, so " + n + " " + (n % 3 === 0 ? "IS" : "is NOT") + " divisible by 3.";
+    case 4: var last2 = n % 100; return "Look at the last two digits of " + n + ": " + last2 + ". " + last2 + " is " + (last2 % 4 === 0 ? "" : "not ") + "divisible by 4, so " + n + " " + (n % 4 === 0 ? "IS" : "is NOT") + " divisible by 4.";
+    case 5: return "A number is divisible by 5 if its ones digit is 0 or 5. " + n + " ends in " + (n % 10) + ", so it " + (n % 5 === 0 ? "IS" : "is NOT") + " divisible by 5.";
+    case 6: return n + " is divisible by 6 only if it's divisible by BOTH 2 and 3. " + n + " is " + (n % 2 === 0 ? "" : "not ") + "divisible by 2, and its digit sum " + digitSum(n) + " is " + (digitSum(n) % 3 === 0 ? "" : "not ") + "divisible by 3. So " + n + " " + (n % 6 === 0 ? "IS" : "is NOT") + " divisible by 6.";
+    case 7: var last = n % 10, rest = Math.floor(n / 10), diff = rest - 2 * last; return "Double the ones digit (" + last + " × 2 = " + (2 * last) + ") and subtract from the rest (" + rest + "): " + rest + " − " + (2 * last) + " = " + diff + ". That " + (Math.abs(diff) % 7 === 0 ? "IS" : "is NOT") + " divisible by 7, so " + n + " " + (n % 7 === 0 ? "IS" : "is NOT") + " divisible by 7.";
+    case 8: var last3 = n % 1000; return "Look at the last three digits of " + n + ": " + last3 + ". " + last3 + " is " + (last3 % 8 === 0 ? "" : "not ") + "divisible by 8, so " + n + " " + (n % 8 === 0 ? "IS" : "is NOT") + " divisible by 8.";
+    case 9: var s9 = digitSum(n); return "Add the digits of " + n + ": digit sum = " + s9 + ". " + s9 + " is " + (s9 % 9 === 0 ? "" : "not ") + "divisible by 9, so " + n + " " + (n % 9 === 0 ? "IS" : "is NOT") + " divisible by 9.";
+    case 10: return "A number is divisible by 10 if its ones digit is 0. " + n + " ends in " + (n % 10) + ", so it " + (n % 10 === 0 ? "IS" : "is NOT") + " divisible by 10.";
+    case 11: var digs = String(n).split("").map(Number); var oddPos = 0, evenPos = 0;
+      for (var i = 0; i < digs.length; i++) { if (i % 2 === 0) oddPos += digs[i]; else evenPos += digs[i]; }
+      var diff11 = Math.abs(oddPos - evenPos);
+      return "Sum digits in odd positions and even positions (counting from the left) separately, then find the difference: " + oddPos + " − " + evenPos + " = " + diff11 + ". That " + (diff11 % 11 === 0 ? "IS" : "is NOT") + " 0 or a multiple of 11, so " + n + " " + (n % 11 === 0 ? "IS" : "is NOT") + " divisible by 11.";
+  }
+  return "";
+}
+function gFactorYesNo() {
+  var y = randInt(10, 300);
+  var divisors = [];
+  for (var i = 1; i <= y; i++) { if (y % i === 0) divisors.push(i); }
+  var d;
+  if (Math.random() < 0.5) { d = pick(divisors); }
+  else { do { d = randInt(2, y - 1); } while (y % d === 0); }
+  var isF = y % d === 0;
+  return { cat:"Factors", mode:"choice", prompt:"Is " + d + " a factor of " + y + "?",
+    answer: isF ? "Yes" : "No", choices:["Yes", "No"],
+    rule: isF ? (y + " ÷ " + d + " = " + (y / d) + " exactly, so " + d + " IS a factor of " + y + ".") : (y + " ÷ " + d + " does not divide exactly, so " + d + " is NOT a factor of " + y + ".") };
+}
+function gEvenOdd() {
+  var n = randInt(10, 999);
+  var isEven = n % 2 === 0;
+  return { cat:"Even & odd", mode:"choice", prompt:"Is " + n + " an EVEN or ODD number?",
+    answer: isEven ? "Even" : "Odd", choices:["Even", "Odd"],
+    rule:"A number is even if it ends in 0, 2, 4, 6 or 8. " + n + " ends in " + (n % 10) + ", so it is " + (isEven ? "EVEN." : "ODD.") };
+}
+function gPrimeComposite() {
+  var n = randInt(2, 120);
+  var p = isPrime(n);
+  return { cat:"Prime & composite", mode:"choice", prompt:"Is " + n + " PRIME or COMPOSITE?",
+    answer: p ? "Prime" : "Composite", choices:["Prime", "Composite"],
+    rule: p ? (n + " has no factors except 1 and itself, so it is PRIME.") : (n + " has more than two factors, so it is COMPOSITE.") };
+}
+var TWIN_PAIRS = ["(3, 5)", "(5, 7)", "(11, 13)", "(17, 19)", "(29, 31)", "(41, 43)", "(59, 61)", "(71, 73)"];
+var NON_TWIN_PAIRS = ["(7, 11)", "(13, 17)", "(2, 3)", "(9, 11)", "(23, 29)", "(31, 37)", "(5, 11)"];
+function gTwinPrimePair() {
+  var correct = pick(TWIN_PAIRS);
+  var distractors = shuffle(NON_TWIN_PAIRS).slice(0, 3);
+  return { cat:"Twin primes", mode:"choice", prompt:"Which pair below is a pair of TWIN PRIMES (two primes with a difference of 2)?",
+    answer: correct, choices: buildChoices(correct, distractors),
+    rule:"Twin primes are two prime numbers that differ by exactly 2, like " + correct + "." };
+}
+function gCoprimeYesNo() {
+  var a = randInt(4, 60), b;
+  do { b = randInt(4, 60); } while (b === a);
+  var g = gcdOf(a, b);
+  var isCo = g === 1;
+  return { cat:"Coprime numbers", mode:"choice", prompt:"Are " + a + " and " + b + " CO-PRIME? (Do they share only 1 as a common factor?)",
+    answer: isCo ? "Yes" : "No", choices:["Yes", "No"],
+    rule:"The highest common factor of " + a + " and " + b + " is " + g + ". " + (isCo ? "Since that's 1, they ARE co-prime." : "Since that's more than 1, they are NOT co-prime.") };
+}
+var PERFECT_NUMS = [6, 28];
+var NON_PERFECT_POOL = [8, 10, 12, 15, 18, 20, 24, 30, 36, 40];
+function gPerfectNumberMCQ() {
+  var correct = pick(PERFECT_NUMS);
+  var distractors = shuffle(NON_PERFECT_POOL).slice(0, 3);
+  var factorsStr = correct === 6 ? "1, 2, 3, 6 (sum = 12 = 2 × 6)" : "1, 2, 4, 7, 14, 28 (sum = 56 = 2 × 28)";
+  return { cat:"Perfect numbers", mode:"choice", prompt:"Which of these is a PERFECT NUMBER (sum of all its factors equals twice the number)?",
+    answer: String(correct), choices: buildChoices(correct, distractors),
+    rule: correct + " is perfect: its factors are " + factorsStr + "." };
+}
+function gPrimeTripletMCQ() {
+  var correct = "(3, 5, 7)";
+  var distractors = ["(5, 7, 11)", "(11, 13, 17)", "(2, 3, 5)"];
+  return { cat:"Prime triplet", mode:"choice", prompt:"A prime triplet is three successive primes each differing by 2. Which is the ONLY prime triplet?",
+    answer: correct, choices: buildChoices(correct, distractors),
+    rule:"(3, 5, 7) is the only prime triplet — for any three numbers spaced 2 apart beyond that, one of them always turns out divisible by 3." };
+}
+function gDivisibilityRule() {
+  var divisor = pick([2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+  var n = Math.random() < 0.5 ? divisor * randInt(10, 900) : randInt(100, 9999);
+  var isDiv = n % divisor === 0;
+  return { cat:"Divisibility rules", mode:"choice", prompt:"Is " + n + " divisible by " + divisor + "?",
+    answer: isDiv ? "Yes, divisible" : "No, not divisible", choices:["Yes, divisible", "No, not divisible"],
+    rule: divRuleExplain(divisor, n) };
+}
+var FACT_STATEMENTS = [
+  { s:"1 is neither prime nor composite.", a:true },
+  { s:"Every number except 1 is either prime or composite.", a:true },
+  { s:"2 is the only even prime number.", a:true },
+  { s:"Two prime numbers are always coprime.", a:true },
+  { s:"Two coprime numbers need not be prime numbers.", a:true },
+  { s:"The number of prime numbers is unlimited.", a:true },
+  { s:"Every multiple of a number is smaller than the number.", a:false },
+  { s:"1 is a prime number.", a:false },
+  { s:"9 is a prime number.", a:false },
+  { s:"4 and 9 are co-prime numbers.", a:true },
+  { s:"Every even number is a composite number.", a:false },
+  { s:"If a number is divisible by two co-prime numbers, it must be divisible by their product.", a:true }
+];
+function gFactStatement() {
+  var f = pick(FACT_STATEMENTS);
+  return { cat:"Number facts", mode:"choice", prompt: f.s + "  True or False?",
+    answer: f.a ? "True" : "False", choices:["True", "False"],
+    rule: f.s + " This statement is " + (f.a ? "TRUE." : "FALSE.") };
+}
+
+/* =====================================================================
+   TOPIC 3: ROMAN NUMERALS (1-3999)
+   ===================================================================== */
+var ROMAN_MAP = [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+function toRomanFull(n) {
+  var out = "";
+  for (var i = 0; i < ROMAN_MAP.length; i++) {
+    while (n >= ROMAN_MAP[i][0]) { out += ROMAN_MAP[i][1]; n -= ROMAN_MAP[i][0]; }
+  }
+  return out;
+}
+var ROMAN_VAL = { I:1, V:5, X:10, L:50, C:100, D:500, M:1000 };
+function fromRomanFull(s) {
+  var total = 0;
+  for (var i = 0; i < s.length; i++) {
+    var cur = ROMAN_VAL[s[i]];
+    var next = i + 1 < s.length ? ROMAN_VAL[s[i + 1]] : 0;
+    if (cur < next) total -= cur; else total += cur;
+  }
+  return total;
+}
+function gRomanToNum2() {
+  var n = randInt(1, 3999);
+  var roman = toRomanFull(n);
+  var candidates = [n + 1, Math.max(1, n - 1), n + 10, Math.max(1, n - 10)];
+  return { cat:"Roman numerals", mode:"choice",
+    prompt:"What number is " + roman + "?",
+    answer: String(n), choices: buildChoices(n, candidates),
+    rule:"I=1, V=5, X=10, L=50, C=100, D=500, M=1000. A smaller symbol before a bigger one means subtract (like IV=4, IX=9). So " + roman + " = " + n + "." };
+}
+function gNumToRoman2() {
+  var n = randInt(1, 3999);
+  var roman = toRomanFull(n);
+  var pool = [n + 1, Math.max(1, n - 1), n + 10, Math.max(1, n - 10)].map(toRomanFull);
+  return { cat:"Roman numerals", mode:"choice",
+    prompt:"Write " + n + " in Roman numerals:",
+    answer: roman, choices: buildChoices(roman, pool),
+    rule:"Build from large to small (M, D, C, L, X, V, I). Use subtraction for 4s and 9s (IV, IX, XL, XC...). So " + n + " = " + roman + "." };
+}
+function gRomanCompare() {
+  var a = randInt(1, 3999), b;
+  do { b = randInt(1, 3999); } while (b === a);
+  var ra = toRomanFull(a), rb = toRomanFull(b);
+  var correct = a > b ? ra : rb;
+  return { cat:"Roman numerals", mode:"choice",
+    prompt:"Which is GREATER?",
+    answer: correct, choices: [ra, rb],
+    rule: ra + " = " + a + " and " + rb + " = " + b + ". So " + correct + " is greater." };
+}
+function gRomanArithmetic() {
+  var op = Math.random() < 0.5 ? "+" : "-";
+  var a, b, result;
+  if (op === "+") {
+    a = randInt(10, 2000); b = randInt(10, 1900);
+    result = a + b;
+    if (result > 3999) { a = randInt(10, 1000); b = randInt(10, 1000); result = a + b; }
+  } else {
+    a = randInt(50, 3999); b = randInt(10, a - 1);
+    result = a - b;
+  }
+  var ra = toRomanFull(a), rb = toRomanFull(b), rr = toRomanFull(result);
+  return { cat:"Roman numerals", mode:"type", paper:true,
+    hint:"✏️ Work it out with numbers first, then write the answer in Roman numerals (e.g. XIV)",
+    prompt: ra + " " + op + " " + rb + " = ?",
+    answer: rr,
+    rule: ra + " = " + a + ", " + rb + " = " + b + ". " + a + " " + op + " " + b + " = " + result + ", which is " + rr + " in Roman numerals." };
+}
+
+/* =====================================================================
+   TOPIC 4: SIMPLIFICATION (BODMAS)
+   ===================================================================== */
+function gBodmasT1() {
+  var c = randInt(1, 9), k = randInt(2, 9), b = c * k;
+  var d = randInt(1, 9), e = randInt(2, 9), a = randInt(1, 20);
+  var inner1 = k + d, inner2 = inner1 * e, result = a + inner2;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: a + " + [{(" + b + " ÷ " + c + ") + " + d + "} × " + e + "]",
+    answer: String(result),
+    rule:"Round brackets first: " + b + " ÷ " + c + " = " + k + ". Then curly brackets: " + k + " + " + d + " = " + inner1 + ". Then square brackets: " + inner1 + " × " + e + " = " + inner2 + ". Finally: " + a + " + " + inner2 + " = " + result + "." };
+}
+function gBodmasT2() {
+  var b = randInt(1, 15), c = randInt(1, 15), a = b + c + randInt(1, 15);
+  var d = randInt(2, 9);
+  var inner = a - (b + c), result = inner * d;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: "{" + a + " - (" + b + " + " + c + ")} × " + d,
+    answer: String(result),
+    rule:"Round bracket first: " + b + " + " + c + " = " + (b + c) + ". Then curly bracket: " + a + " - " + (b + c) + " = " + inner + ". Finally: " + inner + " × " + d + " = " + result + "." };
+}
+function gBodmasT3() {
+  var b = randInt(1, 9), c = randInt(1, 9), k = randInt(2, 9);
+  var a = (b + c) * k, d = randInt(1, 20);
+  var result = k + d;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: a + " ÷ (" + b + " + " + c + ") + " + d,
+    answer: String(result),
+    rule:"Bracket first: " + b + " + " + c + " = " + (b + c) + ". Then divide: " + a + " ÷ " + (b + c) + " = " + k + ". Finally add: " + k + " + " + d + " = " + result + "." };
+}
+function gBodmasT4() {
+  var e = randInt(2, 9), m = randInt(1, 9), d = e * m;
+  var c = randInt(m + 1, m + 9);
+  var innerCurly = c - m;
+  var b = randInt(2, 9);
+  var innerSquare = b * innerCurly;
+  var a = innerSquare + randInt(1, 20);
+  var result = a - innerSquare;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: a + " - [" + b + " × {" + c + " - (" + d + " ÷ " + e + ")}]",
+    answer: String(result),
+    rule:"Round bracket first: " + d + " ÷ " + e + " = " + m + ". Then curly bracket: " + c + " - " + m + " = " + innerCurly + ". Then square bracket: " + b + " × " + innerCurly + " = " + innerSquare + ". Finally: " + a + " - " + innerSquare + " = " + result + "." };
+}
+function gBodmasT5() {
+  var a = randInt(5, 30), b = randInt(2, 9), c = randInt(2, 9);
+  var base = a + b * c;
+  var e = randInt(2, 9), k = randInt(1, Math.min(9, base - 1));
+  var d = e * k;
+  var result = base - k;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: a + " + " + b + " × " + c + " - " + d + " ÷ " + e,
+    answer: String(result),
+    rule:"Do multiplication and division first (left to right): " + b + " × " + c + " = " + (b * c) + ", and " + d + " ÷ " + e + " = " + k + ". Then add/subtract: " + a + " + " + (b * c) + " - " + k + " = " + result + "." };
+}
+function gBodmasT6() {
+  var a = randInt(1, 15), b = randInt(1, 15), c = randInt(2, 9);
+  var product = (a + b) * c;
+  var d = randInt(1, Math.max(1, product - 1));
+  var result = product - d;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: "(" + a + " + " + b + ") × " + c + " - " + d,
+    answer: String(result),
+    rule:"Bracket first: " + a + " + " + b + " = " + (a + b) + ". Then multiply: " + (a + b) + " × " + c + " = " + product + ". Finally subtract: " + product + " - " + d + " = " + result + "." };
+}
+function gBodmasT7() {
+  var a = randInt(2, 9), b = randInt(2, 9);
+  var d = randInt(2, 9), k = randInt(1, 9), c = d * k;
+  var base = a * b + k;
+  var e = randInt(1, Math.max(1, base - 1));
+  var result = base - e;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: a + " × " + b + " + " + c + " ÷ " + d + " - " + e,
+    answer: String(result),
+    rule:"Multiplication and division first: " + a + " × " + b + " = " + (a * b) + ", and " + c + " ÷ " + d + " = " + k + ". Then add/subtract left to right: " + (a * b) + " + " + k + " - " + e + " = " + result + "." };
+}
+function gBodmasT8() {
+  var b = randInt(2, 9), c = randInt(2, 9), a = randInt(5, 20);
+  var base = a + b * c;
+  var k = randInt(1, Math.min(9, base - 1));
+  var e = randInt(2, 9), d = e * k;
+  var result = base - k;
+  return { cat:"BODMAS", mode:"type", paper:true,
+    prompt: "{" + a + " + (" + b + " × " + c + ")} - " + d + " ÷ " + e,
+    answer: String(result),
+    rule:"Round bracket first: " + b + " × " + c + " = " + (b * c) + ". Then curly bracket: " + a + " + " + (b * c) + " = " + base + ". Then division: " + d + " ÷ " + e + " = " + k + ". Finally: " + base + " - " + k + " = " + result + "." };
+}
+
+/* =====================================================================
+   TOPICS registry + learn content
+   ===================================================================== */
+var LEARN_NUMBERS =
+  '<span class="badge-special">Topic 1</span>' +
+  '<h2>Big Numbers &amp; Place Value</h2>' +
+  '<p>Big numbers can be written two ways: the <b>Indian system</b> (Ones, Thousands, Lakhs, Crores) and the <b>International system</b> (Ones, Thousands, Millions).</p>' +
+  '<h4>Indian place value chart</h4>' +
+  '<table><tr><th colspan="2">Crores</th><th colspan="2">Lakhs</th><th colspan="2">Thousands</th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>' +
+  '<tr><td>TC</td><td>C</td><td>TL</td><td>L</td><td>T Th</td><td>Th</td><td>H</td><td>T</td><td>O</td></tr></table>' +
+  '<h4>International place value chart</h4>' +
+  '<table><tr><th colspan="3">Millions</th><th colspan="2">Thousands</th><th>Hundreds</th><th>Tens</th><th>Ones</th></tr>' +
+  '<tr><td>HM</td><td>TM</td><td>M</td><td>TTh</td><td>Th</td><td>H</td><td>T</td><td>O</td></tr></table>' +
+  '<h4>Key conversions to remember</h4>' +
+  '<ul class="rule-list"><li>1 lakh = 100 thousand</li><li>1 crore = 100 lakh</li><li>10 lakh = 1 million</li><li>1 crore = 10 million</li></ul>' +
+  '<h4>Place value vs face value</h4>' +
+  '<p><b>Face value</b> is just the digit itself. <b>Place value</b> is the digit &times; the value of its position.</p>' +
+  '<div class="example-box">In 3,123,456 (Indian: 31,23,456): the digit 1 has face value 1, but place value 1 &times; 100,000 = 1,00,000 because it sits in the Lakhs place.</div>' +
+  '<h4>Expanded form</h4>' +
+  '<div class="example-box">3123456 = 3,000,000 + 100,000 + 20,000 + 3,000 + 400 + 50 + 6</div>' +
+  '<h4>Rounding off</h4>' +
+  '<p>Look at the digit just after the place you are rounding to. <b>5 or more &rarr; round up.</b> Less than 5 &rarr; round down.</p>' +
+  '<div class="example-box">1543 to the nearest 100 &rarr; look at the tens digit (4) &rarr; round down &rarr; 1500. 1563 to the nearest 100 &rarr; look at the tens digit (6) &rarr; round up &rarr; 1600.</div>' +
+  '<h4>Comparing big numbers</h4>' +
+  '<p>First compare the number of digits &mdash; more digits means a bigger number. If the digit count is equal, compare digit by digit from the left.</p>';
+
+var LEARN_FACTORS =
+  '<span class="badge-special">Topic 2</span>' +
+  '<h2>Factors &amp; Multiples</h2>' +
+  '<p>A <b>factor</b> of a number divides it exactly, with no remainder. A <b>multiple</b> of a number is what you get by multiplying it by 1, 2, 3, ...</p>' +
+  '<ul class="rule-list"><li>Every number is a factor of itself, and 1 is a factor of every number.</li><li>Every multiple of a number is equal to or greater than the number.</li><li>Every number has an infinite number of multiples, but a limited number of factors.</li></ul>' +
+  '<h4>Types of numbers</h4>' +
+  '<table><tr><th>Type</th><th>Meaning</th><th>Example</th></tr>' +
+  '<tr><td>Even</td><td>Ends in 0, 2, 4, 6, 8</td><td>48, 430</td></tr>' +
+  '<tr><td>Odd</td><td>Ends in 1, 3, 5, 7, 9</td><td>21, 583</td></tr>' +
+  '<tr><td>Prime</td><td>Only factors are 1 and itself</td><td>2, 3, 5, 7, 11</td></tr>' +
+  '<tr><td>Composite</td><td>More than two factors</td><td>6, 8, 9, 10</td></tr>' +
+  '<tr><td>Co-prime</td><td>Two numbers whose only common factor is 1</td><td>8 &amp; 15</td></tr>' +
+  '</table>' +
+  '<div class="example-box">Twin primes: two primes that differ by 2, e.g. (3,5), (5,7), (11,13).<br>Prime triplet: the only one is (3, 5, 7).<br>Perfect number: sum of all its factors = twice the number, e.g. 6 &rarr; 1+2+3+6 = 12 = 2&times;6.</div>' +
+  '<p style="color:var(--muted);font-size:13px">Good to know: 1 is neither prime nor composite. 2 is the only even prime. Two primes are always co-prime, but co-prime numbers don\'t have to be prime.</p>' +
+  '<h4>Divisibility rules</h4>' +
+  '<table><tr><th>By</th><th>Rule</th></tr>' +
+  '<tr><td>2</td><td>Ones digit is 0,2,4,6,8</td></tr>' +
+  '<tr><td>3</td><td>Digit sum divisible by 3</td></tr>' +
+  '<tr><td>4</td><td>Last 2 digits divisible by 4</td></tr>' +
+  '<tr><td>5</td><td>Ones digit is 0 or 5</td></tr>' +
+  '<tr><td>6</td><td>Divisible by both 2 and 3</td></tr>' +
+  '<tr><td>7</td><td>Double the ones digit, subtract from the rest &mdash; result divisible by 7</td></tr>' +
+  '<tr><td>8</td><td>Last 3 digits divisible by 8</td></tr>' +
+  '<tr><td>9</td><td>Digit sum divisible by 9</td></tr>' +
+  '<tr><td>10</td><td>Ones digit is 0</td></tr>' +
+  '<tr><td>11</td><td>(sum of digits in odd positions) &minus; (sum in even positions) is 0 or a multiple of 11</td></tr>' +
+  '</table>' +
+  '<div class="example-box">616 by 7: ones digit 6&times;2=12, rest 61, 61&minus;12=49, and 49 is divisible by 7 &rarr; so is 616.</div>' +
+  '<p style="color:var(--muted);font-size:13px">This is the groundwork for HCF &amp; LCM, which build directly on factors and multiples.</p>';
+
+var LEARN_ROMAN =
+  '<span class="badge-special">Topic 3</span>' +
+  '<h2>Roman Numerals</h2>' +
+  '<p>The Roman system uses letters instead of digits.</p>' +
+  '<table><tr><th>Symbol</th><td>I</td><td>V</td><td>X</td><td>L</td><td>C</td><td>D</td><td>M</td></tr>' +
+  '<tr><th>Value</th><td>1</td><td>5</td><td>10</td><td>50</td><td>100</td><td>500</td><td>1000</td></tr></table>' +
+  '<h4>The 4 rules</h4>' +
+  '<ol class="rule-list">' +
+  '<li>A symbol can repeat a maximum of 3 times (III = 3, but 4 is not IIII).</li>' +
+  '<li>Only I, X, C and M can repeat.</li>' +
+  '<li>If a smaller symbol comes <b>after</b> a bigger one, add: VI = 5 + 1 = 6.</li>' +
+  '<li>If a smaller symbol comes <b>before</b> a bigger one, subtract: IV = 5 - 1 = 4.</li>' +
+  '</ol>' +
+  '<div class="example-box">MMDCCLXVI &rarr; M+M+D+C+C+L+X+V+I = 1000+1000+500+100+100+50+10+5+1 = 2766</div>' +
+  '<div class="example-box">Writing 439 &rarr; 400 = CD, 30 = XXX, 9 = IX &rarr; CDXXXIX</div>' +
+  '<p style="color:var(--muted);font-size:13px">Note: for numbers of 4000 and above, a bar (vinculum) is drawn over a symbol to multiply it by 1000, e.g. <span style="text-decoration:overline">V</span> = 5000. This special notation isn\'t in the practice quiz below, but you may see it in your worksheet.</p>';
+
+var LEARN_BODMAS =
+  '<span class="badge-special">Topic 4</span>' +
+  '<h2>Simplification (BODMAS)</h2>' +
+  '<p>When a sum has more than one operation, BODMAS tells you the order to solve it in.</p>' +
+  '<table><tr><th>B</th><td>Brackets</td></tr><tr><th>O</th><td>Of (a &times; b written as "a of b")</td></tr><tr><th>D</th><td>Division</td></tr><tr><th>M</th><td>Multiplication</td></tr><tr><th>A</th><td>Addition</td></tr><tr><th>S</th><td>Subtraction</td></tr></table>' +
+  '<h4>Four kinds of brackets, solved from the inside out</h4>' +
+  '<ol class="rule-list">' +
+  '<li><b>Line bracket / vinculum</b> ( <span style="text-decoration:overline">6&divide;3</span>&minus;2 ) &mdash; solved first</li>' +
+  '<li><b>Round brackets</b> ( )</li>' +
+  '<li><b>Curly brackets</b> { }</li>' +
+  '<li><b>Square brackets</b> [ ] &mdash; solved last</li>' +
+  '</ol>' +
+  '<p>In practice: work out the innermost round bracket first, then curly, then square &mdash; then apply the rest of BODMAS to what is left.</p>' +
+  '<div class="example-box">3 + [{(4 &divide; 4) + 1} &times; 8]<br>= 3 + [{1 + 1} &times; 8] &nbsp;(round bracket)<br>= 3 + [2 &times; 8] &nbsp;(curly bracket)<br>= 3 + 16 &nbsp;(square bracket)<br>= 19</div>' +
+  '<p style="color:var(--muted);font-size:13px">Even without brackets, always do multiplication/division before addition/subtraction, working left to right.</p>';
+
+var TOPICS = {
+  numbers: { id:"numbers", icon:"🔢", name:"Big Numbers &amp; Place Value", desc:"Indian &amp; International systems, place value, expanded form, rounding, comparing",
+    learn: LEARN_NUMBERS, gens:[gPlaceValueBig, gFaceValueBig, gExpandedBig, gCompareBig, gIndianCommaBig, gIntlCommaBig, gPeriods, gPeriods, gRoundOff, gPredSuccBig, gGreatestSmallestBig] },
+  factors: { id:"factors", icon:"🧩", name:"Factors &amp; Multiples", desc:"Types of numbers, divisibility rules 2–11, and the groundwork for HCF &amp; LCM",
+    learn: LEARN_FACTORS, gens:[gFactorYesNo, gEvenOdd, gPrimeComposite, gTwinPrimePair, gCoprimeYesNo, gPerfectNumberMCQ, gPrimeTripletMCQ, gDivisibilityRule, gDivisibilityRule, gFactStatement] },
+  roman: { id:"roman", icon:"🏛️", name:"Roman Numerals", desc:"Reading, writing and comparing Roman numerals up to 3999",
+    learn: LEARN_ROMAN, gens:[gRomanToNum2, gNumToRoman2, gRomanCompare, gRomanArithmetic] },
+  bodmas: { id:"bodmas", icon:"🧮", name:"Simplification (BODMAS)", desc:"Order of operations with brackets — line, round, curly &amp; square",
+    learn: LEARN_BODMAS, gens:[gBodmasT1, gBodmasT2, gBodmasT3, gBodmasT4, gBodmasT5, gBodmasT6, gBodmasT7, gBodmasT8] }
+};
+var TOPIC_ORDER = ["numbers", "factors", "roman", "bodmas"];
+
+/* map every generator function back to its topic, for progress tracking */
+var GEN_TOPIC = {};
+TOPIC_ORDER.forEach(function(key) {
+  TOPICS[key].gens.forEach(function(g) { GEN_TOPIC[g.name] = key; });
+});
+
+/* ---------- app state ---------- */
+var state = loadState();
+var current = null;
+var currentGens = null;
+var currentTopicKey = null;   // topic key, or "mixed"
+var locked = false;
+var lastCat = "";
+var clearConfirmPending = false;
+
+/* ---------- DOM ---------- */
+var el = {
+  stars: document.getElementById("starsNum"),
+  streak: document.getElementById("streakNum"),
+  goal: document.getElementById("goalNum"),
+  fill: document.getElementById("progressFill"),
+  banner: document.getElementById("banner"),
+  screenTopics: document.getElementById("screen-topics"),
+  screenLearn: document.getElementById("screen-learn"),
+  screenQuiz: document.getElementById("screen-quiz"),
+  topicsGrid: document.getElementById("topicsGrid"),
+  learnContent: document.getElementById("learnContent"),
+  learnBack: document.getElementById("learnBack"),
+  learnStartBtn: document.getElementById("learnStartBtn"),
+  quizBack: document.getElementById("quizBack"),
+  quizTopicLbl: document.getElementById("quizTopicLbl"),
+  catTag: document.getElementById("catTag"),
+  question: document.getElementById("questionText"),
+  hint: document.getElementById("hint"),
+  typeArea: document.getElementById("typeArea"),
+  input: document.getElementById("answerInput"),
+  checkBtn: document.getElementById("checkBtn"),
+  choicesArea: document.getElementById("choicesArea"),
+  feedback: document.getElementById("feedback"),
+  explain: document.getElementById("explain"),
+  nextBtn: document.getElementById("nextBtn"),
+  mistakesList: document.getElementById("mistakesList"),
+  clearBtn: document.getElementById("clearBtn"),
+  resetBtn: document.getElementById("resetBtn")
+};
+
+/* ---------- screen switching ---------- */
+function showScreen(name) {
+  el.screenTopics.classList.toggle("on", name === "topics");
+  el.screenLearn.classList.toggle("on", name === "learn");
+  el.screenQuiz.classList.toggle("on", name === "quiz");
+}
+
+/* ---------- daily reset ---------- */
+function dailyReset() {
+  var t = todayKey();
+  if (state.today !== t) {
+    state.today = t;
+    state.todayProgress = 0;
+    state.goalCelebrated = false;
+    saveState();
+  }
+}
+function bumpStreakForToday() {
+  var t = todayKey();
+  if (state.lastPlayed === t) return;
+  if (state.lastPlayed === yesterdayKey()) state.streak += 1;
+  else state.streak = 1;
+  state.lastPlayed = t;
+  saveState();
+}
+
+/* ---------- render stats ---------- */
+function renderStats() {
+  el.stars.textContent = state.stars;
+  el.streak.textContent = state.streak;
+  el.goal.textContent = Math.min(state.todayProgress, DAILY_GOAL) + "/" + DAILY_GOAL;
+  var pct = Math.min(100, (state.todayProgress / DAILY_GOAL) * 100);
+  el.fill.style.width = pct + "%";
+  if (state.todayProgress >= DAILY_GOAL) {
+    el.banner.textContent = "🎉 Daily goal done! " + state.todayProgress + " correct today. Keep going or come back tomorrow!";
+    el.banner.classList.add("show");
+  } else {
+    el.banner.classList.remove("show");
+  }
+}
+
+/* ---------- topic list ---------- */
+function renderTopics() {
+  var html = "";
+  TOPIC_ORDER.forEach(function(key) {
+    var t = TOPICS[key];
+    var solved = state.topicCounts[key] || 0;
+    html += '<div class="topic-card">' +
+      '<span class="ico">' + t.icon + '</span>' +
+      '<h3>' + t.name + '</h3>' +
+      '<p>' + t.desc + '</p>' +
+      '<div class="solved">' + (solved ? ("⭐ " + solved + " solved") : "Not started yet") + '</div>' +
+      '<div class="topic-actions">' +
+        '<button data-act="learn" data-topic="' + key + '">📖 Learn</button>' +
+        '<button class="primary" data-act="practice" data-topic="' + key + '">▶ Practice</button>' +
+      '</div></div>';
+  });
+  html += '<div class="topic-card mixed">' +
+    '<span class="ico">🎯</span>' +
+    '<h3>Mixed Practice</h3>' +
+    '<p>A bit of everything from all the topics above — good once you’re comfortable with each one.</p>' +
+    '<div class="solved">&nbsp;</div>' +
+    '<div class="topic-actions"><button class="primary" data-act="practice" data-topic="mixed" style="flex:1 1 100%">▶ Start mixed practice</button></div></div>';
+  el.topicsGrid.innerHTML = html;
+  var btns = el.topicsGrid.querySelectorAll("button[data-act]");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].onclick = function() {
+      var act = this.getAttribute("data-act");
+      var topic = this.getAttribute("data-topic");
+      if (act === "learn") openLearn(topic);
+      else startPractice(topic);
+    };
+  }
+}
+
+function openLearn(topicKey) {
+  currentTopicKey = topicKey;
+  el.learnContent.innerHTML = TOPICS[topicKey].learn;
+  showScreen("learn");
+  window.scrollTo(0, 0);
+}
+el.learnBack.onclick = function() { showScreen("topics"); };
+el.learnStartBtn.onclick = function() { startPractice(currentTopicKey); };
+
+function startPractice(topicKey) {
+  currentTopicKey = topicKey;
+  if (topicKey === "mixed") {
+    currentGens = [];
+    TOPIC_ORDER.forEach(function(k) { currentGens = currentGens.concat(TOPICS[k].gens); });
+    el.quizTopicLbl.textContent = "Mixed Practice";
+  } else {
+    currentGens = TOPICS[topicKey].gens;
+    el.quizTopicLbl.innerHTML = TOPICS[topicKey].name;
+  }
+  showScreen("quiz");
+  window.scrollTo(0, 0);
+  nextQuestion();
+}
+el.quizBack.onclick = function() { showScreen("topics"); renderTopics(); };
+
+/* ---------- mistakes ---------- */
+function renderMistakes() {
+  if (!state.mistakes.length) {
+    el.mistakesList.innerHTML = '<div class="empty">No mistakes yet. Off to a great start!</div>';
+    el.clearBtn.textContent = "Clear";
+    el.clearBtn.classList.remove("danger");
+    clearConfirmPending = false;
+    return;
+  }
+  var html = "";
+  for (var i = 0; i < state.mistakes.length; i++) {
+    var m = state.mistakes[i];
+    html += '<div class="mistake-item">' +
+      '<button class="dismiss-btn" data-idx="' + i + '">✕</button>' +
+      '<div class="q">' + m.cat + ": " + escapeHtml(m.prompt) + '</div>' +
+      '<div class="ans">Her answer: <span class="yours">' + escapeHtml(m.your) + '</span>' +
+      '&nbsp;&nbsp; Correct: <span class="right">' + escapeHtml(m.answer) + '</span></div>' +
+      '<div class="rule">' + escapeHtml(m.rule) + '</div>' +
+    '</div>';
+  }
+  el.mistakesList.innerHTML = html;
+  var dismissBtns = el.mistakesList.querySelectorAll(".dismiss-btn");
+  for (var j = 0; j < dismissBtns.length; j++) {
+    dismissBtns[j].onclick = (function(idx) {
+      return function() {
+        state.mistakes.splice(idx, 1);
+        saveState();
+        renderMistakes();
+      };
+    })(parseInt(dismissBtns[j].getAttribute("data-idx"), 10));
+  }
+}
+
+/* ---------- question flow ---------- */
+function nextQuestion() {
+  locked = false;
+  el.feedback.textContent = "";
+  el.feedback.className = "feedback";
+  el.explain.textContent = "";
+  el.explain.classList.remove("show");
+  el.nextBtn.style.display = "none";
+
+  var gen, q, tries = 0;
+  do {
+    gen = pick(currentGens);
+    q = gen();
+    tries++;
+  } while (q.cat === lastCat && tries < 6);
+  lastCat = q.cat;
+  q._genName = gen.name;
+  current = q;
+
+  el.catTag.textContent = q.cat;
+  el.question.textContent = q.prompt;
+  el.question.className = q.prompt.length > 40 ? "question long" : "question";
+
+  el.typeArea.style.display = "none";
+  el.choicesArea.style.display = "none";
+
+  if (q.mode === "type") {
+    el.typeArea.style.display = "";
+    el.input.value = "";
+    el.input.disabled = false;
+    el.checkBtn.disabled = false;
+    el.input.setAttribute("inputmode", /roman/i.test(q.cat) ? "text" : "numeric");
+    el.hint.textContent = q.hint ? q.hint : (q.paper ? "📓 Work it out on paper first, then type the answer" : "Type your answer");
+    el.hint.className = q.paper ? "hint paper" : "hint";
+    try { el.input.focus(); } catch (e) {}
+  } else {
+    el.choicesArea.style.display = "grid";
+    el.choicesArea.className = "choices";
+    el.hint.textContent = "Tap the correct answer";
+    el.hint.className = "hint";
+    el.choicesArea.innerHTML = "";
+    for (var i = 0; i < q.choices.length; i++) {
+      (function(choiceVal) {
+        var b = document.createElement("button");
+        b.className = "choice";
+        b.textContent = choiceVal;
+        b.onclick = function() { handleChoice(choiceVal, b); };
+        el.choicesArea.appendChild(b);
+      })(q.choices[i]);
+    }
+  }
+}
+
+function normalize(s) {
+  return String(s).trim().replace(/\s+/g, "").toUpperCase();
+}
+
+function handleTypeSubmit() {
+  if (locked) return;
+  var val = el.input.value;
+  if (normalize(val) === "") return;
+  locked = true;
+  el.input.disabled = true;
+  el.checkBtn.disabled = true;
+  var ok = normalize(val) === normalize(current.answer);
+  resolve(ok, val);
+}
+
+function handleChoice(val, btnEl) {
+  if (locked) return;
+  locked = true;
+  var buttons = el.choicesArea.querySelectorAll("button");
+  for (var i = 0; i < buttons.length; i++) buttons[i].disabled = true;
+  var ok = normalize(val) === normalize(current.answer);
+  if (ok) {
+    btnEl.classList.add("pick-correct");
+  } else {
+    btnEl.classList.add("pick-wrong");
+    for (var j = 0; j < buttons.length; j++) {
+      if (normalize(buttons[j].textContent) === normalize(current.answer)) buttons[j].classList.add("reveal");
+    }
+  }
+  resolve(ok, val);
+}
+
+function resolve(ok, given) {
+  bumpStreakForToday();
+  var topicOfQuestion = GEN_TOPIC[current._genName] || currentTopicKey;
+  if (ok) {
+    state.stars += 1;
+    state.todayProgress += 1;
+    if (topicOfQuestion && topicOfQuestion !== "mixed") {
+      state.topicCounts[topicOfQuestion] = (state.topicCounts[topicOfQuestion] || 0) + 1;
+    }
+    saveState();
+    renderStats();
+    el.feedback.textContent = pick(["⭐ Correct!", "🌟 Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
+    el.feedback.className = "feedback correct";
+    starBurst();
+    if (state.todayProgress === DAILY_GOAL && !state.goalCelebrated) {
+      state.goalCelebrated = true;
+      saveState();
+    }
+    setTimeout(nextQuestion, 1100);
+  } else {
+    el.feedback.textContent = "❌ Not quite — saved to your Mistakes Bank";
+    el.feedback.className = "feedback incorrect";
+    el.explain.textContent = "Correct answer: " + current.answer + ".  " + current.rule;
+    el.explain.classList.add("show");
+    state.mistakes.unshift({
+      cat: current.cat, prompt: current.prompt,
+      your: given, answer: current.answer, rule: current.rule
+    });
+    if (state.mistakes.length > 40) state.mistakes.pop();
+    saveState();
+    renderMistakes();
+    el.nextBtn.style.display = "inline-block";
+  }
+}
+
+function starBurst() {
+  var emojis = ["⭐", "🌟", "✨"];
+  for (var i = 0; i < 5; i++) {
+    var s = document.createElement("div");
+    s.className = "burst";
+    s.textContent = pick(emojis);
+    s.style.left = (40 + Math.random() * 20) + "%";
+    s.style.top = "45%";
+    document.body.appendChild(s);
+    (function(node){ setTimeout(function(){ if (node.parentNode) node.parentNode.removeChild(node); }, 1000); })(s);
+  }
+}
+
+/* ---------- events ---------- */
+el.checkBtn.onclick = handleTypeSubmit;
+el.input.addEventListener("keydown", function(e) { if (e.key === "Enter") handleTypeSubmit(); });
+el.nextBtn.onclick = nextQuestion;
+el.clearBtn.onclick = function() {
+  if (!state.mistakes.length) return;
+  if (!clearConfirmPending) {
+    clearConfirmPending = true;
+    el.clearBtn.textContent = "Tap again to clear all";
+    el.clearBtn.classList.add("danger");
+    setTimeout(function() {
+      clearConfirmPending = false;
+      el.clearBtn.textContent = "Clear";
+      el.clearBtn.classList.remove("danger");
+    }, 3000);
+  } else {
+    clearConfirmPending = false;
+    el.clearBtn.textContent = "Clear";
+    el.clearBtn.classList.remove("danger");
+    state.mistakes = [];
+    saveState();
+    renderMistakes();
+  }
+};
+var resetConfirmPending = false;
+el.resetBtn.onclick = function() {
+  if (!resetConfirmPending) {
+    resetConfirmPending = true;
+    el.resetBtn.textContent = "Tap again to confirm reset";
+    setTimeout(function() {
+      resetConfirmPending = false;
+      el.resetBtn.textContent = "Reset all progress";
+    }, 3000);
+  } else {
+    resetConfirmPending = false;
+    el.resetBtn.textContent = "Reset all progress";
+    state = { stars:0, streak:0, lastPlayed:"", today:"", todayProgress:0, goalCelebrated:false, mistakes:[], topicCounts:{} };
+    saveState();
+    dailyReset();
+    renderStats();
+    renderMistakes();
+    renderTopics();
+    showScreen("topics");
+  }
+};
+document.getElementById("backupBtn").onclick = function() {
+  var code = "";
+  try { code = btoa(unescape(encodeURIComponent(JSON.stringify(state)))); } catch (e) { code = ""; }
+  window.prompt("Backup code — copy and keep this somewhere safe. Paste it into 'Restore progress' to bring stars and streak back:", code);
+};
+document.getElementById("restoreBtn").onclick = function() {
+  var code = window.prompt("Paste a backup code to restore progress:");
+  if (!code) return;
+  try {
+    var restored = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
+    if (typeof restored.stars !== "number") throw new Error("bad code");
+    state = {
+      stars: restored.stars || 0, streak: restored.streak || 0,
+      lastPlayed: restored.lastPlayed || "", today: restored.today || "",
+      todayProgress: restored.todayProgress || 0, goalCelebrated: restored.goalCelebrated || false,
+      mistakes: restored.mistakes || [], topicCounts: restored.topicCounts || {}
+    };
+    saveState();
+    dailyReset();
+    renderStats();
+    renderMistakes();
+    renderTopics();
+    window.alert("Progress restored! Stars: " + state.stars + ", streak: " + state.streak + ".");
+  } catch (e) {
+    window.alert("Sorry, that backup code could not be read. Check it was copied in full.");
+  }
+};
+
+/* ---------- init ---------- */
+var jsWarn = document.getElementById("jsWarning");
+if (jsWarn) jsWarn.style.display = "none";
+dailyReset();
+renderStats();
+renderMistakes();
+renderTopics();
+showScreen("topics");
+</script>
+</body>
+</html>
