@@ -82,6 +82,51 @@
   .topic-actions button.primary { background: var(--indigo); color: #fff; border-color: var(--indigo); }
   .topic-actions button:active { transform: scale(0.97); }
   .topic-card.mixed { background: linear-gradient(135deg,#ede9fe,#fef9c3); border: 2px solid var(--amber); }
+  .sect-head { font-size: 17px; font-weight: 900; color: var(--indigo-dark); margin: 22px 0 10px; }
+
+  /* ---------- games ---------- */
+  .tilegrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 14px; }
+  .gtile {
+    min-height: 58px; font-size: 15px; font-weight: 800; border: 3px solid var(--line); background: #fff;
+    border-radius: 14px; color: var(--ink); cursor: pointer; font-family: inherit; padding: 8px;
+    transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease, opacity 0.3s ease;
+    word-break: break-word;
+  }
+  .gtile:active { transform: scale(0.97); }
+  .gtile.sel { border-color: var(--indigo); background: #ede9fe; }
+  .gtile.ok { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); opacity: 0.45; pointer-events: none; }
+  .gtile.no { border-color: var(--rose) !important; background: var(--rose-soft); animation: shake 0.3s; }
+  @keyframes shake { 0%,100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+
+  .tf-row { display: flex; gap: 12px; margin-top: 16px; }
+  .tf-btn {
+    flex: 1; padding: 22px 0; font-size: 21px; font-weight: 900; letter-spacing: 0.5px;
+    border: 3px solid var(--line); background: #fff; border-radius: 16px; color: var(--ink);
+    cursor: pointer; font-family: inherit; transition: transform 0.08s ease, border-color 0.15s ease, background 0.15s ease;
+  }
+  .tf-btn:active { transform: scale(0.97); }
+  .tf-btn.right { border-color: var(--emerald); background: var(--emerald-soft); color: var(--emerald); }
+  .tf-btn.wrong { border-color: var(--rose); background: var(--rose-soft); color: var(--rose); }
+  .tf-btn[disabled] { cursor: default; }
+  .game-progress { font-size: 13px; font-weight: 800; color: var(--muted); margin-top: 4px; }
+  .game-score-big { font-size: 46px; font-weight: 900; margin: 14px 0 4px; }
+
+  /* ---------- learn extras: steppers + fraction bars ---------- */
+  .stepper { background: #f5f3ff; border: 2px solid #ddd6fe; border-radius: 14px; padding: 14px; margin: 12px 0; }
+  .stepper .st-title { font-size: 13px; font-weight: 900; color: var(--indigo); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .stepper .st-step { font-size: 14px; font-weight: 700; line-height: 1.5; padding: 7px 10px; margin-bottom: 6px; background: #fff; border-radius: 9px; border-left: 4px solid var(--indigo); animation: stepIn 0.25s ease; }
+  @keyframes stepIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+  .stepper button {
+    margin-top: 6px; background: var(--indigo); color: #fff; border: none; border-radius: 10px;
+    padding: 9px 18px; font-size: 14px; font-weight: 800; cursor: pointer; font-family: inherit;
+  }
+  .stepper button.done { background: #fff; color: var(--indigo); border: 2px solid var(--indigo); }
+  .fbar { display: inline-flex; gap: 2px; margin: 0 6px; vertical-align: middle; }
+  .fbar i { width: 20px; height: 15px; background: #ede9fe; border: 1.5px solid #c4b5fd; border-radius: 3px; }
+  .fbar i.f { background: var(--amber); border-color: #d97706; }
+
+  .screen.on { animation: fadeUp 0.22s ease; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
   /* ---------- learn screen ---------- */
   .back-link {
@@ -193,7 +238,11 @@
 
   <!-- ================= TOPIC LIST ================= -->
   <div class="screen on" id="screen-topics">
+    <div class="sect-head">📖 Learn &amp; Practise</div>
     <div class="topics-grid" id="topicsGrid"></div>
+
+    <div class="sect-head">🎮 Quick Games</div>
+    <div class="topics-grid" id="gamesGrid"></div>
 
     <div class="mistakes">
       <div class="mistakes-head">
@@ -234,6 +283,15 @@
       <div class="explain" id="explain"></div>
       <button class="btn next" id="nextBtn" style="display:none;">Next question</button>
     </div>
+  </div>
+
+  <!-- ================= GAME ================= -->
+  <div class="screen" id="screen-game">
+    <div class="quiz-topbar">
+      <button class="back-link" id="gameBack">&larr; Topics</button>
+      <span class="lbl" id="gameLbl"></span>
+    </div>
+    <div class="card" id="gameCard"></div>
   </div>
 
   <div class="sync-row" id="syncRow">
@@ -1100,6 +1158,89 @@ function gBodmasT8() {
 }
 
 /* =====================================================================
+   Learn-screen extras: fraction bars + tap-through worked examples
+   ===================================================================== */
+function fbarHTML(filled, total) {
+  var h = '<span class="fbar">';
+  for (var i = 0; i < total; i++) h += (i < filled) ? '<i class="f"></i>' : '<i></i>';
+  return h + '</span>';
+}
+
+/* Worked examples revealed one step at a time — each tap adds the next line,
+   keeping earlier steps visible so the whole working builds up on screen. */
+var STEPPERS = {
+  round100: { title: "Try it: round 4,367 to the nearest 100", steps: [
+    "We are rounding to the <b>hundreds</b> place: 4,<b>3</b>67.",
+    "Look at the digit just to its right — the tens digit: <b>6</b>.",
+    "6 is 5 or more, so round <b>up</b>: the 3 becomes 4.",
+    "Everything after it becomes 0 → <b>4,400</b> ✅"
+  ]},
+  div7: { title: "Try it: is 616 divisible by 7?", steps: [
+    "Take the ones digit (<b>6</b>) and double it: 6 × 2 = <b>12</b>.",
+    "Take what's left of the number: <b>61</b>.",
+    "Subtract: 61 − 12 = <b>49</b>.",
+    "Is 49 divisible by 7? Yes — 7 × 7 = 49.",
+    "So <b>616 is divisible by 7</b> ✅ (616 ÷ 7 = 88)"
+  ]},
+  hcf1824: { title: "Try it: HCF and LCM of 18 and 24", steps: [
+    "Break each into prime factors: 18 = <b>2 × 3 × 3</b>",
+    "24 = <b>2 × 2 × 2 × 3</b>",
+    "HCF = the primes they <b>share</b>: one 2 and one 3 → 2 × 3 = <b>6</b>",
+    "LCM = every prime at its <b>highest</b> count: 2×2×2 × 3×3 = <b>72</b>",
+    "Check the shortcut: HCF × LCM = 6 × 72 = 432 = 18 × 24 ✅"
+  ]},
+  fracadd: { title: "Try it: 2/3 + 1/4", steps: [
+    "The denominators are different (3 and 4), so find their LCM: <b>12</b>.",
+    "Convert: 2/3 = <b>8/12</b> (multiply top and bottom by 4).",
+    "Convert: 1/4 = <b>3/12</b> (multiply top and bottom by 3).",
+    "Now they're like fractions — add the tops: 8 + 3 = 11.",
+    "Answer: <b>11/12</b> ✅ (already in simplest form)"
+  ]},
+  imp2mix: { title: "Try it: convert 17/5 to a mixed number", steps: [
+    "Divide the top by the bottom: 17 ÷ 5.",
+    "5 goes into 17 <b>three</b> times (5 × 3 = 15).",
+    "The leftover is 17 − 15 = <b>2</b>.",
+    "Whole part 3, remainder 2 over the same 5 → <b>3 2/5</b> ✅"
+  ]},
+  roman439: { title: "Try it: write 439 in Roman numerals", steps: [
+    "Break 439 into parts: 400 + 30 + 9.",
+    "400 = 500 − 100 → <b>CD</b>",
+    "30 = 10 + 10 + 10 → <b>XXX</b>",
+    "9 = 10 − 1 → <b>IX</b>",
+    "Join them: <b>CDXXXIX</b> ✅"
+  ]},
+  bodmasNest: { title: "Try it: 3 + [{(4 ÷ 4) + 1} × 8]", steps: [
+    "Round bracket first: (4 ÷ 4) = <b>1</b> → 3 + [{1 + 1} × 8]",
+    "Curly bracket next: {1 + 1} = <b>2</b> → 3 + [2 × 8]",
+    "Square bracket: [2 × 8] = <b>16</b> → 3 + 16",
+    "Finally add: 3 + 16 = <b>19</b> ✅"
+  ]}
+};
+function initLearnExtras(container) {
+  var nodes = container.querySelectorAll(".stepper");
+  for (var i = 0; i < nodes.length; i++) {
+    (function (node) {
+      var def = STEPPERS[node.getAttribute("data-key")];
+      if (!def) { node.style.display = "none"; return; }
+      var shown = 0;
+      function render() {
+        var h = '<div class="st-title">👆 ' + def.title + '</div>';
+        for (var s = 0; s < shown; s++) h += '<div class="st-step">' + def.steps[s] + '</div>';
+        h += shown < def.steps.length
+          ? '<button>' + (shown === 0 ? "Show me, step by step ▶" : "Next step ▶") + '</button>'
+          : '<button class="done">↺ Start again</button>';
+        node.innerHTML = h;
+        node.querySelector("button").onclick = function () {
+          shown = shown < def.steps.length ? shown + 1 : 0;
+          render();
+        };
+      }
+      render();
+    })(nodes[i]);
+  }
+}
+
+/* =====================================================================
    TOPICS registry + learn content
    ===================================================================== */
 var LEARN_NUMBERS =
@@ -1122,6 +1263,7 @@ var LEARN_NUMBERS =
   '<h4>Rounding off</h4>' +
   '<p>Look at the digit just after the place you are rounding to. <b>5 or more &rarr; round up.</b> Less than 5 &rarr; round down.</p>' +
   '<div class="example-box">1543 to the nearest 100 &rarr; look at the tens digit (4) &rarr; round down &rarr; 1500. 1563 to the nearest 100 &rarr; look at the tens digit (6) &rarr; round up &rarr; 1600.</div>' +
+  '<div class="stepper" data-key="round100"></div>' +
   '<h4>Comparing big numbers</h4>' +
   '<p>First compare the number of digits &mdash; more digits means a bigger number. If the digit count is equal, compare digit by digit from the left.</p>';
 
@@ -1153,17 +1295,15 @@ var LEARN_FACTORS =
   '<tr><td>10</td><td>Ones digit is 0</td></tr>' +
   '<tr><td>11</td><td>(sum of digits in odd positions) &minus; (sum in even positions) is 0 or a multiple of 11</td></tr>' +
   '</table>' +
-  '<div class="example-box">616 by 7: ones digit 6&times;2=12, rest 61, 61&minus;12=49, and 49 is divisible by 7 &rarr; so is 616.</div>' +
+  '<div class="stepper" data-key="div7"></div>' +
   '<p style="color:var(--muted);font-size:13px">This is the groundwork for HCF &amp; LCM, which build directly on factors and multiples.</p>';
 
 var LEARN_HCFLCM =
   '<span class="badge-special">Topic 3</span>' +
   '<h2>HCF &amp; LCM</h2>' +
   '<p><b>HCF</b> (Highest Common Factor) is the biggest number that divides two or more numbers exactly. <b>LCM</b> (Lowest Common Multiple) is the smallest number that two or more numbers all divide into exactly.</p>' +
-  '<h4>Finding HCF &mdash; prime factorization</h4>' +
-  '<div class="example-box">HCF of 18 and 24:<br>18 = 2 &times; 3 &times; 3<br>24 = 2 &times; 2 &times; 2 &times; 3<br>Common primes: one 2 and one 3 &rarr; HCF = 2 &times; 3 = 6</div>' +
-  '<h4>Finding LCM &mdash; prime factorization</h4>' +
-  '<div class="example-box">LCM of 18 and 24:<br>Take every prime that appears, at its highest power: 2&times;2&times;2 &times; 3&times;3 = 72</div>' +
+  '<h4>Finding HCF and LCM &mdash; prime factorization</h4>' +
+  '<div class="stepper" data-key="hcf1824"></div>' +
   '<h4>A useful shortcut</h4>' +
   '<p>For any two numbers a and b: <b>HCF &times; LCM = a &times; b</b>. If you know three of these four values, you can always find the fourth.</p>' +
   '<h4>Word problem clues</h4>' +
@@ -1177,20 +1317,25 @@ var LEARN_HCFLCM =
 var LEARN_FRACTIONS =
   '<span class="badge-special">Topic 4</span>' +
   '<h2>Fractions</h2>' +
-  '<p>A fraction shows part of a whole: <b>numerator</b> (top) over <b>denominator</b> (bottom).</p>' +
+  '<p>A fraction shows part of a whole: <b>numerator</b> (top) over <b>denominator</b> (bottom). Here is 3/4 as a picture &mdash; 3 shaded parts out of 4 equal parts:</p>' +
+  '<p style="text-align:center">3/4 = ' + fbarHTML(3, 4) + '</p>' +
   '<table><tr><th>Type</th><th>Meaning</th><th>Example</th></tr>' +
-  '<tr><td>Proper</td><td>Numerator &lt; denominator (less than 1)</td><td>3/4</td></tr>' +
-  '<tr><td>Improper</td><td>Numerator &ge; denominator (1 or more)</td><td>7/4</td></tr>' +
+  '<tr><td>Proper</td><td>Numerator &lt; denominator (less than 1)</td><td>3/4 ' + fbarHTML(3, 4) + '</td></tr>' +
+  '<tr><td>Improper</td><td>Numerator &ge; denominator (1 or more)</td><td>7/4 ' + fbarHTML(4, 4) + fbarHTML(3, 4) + '</td></tr>' +
   '<tr><td>Mixed number</td><td>A whole number + a proper fraction</td><td>1&frac34;</td></tr>' +
   '</table>' +
+  '<p style="color:var(--muted);font-size:13px">Notice 7/4 and 1&frac34; are the same amount &mdash; one whole bar plus three quarters. That\'s why we can convert between them.</p>' +
   '<h4>Converting improper &harr; mixed</h4>' +
-  '<div class="example-box">Improper &rarr; mixed: 17/5 &rarr; 17 &divide; 5 = 3 remainder 2 &rarr; 3 2/5<br>Mixed &rarr; improper: 3 2/5 &rarr; (3 &times; 5) + 2 = 17 &rarr; 17/5</div>' +
+  '<div class="stepper" data-key="imp2mix"></div>' +
+  '<div class="example-box">Going back the other way: 3 2/5 &rarr; (3 &times; 5) + 2 = 17 &rarr; 17/5</div>' +
   '<h4>Equivalent fractions &amp; simplifying</h4>' +
+  '<p>These bars are all the same amount of shading &mdash; equivalent fractions:</p>' +
+  '<p style="text-align:center">1/2 = ' + fbarHTML(1, 2) + ' &nbsp; 2/4 = ' + fbarHTML(2, 4) + ' &nbsp; 4/8 = ' + fbarHTML(4, 8) + '</p>' +
   '<p>Multiply top and bottom by the same number to get an equivalent fraction. Divide both by their HCF to simplify to lowest terms.</p>' +
   '<div class="example-box">8/12 &divide; 4/4 (HCF of 8 and 12 is 4) = 2/3</div>' +
   '<h4>Adding &amp; subtracting</h4>' +
   '<p><b>Like fractions</b> (same denominator): just add/subtract the numerators.<br><b>Unlike fractions</b> (different denominators): find the LCM of the denominators first, convert both fractions, then add/subtract.</p>' +
-  '<div class="example-box">2/3 + 1/4 &rarr; LCM of 3 and 4 is 12 &rarr; 8/12 + 3/12 = 11/12</div>' +
+  '<div class="stepper" data-key="fracadd"></div>' +
   '<h4>Multiplying &amp; dividing</h4>' +
   '<div class="example-box">Multiply straight across: 2/3 &times; 3/5 = 6/15 = 2/5 (simplified)<br>Divide by flipping the second fraction and multiplying: 2/3 &divide; 3/5 = 2/3 &times; 5/3 = 10/9</div>' +
   '<h4>BODMAS with fractions</h4>' +
@@ -1211,7 +1356,7 @@ var LEARN_ROMAN =
   '<li>If a smaller symbol comes <b>before</b> a bigger one, subtract: IV = 5 - 1 = 4.</li>' +
   '</ol>' +
   '<div class="example-box">MMDCCLXVI &rarr; M+M+D+C+C+L+X+V+I = 1000+1000+500+100+100+50+10+5+1 = 2766</div>' +
-  '<div class="example-box">Writing 439 &rarr; 400 = CD, 30 = XXX, 9 = IX &rarr; CDXXXIX</div>' +
+  '<div class="stepper" data-key="roman439"></div>' +
   '<p style="color:var(--muted);font-size:13px">Note: for numbers of 4000 and above, a bar (vinculum) is drawn over a symbol to multiply it by 1000, e.g. <span style="text-decoration:overline">V</span> = 5000. This special notation isn\'t in the practice quiz below, but you may see it in your worksheet.</p>';
 
 var LEARN_BODMAS =
@@ -1227,7 +1372,7 @@ var LEARN_BODMAS =
   '<li><b>Square brackets</b> [ ] &mdash; solved last</li>' +
   '</ol>' +
   '<p>In practice: work out the innermost round bracket first, then curly, then square &mdash; then apply the rest of BODMAS to what is left.</p>' +
-  '<div class="example-box">3 + [{(4 &divide; 4) + 1} &times; 8]<br>= 3 + [{1 + 1} &times; 8] &nbsp;(round bracket)<br>= 3 + [2 &times; 8] &nbsp;(curly bracket)<br>= 3 + 16 &nbsp;(square bracket)<br>= 19</div>' +
+  '<div class="stepper" data-key="bodmasNest"></div>' +
   '<p style="color:var(--muted);font-size:13px">Even without brackets, always do multiplication/division before addition/subtraction, working left to right.</p>';
 
 var TOPICS = {
@@ -1271,6 +1416,11 @@ var el = {
   screenTopics: document.getElementById("screen-topics"),
   screenLearn: document.getElementById("screen-learn"),
   screenQuiz: document.getElementById("screen-quiz"),
+  screenGame: document.getElementById("screen-game"),
+  gamesGrid: document.getElementById("gamesGrid"),
+  gameCard: document.getElementById("gameCard"),
+  gameLbl: document.getElementById("gameLbl"),
+  gameBack: document.getElementById("gameBack"),
   topicsGrid: document.getElementById("topicsGrid"),
   learnContent: document.getElementById("learnContent"),
   learnBack: document.getElementById("learnBack"),
@@ -1297,6 +1447,7 @@ function showScreen(name) {
   el.screenTopics.classList.toggle("on", name === "topics");
   el.screenLearn.classList.toggle("on", name === "learn");
   el.screenQuiz.classList.toggle("on", name === "quiz");
+  el.screenGame.classList.toggle("on", name === "game");
 }
 
 /* ---------- daily reset ---------- */
@@ -1370,6 +1521,7 @@ function renderTopics() {
 function openLearn(topicKey) {
   currentTopicKey = topicKey;
   el.learnContent.innerHTML = TOPICS[topicKey].learn;
+  initLearnExtras(el.learnContent);
   showScreen("learn");
   window.scrollTo(0, 0);
 }
@@ -1390,7 +1542,351 @@ function startPractice(topicKey) {
   window.scrollTo(0, 0);
   nextQuestion();
 }
-el.quizBack.onclick = function() { showScreen("topics"); renderTopics(); };
+el.quizBack.onclick = function() { cancelChallenge(); showScreen("topics"); renderTopics(); };
+
+/* =====================================================================
+   GAMES — match pairs, true/false round, timed Quick 10 challenge
+   ===================================================================== */
+var GAMES = [
+  { id:"match", icon:"🃏", name:"Match Pairs", desc:"Tap a card, then find its partner — Roman numerals, fractions, HCF & more" },
+  { id:"tf", icon:"⚡", name:"True or False?", desc:"10 quick statements — trust your maths instincts!" },
+  { id:"quick10", icon:"⏱️", name:"Quick 10 Challenge", desc:"10 mixed questions against a 3-minute clock" }
+];
+function renderGames() {
+  var html = "";
+  GAMES.forEach(function (g) {
+    html += '<div class="topic-card">' +
+      '<span class="ico">' + g.icon + '</span>' +
+      '<h3>' + g.name + '</h3>' +
+      '<p>' + g.desc + '</p>' +
+      '<div class="topic-actions"><button class="primary" data-game="' + g.id + '" style="flex:1 1 100%">▶ Play</button></div></div>';
+  });
+  el.gamesGrid.innerHTML = html;
+  var btns = el.gamesGrid.querySelectorAll("button[data-game]");
+  for (var i = 0; i < btns.length; i++) {
+    btns[i].onclick = function () { startGame(this.getAttribute("data-game")); };
+  }
+}
+function startGame(id) {
+  if (id === "match") startMatchGame();
+  else if (id === "tf") startTFGame();
+  else if (id === "quick10") startChallenge();
+}
+el.gameBack.onclick = function () { showScreen("topics"); renderTopics(); };
+
+/* shared: award stars earned in a game round, same economy as quiz answers */
+function awardGameStars(n) {
+  if (n <= 0) return;
+  bumpStreakForToday();
+  state.stars += n;
+  state.todayProgress += n;
+  saveState();
+  renderStats();
+}
+function gameSummary(title, scoreText, noteText, playAgainFn) {
+  el.gameLbl.textContent = title;
+  el.gameCard.innerHTML =
+    '<span class="tag">' + title + '</span>' +
+    '<div class="game-score-big">' + scoreText + '</div>' +
+    '<div class="feedback correct" style="margin-top:4px">' + noteText + '</div>' +
+    '<button class="btn next" id="gAgain">▶ Play again</button><br>' +
+    '<button class="btn ghost" id="gBackBtn" style="margin-top:10px">Back to topics</button>';
+  document.getElementById("gAgain").onclick = playAgainFn;
+  document.getElementById("gBackBtn").onclick = function () { showScreen("topics"); renderTopics(); };
+}
+
+/* ---------- game 1: match pairs ---------- */
+function mpRoman() {
+  var pairs = [], used = {};
+  while (pairs.length < 5) {
+    var n = randInt(1, 200);
+    if (used[n]) continue;
+    used[n] = 1;
+    pairs.push([toRomanFull(n), String(n)]);
+  }
+  return { name: "Roman ↔ Number", pairs: pairs };
+}
+function mpMixed() {
+  var pairs = [], used = {};
+  while (pairs.length < 5) {
+    var d = randInt(2, 9), wh = randInt(1, 4), r = randInt(1, d - 1);
+    var key = (wh + r / d).toFixed(4);
+    if (used[key]) continue;
+    used[key] = 1;
+    pairs.push([(wh * d + r) + "/" + d, wh + " " + r + "/" + d]);
+  }
+  return { name: "Improper ↔ Mixed", pairs: pairs };
+}
+function mpSimplify() {
+  var pairs = [], used = {};
+  while (pairs.length < 5) {
+    var n = randInt(1, 5), d = randInt(n + 1, 9);
+    if (gcdOf(n, d) !== 1) continue;
+    var key = (n / d).toFixed(4);
+    if (used[key]) continue;
+    used[key] = 1;
+    var k = randInt(2, 5);
+    pairs.push([(n * k) + "/" + (d * k), n + "/" + d]);
+  }
+  return { name: "Fraction ↔ Simplest form", pairs: pairs };
+}
+function mpHCF() {
+  var pairs = [], used = {}, guard = 0;
+  while (pairs.length < 5 && guard++ < 500) {
+    var a = randInt(6, 48), b = randInt(6, 48);
+    if (a === b) continue;
+    var h = gcdOf(a, b);
+    if (h < 2 || used[h]) continue;
+    used[h] = 1;
+    pairs.push(["HCF of " + a + " & " + b, String(h)]);
+  }
+  return pairs.length === 5 ? { name: "HCF ↔ Answer", pairs: pairs } : mpRoman();
+}
+function mpLCM() {
+  var pairs = [], used = {}, guard = 0;
+  while (pairs.length < 5 && guard++ < 500) {
+    var a = randInt(2, 12), b = randInt(2, 12);
+    if (a === b) continue;
+    var l = lcmOf(a, b);
+    if (used[l]) continue;
+    used[l] = 1;
+    pairs.push(["LCM of " + a + " & " + b, String(l)]);
+  }
+  return pairs.length === 5 ? { name: "LCM ↔ Answer", pairs: pairs } : mpRoman();
+}
+function mpConversions() {
+  var all = [
+    ["1 crore", "10 million"], ["1 lakh", "100 thousand"], ["10 lakh", "1 million"],
+    ["10 crore", "100 million"], ["1 thousand", "10 hundreds"]
+  ];
+  return { name: "Indian ↔ International", pairs: shuffle(all) };
+}
+var MATCH_BUILDERS = [mpRoman, mpMixed, mpSimplify, mpHCF, mpLCM, mpConversions];
+
+var matchState = null;
+function startMatchGame() {
+  var set = pick(MATCH_BUILDERS)();
+  var tiles = [];
+  set.pairs.forEach(function (p, idx) {
+    tiles.push({ pid: idx, text: p[0] });
+    tiles.push({ pid: idx, text: p[1] });
+  });
+  matchState = { tiles: shuffle(tiles), sel: null, matched: 0, wrong: 0 };
+  el.gameLbl.textContent = "🃏 " + set.name;
+  var html = '<span class="tag">Match Pairs</span>' +
+    '<div class="hint" style="margin-top:10px">Tap a card, then tap its matching partner</div>' +
+    '<div class="game-progress" id="mpProgress">0 / 5 pairs</div>' +
+    '<div class="tilegrid" id="mpGrid"></div>';
+  el.gameCard.innerHTML = html;
+  var grid = document.getElementById("mpGrid");
+  matchState.tiles.forEach(function (t, i) {
+    var b = document.createElement("button");
+    b.className = "gtile";
+    b.textContent = t.text;
+    b.onclick = function () { tapTile(i, b); };
+    grid.appendChild(b);
+    t.node = b;
+  });
+  showScreen("game");
+  window.scrollTo(0, 0);
+}
+function tapTile(i, node) {
+  var st = matchState;
+  if (!st || node.classList.contains("ok")) return;
+  if (st.sel === null) { st.sel = i; node.classList.add("sel"); return; }
+  if (st.sel === i) { st.sel = null; node.classList.remove("sel"); return; }
+  var first = st.tiles[st.sel];
+  first.node.classList.remove("sel");
+  if (first.pid === st.tiles[i].pid) {
+    first.node.classList.add("ok");
+    node.classList.add("ok");
+    st.matched++;
+    starBurst();
+    document.getElementById("mpProgress").textContent = st.matched + " / 5 pairs";
+    if (st.matched === 5) {
+      var earned = Math.max(1, 5 - st.wrong);
+      awardGameStars(earned);
+      setTimeout(function () {
+        gameSummary("Match Pairs", "🎉 All matched!",
+          "+" + earned + " star" + (earned > 1 ? "s" : "") + (st.wrong ? " (" + st.wrong + " wrong tap" + (st.wrong > 1 ? "s" : "") + ")" : " — flawless!"),
+          startMatchGame);
+      }, 700);
+    }
+  } else {
+    st.wrong++;
+    node.classList.add("no");
+    first.node.classList.add("no");
+    setTimeout(function () { node.classList.remove("no"); first.node.classList.remove("no"); }, 350);
+  }
+  st.sel = null;
+}
+
+/* ---------- game 2: true / false round ---------- */
+function tfFracCompare() {
+  var a = randInt(1, 8), b = randInt(a + 1, 10), c = randInt(1, 8), d = randInt(c + 1, 10);
+  var claimGreater = Math.random() < 0.5;
+  var truth = claimGreater ? (a * d > c * b) : (a * d < c * b);
+  if (a * d === c * b) return tfFracCompare();
+  return { text: a + "/" + b + " is " + (claimGreater ? "GREATER" : "SMALLER") + " than " + c + "/" + d, a: truth,
+    why: "Cross-multiply: " + a + "×" + d + " = " + (a * d) + " vs " + c + "×" + b + " = " + (c * b) + "." };
+}
+function tfRoman() {
+  var n = randInt(1, 500);
+  var lie = Math.random() < 0.5;
+  var shown = lie ? n + pick([1, -1, 10, -10]) : n;
+  if (shown < 1) shown = n + 1;
+  return { text: toRomanFull(n) + " = " + shown, a: !lie || shown === n,
+    why: toRomanFull(n) + " is " + n + "." };
+}
+function tfDivisible() {
+  var k = pick([2, 3, 4, 5, 6, 9, 10]);
+  var n = Math.random() < 0.5 ? k * randInt(10, 400) : randInt(50, 4000);
+  return { text: n + " is divisible by " + k, a: n % k === 0,
+    why: n + " ÷ " + k + (n % k === 0 ? " divides exactly." : " leaves remainder " + (n % k) + ".") };
+}
+function tfPrime() {
+  var n = randInt(2, 100);
+  return { text: n + " is a prime number", a: isPrime(n),
+    why: isPrime(n) ? n + " has no factors except 1 and itself." : n + " is composite." };
+}
+function tfFracType() {
+  var d = randInt(2, 9), n = Math.random() < 0.5 ? randInt(1, d - 1) : randInt(d, d * 2);
+  var claimProper = Math.random() < 0.5;
+  return { text: n + "/" + d + " is a " + (claimProper ? "PROPER" : "IMPROPER") + " fraction",
+    a: claimProper === (n < d),
+    why: n + (n < d ? " < " : " ≥ ") + d + ", so " + n + "/" + d + " is " + (n < d ? "proper." : "improper.") };
+}
+function tfSuccessor() {
+  var n = randInt(1000, 99999);
+  var lie = Math.random() < 0.5;
+  var shown = lie ? n + pick([2, -1, 10]) : n + 1;
+  return { text: "The successor of " + indianGroup(n) + " is " + indianGroup(shown), a: shown === n + 1,
+    why: "The successor is always exactly 1 more: " + indianGroup(n + 1) + "." };
+}
+function tfPeriodFact() {
+  var facts = [
+    { text: "1 crore = 10 million", a: true, why: "1 crore = 1,00,00,000 = 10 million." },
+    { text: "1 lakh = 1 million", a: false, why: "1 lakh = 100 thousand. 10 lakh = 1 million." },
+    { text: "1 lakh = 100 thousand", a: true, why: "1,00,000 = 100 × 1,000." },
+    { text: "1 crore = 100 million", a: false, why: "1 crore = 10 million. 10 crore = 100 million." }
+  ];
+  return pick(facts);
+}
+function tfEquivalent() {
+  var n = randInt(1, 5), d = randInt(n + 1, 9), k = randInt(2, 4);
+  var lie = Math.random() < 0.5;
+  var n2 = n * k + (lie ? 1 : 0), d2 = d * k;
+  return { text: n + "/" + d + " = " + n2 + "/" + d2, a: !lie,
+    why: n + "/" + d + " × " + k + "/" + k + " = " + (n * k) + "/" + d2 + "." };
+}
+var TF_BUILDERS = [tfFracCompare, tfRoman, tfDivisible, tfPrime, tfFracType, tfSuccessor, tfPeriodFact, tfEquivalent];
+
+var tfState = null;
+function startTFGame() {
+  tfState = { q: 0, correct: 0, current: null };
+  el.gameLbl.textContent = "⚡ True or False?";
+  showScreen("game");
+  window.scrollTo(0, 0);
+  nextTF();
+}
+function nextTF() {
+  var st = tfState;
+  if (st.q >= 10) {
+    var note = st.correct === 10 ? "🏆 PERFECT round!" : st.correct >= 7 ? "🌟 Sharp instincts!" : "💪 Keep at it!";
+    gameSummary("True or False?", st.correct + " / 10", note + " +" + st.correct + " stars", startTFGame);
+    return;
+  }
+  st.current = pick(TF_BUILDERS)();
+  el.gameCard.innerHTML =
+    '<span class="tag">True or False?</span>' +
+    '<div class="game-progress">Question ' + (st.q + 1) + ' of 10 · ' + st.correct + ' right so far</div>' +
+    '<div class="question long" style="margin-top:14px">' + escapeHtml(st.current.text) + '</div>' +
+    '<div class="tf-row">' +
+      '<button class="tf-btn" id="tfTrue">✅ TRUE</button>' +
+      '<button class="tf-btn" id="tfFalse">❌ FALSE</button>' +
+    '</div>' +
+    '<div class="feedback" id="tfFeedback"></div>' +
+    '<div class="explain" id="tfExplain"></div>' +
+    '<button class="btn next" id="tfNext" style="display:none">Next</button>';
+  document.getElementById("tfTrue").onclick = function () { answerTF(true); };
+  document.getElementById("tfFalse").onclick = function () { answerTF(false); };
+}
+function answerTF(saidTrue) {
+  var st = tfState, cur = st.current;
+  var tBtn = document.getElementById("tfTrue"), fBtn = document.getElementById("tfFalse");
+  tBtn.disabled = true; fBtn.disabled = true;
+  var pickedBtn = saidTrue ? tBtn : fBtn;
+  var ok = saidTrue === cur.a;
+  st.q++;
+  var fb = document.getElementById("tfFeedback");
+  if (ok) {
+    st.correct++;
+    pickedBtn.classList.add("right");
+    fb.textContent = pick(["⭐ Correct!", "🌟 Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
+    fb.className = "feedback correct";
+    bumpStreakForToday();
+    state.stars += 1;
+    state.todayProgress += 1;
+    saveState();
+    renderStats();
+    starBurst();
+    setTimeout(nextTF, 1000);
+  } else {
+    pickedBtn.classList.add("wrong");
+    (cur.a ? tBtn : fBtn).classList.add("right");
+    fb.textContent = "❌ Not quite — saved to your Mistakes Bank";
+    fb.className = "feedback incorrect";
+    var ex = document.getElementById("tfExplain");
+    ex.textContent = "It's " + (cur.a ? "TRUE" : "FALSE") + ". " + cur.why;
+    ex.classList.add("show");
+    state.mistakes.unshift({ cat: "True or False", prompt: cur.text,
+      your: saidTrue ? "True" : "False", answer: cur.a ? "True" : "False", rule: cur.why });
+    if (state.mistakes.length > 40) state.mistakes.pop();
+    saveState();
+    renderMistakes();
+    var nx = document.getElementById("tfNext");
+    nx.style.display = "inline-block";
+    nx.onclick = nextTF;
+  }
+}
+
+/* ---------- game 3: Quick 10 timed challenge ---------- */
+var challenge = null;
+function startChallenge() {
+  currentTopicKey = "mixed";
+  currentGens = [];
+  TOPIC_ORDER.forEach(function (k) { currentGens = currentGens.concat(TOPICS[k].gens); });
+  challenge = { answered: 0, correct: 0, endAt: Date.now() + 180000, timerId: null };
+  challenge.timerId = setInterval(tickChallenge, 500);
+  showScreen("quiz");
+  window.scrollTo(0, 0);
+  nextQuestion();
+  tickChallenge();
+}
+function tickChallenge() {
+  if (!challenge) return;
+  var msLeft = challenge.endAt - Date.now();
+  if (msLeft <= 0) { endChallenge(); return; }
+  var s = Math.ceil(msLeft / 1000);
+  el.quizTopicLbl.textContent = "⏱️ " + Math.floor(s / 60) + ":" + ("0" + (s % 60)).slice(-2) + " · Q " + Math.min(challenge.answered + 1, 10) + "/10";
+}
+function cancelChallenge() {
+  if (!challenge) return;
+  clearInterval(challenge.timerId);
+  challenge = null;
+}
+function endChallenge() {
+  if (!challenge) return;
+  var correct = challenge.correct, answered = challenge.answered;
+  cancelChallenge();
+  var note = correct === 10 ? "🏆 PERFECT — all ten!" :
+    correct >= 8 ? "🌟 Superstar!" :
+    correct >= 6 ? "💪 Great job!" :
+    correct >= 4 ? "👍 Good try — play again?" : "🌱 Keep practising, you've got this!";
+  if (answered < 10) note = "⏰ Time's up! " + note;
+  gameSummary("Quick 10 Challenge", correct + " / 10", note, startChallenge);
+  showScreen("game");
+}
 
 /* ---------- mistakes ---------- */
 function renderMistakes() {
@@ -1427,6 +1923,7 @@ function renderMistakes() {
 
 /* ---------- question flow ---------- */
 function nextQuestion() {
+  if (challenge && challenge.answered >= 10) { endChallenge(); return; }
   locked = false;
   el.feedback.textContent = "";
   el.feedback.className = "feedback";
@@ -1517,6 +2014,7 @@ function handleChoice(val, btnEl) {
 
 function resolve(ok, given) {
   bumpStreakForToday();
+  if (challenge) { challenge.answered++; if (ok) challenge.correct++; }
   var topicOfQuestion = GEN_TOPIC[current._genName] || currentTopicKey;
   if (ok) {
     state.stars += 1;
@@ -1643,6 +2141,7 @@ dailyReset();
 renderStats();
 renderMistakes();
 renderTopics();
+renderGames();
 showScreen("topics");
 _initialBoot = false;
 
