@@ -55,8 +55,14 @@
   .stat .num { font-size: 26px; font-weight: 900; line-height: 1; }
   .stat .lbl { font-size: 12px; font-weight: 700; color: var(--muted); margin-top: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
   .stat.stars .num { color: var(--amber); }
+  .stat.gems .num { color: #0ea5e9; }
   .stat.streak .num { color: var(--rose); }
   .stat.goal .num { color: var(--indigo); }
+  @media (max-width: 420px) {
+    .stat { padding: 12px 4px; }
+    .stat .num { font-size: 22px; }
+    .stat .lbl { font-size: 9.5px; letter-spacing: 0.3px; }
+  }
 
   .progress-track { height: 14px; background: #ede9fe; border-radius: 99px; overflow: hidden; margin-bottom: 18px; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); }
   .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--indigo), #8b5cf6); border-radius: 99px; transition: width 0.4s ease; }
@@ -230,6 +236,7 @@
 
   <div class="stats">
     <div class="stat stars"><div class="num" id="starsNum">0</div><div class="lbl">Stars</div></div>
+    <div class="stat gems"><div class="num" id="diamondsNum">0</div><div class="lbl">Diamonds</div></div>
     <div class="stat streak"><div class="num" id="streakNum">0</div><div class="lbl">Day streak</div></div>
     <div class="stat goal"><div class="num" id="goalNum">0/12</div><div class="lbl">Today</div></div>
   </div>
@@ -241,7 +248,7 @@
     <div class="sect-head">📖 Learn &amp; Practise</div>
     <div class="topics-grid" id="topicsGrid"></div>
 
-    <div class="sect-head">🎮 Quick Games</div>
+    <div class="sect-head">🎮 Quick Games <span style="font-size:12px;font-weight:800;color:var(--muted)">· games earn 💎, practice earns ⭐</span></div>
     <div class="topics-grid" id="gamesGrid"></div>
 
     <div class="mistakes">
@@ -330,8 +337,15 @@ function loadState() {
   try { raw = window.localStorage.getItem(STORAGE_KEY); } catch (e) { raw = memoryFallback; }
   if (!raw) raw = getCookie(STORAGE_KEY) || memoryFallback;
   var s = raw ? JSON.parse(raw) : {};
+  return normalizeState(s);
+}
+/* Fills in defaults for any missing fields — used both for local loads and
+   for state pulled from sync, which may have been written by an older
+   version of this file that didn't have every field (e.g. diamonds). */
+function normalizeState(s) {
   return {
     stars: s.stars || 0,
+    diamonds: s.diamonds || 0,
     streak: s.streak || 0,
     lastPlayed: s.lastPlayed || "",
     today: s.today || "",
@@ -353,7 +367,7 @@ function saveState() {
   var json = JSON.stringify(state);
   try { window.localStorage.setItem(STORAGE_KEY, json); } catch (e) { memoryFallback = json; }
   var core = JSON.stringify({
-    stars: state.stars, streak: state.streak, lastPlayed: state.lastPlayed,
+    stars: state.stars, diamonds: state.diamonds, streak: state.streak, lastPlayed: state.lastPlayed,
     today: state.today, todayProgress: state.todayProgress, goalCelebrated: state.goalCelebrated,
     mistakes: [], topicCounts: state.topicCounts, updatedAt: state.updatedAt
   });
@@ -1409,6 +1423,7 @@ var clearConfirmPending = false;
 /* ---------- DOM ---------- */
 var el = {
   stars: document.getElementById("starsNum"),
+  diamonds: document.getElementById("diamondsNum"),
   streak: document.getElementById("streakNum"),
   goal: document.getElementById("goalNum"),
   fill: document.getElementById("progressFill"),
@@ -1472,6 +1487,7 @@ function bumpStreakForToday() {
 /* ---------- render stats ---------- */
 function renderStats() {
   el.stars.textContent = state.stars;
+  el.diamonds.textContent = state.diamonds;
   el.streak.textContent = state.streak;
   el.goal.textContent = Math.min(state.todayProgress, DAILY_GOAL) + "/" + DAILY_GOAL;
   var pct = Math.min(100, (state.todayProgress / DAILY_GOAL) * 100);
@@ -1574,14 +1590,27 @@ function startGame(id) {
 }
 el.gameBack.onclick = function () { showScreen("topics"); renderTopics(); };
 
-/* shared: award stars earned in a game round, same economy as quiz answers */
-function awardGameStars(n) {
+/* Games pay 💎 diamonds — a separate currency from ⭐ stars, which are only
+   earned by real practice questions and are what the daily goal counts.
+   Playing games still keeps the day streak alive. */
+function awardDiamonds(n) {
   if (n <= 0) return;
   bumpStreakForToday();
-  state.stars += n;
-  state.todayProgress += n;
+  state.diamonds += n;
   saveState();
   renderStats();
+}
+function gemBurst() {
+  var emojis = ["💎", "✨", "💠"];
+  for (var i = 0; i < 5; i++) {
+    var s = document.createElement("div");
+    s.className = "burst";
+    s.textContent = pick(emojis);
+    s.style.left = (40 + Math.random() * 20) + "%";
+    s.style.top = "45%";
+    document.body.appendChild(s);
+    (function (node) { setTimeout(function () { if (node.parentNode) node.parentNode.removeChild(node); }, 1000); })(s);
+  }
 }
 function gameSummary(title, scoreText, noteText, playAgainFn) {
   el.gameLbl.textContent = title;
@@ -1701,14 +1730,14 @@ function tapTile(i, node) {
     first.node.classList.add("ok");
     node.classList.add("ok");
     st.matched++;
-    starBurst();
+    gemBurst();
     document.getElementById("mpProgress").textContent = st.matched + " / 5 pairs";
     if (st.matched === 5) {
       var earned = Math.max(1, 5 - st.wrong);
-      awardGameStars(earned);
+      awardDiamonds(earned);
       setTimeout(function () {
         gameSummary("Match Pairs", "🎉 All matched!",
-          "+" + earned + " star" + (earned > 1 ? "s" : "") + (st.wrong ? " (" + st.wrong + " wrong tap" + (st.wrong > 1 ? "s" : "") + ")" : " — flawless!"),
+          "+" + earned + " 💎" + (st.wrong ? " (" + st.wrong + " wrong tap" + (st.wrong > 1 ? "s" : "") + ")" : " — flawless!"),
           startMatchGame);
       }, 700);
     }
@@ -1793,7 +1822,7 @@ function nextTF() {
   var st = tfState;
   if (st.q >= 10) {
     var note = st.correct === 10 ? "🏆 PERFECT round!" : st.correct >= 7 ? "🌟 Sharp instincts!" : "💪 Keep at it!";
-    gameSummary("True or False?", st.correct + " / 10", note + " +" + st.correct + " stars", startTFGame);
+    gameSummary("True or False?", st.correct + " / 10", note + " +" + st.correct + " 💎", startTFGame);
     return;
   }
   st.current = pick(TF_BUILDERS)();
@@ -1822,14 +1851,10 @@ function answerTF(saidTrue) {
   if (ok) {
     st.correct++;
     pickedBtn.classList.add("right");
-    fb.textContent = pick(["⭐ Correct!", "🌟 Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
+    fb.textContent = pick(["💎 Correct!", "✨ Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
     fb.className = "feedback correct";
-    bumpStreakForToday();
-    state.stars += 1;
-    state.todayProgress += 1;
-    saveState();
-    renderStats();
-    starBurst();
+    awardDiamonds(1);
+    gemBurst();
     setTimeout(nextTF, 1000);
   } else {
     pickedBtn.classList.add("wrong");
@@ -1884,6 +1909,7 @@ function endChallenge() {
     correct >= 6 ? "💪 Great job!" :
     correct >= 4 ? "👍 Good try — play again?" : "🌱 Keep practising, you've got this!";
   if (answered < 10) note = "⏰ Time's up! " + note;
+  if (correct > 0) note += " +" + correct + " 💎";
   gameSummary("Quick 10 Challenge", correct + " / 10", note, startChallenge);
   showScreen("game");
 }
@@ -2017,16 +2043,24 @@ function resolve(ok, given) {
   if (challenge) { challenge.answered++; if (ok) challenge.correct++; }
   var topicOfQuestion = GEN_TOPIC[current._genName] || currentTopicKey;
   if (ok) {
-    state.stars += 1;
-    state.todayProgress += 1;
+    if (challenge) {
+      // Quick 10 is a game: it pays diamonds, not stars, and doesn't count
+      // toward the daily practice goal.
+      state.diamonds += 1;
+    } else {
+      state.stars += 1;
+      state.todayProgress += 1;
+    }
     if (topicOfQuestion && topicOfQuestion !== "mixed") {
       state.topicCounts[topicOfQuestion] = (state.topicCounts[topicOfQuestion] || 0) + 1;
     }
     saveState();
     renderStats();
-    el.feedback.textContent = pick(["⭐ Correct!", "🌟 Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
+    el.feedback.textContent = challenge
+      ? pick(["💎 Correct!", "✨ Brilliant!", "✅ Well done!", "💥 Nailed it!"])
+      : pick(["⭐ Correct!", "🌟 Brilliant!", "✅ Well done!", "💥 Nailed it!"]);
     el.feedback.className = "feedback correct";
-    starBurst();
+    if (challenge) gemBurst(); else starBurst();
     if (state.todayProgress === DAILY_GOAL && !state.goalCelebrated) {
       state.goalCelebrated = true;
       saveState();
@@ -2097,7 +2131,7 @@ el.resetBtn.onclick = function() {
   } else {
     resetConfirmPending = false;
     el.resetBtn.textContent = "Reset all progress";
-    state = { stars:0, streak:0, lastPlayed:"", today:"", todayProgress:0, goalCelebrated:false, mistakes:[], topicCounts:{} };
+    state = { stars:0, diamonds:0, streak:0, lastPlayed:"", today:"", todayProgress:0, goalCelebrated:false, mistakes:[], topicCounts:{} };
     saveState();
     dailyReset();
     renderStats();
@@ -2118,7 +2152,7 @@ document.getElementById("restoreBtn").onclick = function() {
     var restored = JSON.parse(decodeURIComponent(escape(atob(code.trim()))));
     if (typeof restored.stars !== "number") throw new Error("bad code");
     state = {
-      stars: restored.stars || 0, streak: restored.streak || 0,
+      stars: restored.stars || 0, diamonds: restored.diamonds || 0, streak: restored.streak || 0,
       lastPlayed: restored.lastPlayed || "", today: restored.today || "",
       todayProgress: restored.todayProgress || 0, goalCelebrated: restored.goalCelebrated || false,
       mistakes: restored.mistakes || [], topicCounts: restored.topicCounts || {}
@@ -2150,7 +2184,7 @@ if (typeof DikshaSync !== "undefined" && DikshaSync.init()) {
   DikshaSync.attachUI();
   DikshaSync.pull(STORAGE_KEY).then(function (remote) {
     if (remote && (remote.updatedAt || 0) > (state.updatedAt || 0)) {
-      state = remote;
+      state = normalizeState(remote);
       dailyReset();
       renderStats();
       renderMistakes();
