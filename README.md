@@ -14,10 +14,10 @@ static HTML file with no build step or dependencies.
 - **`special-classes-maths.html`** — Maths Special Class (July): a short
   concept lesson followed by practice for each topic — big numbers &
   place value (Indian/International systems), factors & multiples
-  (divisibility rules), Roman numerals, and simplification (BODMAS) —
-  based on the school's special-class worksheet packet. Fractions and
-  HCF/LCM methods aren't covered yet; add them as further topics once
-  that material is available.
+  (divisibility rules), HCF & LCM (prime factorization, word problems),
+  fractions (proper/improper/mixed, simplifying, add/subtract/multiply/
+  divide, fraction BODMAS), Roman numerals, and simplification (BODMAS)
+  — based on the school's special-class worksheet packets.
 
 Open `index.html` in a browser to get started, or open any quest file
 directly. Progress for each quest is saved separately in the browser's

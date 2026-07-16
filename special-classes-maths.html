@@ -180,7 +180,7 @@
   <header>
     <div class="badge-special">&#127979; Special Class &middot; July</div>
     <h1>Maths: Special Class</h1>
-    <p class="tagline">Big numbers, factors &amp; multiples, Roman numerals, BODMAS</p>
+    <p class="tagline">Big numbers, factors, HCF/LCM, fractions, Roman numerals, BODMAS</p>
   </header>
 
   <div class="stats">
@@ -637,7 +637,315 @@ function gFactStatement() {
 }
 
 /* =====================================================================
-   TOPIC 3: ROMAN NUMERALS (1-3999)
+   TOPIC 3: HCF & LCM
+   ===================================================================== */
+function primeFactorList(n) {
+  var factors = [];
+  var d = 2;
+  while (d * d <= n) {
+    while (n % d === 0) { factors.push(d); n = n / d; }
+    d++;
+  }
+  if (n > 1) factors.push(n);
+  return factors;
+}
+function hcfOf(a, b) { return gcdOf(a, b); }
+function lcmOf(a, b) { return (a * b) / gcdOf(a, b); }
+
+function gPrimeFactorPick() {
+  var n = randInt(12, 100);
+  var factors = primeFactorList(n);
+  var correct = factors.join(" × ");
+  var distractors = [
+    factors.slice().reverse().join(" + "),
+    primeFactorList(n + (n % 2 === 0 ? 1 : 2)).join(" × "),
+    factors.map(function (f) { return f + 1; }).join(" × ")
+  ];
+  return { cat:"Prime factorization", mode:"choice",
+    prompt:"What is the prime factorization of " + n + "?",
+    answer: correct, choices: buildChoices(correct, distractors),
+    rule:"Break " + n + " down into prime factors by dividing by the smallest prime that fits, again and again: " + n + " = " + correct + "." };
+}
+function gHCFCompute() {
+  var a = randInt(6, 60), b = randInt(6, 60);
+  var h = hcfOf(a, b);
+  return { cat:"HCF", mode:"type", paper:true,
+    prompt:"Find the HCF of " + a + " and " + b + ".",
+    answer: String(h),
+    rule:"List the factors of each number (or use prime factorization) and pick the largest one they share. HCF(" + a + ", " + b + ") = " + h + "." };
+}
+function gLCMCompute() {
+  var a = randInt(3, 20), b = randInt(3, 20);
+  var l = lcmOf(a, b);
+  return { cat:"LCM", mode:"type", paper:true,
+    prompt:"Find the LCM of " + a + " and " + b + ".",
+    answer: String(l),
+    rule:"The LCM is the smallest number that both divide into exactly. LCM(" + a + ", " + b + ") = " + l + ". (Tip: LCM × HCF = " + a + " × " + b + ", and HCF(" + a + "," + b + ") = " + hcfOf(a, b) + ".)" };
+}
+function gHCFLCMRelation() {
+  var a = randInt(4, 24), b = randInt(4, 24);
+  var h = hcfOf(a, b), l = lcmOf(a, b);
+  var correct = String(a * b);
+  var candidates = [String(h * l + h), String(a + b), String(h + l)];
+  return { cat:"HCF × LCM", mode:"choice",
+    prompt:"The HCF of " + a + " and " + b + " is " + h + ", and their LCM is " + l + ". What is " + h + " × " + l + "?",
+    answer: correct, choices: buildChoices(a * b, candidates),
+    rule:"For any two numbers, HCF × LCM = the product of the two numbers. " + h + " × " + l + " = " + a + " × " + b + " = " + correct + "." };
+}
+function gLCMWordProblem() {
+  var a = randInt(3, 10), b = randInt(3, 10);
+  while (b === a) b = randInt(3, 10);
+  var l = lcmOf(a, b);
+  return { cat:"LCM word problem", mode:"type", paper:true,
+    prompt:"Two bells ring every " + a + " minutes and " + b + " minutes. If they ring together now, after how many minutes will they next ring together?",
+    answer: String(l),
+    rule:"“Ring together again” means find the LCM of " + a + " and " + b + " = " + l + " minutes." };
+}
+function gHCFWordProblem() {
+  var a = randInt(12, 60), b = randInt(12, 60);
+  while (b === a) b = randInt(12, 60);
+  var h = hcfOf(a, b);
+  return { cat:"HCF word problem", mode:"type", paper:true,
+    prompt:"What is the greatest length that can measure exactly both " + a + " m and " + b + " m?",
+    answer: String(h),
+    rule:"“Greatest length that measures both exactly” means find the HCF of " + a + " and " + b + " = " + h + " m." };
+}
+
+/* =====================================================================
+   TOPIC 4: FRACTIONS
+   ===================================================================== */
+function reduceFrac(n, d) {
+  if (d < 0) { n = -n; d = -d; }
+  var g = gcdOf(Math.abs(n) || 1, d) || 1;
+  return [n / g, d / g];
+}
+/* Displays a reduced [numerator, denominator] pair as a whole number when
+   the denominator reduces to 1 (e.g. 4/2 -> "2", not "2/1"). */
+function arrFracStr(r) { return r[1] === 1 ? String(r[0]) : r[0] + "/" + r[1]; }
+function fracStr(n, d) { return arrFracStr(reduceFrac(n, d)); }
+function addFrac(a, b, c, d) { return reduceFrac(a * d + c * b, b * d); }
+function subFrac(a, b, c, d) { return reduceFrac(a * d - c * b, b * d); }
+function mulFrac(a, b, c, d) { return reduceFrac(a * c, b * d); }
+function divFrac(a, b, c, d) { return reduceFrac(a * d, b * c); }
+
+function gFractionType() {
+  var isProper = Math.random() < 0.5;
+  var d = randInt(2, 12);
+  var n = isProper ? randInt(1, d - 1) : randInt(d, d * 2);
+  return { cat:"Fraction types", mode:"choice",
+    prompt:"Is " + n + "/" + d + " a PROPER or IMPROPER fraction?",
+    answer: isProper ? "Proper" : "Improper", choices:["Proper", "Improper"],
+    rule:"A PROPER fraction has a numerator smaller than its denominator (value less than 1). An IMPROPER fraction has a numerator equal to or greater than its denominator (value 1 or more). " + n + "/" + d + " is " + (isProper ? "PROPER." : "IMPROPER.") };
+}
+function gImproperToMixed() {
+  var d = randInt(2, 9);
+  var whole = randInt(1, 5);
+  var rem = randInt(1, d - 1);
+  var n = whole * d + rem;
+  var correct = whole + " " + rem + "/" + d;
+  var candidates = [
+    (whole + 1) + " " + rem + "/" + d,
+    Math.max(0, whole - 1) + " " + rem + "/" + d,
+    whole + " " + (d - rem) + "/" + d
+  ];
+  return { cat:"Improper to mixed", mode:"choice",
+    prompt:"Convert " + n + "/" + d + " to a mixed number:",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule: n + " ÷ " + d + " = " + whole + " remainder " + rem + ", so " + n + "/" + d + " = " + correct + "." };
+}
+function gMixedToImproper() {
+  var d = randInt(2, 9);
+  var whole = randInt(1, 5);
+  var rem = randInt(1, d - 1);
+  var correctNum = whole * d + rem;
+  var correct = correctNum + "/" + d;
+  var candidates = [
+    (whole + rem) + "/" + d,
+    Math.max(1, whole * d - rem) + "/" + d,
+    (correctNum + d) + "/" + d
+  ];
+  return { cat:"Mixed to improper", mode:"choice",
+    prompt:"Convert " + whole + " " + rem + "/" + d + " to an improper fraction:",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Multiply whole × denominator, then add the numerator: (" + whole + " × " + d + ") + " + rem + " = " + correctNum + ", over the same denominator: " + correct + "." };
+}
+function gEquivalentFraction() {
+  var n = randInt(1, 6), d = randInt(n + 1, 10);
+  var k = randInt(2, 5);
+  var correct = (n * k) + "/" + (d * k);
+  var candidates = [
+    (n * k + 1) + "/" + (d * k),
+    n + "/" + (d * k),
+    (n + k) + "/" + (d + k)
+  ];
+  return { cat:"Equivalent fractions", mode:"choice",
+    prompt:"Which fraction is equivalent to " + n + "/" + d + "?",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Multiply top and bottom by the same number: " + n + "/" + d + " × " + k + "/" + k + " = " + correct + "." };
+}
+function gSimplifyFraction() {
+  var n2 = randInt(1, 6), d2 = randInt(n2 + 1, 8);
+  while (gcdOf(n2, d2) !== 1) { d2 = randInt(n2 + 1, 8); }
+  var g = randInt(2, 6);
+  var n = n2 * g, d = d2 * g;
+  var correct = n2 + "/" + d2;
+  var candidates = [
+    n + "/" + d,
+    (n2 + 1) + "/" + d2,
+    n2 + "/" + (d2 + 1)
+  ];
+  return { cat:"Simplifying fractions", mode:"choice",
+    prompt:"Simplify " + n + "/" + d + " to its lowest terms:",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Divide top and bottom by their HCF, " + g + ": " + n + "/" + d + " ÷ " + g + "/" + g + " = " + correct + "." };
+}
+function gCompareFractions() {
+  var a = randInt(1, 9), b = randInt(a + 1, 12);
+  var c = randInt(1, 9), d = randInt(c + 1, 12);
+  var left = a * d, right = c * b;
+  var correct = left > right ? ">" : (left < right ? "<" : "=");
+  return { cat:"Compare fractions", mode:"choice", symbols:true,
+    prompt:"Which sign goes here?  " + a + "/" + b + "  __  " + c + "/" + d,
+    answer: correct, choices:["<", ">", "="],
+    rule:"Cross-multiply: " + a + "×" + d + " = " + left + " and " + c + "×" + b + " = " + right + ". So " + a + "/" + b + " " + correct + " " + c + "/" + d + "." };
+}
+function gAddSubtractLike() {
+  var d = randInt(4, 12);
+  var a, b;
+  do { a = randInt(1, d - 1); b = randInt(1, d - 1); } while (a === b);
+  var isAdd = Math.random() < 0.5;
+  if (!isAdd && a < b) { var t = a; a = b; b = t; }
+  var resultNum = isAdd ? a + b : a - b;
+  var unsimplified = resultNum + "/" + d;
+  var correct = fracStr(resultNum, d);
+  var opSym = isAdd ? "+" : "−";
+  var candidates = [
+    resultNum + "/" + (d * 2),
+    (resultNum + 1) + "/" + d,
+    a + "/" + d
+  ];
+  return { cat:"Add/subtract fractions (like)", mode:"choice",
+    prompt: a + "/" + d + " " + opSym + " " + b + "/" + d + " = ?",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Same denominator — just " + (isAdd ? "add" : "subtract") + " the numerators: " + a + " " + opSym + " " + b + " = " + resultNum + ", over " + d + " = " + unsimplified + (unsimplified !== correct ? " = " + correct + " simplified." : ".") };
+}
+function gAddSubtractUnlike() {
+  var b = randInt(2, 8), d = randInt(2, 8);
+  while (d === b) d = randInt(2, 8);
+  var a = randInt(1, b - 1), c = randInt(1, d - 1);
+  var isAdd = Math.random() < 0.5;
+  var result = isAdd ? addFrac(a, b, c, d) : subFrac(a, b, c, d);
+  if (!isAdd && result[0] < 0) { var ta = a, tb = b; a = c; b = d; c = ta; d = tb; result = subFrac(a, b, c, d); }
+  var correct = arrFracStr(result);
+  var lcmDen = lcmOf(b, d);
+  var opSym = isAdd ? "+" : "−";
+  var unsimplifiedNum = isAdd ? (a * (lcmDen / b) + c * (lcmDen / d)) : (a * (lcmDen / b) - c * (lcmDen / d));
+  var unsimplified = unsimplifiedNum + "/" + lcmDen;
+  var candidates = [
+    (isAdd ? (a + c) : Math.abs(a - c)) + "/" + Math.abs(b - d),
+    a + "/" + b,
+    unsimplified !== correct ? unsimplified : (result[0] + 1) + "/" + result[1]
+  ];
+  return { cat:"Add/subtract fractions (unlike)", mode:"choice",
+    prompt: a + "/" + b + " " + opSym + " " + c + "/" + d + " = ?  (simplest form)",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Find the LCM of the denominators (" + b + " and " + d + " → " + lcmDen + "), convert both fractions, then " + (isAdd ? "add" : "subtract") + ": " + unsimplified + (unsimplified !== correct ? " = " + correct + " simplified." : ".") };
+}
+function gMultiplyFractions() {
+  var a = randInt(1, 6), b = randInt(a + 1, 10);
+  var c = randInt(1, 6), d = randInt(c + 1, 10);
+  var result = mulFrac(a, b, c, d);
+  var correct = arrFracStr(result);
+  var unsimplified = (a * c) + "/" + (b * d);
+  var candidates = [
+    unsimplified !== correct ? unsimplified : (a * c + 1) + "/" + (b * d),
+    (a + c) + "/" + (b + d),
+    (a * d) + "/" + (b * c)
+  ];
+  return { cat:"Multiplying fractions", mode:"choice",
+    prompt: a + "/" + b + " × " + c + "/" + d + " = ?  (simplest form)",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Multiply straight across — numerator × numerator, denominator × denominator: (" + a + "×" + c + ")/(" + b + "×" + d + ") = " + unsimplified + (unsimplified !== correct ? " = " + correct + " simplified." : ".") };
+}
+function gDivideFractions() {
+  var a = randInt(1, 6), b = randInt(a + 1, 10);
+  var c = randInt(1, 6), d = randInt(c + 1, 10);
+  var result = divFrac(a, b, c, d);
+  var correct = arrFracStr(result);
+  var unsimplified = (a * d) + "/" + (b * c);
+  var candidates = [
+    unsimplified !== correct ? unsimplified : (a * d + 1) + "/" + (b * c),
+    (a * c) + "/" + (b * d),
+    (a + d) + "/" + (b + c)
+  ];
+  return { cat:"Dividing fractions", mode:"choice",
+    prompt: a + "/" + b + " ÷ " + c + "/" + d + " = ?  (simplest form)",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Flip the second fraction and multiply: " + a + "/" + b + " × " + d + "/" + c + " = (" + a + "×" + d + ")/(" + b + "×" + c + ") = " + unsimplified + (unsimplified !== correct ? " = " + correct + " simplified." : ".") };
+}
+function gFracBodmas1() {
+  var b = randInt(2, 9), a = randInt(1, b - 1);
+  var d = randInt(2, 8), c = randInt(1, d - 1);
+  var f = randInt(2, 8), e = randInt(1, f - 1);
+  var prod = mulFrac(c, d, e, f);
+  var prodUnsimplified = (c * e) + "/" + (d * f);
+  var prodStr = arrFracStr(prod);
+  var finalRes = addFrac(a, b, prod[0], prod[1]);
+  var correct = arrFracStr(finalRes);
+  var candidates = [
+    (a + c) + "/" + (b + d),
+    prodStr,
+    a + "/" + b
+  ];
+  return { cat:"Fraction BODMAS", mode:"choice",
+    prompt: a + "/" + b + " + " + c + "/" + d + " × " + e + "/" + f + "  (simplest form)",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Multiplication before addition: " + c + "/" + d + " × " + e + "/" + f + " = " + prodUnsimplified + (prodUnsimplified !== prodStr ? " = " + prodStr + " simplified" : "") + ". Then " + a + "/" + b + " + " + prodStr + " = " + correct + "." };
+}
+function gFracBodmas2() {
+  var b = randInt(2, 9), a = randInt(1, b - 1);
+  var d = randInt(2, 8), c = randInt(1, d - 1);
+  var f = randInt(2, 8), e = randInt(1, f - 1);
+  var step1 = mulFrac(a, b, c, d);
+  var step1Str = arrFracStr(step1);
+  var final = divFrac(step1[0], step1[1], e, f);
+  var correct = arrFracStr(final);
+  var wrongDiv = mulFrac(step1[0], step1[1], e, f);
+  var candidates = [
+    arrFracStr(wrongDiv),
+    (a + c) + "/" + (b + d),
+    step1Str
+  ];
+  return { cat:"Fraction BODMAS", mode:"choice",
+    prompt: a + "/" + b + " × " + c + "/" + d + " ÷ " + e + "/" + f + "  (simplest form)",
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Work left to right: " + a + "/" + b + " × " + c + "/" + d + " = " + step1Str + ". Then divide by " + e + "/" + f + " (flip and multiply): " + step1Str + " × " + f + "/" + e + " = " + correct + "." };
+}
+function gFracBodmas3() {
+  var b = randInt(2, 8), a = randInt(1, b - 1), whole = randInt(2, 5);
+  var d = randInt(2, 7), c = randInt(1, d - 1);
+  var f = randInt(2, 7), e = randInt(1, f - 1);
+  var quot = divFrac(c, d, e, f);
+  var quotStr = arrFracStr(quot);
+  var impNum = whole * b + a;
+  var final = subFrac(impNum, b, quot[0], quot[1]);
+  var guard = 0;
+  while (final[0] < 0 && guard < 20) { whole++; impNum = whole * b + a; final = subFrac(impNum, b, quot[0], quot[1]); guard++; }
+  var correct = arrFracStr(final);
+  var mixedLeftStr = whole + " " + a + "/" + b;
+  var candidates = [
+    quotStr,
+    mixedLeftStr,
+    (final[0] + 1) + "/" + final[1]
+  ];
+  return { cat:"Fraction BODMAS", mode:"choice",
+    prompt: mixedLeftStr + " − " + c + "/" + d + " ÷ " + e + "/" + f,
+    answer: correct, choices: buildChoices(correct, candidates),
+    rule:"Division before subtraction: " + c + "/" + d + " ÷ " + e + "/" + f + " = " + c + "/" + d + " × " + f + "/" + e + " = " + quotStr + ". Then " + mixedLeftStr + " − " + quotStr + " = " + correct + "." };
+}
+
+/* =====================================================================
+   TOPIC 5: ROMAN NUMERALS (1-3999)
    ===================================================================== */
 var ROMAN_MAP = [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
 function toRomanFull(n) {
@@ -705,7 +1013,7 @@ function gRomanArithmetic() {
 }
 
 /* =====================================================================
-   TOPIC 4: SIMPLIFICATION (BODMAS)
+   TOPIC 6: SIMPLIFICATION (BODMAS)
    ===================================================================== */
 function gBodmasT1() {
   var c = randInt(1, 9), k = randInt(2, 9), b = c * k;
@@ -848,8 +1156,49 @@ var LEARN_FACTORS =
   '<div class="example-box">616 by 7: ones digit 6&times;2=12, rest 61, 61&minus;12=49, and 49 is divisible by 7 &rarr; so is 616.</div>' +
   '<p style="color:var(--muted);font-size:13px">This is the groundwork for HCF &amp; LCM, which build directly on factors and multiples.</p>';
 
-var LEARN_ROMAN =
+var LEARN_HCFLCM =
   '<span class="badge-special">Topic 3</span>' +
+  '<h2>HCF &amp; LCM</h2>' +
+  '<p><b>HCF</b> (Highest Common Factor) is the biggest number that divides two or more numbers exactly. <b>LCM</b> (Lowest Common Multiple) is the smallest number that two or more numbers all divide into exactly.</p>' +
+  '<h4>Finding HCF &mdash; prime factorization</h4>' +
+  '<div class="example-box">HCF of 18 and 24:<br>18 = 2 &times; 3 &times; 3<br>24 = 2 &times; 2 &times; 2 &times; 3<br>Common primes: one 2 and one 3 &rarr; HCF = 2 &times; 3 = 6</div>' +
+  '<h4>Finding LCM &mdash; prime factorization</h4>' +
+  '<div class="example-box">LCM of 18 and 24:<br>Take every prime that appears, at its highest power: 2&times;2&times;2 &times; 3&times;3 = 72</div>' +
+  '<h4>A useful shortcut</h4>' +
+  '<p>For any two numbers a and b: <b>HCF &times; LCM = a &times; b</b>. If you know three of these four values, you can always find the fourth.</p>' +
+  '<h4>Word problem clues</h4>' +
+  '<ul class="rule-list">' +
+  '<li>"Greatest / largest that divides exactly / measures exactly" &rarr; <b>HCF</b></li>' +
+  '<li>"Smallest / least / when will they happen together again" &rarr; <b>LCM</b></li>' +
+  '</ul>' +
+  '<div class="example-box">Two bells ring every 6 and 8 minutes. When do they next ring together? That\'s asking for the LCM of 6 and 8 = 24 minutes.</div>' +
+  '<p style="color:var(--muted);font-size:13px">HCF and LCM are exactly what you need for the next topic &mdash; simplifying fractions and adding fractions with different denominators.</p>';
+
+var LEARN_FRACTIONS =
+  '<span class="badge-special">Topic 4</span>' +
+  '<h2>Fractions</h2>' +
+  '<p>A fraction shows part of a whole: <b>numerator</b> (top) over <b>denominator</b> (bottom).</p>' +
+  '<table><tr><th>Type</th><th>Meaning</th><th>Example</th></tr>' +
+  '<tr><td>Proper</td><td>Numerator &lt; denominator (less than 1)</td><td>3/4</td></tr>' +
+  '<tr><td>Improper</td><td>Numerator &ge; denominator (1 or more)</td><td>7/4</td></tr>' +
+  '<tr><td>Mixed number</td><td>A whole number + a proper fraction</td><td>1&frac34;</td></tr>' +
+  '</table>' +
+  '<h4>Converting improper &harr; mixed</h4>' +
+  '<div class="example-box">Improper &rarr; mixed: 17/5 &rarr; 17 &divide; 5 = 3 remainder 2 &rarr; 3 2/5<br>Mixed &rarr; improper: 3 2/5 &rarr; (3 &times; 5) + 2 = 17 &rarr; 17/5</div>' +
+  '<h4>Equivalent fractions &amp; simplifying</h4>' +
+  '<p>Multiply top and bottom by the same number to get an equivalent fraction. Divide both by their HCF to simplify to lowest terms.</p>' +
+  '<div class="example-box">8/12 &divide; 4/4 (HCF of 8 and 12 is 4) = 2/3</div>' +
+  '<h4>Adding &amp; subtracting</h4>' +
+  '<p><b>Like fractions</b> (same denominator): just add/subtract the numerators.<br><b>Unlike fractions</b> (different denominators): find the LCM of the denominators first, convert both fractions, then add/subtract.</p>' +
+  '<div class="example-box">2/3 + 1/4 &rarr; LCM of 3 and 4 is 12 &rarr; 8/12 + 3/12 = 11/12</div>' +
+  '<h4>Multiplying &amp; dividing</h4>' +
+  '<div class="example-box">Multiply straight across: 2/3 &times; 3/5 = 6/15 = 2/5 (simplified)<br>Divide by flipping the second fraction and multiplying: 2/3 &divide; 3/5 = 2/3 &times; 5/3 = 10/9</div>' +
+  '<h4>BODMAS with fractions</h4>' +
+  '<p>Same rule as always &mdash; multiplication and division happen before addition and subtraction.</p>' +
+  '<div class="example-box">3&frac12; + 2&times;2/7 &times; 14/16 &times; 2&frac12; &divide; 2 &mdash; do every &times; and &divide; first, left to right, then the addition last. Always give your final answer in simplest form.</div>';
+
+var LEARN_ROMAN =
+  '<span class="badge-special">Topic 5</span>' +
   '<h2>Roman Numerals</h2>' +
   '<p>The Roman system uses letters instead of digits.</p>' +
   '<table><tr><th>Symbol</th><td>I</td><td>V</td><td>X</td><td>L</td><td>C</td><td>D</td><td>M</td></tr>' +
@@ -866,7 +1215,7 @@ var LEARN_ROMAN =
   '<p style="color:var(--muted);font-size:13px">Note: for numbers of 4000 and above, a bar (vinculum) is drawn over a symbol to multiply it by 1000, e.g. <span style="text-decoration:overline">V</span> = 5000. This special notation isn\'t in the practice quiz below, but you may see it in your worksheet.</p>';
 
 var LEARN_BODMAS =
-  '<span class="badge-special">Topic 4</span>' +
+  '<span class="badge-special">Topic 6</span>' +
   '<h2>Simplification (BODMAS)</h2>' +
   '<p>When a sum has more than one operation, BODMAS tells you the order to solve it in.</p>' +
   '<table><tr><th>B</th><td>Brackets</td></tr><tr><th>O</th><td>Of (a &times; b written as "a of b")</td></tr><tr><th>D</th><td>Division</td></tr><tr><th>M</th><td>Multiplication</td></tr><tr><th>A</th><td>Addition</td></tr><tr><th>S</th><td>Subtraction</td></tr></table>' +
@@ -886,12 +1235,16 @@ var TOPICS = {
     learn: LEARN_NUMBERS, gens:[gPlaceValueBig, gFaceValueBig, gExpandedBig, gCompareBig, gIndianCommaBig, gIntlCommaBig, gPeriods, gPeriods, gRoundOff, gPredSuccBig, gGreatestSmallestBig] },
   factors: { id:"factors", icon:"🧩", name:"Factors &amp; Multiples", desc:"Types of numbers, divisibility rules 2–11, and the groundwork for HCF &amp; LCM",
     learn: LEARN_FACTORS, gens:[gFactorYesNo, gEvenOdd, gPrimeComposite, gTwinPrimePair, gCoprimeYesNo, gPerfectNumberMCQ, gPrimeTripletMCQ, gDivisibilityRule, gDivisibilityRule, gFactStatement] },
+  hcflcm: { id:"hcflcm", icon:"🔗", name:"HCF &amp; LCM", desc:"Prime factorization, the HCF×LCM shortcut, and word problems",
+    learn: LEARN_HCFLCM, gens:[gPrimeFactorPick, gHCFCompute, gLCMCompute, gHCFLCMRelation, gLCMWordProblem, gHCFWordProblem] },
+  fractions: { id:"fractions", icon:"🍕", name:"Fractions", desc:"Proper/improper/mixed, simplifying, add, subtract, multiply, divide & fraction BODMAS",
+    learn: LEARN_FRACTIONS, gens:[gFractionType, gImproperToMixed, gMixedToImproper, gEquivalentFraction, gSimplifyFraction, gCompareFractions, gAddSubtractLike, gAddSubtractUnlike, gMultiplyFractions, gDivideFractions, gFracBodmas1, gFracBodmas2, gFracBodmas3] },
   roman: { id:"roman", icon:"🏛️", name:"Roman Numerals", desc:"Reading, writing and comparing Roman numerals up to 3999",
     learn: LEARN_ROMAN, gens:[gRomanToNum2, gNumToRoman2, gRomanCompare, gRomanArithmetic] },
   bodmas: { id:"bodmas", icon:"🧮", name:"Simplification (BODMAS)", desc:"Order of operations with brackets — line, round, curly &amp; square",
     learn: LEARN_BODMAS, gens:[gBodmasT1, gBodmasT2, gBodmasT3, gBodmasT4, gBodmasT5, gBodmasT6, gBodmasT7, gBodmasT8] }
 };
-var TOPIC_ORDER = ["numbers", "factors", "roman", "bodmas"];
+var TOPIC_ORDER = ["numbers", "factors", "hcflcm", "fractions", "roman", "bodmas"];
 
 /* map every generator function back to its topic, for progress tracking */
 var GEN_TOPIC = {};
