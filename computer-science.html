@@ -6,6 +6,10 @@
 <title>Computer Adventure - Class 4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
 <style>
 :root{
   --bg:#FDF6EC; --card:#FFFFFF; --ink:#2E2A3B;
@@ -188,6 +192,12 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
       <button class="action" onclick="restoreProgress()">Restore</button>
       <div class="feedback" id="restoreFb"></div>
     </div>
+    <div class="card" id="syncCard" style="display:none">
+      <h3>🔄 Sync across devices</h3>
+      <p style="font-size:13px;font-weight:700;color:#6B6478">Enter this same code on another device to keep progress in sync automatically — no backup/restore needed.</p>
+      <code class="progress-code" id="syncCodeDisplay" style="cursor:pointer"></code>
+      <button class="action ghost" style="margin-top:10px" onclick="changeSyncCode()">Use a different code</button>
+    </div>
     <div class="card">
       <h3>🧹 Start fresh</h3>
       <p style="font-size:13px;font-weight:700;color:#6B6478">This erases all stars, streaks and tricky questions.</p>
@@ -209,12 +219,20 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
 const LS_KEY = "diksha_cs_v1";
 const DAILY_GOAL = 15;
 let S = { stars:0, streak:0, lastDay:"", todayCount:0, mistakes:[] };
+/* True only during the initial synchronous boot below, so the automatic
+   save inside loadState()'s "new day" check can't stamp a fresh updatedAt
+   onto whatever S.updatedAt already was — that would make a just-booted
+   device look newer than genuinely newer progress sitting in the cloud,
+   and the sync merge below would wrongly keep it. */
+let _initialBoot = true;
 
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
 function saveState(){
+  if(!_initialBoot) S.updatedAt = Date.now();
   const raw = JSON.stringify(S);
   try{ localStorage.setItem(LS_KEY, raw); }catch(e){}
   try{ document.cookie = LS_KEY+"="+encodeURIComponent(btoa(raw))+";max-age=31536000;path=/;SameSite=Lax"; }catch(e){}
+  if(typeof DikshaSync!=="undefined") DikshaSync.push(LS_KEY, S);
 }
 function loadState(){
   let raw=null;
@@ -595,6 +613,24 @@ function showSettings(){
   document.getElementById("backupCode").textContent=btoa(JSON.stringify(S));
   document.getElementById("restoreFb").className="feedback";
   hideReset();
+  if(typeof DikshaSync!=="undefined" && DikshaSync.isReady()){
+    document.getElementById("syncCard").style.display="";
+    const disp=document.getElementById("syncCodeDisplay");
+    disp.textContent=DikshaSync.getCode();
+    disp.onclick=function(){
+      const code=DikshaSync.getCode();
+      try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code); disp.textContent="Copied! "+code; setTimeout(function(){disp.textContent=code;},1500); return; } }catch(e){}
+      window.prompt("Your sync code (copy it):",code);
+    };
+  }
+}
+function changeSyncCode(){
+  const input=window.prompt("Enter the sync code from her other device (e.g. TIGER-4271):");
+  if(!input) return;
+  if(DikshaSync.setCode(input)){
+    window.alert("Linked! Reloading to bring in progress from that code...");
+    window.location.reload();
+  }
 }
 function restoreProgress(){
   const fb=document.getElementById("restoreFb");
@@ -644,6 +680,19 @@ document.getElementById("greeting").textContent =
   hr<12?"Good morning Diksha! ☀️ Ready to become a Computer Champion?":
   hr<17?"Hi Diksha! 🌤️ Let's practise for Monday's test!":
   "Good evening Diksha! 🌙 A little practice before bed?";
+_initialBoot = false;
+
+/* cross-device sync (optional, no-op until firebase-config.js is filled in) */
+if(typeof DikshaSync!=="undefined" && DikshaSync.init()){
+  DikshaSync.pull(LS_KEY).then(function(remote){
+    if(remote && (remote.updatedAt||0) > (S.updatedAt||0)){
+      S=Object.assign(S,remote);
+      renderStats();
+    }
+    DikshaSync.arm();
+    DikshaSync.push(LS_KEY, S);
+  });
+}
 </script>
 </body>
 </html>
