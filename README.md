@@ -17,7 +17,10 @@ static HTML file with no build step or dependencies.
   (divisibility rules), HCF & LCM (prime factorization, word problems),
   fractions (proper/improper/mixed, simplifying, add/subtract/multiply/
   divide, fraction BODMAS), Roman numerals, and simplification (BODMAS)
-  — based on the school's special-class worksheet packets.
+  — based on the school's special-class worksheet packets. Lessons
+  include tap-through worked examples and visual fraction bars, and a
+  Quick Games section adds three arcade-style modes: Match Pairs,
+  True-or-False rounds, and a timed Quick 10 challenge.
 
 Open `index.html` in a browser to get started, or open any quest file
 directly. Progress for each quest is saved separately in the browser's
