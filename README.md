@@ -20,7 +20,9 @@ static HTML file with no build step or dependencies.
   — based on the school's special-class worksheet packets. Lessons
   include tap-through worked examples and visual fraction bars, and a
   Quick Games section adds three arcade-style modes: Match Pairs,
-  True-or-False rounds, and a timed Quick 10 challenge.
+  True-or-False rounds, and a timed Quick 10 challenge. Games earn
+  💎 diamonds (a separate currency); ⭐ stars and the daily goal come
+  only from real practice questions.
 
 Open `index.html` in a browser to get started, or open any quest file
 directly. Progress for each quest is saved separately in the browser's
