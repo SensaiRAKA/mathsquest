@@ -127,6 +127,30 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
 .cycle{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:6px}
 .cycle .st{background:#fff;border:2px solid #D6EFDE;border-radius:12px;padding:6px 10px;font-size:13px;font-weight:800}
 .cycle .ar{font-size:16px;color:var(--leaf-dark)}
+/* ---------- games ---------- */
+.sect-head{font-family:'Baloo 2';font-size:18px;font-weight:800;color:var(--leaf-dark);margin:20px 0 8px}
+.sect-head .note{font-size:11px;font-weight:800;color:#8A8496}
+.tilegrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.gtile{min-height:58px;font-size:15px;font-weight:800;border:3px solid #DCEFE3;background:#fff;border-radius:14px;
+  color:var(--ink);cursor:pointer;font-family:inherit;padding:8px;word-break:break-word;
+  transition:transform .08s ease,border-color .15s ease,background .15s ease,opacity .3s ease}
+.gtile:active{transform:scale(.97)}
+.gtile.sel{border-color:var(--lilac);background:#EFEBFF}
+.gtile.ok{border-color:var(--good);background:#E4F6EC;color:var(--leaf-dark);opacity:.45;pointer-events:none}
+.gtile.no{border-color:var(--bad)!important;background:#FBE9E2;animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.tf-row{display:flex;gap:12px;margin-top:16px}
+.tf-btn{flex:1;padding:22px 0;font-size:20px;font-weight:800;letter-spacing:.5px;border:3px solid #DCEFE3;background:#fff;
+  border-radius:16px;color:var(--ink);cursor:pointer;font-family:inherit;transition:transform .08s ease,border-color .15s ease,background .15s ease}
+.tf-btn:active{transform:scale(.97)}
+.tf-btn.right{border-color:var(--good);background:#E4F6EC;color:var(--leaf-dark)}
+.tf-btn.wrong{border-color:var(--bad);background:#FBE9E2;color:var(--bad)}
+.tf-btn[disabled]{cursor:default}
+.game-progress{font-size:13px;font-weight:800;color:#8A8496;margin-top:4px}
+.game-score-big{font-family:'Baloo 2';font-size:46px;font-weight:800;margin:14px 0 4px;text-align:center;color:var(--leaf-dark)}
+.game-card-c{text-align:center}
+.heart-fly{position:fixed;font-size:24px;animation:heartFly 1s ease-out forwards;pointer-events:none;z-index:60}
+@keyframes heartFly{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-60px) scale(1.4)}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -142,6 +166,7 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
 
   <div class="statbar">
     <div class="stat"><div class="n" id="stStars">0</div><div class="l">⭐ Stars</div></div>
+    <div class="stat"><div class="n" id="stHearts">0</div><div class="l">❤️ Hearts</div></div>
     <div class="stat"><div class="n" id="stStreak">0</div><div class="l">🔥 Streak</div></div>
     <div class="stat"><div class="n" id="stToday">0/15</div><div class="l">🎯 Today</div></div>
   </div>
@@ -156,6 +181,11 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
     <button class="big-btn" onclick="startQuiz(1)"><span class="ico">🐘</span><span><b>Quiz: Animals &amp; Eggs</b><span class="desc">Mammals, egg-layers, parts of an egg, parental care</span></span></button>
     <button class="big-btn" onclick="startQuiz(2)"><span class="ico">🐸</span><span><b>Quiz: Life Cycles</b><span class="desc">Metamorphosis, hatching, moulting &amp; the life stages</span></span></button>
     <button class="big-btn" onclick="startQuiz(0)"><span class="ico">🏆</span><span><b>Big Test Practice</b><span class="desc">Mixed questions from the whole chapter, like the real test!</span></span></button>
+    <div class="sect-head">🎮 Quick Games <span class="note">· games earn ❤️, practice earns ⭐</span></div>
+    <button class="big-btn" onclick="startGame('match')"><span class="ico">🃏</span><span><b>Match Pairs</b><span class="desc">Tap a card, then find its partner — words, egg parts &amp; animals</span></span></button>
+    <button class="big-btn" onclick="startGame('tf')"><span class="ico">⚡</span><span><b>True or False?</b><span class="desc">10 quick statements — trust your Science instincts!</span></span></button>
+    <button class="big-btn" onclick="startGame('quick10')"><span class="ico">⏱️</span><span><b>Quick 10 Challenge</b><span class="desc">10 mixed questions against a 3-minute clock</span></span></button>
+    <div class="sect-head">📌 Extras</div>
     <button class="big-btn" onclick="showMistakes()"><span class="ico">🔁</span><span><b>My Tricky Questions</b><span class="desc" id="mbCount">Questions to try again</span></span></button>
     <button class="big-btn" onclick="showSettings()"><span class="ico">⚙️</span><span><b>My Progress &amp; Backup</b><span class="desc">Save code, daily goal, reset</span></span></button>
     <div class="footer-note">Made with ❤️ for Diksha · Chapter 3 · Reproduction in Animals</div>
@@ -177,6 +207,12 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
     <button class="back" onclick="goHome()">← Back home</button>
     <div class="progressbar"><div class="fill" id="quizFill"></div></div>
     <div class="card" id="quizCard"></div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="scrGame" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="card" id="gameCard"></div>
   </div>
 
   <!-- ============ MISTAKES ============ -->
@@ -224,7 +260,7 @@ code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;b
 ===================================================== */
 const LS_KEY = "diksha_sci_v1";
 const DAILY_GOAL = 15;
-let S = { stars:0, streak:0, lastDay:"", todayCount:0, mistakes:[] };
+let S = { stars:0, hearts:0, streak:0, lastDay:"", todayCount:0, mistakes:[] };
 let _initialBoot = true;
 
 function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
@@ -262,6 +298,7 @@ function bumpProgress(correct){
 }
 function renderStats(){
   document.getElementById("stStars").textContent=S.stars;
+  document.getElementById("stHearts").textContent=S.hearts||0;
   document.getElementById("stStreak").textContent=S.streak;
   document.getElementById("stToday").textContent=Math.min(S.todayCount,DAILY_GOAL)+"/"+DAILY_GOAL;
   document.getElementById("mbCount").textContent = S.mistakes.length ? (S.mistakes.length+" waiting for you!") : "No tricky ones — great job!";
@@ -629,7 +666,7 @@ function restoreProgress(){
   try{
     const obj=JSON.parse(atob(document.getElementById("restoreInput").value.trim()));
     if(typeof obj.stars!=="number")throw 0;
-    S=Object.assign({stars:0,streak:0,lastDay:"",todayCount:0,mistakes:[]},obj);
+    S=Object.assign({stars:0,hearts:0,streak:0,lastDay:"",todayCount:0,mistakes:[]},obj);
     saveState();renderStats();
     fb.className="feedback show good";fb.textContent="Progress restored! 🎉";
   }catch(e){fb.className="feedback show bad";fb.textContent="That code doesn't look right. Check and try again.";}
@@ -637,11 +674,11 @@ function restoreProgress(){
 function askReset(){document.getElementById("resetConfirm").classList.add("show");}
 function hideReset(){document.getElementById("resetConfirm").classList.remove("show");}
 function doReset(){
-  S={stars:0,streak:0,lastDay:todayStr(),todayCount:0,mistakes:[]};
+  S={stars:0,hearts:0,streak:0,lastDay:todayStr(),todayCount:0,mistakes:[]};
   saveState();renderStats();hideReset();goHome();
 }
 function showScreen(id){
-  ["scrHome","scrLearn","scrQuiz","scrMistakes","scrSettings"].forEach(s=>document.getElementById(s).classList.add("hidden"));
+  ["scrHome","scrLearn","scrQuiz","scrGame","scrMistakes","scrSettings"].forEach(s=>document.getElementById(s).classList.add("hidden"));
   document.getElementById(id).classList.remove("hidden");
   window.scrollTo(0,0);
 }
@@ -664,6 +701,246 @@ function burstSmall(){
     s.style.left=(30+Math.random()*40)+"%";c.appendChild(s);setTimeout(()=>s.remove(),1800);
   }
 }
+
+/* =====================================================
+   GAMES — earn ❤️ hearts (separate from ⭐ practice stars)
+   Games: Match Pairs · True or False · Quick 10 Challenge
+===================================================== */
+function awardHearts(n){
+  if(n<=0) return;
+  S.hearts=(S.hearts||0)+n;
+  saveState(); renderStats();
+}
+function heartBurst(){
+  for(let i=0;i<5;i++){
+    const s=document.createElement("div");s.className="heart-fly";
+    s.textContent=["❤️","💖","✨","💕"][i%4];
+    s.style.left=(40+Math.random()*20)+"%";s.style.top="45%";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1000);
+  }
+}
+function startGame(id){
+  showScreen("scrGame");
+  if(id==="match") startMatchGame();
+  else if(id==="tf") startTFGame();
+  else if(id==="quick10") startQuick10();
+}
+function gameSummary(title,scoreText,noteText,playAgainFn){
+  document.getElementById("gameCard").innerHTML=
+    '<div class="game-card-c"><div class="qtag">'+title+'</div>'+
+    '<div class="game-score-big">'+scoreText+'</div>'+
+    '<div class="feedback show good" style="margin-top:4px">'+noteText+'</div>'+
+    '<button class="action leaf" id="gAgain">▶ Play again</button>'+
+    '<button class="action ghost" id="gBack" style="margin-top:10px">Back home</button></div>';
+  document.getElementById("gAgain").onclick=playAgainFn;
+  document.getElementById("gBack").onclick=goHome;
+}
+
+/* ---- Game 1: Match Pairs ---- */
+const MATCH_SETS=[
+  {name:"Word ↔ Meaning", pool:[
+    ["Hatching","Baby breaks out of the egg"],
+    ["Incubation","Sitting on eggs to keep them warm"],
+    ["Moulting","Shedding old skin for a new one"],
+    ["Metamorphosis","Change from young form to adult"],
+    ["Chrysalis","A butterfly's pupa"],
+    ["Embryo","The growing baby inside an egg"]
+  ]},
+  {name:"Animal ↔ Fact", pool:[
+    ["Bat","Mammal that can fly"],
+    ["Whale","Mammal that lives in water"],
+    ["Platypus","Egg-laying mammal"],
+    ["Crocodile","Reptile — no parental care"],
+    ["Cockroach","Insect with 3 stages"],
+    ["Butterfly","Insect with 4 stages"]
+  ]},
+  {name:"Part ↔ Job", pool:[
+    ["Shell","Hard outer cover of an egg"],
+    ["Yolk","Yellow central part of an egg"],
+    ["Albumen","The white part of an egg"],
+    ["Gills","Help a tadpole breathe in water"],
+    ["Nymph","Young cockroach with no wings"]
+  ]}
+];
+let matchState=null;
+function startMatchGame(){
+  const set=MATCH_SETS[Math.floor(Math.random()*MATCH_SETS.length)];
+  const chosen=shuffle(set.pool.slice()).slice(0,5);
+  const tiles=[];
+  chosen.forEach((p,idx)=>{ tiles.push({pid:idx,text:p[0]}); tiles.push({pid:idx,text:p[1]}); });
+  matchState={tiles:shuffle(tiles),sel:null,matched:0,wrong:0};
+  let h='<div class="qtag">🃏 Match Pairs · '+set.name+'</div>'+
+    '<p style="font-size:13px;font-weight:700;color:#8A8496;margin-top:6px">Tap a card, then tap its matching partner.</p>'+
+    '<div class="game-progress" id="mpProgress">0 / 5 pairs</div><div class="tilegrid" id="mpGrid"></div>';
+  document.getElementById("gameCard").innerHTML=h;
+  const grid=document.getElementById("mpGrid");
+  matchState.tiles.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="gtile";b.textContent=t.text;
+    b.onclick=()=>tapTile(i,b); grid.appendChild(b); t.node=b;
+  });
+  window.scrollTo(0,0);
+}
+function tapTile(i,node){
+  const st=matchState;
+  if(!st||node.classList.contains("ok"))return;
+  if(st.sel===null){st.sel=i;node.classList.add("sel");return;}
+  if(st.sel===i){st.sel=null;node.classList.remove("sel");return;}
+  const first=st.tiles[st.sel]; first.node.classList.remove("sel");
+  if(first.pid===st.tiles[i].pid){
+    first.node.classList.add("ok");node.classList.add("ok");st.matched++;heartBurst();
+    document.getElementById("mpProgress").textContent=st.matched+" / 5 pairs";
+    if(st.matched===5){
+      const earned=Math.max(1,5-st.wrong);
+      awardHearts(earned);
+      setTimeout(()=>gameSummary("🃏 Match Pairs","🎉 All matched!",
+        "+"+earned+" ❤️"+(st.wrong?" ("+st.wrong+" wrong tap"+(st.wrong>1?"s":"")+")":" — flawless!"),
+        ()=>startGame("match")),700);
+    }
+  }else{
+    st.wrong++;node.classList.add("no");first.node.classList.add("no");
+    setTimeout(()=>{node.classList.remove("no");first.node.classList.remove("no");},350);
+  }
+  st.sel=null;
+}
+
+/* ---- Game 2: True or False? ---- */
+const TF_POOL=[
+  {text:"A whale is a mammal.",a:true,why:"Whales give birth and feed their babies milk."},
+  {text:"A bat is a bird.",a:false,why:"A bat is a mammal that can fly."},
+  {text:"Frogs give birth to babies.",a:false,why:"Frogs lay eggs in water."},
+  {text:"Cows give birth to their young ones.",a:true,why:"Cows are mammals."},
+  {text:"Hens lay eggs.",a:true,why:"Birds like hens lay eggs."},
+  {text:"A butterfly has 4 stages in its life cycle.",a:true,why:"Egg, caterpillar, pupa and butterfly."},
+  {text:"A cockroach has 5 stages in its life cycle.",a:false,why:"It has 3: egg, nymph and adult."},
+  {text:"The larva of a butterfly is called a caterpillar.",a:true,why:"The caterpillar is the larva."},
+  {text:"The pupa is the resting stage of a butterfly.",a:true,why:"Inside the pupa it changes into a butterfly."},
+  {text:"A tadpole can breathe on land.",a:false,why:"A tadpole has gills, so it breathes in water."},
+  {text:"Moulting means shedding old skin for new skin.",a:true,why:"A nymph grows bigger each time it moults."},
+  {text:"The yolk is the white part of an egg.",a:false,why:"The yolk is the yellow part; the albumen is white."},
+  {text:"Duck-billed platypus lays eggs.",a:true,why:"It is a special egg-laying mammal."},
+  {text:"Crocodiles take great care of their babies.",a:false,why:"Reptiles do not take care of their young."},
+  {text:"Dolphins feed their babies with milk.",a:true,why:"Dolphins are mammals."},
+  {text:"Mammals have hair on their body.",a:true,why:"Hair on the body is a feature of mammals."},
+  {text:"A fish lays only one egg at a time.",a:false,why:"Fish lay many eggs because many are eaten by predators."},
+  {text:"A chrysalis is the pupa of a butterfly or moth.",a:true,why:"Chrysalis is another name for the pupa."},
+  {text:"Birds sit on their eggs to keep them warm.",a:true,why:"This is called incubation."},
+  {text:"A nymph has wings just like an adult cockroach.",a:false,why:"A nymph looks like an adult but has no wings."}
+];
+let tfState=null;
+function startTFGame(){
+  tfState={items:shuffle(TF_POOL.slice()).slice(0,10),q:0,correct:0};
+  nextTF(); window.scrollTo(0,0);
+}
+function nextTF(){
+  const st=tfState;
+  if(st.q>=10){
+    const note=st.correct===10?"🏆 PERFECT round!":st.correct>=7?"🌟 Sharp instincts!":"💪 Keep at it!";
+    awardHearts(st.correct);
+    gameSummary("⚡ True or False?",st.correct+" / 10",note+" +"+st.correct+" ❤️",()=>startGame("tf"));
+    return;
+  }
+  const cur=st.items[st.q];
+  document.getElementById("gameCard").innerHTML=
+    '<div class="qtag">⚡ True or False?</div>'+
+    '<div class="game-progress">Question '+(st.q+1)+' of 10 · '+st.correct+' right so far</div>'+
+    '<div class="qtext" style="margin-top:12px">'+cur.text+'</div>'+
+    '<div class="tf-row"><button class="tf-btn" id="tfT">✅ TRUE</button><button class="tf-btn" id="tfF">❌ FALSE</button></div>'+
+    '<div class="feedback" id="tfFb"></div>'+
+    '<button class="action orange hidden" id="tfNext">Next →</button>';
+  document.getElementById("tfT").onclick=()=>answerTF(true);
+  document.getElementById("tfF").onclick=()=>answerTF(false);
+}
+function answerTF(saidTrue){
+  const st=tfState,cur=st.items[st.q];
+  const tBtn=document.getElementById("tfT"),fBtn=document.getElementById("tfF");
+  tBtn.disabled=true;fBtn.disabled=true;
+  const ok=saidTrue===cur.a, fb=document.getElementById("tfFb");
+  st.q++;
+  if(ok){
+    st.correct++;(saidTrue?tBtn:fBtn).classList.add("right");
+    fb.className="feedback show good";fb.innerHTML="❤️ "+["Correct!","Brilliant!","Well done!","Nailed it!"][Math.floor(Math.random()*4)];
+    heartBurst();setTimeout(nextTF,950);
+  }else{
+    (saidTrue?tBtn:fBtn).classList.add("wrong");(cur.a?tBtn:fBtn).classList.add("right");
+    fb.className="feedback show bad";fb.innerHTML="Not quite — it's <b>"+(cur.a?"TRUE":"FALSE")+"</b>. "+cur.why;
+    addMistake("(True/False) "+cur.text,(cur.a?"True":"False"),cur.why);
+    const nx=document.getElementById("tfNext");nx.classList.remove("hidden");nx.onclick=nextTF;
+  }
+}
+
+/* ---- Game 3: Quick 10 Challenge (timed) ---- */
+let q10=null;
+function startQuick10(){
+  const pool=Q1.concat(Q2).filter(q=>q.t==="mcq"||q.t==="tf");
+  q10={items:shuffle(pool).slice(0,10),idx:0,correct:0,endAt:Date.now()+180000,timerId:null,locked:false};
+  q10.timerId=setInterval(tickQ10,500);
+  renderQ10();tickQ10();window.scrollTo(0,0);
+}
+function tickQ10(){
+  if(!q10||q10.done)return;
+  const msLeft=q10.endAt-Date.now();
+  const lbl=document.getElementById("q10timer");
+  if(msLeft<=0){endQuick10(true);return;}
+  if(lbl){const s=Math.ceil(msLeft/1000);lbl.textContent="⏱️ "+Math.floor(s/60)+":"+("0"+(s%60)).slice(-2);}
+}
+function stopQ10Timer(){ if(q10&&q10.timerId){clearInterval(q10.timerId);q10.timerId=null;} }
+function endQuick10(timedOut){
+  if(!q10||q10.done)return;
+  q10.done=true;
+  stopQ10Timer();
+  const c=q10?q10.correct:0;
+  awardHearts(c);
+  const note=timedOut?"⏰ Time's up! ":c>=8?"🏆 Superb! ":c>=5?"🌟 Nice work! ":"💪 Keep practising! ";
+  gameSummary("⏱️ Quick 10 Challenge",c+" / 10",note+"+"+c+" ❤️",()=>startGame("quick10"));
+}
+function renderQ10(){
+  if(!q10)return;
+  if(q10.idx>=10){endQuick10(false);return;}
+  q10.locked=false;
+  const q=q10.items[q10.idx];
+  let h='<div style="display:flex;justify-content:space-between;align-items:center">'+
+    '<div class="qtag">Quick 10 · '+(q10.idx+1)+'/10</div>'+
+    '<div class="game-progress" id="q10timer" style="margin:0;color:var(--orange-dark)">⏱️ 3:00</div></div>'+
+    '<div class="qtext" style="margin-top:10px">'+q.q+'</div>';
+  if(q.t==="mcq"){ q.o.forEach((o,i)=>{h+='<button class="opt" onclick="ansQ10('+i+',this)">'+o+'</button>';}); }
+  else { h+='<div class="tf-row"><button class="tf-btn" onclick="ansQ10(true,this)">✅ TRUE</button><button class="tf-btn" onclick="ansQ10(false,this)">❌ FALSE</button></div>'; }
+  h+='<div class="feedback" id="q10fb"></div><button class="action orange hidden" id="q10next" onclick="q10Next()">Next →</button>';
+  document.getElementById("gameCard").innerHTML=h;
+}
+function ansQ10(val,btn){
+  if(!q10||q10.locked)return;
+  q10.locked=true;
+  const q=q10.items[q10.idx], fb=document.getElementById("q10fb");
+  let ok, correctText;
+  if(q.t==="mcq"){
+    const opts=document.querySelectorAll("#gameCard .opt");opts.forEach(o=>o.classList.add("locked"));
+    ok=(val===q.a);
+    if(ok)btn.classList.add("correct");else{btn.classList.add("wrong");opts[q.a].classList.add("correct");}
+    correctText=q.o[q.a];
+  }else{
+    const btns=document.querySelectorAll("#gameCard .tf-btn");btns.forEach(b=>b.disabled=true);
+    ok=(val===q.a);
+    if(ok)btn.classList.add("right");else{btn.classList.add("wrong");btns[q.a?0:1].classList.add("right");}
+    correctText=q.a?"True":"False";
+  }
+  q10.idx++;
+  if(ok){
+    q10.correct++;fb.className="feedback show good";fb.innerHTML="❤️ Correct!";heartBurst();
+    setTimeout(()=>{ if(q10&&!q10.done){renderQ10();} },700);
+  }else{
+    fb.className="feedback show bad";fb.innerHTML="It's <b>"+correctText+"</b>. "+(q.why||"");
+    addMistake(q.q,correctText,q.why);
+    document.getElementById("q10next").classList.remove("hidden");
+  }
+}
+function q10Next(){ if(q10) renderQ10(); }
+
+/* Leaving the game screen must stop the Quick 10 clock. */
+(function(){
+  const _goHome=goHome;
+  goHome=function(){ stopQ10Timer(); q10=null; _goHome(); };
+})();
 
 /* boot */
 loadState();renderStats();
