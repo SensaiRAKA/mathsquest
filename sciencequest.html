@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Science Quest - Class 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<style>
+:root{
+  --bg:#F2FBF6; --card:#FFFFFF; --ink:#2E2A3B;
+  --teal:#0FA3A3; --teal-dark:#0B7C7C;
+  --orange:#FF8C42; --orange-dark:#E56E22;
+  --berry:#C94F7C; --lilac:#9B8CFF;
+  --leaf:#4CAF6E; --leaf-dark:#2E8B54;
+  --good:#3BB273; --bad:#E4572E;
+  --shadow:0 4px 0 rgba(46,42,59,.14);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(76,175,110,.10) 0 90px, transparent 91px),
+  radial-gradient(circle at 88% 20%, rgba(255,140,66,.10) 0 70px, transparent 71px),
+  radial-gradient(circle at 20% 90%, rgba(15,163,163,.09) 0 80px, transparent 81px);}
+h1,h2,h3,.disp{font-family:'Baloo 2',cursive}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 90px}
+header{display:flex;align-items:center;gap:10px;padding:10px 4px}
+.mascot{font-size:38px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.12));transition:transform .3s}
+.mascot.happy{transform:rotate(-8deg) scale(1.15)}
+.mascot.sad{transform:rotate(8deg) scale(.95)}
+.title-block h1{font-size:24px;color:var(--leaf-dark);line-height:1.05}
+.title-block .sub{font-size:12px;font-weight:700;color:var(--berry)}
+.statbar{display:flex;gap:8px;margin:6px 0 14px}
+.stat{flex:1;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:8px;text-align:center}
+.stat .n{font-family:'Baloo 2';font-size:20px;font-weight:800;color:var(--orange-dark)}
+.stat .l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8A8496}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+button{font-family:'Nunito';font-weight:800;border:none;cursor:pointer}
+.big-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);
+  border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:12px;font-size:16px;color:var(--ink);
+  transition:transform .1s}
+.big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(46,42,59,.14)}
+.big-btn .ico{font-size:30px}
+.big-btn .desc{font-size:12px;font-weight:700;color:#8A8496;display:block}
+.pill{display:inline-block;background:var(--lilac);color:#fff;font-size:11px;font-weight:800;border-radius:99px;padding:2px 10px}
+.pill.o{background:var(--orange)}
+.pill.t{background:var(--teal)}
+.chip-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.opt{display:block;width:100%;text-align:left;background:#EDF7F1;border:3px solid transparent;border-radius:14px;
+  padding:12px 14px;margin-bottom:10px;font-size:16px;font-weight:700;color:var(--ink)}
+.opt:active{transform:scale(.99)}
+.opt.correct{background:#E4F6EC;border-color:var(--good)}
+.opt.wrong{background:#FBE9E2;border-color:var(--bad)}
+.opt.locked{pointer-events:none;opacity:.85}
+.qtext{font-size:18px;font-weight:800;margin-bottom:14px;line-height:1.35}
+.qtag{font-size:11px;font-weight:800;color:#fff;background:var(--berry);display:inline-block;border-radius:99px;padding:3px 10px;margin-bottom:10px}
+input[type=text]{width:100%;font-family:'Nunito';font-size:18px;font-weight:700;padding:12px;border:3px solid #DCEFE3;
+  border-radius:14px;outline:none;background:#FBFEFC}
+input[type=text]:focus{border-color:var(--leaf)}
+.action{width:100%;background:var(--teal);color:#fff;font-size:17px;padding:14px;border-radius:14px;margin-top:12px;
+  box-shadow:0 4px 0 var(--teal-dark)}
+.action:active{transform:translateY(3px);box-shadow:none}
+.action.orange{background:var(--orange);box-shadow:0 4px 0 var(--orange-dark)}
+.action.leaf{background:var(--leaf);box-shadow:0 4px 0 var(--leaf-dark)}
+.action.ghost{background:#E8F3EC;color:var(--ink);box-shadow:0 4px 0 #CFE6D8}
+.feedback{border-radius:14px;padding:12px 14px;margin-top:12px;font-weight:700;font-size:15px;display:none}
+.feedback.show{display:block}
+.feedback.good{background:#E4F6EC;color:#1E6B44}
+.feedback.bad{background:#FBE9E2;color:#9C3B1E}
+.wordbank{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.wordbank .wb{background:#FFF3E6;border:2px dashed var(--orange);color:var(--orange-dark);font-weight:800;
+  border-radius:10px;padding:6px 12px;font-size:14px}
+.pair-col{display:flex;gap:10px}
+.pair-col>div{flex:1;display:flex;flex-direction:column;gap:8px}
+.pair-item{background:#EDF7F1;border:3px solid transparent;border-radius:12px;padding:10px;font-weight:700;
+  font-size:14px;text-align:center;min-height:52px;display:flex;align-items:center;justify-content:center}
+.pair-item.sel{border-color:var(--lilac);background:#EFEBFF}
+.pair-item.done{background:#E4F6EC;border-color:var(--good);pointer-events:none}
+.pair-item.flash{background:#FBE9E2;border-color:var(--bad)}
+.bucket-zone{display:flex;gap:10px;margin-top:12px}
+.bucket{flex:1;border:3px dashed #BFE0CC;border-radius:14px;min-height:90px;padding:8px;text-align:center}
+.bucket h4{font-family:'Baloo 2';font-size:14px;margin-bottom:6px}
+.bucket .b-items{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.bucket .b-items span{background:#E4F6EC;border-radius:8px;padding:3px 8px;font-size:12px;font-weight:800}
+.bucket .b-items span.wrongdrop{background:#FBE9E2}
+.sort-item{display:inline-block;background:#FFF3E6;border:3px solid var(--orange);border-radius:12px;
+  padding:10px 16px;font-weight:800;font-size:16px;margin:0 4px}
+.order-list{display:flex;flex-direction:column;gap:8px}
+.order-item{background:#EDF7F1;border:3px solid transparent;border-radius:12px;padding:12px;font-weight:700;font-size:15px;
+  display:flex;align-items:center;gap:10px}
+.order-item .num{background:var(--leaf);color:#fff;border-radius:99px;width:26px;height:26px;display:flex;
+  align-items:center;justify-content:center;font-weight:800;flex-shrink:0}
+.order-item.sel{border-color:var(--lilac);background:#EFEBFF}
+.progressbar{height:12px;background:#E4F1EA;border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progressbar .fill{height:100%;background:linear-gradient(90deg,var(--leaf),var(--teal));border-radius:99px;transition:width .3s}
+.learn-card{background:linear-gradient(145deg,#FFFDF8,#EEFBF3);border:3px solid #D6EFDE;border-radius:20px;padding:20px;min-height:230px;
+  display:flex;flex-direction:column;justify-content:center;text-align:center;margin-bottom:14px}
+.learn-card .emo{font-size:52px;margin-bottom:8px}
+.learn-card h3{font-size:22px;color:var(--leaf-dark);margin-bottom:8px}
+.learn-card p{font-size:16px;font-weight:700;line-height:1.5}
+.learn-card .fact{margin-top:10px;background:#FFF3E6;border-radius:12px;padding:8px 12px;font-size:13px;font-weight:800;color:var(--orange-dark)}
+.nav-row{display:flex;gap:10px}
+.nav-row .action{flex:1;margin-top:0}
+.mistake-entry{border-left:5px solid var(--berry);background:#FDF3F7;border-radius:0 14px 14px 0;padding:12px;margin-bottom:10px}
+.mistake-entry .q{font-weight:800;font-size:14px}
+.mistake-entry .a{font-size:13px;font-weight:700;color:#1E6B44;margin-top:4px}
+.mistake-entry .why{font-size:12px;font-weight:600;color:#6B6478;margin-top:4px}
+.mistake-entry .dismiss{margin-top:8px;background:#E8F3EC;border-radius:10px;padding:6px 12px;font-size:12px}
+.back{background:none;font-size:14px;font-weight:800;color:var(--leaf-dark);padding:6px 0;margin-bottom:8px}
+.confirm-inline{display:none;gap:8px;margin-top:8px}
+.confirm-inline.show{display:flex}
+.confirm-inline button{flex:1;padding:10px;border-radius:12px;font-size:14px}
+.confirm-yes{background:var(--bad);color:#fff}
+.confirm-no{background:#E8F3EC}
+.celebrate{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.confetti{position:absolute;top:-20px;font-size:22px;animation:fall 1.6s linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+.hidden{display:none!important}
+code.progress-code{display:block;background:#2E2A3B;color:#8FF0E4;padding:12px;border-radius:12px;
+  font-size:13px;word-break:break-all;margin-top:10px;user-select:all}
+.footer-note{text-align:center;font-size:11px;font-weight:700;color:#A79FB8;margin-top:16px}
+/* life-cycle mini diagram for learn cards */
+.cycle{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;margin-top:6px}
+.cycle .st{background:#fff;border:2px solid #D6EFDE;border-radius:12px;padding:6px 10px;font-size:13px;font-weight:800}
+.cycle .ar{font-size:16px;color:var(--leaf-dark)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mascot" id="mascot">🦉</div>
+    <div class="title-block">
+      <h1>Science Quest</h1>
+      <div class="sub">Class 4 · Reproduction in Animals · with Hootie the Owl</div>
+    </div>
+  </header>
+
+  <div class="statbar">
+    <div class="stat"><div class="n" id="stStars">0</div><div class="l">⭐ Stars</div></div>
+    <div class="stat"><div class="n" id="stStreak">0</div><div class="l">🔥 Streak</div></div>
+    <div class="stat"><div class="n" id="stToday">0/15</div><div class="l">🎯 Today</div></div>
+  </div>
+
+  <!-- ============ HOME ============ -->
+  <div id="scrHome">
+    <div class="card" style="text-align:center">
+      <div class="disp" style="font-size:17px;font-weight:800" id="greeting">Hi Diksha! Ready to explore how animals make babies? 🐣</div>
+    </div>
+    <button class="big-btn" onclick="openLearn(1)"><span class="ico">🐣</span><span><b>Learn: How Animals Reproduce</b><span class="desc">Eggs, babies, mammals &amp; the parts of an egg</span></span></button>
+    <button class="big-btn" onclick="openLearn(2)"><span class="ico">🦋</span><span><b>Learn: Life Cycles</b><span class="desc">Frog, butterfly &amp; cockroach — and special words</span></span></button>
+    <button class="big-btn" onclick="startQuiz(1)"><span class="ico">🐘</span><span><b>Quiz: Animals &amp; Eggs</b><span class="desc">Mammals, egg-layers, parts of an egg, parental care</span></span></button>
+    <button class="big-btn" onclick="startQuiz(2)"><span class="ico">🐸</span><span><b>Quiz: Life Cycles</b><span class="desc">Metamorphosis, hatching, moulting &amp; the life stages</span></span></button>
+    <button class="big-btn" onclick="startQuiz(0)"><span class="ico">🏆</span><span><b>Big Test Practice</b><span class="desc">Mixed questions from the whole chapter, like the real test!</span></span></button>
+    <button class="big-btn" onclick="showMistakes()"><span class="ico">🔁</span><span><b>My Tricky Questions</b><span class="desc" id="mbCount">Questions to try again</span></span></button>
+    <button class="big-btn" onclick="showSettings()"><span class="ico">⚙️</span><span><b>My Progress &amp; Backup</b><span class="desc">Save code, daily goal, reset</span></span></button>
+    <div class="footer-note">Made with ❤️ for Diksha · Chapter 3 · Reproduction in Animals</div>
+  </div>
+
+  <!-- ============ LEARN ============ -->
+  <div id="scrLearn" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="progressbar"><div class="fill" id="learnFill"></div></div>
+    <div class="learn-card" id="learnCard"></div>
+    <div class="nav-row">
+      <button class="action ghost" onclick="learnNav(-1)">← Back</button>
+      <button class="action leaf" onclick="learnNav(1)">Next →</button>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div id="scrQuiz" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="progressbar"><div class="fill" id="quizFill"></div></div>
+    <div class="card" id="quizCard"></div>
+  </div>
+
+  <!-- ============ MISTAKES ============ -->
+  <div id="scrMistakes" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <h2 style="margin-bottom:10px">🔁 My Tricky Questions</h2>
+    <div id="mistakeList"></div>
+  </div>
+
+  <!-- ============ SETTINGS ============ -->
+  <div id="scrSettings" class="hidden">
+    <button class="back" onclick="goHome()">← Back home</button>
+    <div class="card">
+      <h3>💾 Backup my progress</h3>
+      <p style="font-size:13px;font-weight:700;color:#6B6478">Copy this code and keep it safe. You can paste it on another device to restore stars and streaks.</p>
+      <code class="progress-code" id="backupCode"></code>
+      <h3 style="margin-top:16px">📥 Restore from a code</h3>
+      <input type="text" id="restoreInput" placeholder="Paste your code here">
+      <button class="action" onclick="restoreProgress()">Restore</button>
+      <div class="feedback" id="restoreFb"></div>
+    </div>
+    <div class="card" id="syncCard" style="display:none">
+      <h3>🔄 Sync across devices</h3>
+      <p style="font-size:13px;font-weight:700;color:#6B6478">Enter this same code on another device to keep progress in sync automatically — no backup/restore needed.</p>
+      <code class="progress-code" id="syncCodeDisplay" style="cursor:pointer"></code>
+      <button class="action ghost" style="margin-top:10px" onclick="changeSyncCode()">Use a different code</button>
+    </div>
+    <div class="card">
+      <h3>🧹 Start fresh</h3>
+      <p style="font-size:13px;font-weight:700;color:#6B6478">This erases all stars, streaks and tricky questions.</p>
+      <button class="action ghost" onclick="askReset()">Reset everything</button>
+      <div class="confirm-inline" id="resetConfirm">
+        <button class="confirm-yes" onclick="doReset()">Yes, erase all</button>
+        <button class="confirm-no" onclick="hideReset()">No, keep it</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="celebrate" id="celebrate"></div>
+
+<script>
+"use strict";
+/* =====================================================
+   STATE + PERSISTENCE (localStorage with cookie mirror)
+===================================================== */
+const LS_KEY = "diksha_sci_v1";
+const DAILY_GOAL = 15;
+let S = { stars:0, streak:0, lastDay:"", todayCount:0, mistakes:[] };
+let _initialBoot = true;
+
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function saveState(){
+  if(!_initialBoot) S.updatedAt = Date.now();
+  const raw = JSON.stringify(S);
+  try{ localStorage.setItem(LS_KEY, raw); }catch(e){}
+  try{ document.cookie = LS_KEY+"="+encodeURIComponent(btoa(raw))+";max-age=31536000;path=/;SameSite=Lax"; }catch(e){}
+  if(typeof DikshaSync!=="undefined") DikshaSync.push(LS_KEY, S);
+}
+function loadState(){
+  let raw=null;
+  try{ raw = localStorage.getItem(LS_KEY); }catch(e){}
+  if(!raw){
+    const m=document.cookie.match(new RegExp(LS_KEY+"=([^;]+)"));
+    if(m){ try{ raw=atob(decodeURIComponent(m[1])); }catch(e){} }
+  }
+  if(raw){ try{ S=Object.assign(S,JSON.parse(raw)); }catch(e){} }
+  const t=todayStr();
+  if(S.lastDay!==t){
+    const y=new Date(); y.setDate(y.getDate()-1);
+    const yStr=y.getFullYear()+"-"+(y.getMonth()+1)+"-"+y.getDate();
+    if(S.lastDay!==yStr && S.lastDay!=="") S.streak=0;
+    S.todayCount=0; S.lastDay=t;
+  }
+  saveState();
+}
+function bumpProgress(correct){
+  if(correct){
+    S.stars++;
+    S.todayCount++;
+    if(S.todayCount===DAILY_GOAL){ S.streak++; burst("🎉"); }
+  }
+  saveState(); renderStats();
+}
+function renderStats(){
+  document.getElementById("stStars").textContent=S.stars;
+  document.getElementById("stStreak").textContent=S.streak;
+  document.getElementById("stToday").textContent=Math.min(S.todayCount,DAILY_GOAL)+"/"+DAILY_GOAL;
+  document.getElementById("mbCount").textContent = S.mistakes.length ? (S.mistakes.length+" waiting for you!") : "No tricky ones — great job!";
+}
+function addMistake(q, correctText, why){
+  if(S.mistakes.some(m=>m.q===q)) return;
+  S.mistakes.push({q:q, a:correctText, why:why||""});
+  if(S.mistakes.length>40) S.mistakes.shift();
+  saveState();
+}
+
+/* =====================================================
+   LEARN CARDS
+===================================================== */
+const LEARN = {
+1:[
+ {e:"🐣",t:"What is Reproduction?",p:"Reproduction is the process by which living things produce more of their own kind. Every living thing comes from a parent!",f:"Living things produce their own kind"},
+ {e:"🥚",t:"Two ways animals reproduce",p:"Animals reproduce in TWO ways: some LAY EGGS (like hens, frogs and snakes) and some GIVE BIRTH to babies (like cows, dogs and humans).",f:"Lay eggs OR give birth to young ones"},
+ {e:"🐄",t:"Mammals",p:"Animals that give birth to their young ones are called MAMMALS. They are warm-blooded, hairy animals. They feed their young ones with their own MILK and protect them from enemies.",f:"Mammals give birth + feed milk + have hair"},
+ {e:"🦇",t:"Surprising mammals!",p:"A BAT is a mammal that can FLY. A WHALE and a DOLPHIN are mammals that live in water — they do NOT lay eggs, they give birth and feed their babies milk.",f:"Bat flies, whale swims — but both are mammals!"},
+ {e:"🦆",t:"Egg-laying mammals",p:"Almost all mammals give birth — but there are two special ones that LAY EGGS: the DUCK-BILLED PLATYPUS and the SPINY ANTEATER. They are still mammals because they feed their babies milk.",f:"Platypus &amp; spiny anteater are egg-laying mammals"},
+ {e:"🐍",t:"Egg-laying animals",p:"Birds, frogs, fishes, turtles, lizards, crocodiles, snakes, cockroaches, butterflies and mosquitoes all reproduce by LAYING EGGS.",f:"Insects, reptiles, birds, fish &amp; frogs lay eggs"},
+ {e:"🥚",t:"Parts of an egg",p:"An egg is made of three parts: the SHELL (hard outer cover), the ALBUMEN (the white part) and the YOLK (the yellow central part). Inside grows the baby — the embryo.",f:"Shell + Albumen (white) + Yolk (yellow)"},
+ {e:"🍳",t:"Yolk &amp; Albumen — the baby's food",p:"The ALBUMEN (white) is mostly water and protein. The YOLK (yellow) is mostly fat and protein. BOTH provide FOOD for the growing chick inside the egg.",f:"Yolk = yellow food store. Albumen = white part."},
+ {e:"👶",t:"Embryo",p:"The growing baby inside an egg is called the EMBRYO. It develops safely inside the shell, using the yolk and albumen as food, until it is ready to hatch.",f:"Embryo = the growing baby inside the egg"},
+ {e:"🐤",t:"Hatching",p:"HATCHING is the process in which the egg shell breaks and the baby comes out of it. A baby bird pecks its way out of the shell!",f:"Hatching = baby breaks out of the egg"},
+ {e:"🐔",t:"Incubation",p:"INCUBATION is the process in which a parent animal sits on the eggs to keep them warm. Most birds sit on their eggs so the babies inside stay warm and can hatch.",f:"Incubation = sitting on eggs to keep them warm"},
+ {e:"🐦",t:"How birds care for babies",p:"Birds build a NEST to lay eggs, sit on them (incubation) so chicks hatch, protect the weak featherless chicks from enemies, and FEED them and teach them how to FLY.",f:"Birds feed their chicks and teach them to fly"},
+ {e:"🐊",t:"Reptiles don't care for babies",p:"Reptiles like the lizard and crocodile lay eggs but do NOT take care of their young ones. The babies must look after themselves after hatching.",f:"Lizards &amp; crocodiles don't care for their young"},
+ {e:"🐟",t:"Why fish lay so many eggs",p:"A fish lays a very large number of eggs at one time. This is because MANY of the eggs are eaten up by predators, so only a few survive to become baby fish.",f:"Many eggs are eaten by predators!"},
+ {e:"⭐",t:"Mammal features to remember",p:"THREE features of mammals: (1) they have HAIR on their body, (2) they GIVE BIRTH to young ones, and (3) they PRODUCE MILK to feed their young ones (and take care of them).",f:"Hair + give birth + feed milk"}
+],
+2:[
+ {e:"🔁",t:"What is a life cycle?",p:"The development of an embryo into an adult is known as a LIFE CYCLE. Every animal grows through different stages before becoming a full-grown adult.",f:"Life cycle = growing from egg/baby to adult"},
+ {e:"🐸",t:"Life cycle of a frog",p:"A frog grows through these stages: EGGS → TADPOLE → TADPOLE WITH LEGS → YOUNG FROG → ADULT FROG. The eggs are laid in water.",f:"Eggs → Tadpole → Young frog → Adult frog"},
+ {e:"💧",t:"Why tadpoles live in water",p:"A tadpole CANNOT live on land. This is because a tadpole does NOT have lungs — instead it has GILLS to breathe in water, just like a fish.",f:"Tadpoles breathe with gills, not lungs"},
+ {e:"🦋",t:"Life cycle of a butterfly",p:"A butterfly has FOUR stages: EGG → CATERPILLAR (larva) → PUPA → BUTTERFLY. The caterpillar is the larva, and the pupa is the resting stage.",f:"Egg → Caterpillar → Pupa → Butterfly (4 stages)"},
+ {e:"🐛",t:"Caterpillar = larva",p:"The LARVA of a butterfly is called a CATERPILLAR. It eats a lot of leaves and grows quickly before turning into a pupa.",f:"The larva of a butterfly is the caterpillar"},
+ {e:"🛡️",t:"Cocoon &amp; Chrysalis",p:"The caterpillar spins a COCOON — a protective covering — around itself. The pupa of a butterfly or moth is also called a CHRYSALIS. The cocoon is used for PROTECTION.",f:"Cocoon protects the pupa. Pupa = chrysalis."},
+ {e:"😴",t:"Pupa — the resting stage",p:"The PUPA is the RESTING stage of the butterfly's life cycle. Inside it, the caterpillar slowly changes into a beautiful butterfly.",f:"Pupa = the resting stage"},
+ {e:"🪳",t:"Life cycle of a cockroach",p:"A cockroach has THREE stages: EGG → NYMPH → ADULT. When the egg hatches, a young cockroach called a NYMPH comes out.",f:"Egg → Nymph → Adult (3 stages)"},
+ {e:"🐜",t:"Nymph",p:"A NYMPH is a young cockroach that hatches from the egg. It looks like an adult but does NOT have wings. As it grows and moults, it slowly becomes an adult cockroach.",f:"Nymph = young cockroach, looks like adult, no wings"},
+ {e:"🧥",t:"Moulting",p:"MOULTING is the process by which old skin is SHED (thrown off) and replaced with a new skin. A nymph grows bigger in size each time it moults.",f:"Moulting = shedding old skin for new skin"},
+ {e:"✨",t:"Metamorphosis",p:"METAMORPHOSIS is the process of change from an immature young form into an adult form. The change from caterpillar to butterfly, or tadpole to frog, is metamorphosis!",f:"Metamorphosis = big change from young to adult"},
+ {e:"🦗",t:"Counting life-cycle stages",p:"Butterfly = 4 stages (egg, caterpillar, pupa, adult). Cockroach and grasshopper = 3 stages (egg, nymph, adult). A GRASSHOPPER is an insect with three stages.",f:"Grasshopper has 3 stages; butterfly has 4"},
+ {e:"🌍",t:"Why reproduction matters (HOTS)",p:"Would life on Earth continue if animals did NOT reproduce? NO! If animals stopped reproducing, no new babies would be born, and slowly all the animals would disappear.",f:"No reproduction → no new life on Earth"}
+]};
+
+let learnDeck=[], learnIdx=0;
+function openLearn(ch){
+  learnDeck=LEARN[ch]; learnIdx=0;
+  showScreen("scrLearn"); renderLearn();
+}
+function renderLearn(){
+  const c=learnDeck[learnIdx];
+  document.getElementById("learnCard").innerHTML =
+    '<div class="emo">'+c.e+'</div><h3>'+c.t+'</h3><p>'+c.p+'</p><div class="fact">💡 '+c.f+'</div>';
+  document.getElementById("learnFill").style.width=((learnIdx+1)/learnDeck.length*100)+"%";
+}
+function learnNav(d){
+  learnIdx+=d;
+  if(learnIdx<0) learnIdx=0;
+  if(learnIdx>=learnDeck.length){ burst("🌟"); goHome(); return; }
+  renderLearn();
+}
+
+/* =====================================================
+   QUESTION BANK
+   type: mcq | tf | fill | oneword | subj | pair | bucket | order
+===================================================== */
+const Q1=[
+{t:"mcq",q:"Which of the following is a mammal?",o:["Fish","Octopus","Whale","Frog"],a:2,why:"A whale gives birth to babies and feeds them milk, so it is a mammal — even though it lives in water!"},
+{t:"mcq",q:"A bat is a mammal that can ________.",o:["swim","fly","crawl","lay eggs"],a:1,why:"A bat is the only mammal that can truly fly."},
+{t:"mcq",q:"Which of the following animal LAYS eggs?",o:["Whale","Cockroach","Cat","Dog"],a:1,why:"Cockroaches, birds, frogs, fish and reptiles lay eggs. Whales, cats and dogs give birth."},
+{t:"mcq",q:"X lays eggs and Y gives birth to young ones. Which pair fits?",o:["X – chicken, Y – frog","X – pigeon, Y – horse","X – whale, Y – chicken","X – tiger, Y – cow"],a:1,why:"A pigeon lays eggs (X) and a horse gives birth to young ones (Y)."},
+{t:"mcq",q:"Animals that give birth to their young ones are called ________.",o:["reptiles","birds","mammals","insects"],a:2,why:"Mammals give birth to babies and feed them with their milk."},
+{t:"mcq",q:"Which part of an egg is the yellow, central part?",o:["Shell","Albumen","Yolk","Nest"],a:2,why:"The yolk is the yellow central part. The albumen is the white part."},
+{t:"mcq",q:"Which two animals are egg-laying mammals?",o:["Bat and whale","Duck-billed platypus and spiny anteater","Snake and lizard","Hen and duck"],a:1,why:"The duck-billed platypus and spiny anteater are the special mammals that lay eggs."},
+{t:"mcq",q:"Which of these does NOT take care of its young ones?",o:["Hen","Cow","Crocodile","Dog"],a:2,why:"Reptiles like crocodiles and lizards do not take care of their young ones."},
+{t:"mcq",q:"Why does a fish lay so many eggs at a time?",o:["To make the water dirty","Because many eggs are eaten by predators","Because fish cannot swim","So that all of them hatch together"],a:1,why:"Many of the eggs are eaten by predators, so laying many means at least a few survive."},
+{t:"mcq",q:"Which of these is an OUTER, hard part of an egg?",o:["Yolk","Albumen","Shell","Embryo"],a:2,why:"The shell is the hard outer covering that protects the egg."},
+{t:"fill",q:"The white part of an egg is called the ________.",a:["albumen","albumin"],bank:["Albumen","Yolk","Shell"],why:"Albumen is the white part — mostly water and protein."},
+{t:"fill",q:"The yellow, central part of an egg is the ________.",a:["yolk","yellow yolk"],bank:["Yolk","Albumen","Shell"],why:"The yolk is the yellow central part and stores food for the baby."},
+{t:"fill",q:"Animals that give birth to babies and feed them milk are called ________.",a:["mammals","mammal"],bank:["Mammals","Reptiles","Birds"],why:"Mammals give birth and feed their young with milk."},
+{t:"fill",q:"Duck-billed platypus and spiny anteater are egg-laying ________.",a:["mammals","mammal"],bank:["mammals","birds","reptiles"],why:"They are the two mammals that lay eggs."},
+{t:"fill",q:"Mammals feed their young ones with their ________.",a:["milk"],bank:["milk","eggs","leaves"],why:"Mammals produce milk to feed their babies."},
+{t:"fill",q:"The growing baby inside an egg is called the ________.",a:["embryo"],bank:["embryo","yolk","chick"],why:"The embryo is the developing baby inside the egg."},
+{t:"tf",q:"Dolphins and whales feed their babies with milk.",a:true,why:"True — dolphins and whales are mammals, so they feed their babies milk."},
+{t:"tf",q:"Parent birds feed and teach their young ones how to fly.",a:true,why:"True — birds feed their chicks and teach them to fly."},
+{t:"tf",q:"All mammals give birth to babies and none of them lay eggs.",a:false,why:"False — the duck-billed platypus and spiny anteater are mammals that lay eggs."},
+{t:"tf",q:"A whale is a fish because it lives in the sea.",a:false,why:"False — a whale is a MAMMAL. It gives birth and feeds its babies milk."},
+{t:"tf",q:"Crocodiles and lizards take good care of their young ones.",a:false,why:"False — reptiles like crocodiles and lizards do not take care of their young."},
+{t:"tf",q:"The yolk and albumen provide food for the developing chick.",a:true,why:"True — both the yolk and albumen give food to the growing baby inside the egg."},
+{t:"tf",q:"Mammals have hair on their body.",a:true,why:"True — having hair on the body is a feature of mammals."},
+{t:"oneword",q:"The process in which the egg shell breaks and the baby comes out of it.",a:["hatching","hatch"],why:"Hatching — the baby breaks out of the shell."},
+{t:"oneword",q:"The process in which a parent animal sits on the eggs to give them warmth.",a:["incubation","incubating"],why:"Incubation — sitting on eggs to keep them warm."},
+{t:"oneword",q:"The growing baby inside an egg is called the ________?",a:["embryo"],why:"Embryo."},
+{t:"oneword",q:"Animals that give birth to babies and feed them milk are called ________?",a:["mammals","mammal"],why:"Mammals."},
+{t:"subj",q:"What is REPRODUCTION? Write one sentence.",k:[["produce","make","give birth","new"],["own kind","young","babies","living"]],model:"Reproduction is the process by which living things produce their own kind (young ones).",why:"Key idea: living things produce their own kind."},
+{t:"subj",q:"Write any THREE characteristic features of mammals.",k:[["hair","milk","birth","warm"]],model:"1) They have hair on their body. 2) They give birth to young ones. 3) They produce milk to feed their young ones.",why:"Any of: hair on body, give birth, produce milk, take care of babies, warm-blooded."},
+{t:"subj",q:"Why does a fish lay so many eggs? Explain.",k:[["eaten","eat","predator","predators","survive"]],model:"A fish lays many eggs because most of them are eaten by predators, so only a few survive.",why:"Key idea: many eggs are eaten by predators."},
+{t:"subj",q:"How do birds show parental care? Give one way.",k:[["nest","sit","incubat","warm","feed","protect","teach","fly"]],model:"Birds build nests, sit on their eggs to keep them warm (incubation), protect the chicks, and feed them and teach them to fly.",why:"Key idea: nest / incubation / protect / feed / teach to fly."},
+{t:"pair",q:"Match each animal to how it reproduces!",pairs:[["Cow","Gives birth to a baby"],["Hen","Lays eggs"],["Frog","Lays eggs in water"],["Dog","Gives birth to puppies"],["Snake","Lays eggs"]],why:"Mammals give birth; birds, frogs and reptiles lay eggs."},
+{t:"pair",q:"Match each part of an egg to its description!",pairs:[["Shell","Hard outer covering"],["Albumen","The white part"],["Yolk","The yellow central part"],["Embryo","The growing baby"]],why:"Shell protects; albumen is white; yolk is yellow; embryo is the baby."},
+{t:"bucket",q:"Sort each animal: does it LAY EGGS or GIVE BIRTH?",b1:"LAYS EGGS 🥚",b2:"GIVES BIRTH 🐣",items:[["Hen",1],["Cow",2],["Frog",1],["Dog",2],["Snake",1],["Whale",2],["Crocodile",1],["Cat",2],["Butterfly",1],["Human",2]],why:"Birds, frogs, reptiles and insects lay eggs. Mammals like cow, dog, whale, cat and human give birth."},
+{t:"bucket",q:"Sort each animal: is it a MAMMAL or NOT a mammal?",b1:"MAMMAL 🐘",b2:"NOT A MAMMAL 🦎",items:[["Whale",1],["Bat",1],["Snake",2],["Dog",1],["Frog",2],["Cow",1],["Hen",2],["Dolphin",1]],why:"Mammals give birth and feed milk (whale, bat, dog, cow, dolphin). Snakes, frogs and hens are not mammals."},
+{t:"order",q:"Put the parts of a chick hatching in the right order!",items:["A hen lays an egg","The hen sits on the egg to keep it warm (incubation)","The embryo grows using the yolk and albumen","The shell breaks — the chick hatches out!"],why:"Lay → incubate → the embryo grows → hatch."}
+];
+
+const Q2=[
+{t:"mcq",q:"How many stages are there in the life cycle of a cockroach?",o:["5","2","4","3"],a:3,why:"A cockroach has 3 stages: egg, nymph and adult."},
+{t:"mcq",q:"Which insect has THREE stages in its life cycle?",o:["Butterfly","Grasshopper","Housefly","Mosquito"],a:1,why:"A grasshopper (like a cockroach) has 3 stages: egg, nymph, adult."},
+{t:"mcq",q:"The larva of a butterfly is called a ________.",o:["pupa","cocoon","caterpillar","adult"],a:2,why:"The larva of a butterfly is the caterpillar."},
+{t:"mcq",q:"In which stage does a caterpillar weave a protective layer around itself?",o:["pupa","larva","adult","egg"],a:0,why:"In the pupa stage the caterpillar makes a protective cocoon around itself."},
+{t:"mcq",q:"Which is the RESTING stage of a butterfly's life cycle?",o:["Egg","Caterpillar","Pupa","Butterfly"],a:2,why:"The pupa is the resting stage."},
+{t:"mcq",q:"The pupa of a moth or butterfly is also called a ________.",o:["nymph","chrysalis","larva","embryo"],a:1,why:"The pupa of a butterfly/moth is called a chrysalis."},
+{t:"mcq",q:"Why can a tadpole NOT live on land?",o:["It has no legs","It has gills, not lungs, so it breathes in water","It is too small","It cannot see"],a:1,why:"A tadpole has gills (not lungs), so it can only breathe in water."},
+{t:"mcq",q:"What is the correct order of a butterfly's life cycle?",o:["Egg → Pupa → Caterpillar → Butterfly","Egg → Caterpillar → Pupa → Butterfly","Caterpillar → Egg → Butterfly → Pupa","Butterfly → Pupa → Egg → Caterpillar"],a:1,why:"Egg → Caterpillar (larva) → Pupa → Butterfly."},
+{t:"mcq",q:"What is the main function of a cocoon?",o:["To give food","For protection","To help it fly","To lay eggs"],a:1,why:"The cocoon is used for protection while the pupa changes."},
+{t:"fill",q:"________ is the process by which old skin is shed and replaced with new skin.",a:["moulting","molting","moult","molt"],bank:["Moulting","Hatching","Incubation"],why:"Moulting — a nymph grows bigger each time it moults."},
+{t:"fill",q:"The pupa of a butterfly or moth is called a ________.",a:["chrysalis"],bank:["Chrysalis","Nymph","Larva"],why:"Chrysalis is another name for the butterfly's pupa."},
+{t:"fill",q:"A young cockroach that hatches from the egg is called a ________.",a:["nymph"],bank:["Nymph","Larva","Pupa"],why:"A nymph looks like an adult but has no wings."},
+{t:"fill",q:"The process of change from a young form into an adult form is called ________.",a:["metamorphosis"],bank:["metamorphosis","hatching","moulting"],why:"Metamorphosis — like caterpillar to butterfly."},
+{t:"fill",q:"The ________ is the resting stage of a butterfly's life cycle.",a:["pupa"],bank:["pupa","larva","egg"],why:"The pupa is the resting stage."},
+{t:"fill",q:"A tadpole breathes with its ________ while living in water.",a:["gills","gill"],bank:["gills","lungs","nose"],why:"Tadpoles have gills, like fish."},
+{t:"tf",q:"Caterpillars spin a cocoon before turning into a butterfly.",a:true,why:"True — the caterpillar spins a cocoon around itself before becoming a butterfly."},
+{t:"tf",q:"A nymph looks like an adult cockroach but does not have wings.",a:true,why:"True — a nymph resembles the adult but has no wings yet."},
+{t:"tf",q:"A butterfly has only two stages in its life cycle.",a:false,why:"False — a butterfly has FOUR stages: egg, caterpillar, pupa and butterfly."},
+{t:"tf",q:"A tadpole can live and breathe easily on dry land.",a:false,why:"False — a tadpole has gills, not lungs, so it can only breathe in water."},
+{t:"tf",q:"A nymph grows bigger in size each time it moults.",a:true,why:"True — with each moult the nymph grows larger."},
+{t:"tf",q:"Metamorphosis means the change from a young form to an adult form.",a:true,why:"True — like caterpillar changing into a butterfly."},
+{t:"oneword",q:"The pupa of a butterfly or moth is called a ________?",a:["chrysalis"],why:"Chrysalis."},
+{t:"oneword",q:"A young cockroach that hatches from an egg and has no wings.",a:["nymph"],why:"Nymph."},
+{t:"oneword",q:"The process of change from an immature young form to an adult form.",a:["metamorphosis"],why:"Metamorphosis."},
+{t:"oneword",q:"The larva of a butterfly is called a ________?",a:["caterpillar","catterpillar"],why:"Caterpillar."},
+{t:"subj",q:"Define MOULTING in one sentence.",k:[["old skin","skin"],["shed","replaced","new","off"]],model:"Moulting is the process by which old skin is shed and replaced with a new skin.",why:"Key idea: old skin is shed and replaced with new skin."},
+{t:"subj",q:"What is a CHRYSALIS?",k:[["pupa"],["butterfly","moth"]],model:"A chrysalis is the pupa of a butterfly or moth.",why:"Key idea: pupa of a butterfly/moth."},
+{t:"subj",q:"What is METAMORPHOSIS?",k:[["change"],["young","immature","adult"]],model:"Metamorphosis is the process of change from an immature young form to an adult form.",why:"Key idea: change from young form to adult form."},
+{t:"subj",q:"Why can tadpoles NOT live on land?",k:[["gill","gills"],["water","breathe","lung","lungs"]],model:"Tadpoles cannot live on land because they do not have lungs — they have gills to breathe in water.",why:"Key idea: they have gills (not lungs), so they breathe in water."},
+{t:"pair",q:"Match each life-cycle word to its meaning!",pairs:[["Hatching","Baby breaks out of the egg shell"],["Incubation","Sitting on eggs to keep them warm"],["Moulting","Shedding old skin for new skin"],["Metamorphosis","Change from young form to adult"],["Chrysalis","Another name for a butterfly's pupa"]],why:"These are the key words of the chapter."},
+{t:"pair",q:"Match the animal to the number of stages in its life cycle!",pairs:[["Butterfly","4 stages"],["Cockroach","3 stages"],["Grasshopper","3 stages (egg, nymph, adult)"]],why:"Butterfly has 4 stages; cockroach and grasshopper have 3."},
+{t:"bucket",q:"Sort each word: is it a stage of a FROG or a BUTTERFLY?",b1:"FROG 🐸",b2:"BUTTERFLY 🦋",items:[["Tadpole",1],["Caterpillar",2],["Young frog",1],["Pupa",2],["Tadpole with legs",1],["Chrysalis",2],["Adult frog",1]],why:"Frog: tadpole, tadpole with legs, young frog, adult frog. Butterfly: caterpillar, pupa (chrysalis), butterfly."},
+{t:"order",q:"Put the FROG's life cycle in the correct order!",items:["Eggs","Tadpole","Tadpole with legs","Young frog","Adult frog"],why:"Eggs → tadpole → tadpole with legs → young frog → adult frog."},
+{t:"order",q:"Put the BUTTERFLY's life cycle in the correct order!",items:["Egg","Caterpillar (larva)","Pupa","Butterfly"],why:"Egg → caterpillar → pupa → butterfly."},
+{t:"order",q:"Put the COCKROACH's life cycle in the correct order!",items:["Egg","Nymph","Adult cockroach"],why:"Egg → nymph → adult."}
+];
+
+/* =====================================================
+   QUIZ ENGINE
+===================================================== */
+let quiz=[], qi=0, qDone=false;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startQuiz(ch){
+  let pool = ch===1?Q1.slice(): ch===2?Q2.slice(): Q1.concat(Q2);
+  quiz = shuffle(pool).slice(0, ch===0?20:12);
+  qi=0; showScreen("scrQuiz"); renderQ();
+}
+function mascotReact(good){
+  const m=document.getElementById("mascot");
+  m.className = "mascot " + (good?"happy":"sad");
+  setTimeout(()=>{m.className="mascot";}, 700);
+}
+function esc(s){return s.replace(/</g,"&lt;");}
+function tagFor(t){return {mcq:"Choose one",tf:"True or False?",fill:"Fill the blank",oneword:"One word answer",subj:"Write it!",pair:"Match the pairs",bucket:"Sort it!",order:"Put in order"}[t];}
+
+function renderQ(){
+  if(qi>=quiz.length){ finishQuiz(); return; }
+  qDone=false;
+  const q=quiz[qi], el=document.getElementById("quizCard");
+  document.getElementById("quizFill").style.width=(qi/quiz.length*100)+"%";
+  let h='<div class="qtag">'+tagFor(q.t)+' · '+(qi+1)+'/'+quiz.length+'</div><div class="qtext">'+q.q+'</div>';
+
+  if(q.t==="mcq"){
+    q.o.forEach((o,i)=>{h+='<button class="opt" onclick="ansMcq(this,'+i+')">'+o+'</button>';});
+  }
+  else if(q.t==="tf"){
+    h+='<button class="opt" onclick="ansTf(this,true)">✅ True</button><button class="opt" onclick="ansTf(this,false)">❌ False</button>';
+  }
+  else if(q.t==="fill"||q.t==="oneword"){
+    if(q.bank){h+='<div class="wordbank">'+q.bank.map(w=>'<span class="wb">'+w+'</span>').join('')+'</div>';}
+    h+='<input type="text" id="txtAns" autocomplete="off" placeholder="Type your answer..."><button class="action" onclick="ansText()">Check ✔</button>';
+  }
+  else if(q.t==="subj"){
+    h+='<input type="text" id="txtAns" autocomplete="off" placeholder="Write your answer in your own words..."><button class="action" onclick="ansSubj()">Check ✔</button>';
+  }
+  else if(q.t==="pair"){
+    const L=q.pairs.map((p,i)=>({txt:p[0],id:i})), R=shuffle(q.pairs.map((p,i)=>({txt:p[1],id:i})));
+    h+='<div class="pair-col"><div>'+L.map(x=>'<button class="pair-item" data-side="L" data-id="'+x.id+'" onclick="pairTap(this)">'+x.txt+'</button>').join('')+'</div>'+
+       '<div>'+R.map(x=>'<button class="pair-item" data-side="R" data-id="'+x.id+'" onclick="pairTap(this)">'+x.txt+'</button>').join('')+'</div></div>';
+  }
+  else if(q.t==="bucket"){
+    h+='<div style="text-align:center;margin:10px 0"><span class="sort-item" id="sortCurrent"></span></div>';
+    h+='<div class="bucket-zone">'+
+      '<button class="bucket" onclick="bucketTap(1)"><h4>'+q.b1+'</h4><div class="b-items" id="bk1"></div></button>'+
+      '<button class="bucket" onclick="bucketTap(2)"><h4>'+q.b2+'</h4><div class="b-items" id="bk2"></div></button></div>';
+  }
+  else if(q.t==="order"){
+    const items=shuffle(q.items.map((x,i)=>({txt:x,id:i})));
+    h+='<p style="font-size:13px;font-weight:700;color:#8A8496;margin-bottom:8px">Tap the steps in the correct order — first step first!</p>';
+    h+='<div class="order-list">'+items.map(x=>'<button class="order-item" data-id="'+x.id+'" onclick="orderTap(this)"><span class="num">?</span><span>'+x.txt+'</span></button>').join('')+'</div>';
+  }
+  h+='<div class="feedback" id="fb"></div><button class="action orange hidden" id="nextBtn" onclick="nextQ()">Next question →</button>';
+  el.innerHTML=h;
+
+  if(q.t==="bucket"){ bucketState={idx:0,items:shuffle(q.items.slice()),wrong:0}; showSortItem(); }
+  if(q.t==="pair") pairState={sel:null,done:0,wrong:0};
+  if(q.t==="order") orderState={next:0,wrong:0};
+  const txt=document.getElementById("txtAns"); if(txt) txt.focus();
+}
+
+function markDone(good,customMsg){
+  qDone=true;
+  const q=quiz[qi], fb=document.getElementById("fb");
+  fb.className="feedback show "+(good?"good":"bad");
+  fb.innerHTML=(good?"🎉 Correct! ":"💪 Not quite. ")+(customMsg||q.why||"");
+  document.getElementById("nextBtn").classList.remove("hidden");
+  mascotReact(good);
+  if(good) burstSmall();
+  else{
+    let correctText="";
+    if(q.t==="mcq") correctText=q.o[q.a];
+    else if(q.t==="tf") correctText=q.a?"True":"False";
+    else if(q.t==="fill"||q.t==="oneword") correctText=q.a[0];
+    else if(q.t==="subj") correctText=q.model;
+    else correctText="See explanation";
+    addMistake(q.q,correctText,q.why);
+  }
+  bumpProgress(good);
+}
+function nextQ(){ qi++; renderQ(); }
+function finishQuiz(){
+  const el=document.getElementById("quizCard");
+  document.getElementById("quizFill").style.width="100%";
+  el.innerHTML='<div style="text-align:center"><div style="font-size:56px">🏅</div><h2>Quiz finished!</h2>'+
+  '<p style="font-weight:700;margin:8px 0">Hootie is proud of you, Diksha!</p>'+
+  '<button class="action" onclick="goHome()">Back home</button>'+
+  (S.mistakes.length?'<button class="action ghost" onclick="showMistakes()">See my tricky questions ('+S.mistakes.length+')</button>':'')+'</div>';
+  burst("⭐");
+}
+
+/* ---- answer handlers ---- */
+function ansMcq(btn,i){
+  if(qDone)return;
+  const q=quiz[qi], opts=document.querySelectorAll(".opt");
+  opts.forEach(o=>o.classList.add("locked"));
+  if(i===q.a){btn.classList.add("correct");markDone(true);}
+  else{btn.classList.add("wrong");opts[q.a].classList.add("correct");markDone(false);}
+}
+function ansTf(btn,v){
+  if(qDone)return;
+  const q=quiz[qi], opts=document.querySelectorAll(".opt");
+  opts.forEach(o=>o.classList.add("locked"));
+  if(v===q.a){btn.classList.add("correct");markDone(true);}
+  else{btn.classList.add("wrong");opts[q.a?0:1].classList.add("correct");markDone(false);}
+}
+function norm(s){return s.toLowerCase().replace(/[^a-z0-9 -]/g,"").replace(/\s+/g," ").trim();}
+function ansText(){
+  if(qDone)return;
+  const q=quiz[qi], v=norm(document.getElementById("txtAns").value);
+  if(!v)return;
+  const ok=q.a.some(a=>norm(a)===v || (v.length>3 && norm(a).indexOf(v)===0));
+  markDone(ok, ok?null:("The answer is: <b>"+q.a[0]+"</b>. "+(q.why||"")));
+}
+function ansSubj(){
+  if(qDone)return;
+  const q=quiz[qi], v=norm(document.getElementById("txtAns").value);
+  if(!v)return;
+  const ok=q.k.every(group=>group.some(kw=>v.includes(norm(kw))));
+  markDone(ok, ok?("Great sentence! A model answer: <i>"+q.model+"</i>")
+               :("Good try! A model answer: <i>"+q.model+"</i>"));
+}
+/* pair */
+let pairState=null;
+function pairTap(el){
+  if(qDone||el.classList.contains("done"))return;
+  if(!pairState.sel){pairState.sel=el;el.classList.add("sel");return;}
+  if(pairState.sel===el){el.classList.remove("sel");pairState.sel=null;return;}
+  const a=pairState.sel,b=el;
+  if(a.dataset.side===b.dataset.side){a.classList.remove("sel");b.classList.add("sel");pairState.sel=b;return;}
+  if(a.dataset.id===b.dataset.id){
+    a.classList.remove("sel");a.classList.add("done");b.classList.add("done");
+    pairState.sel=null;pairState.done++;
+    if(pairState.done===quiz[qi].pairs.length) markDone(pairState.wrong===0, pairState.wrong===0?null:("You matched them all — but with "+pairState.wrong+" wrong tries. "+(quiz[qi].why||"")));
+  }else{
+    pairState.wrong++;
+    a.classList.remove("sel");a.classList.add("flash");b.classList.add("flash");
+    setTimeout(()=>{a.classList.remove("flash");b.classList.remove("flash");},450);
+    pairState.sel=null;
+  }
+}
+/* bucket */
+let bucketState=null;
+function showSortItem(){
+  const c=document.getElementById("sortCurrent");
+  if(bucketState.idx>=bucketState.items.length){
+    markDone(bucketState.wrong===0, bucketState.wrong===0?null:("All sorted — with "+bucketState.wrong+" slip"+(bucketState.wrong>1?"s":"")+". "+(quiz[qi].why||"")));
+    c.textContent="Done! 🎉";return;
+  }
+  c.textContent=bucketState.items[bucketState.idx][0];
+}
+function bucketTap(z){
+  if(qDone||bucketState.idx>=bucketState.items.length)return;
+  const item=bucketState.items[bucketState.idx], ok=item[1]===z;
+  const zone=document.getElementById("bk"+item[1]);
+  const s=document.createElement("span");s.textContent=item[0];
+  if(!ok){bucketState.wrong++;s.classList.add("wrongdrop");mascotReact(false);}
+  zone.appendChild(s);
+  bucketState.idx++;showSortItem();
+}
+/* order */
+let orderState=null;
+function orderTap(el){
+  if(qDone||el.classList.contains("sel"))return;
+  const id=+el.dataset.id;
+  if(id===orderState.next){
+    el.classList.add("sel");el.querySelector(".num").textContent=orderState.next+1;
+    orderState.next++;
+    if(orderState.next===quiz[qi].items.length) markDone(orderState.wrong===0, orderState.wrong===0?null:("Finished — with "+orderState.wrong+" wrong taps. "+(quiz[qi].why||"")));
+  }else{
+    orderState.wrong++;
+    el.style.borderColor="var(--bad)";setTimeout(()=>{el.style.borderColor="";},400);
+    mascotReact(false);
+  }
+}
+
+/* =====================================================
+   MISTAKES / SETTINGS / NAV
+===================================================== */
+function showMistakes(){
+  showScreen("scrMistakes");
+  const el=document.getElementById("mistakeList");
+  if(!S.mistakes.length){el.innerHTML='<div class="card" style="text-align:center"><div style="font-size:44px">🌈</div><b>No tricky questions right now. Amazing work!</b></div>';return;}
+  el.innerHTML=S.mistakes.map((m,i)=>
+    '<div class="mistake-entry"><div class="q">'+m.q+'</div><div class="a">✔ '+m.a+'</div>'+
+    (m.why?'<div class="why">'+m.why+'</div>':'')+
+    '<button class="dismiss" onclick="dismissMistake('+i+')">Got it! Remove ✔</button></div>').join('');
+}
+function dismissMistake(i){S.mistakes.splice(i,1);saveState();renderStats();showMistakes();}
+function showSettings(){
+  showScreen("scrSettings");
+  document.getElementById("backupCode").textContent=btoa(JSON.stringify(S));
+  document.getElementById("restoreFb").className="feedback";
+  hideReset();
+  if(typeof DikshaSync!=="undefined" && DikshaSync.isReady()){
+    document.getElementById("syncCard").style.display="";
+    const disp=document.getElementById("syncCodeDisplay");
+    disp.textContent=DikshaSync.getCode();
+    disp.onclick=function(){
+      const code=DikshaSync.getCode();
+      try{ if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code); disp.textContent="Copied! "+code; setTimeout(function(){disp.textContent=code;},1500); return; } }catch(e){}
+      window.prompt("Your sync code (copy it):",code);
+    };
+  }
+}
+function changeSyncCode(){
+  const input=window.prompt("Enter the sync code from her other device (e.g. TIGER-4271):");
+  if(!input) return;
+  if(DikshaSync.setCode(input)){
+    window.alert("Linked! Reloading to bring in progress from that code...");
+    window.location.reload();
+  }
+}
+function restoreProgress(){
+  const fb=document.getElementById("restoreFb");
+  try{
+    const obj=JSON.parse(atob(document.getElementById("restoreInput").value.trim()));
+    if(typeof obj.stars!=="number")throw 0;
+    S=Object.assign({stars:0,streak:0,lastDay:"",todayCount:0,mistakes:[]},obj);
+    saveState();renderStats();
+    fb.className="feedback show good";fb.textContent="Progress restored! 🎉";
+  }catch(e){fb.className="feedback show bad";fb.textContent="That code doesn't look right. Check and try again.";}
+}
+function askReset(){document.getElementById("resetConfirm").classList.add("show");}
+function hideReset(){document.getElementById("resetConfirm").classList.remove("show");}
+function doReset(){
+  S={stars:0,streak:0,lastDay:todayStr(),todayCount:0,mistakes:[]};
+  saveState();renderStats();hideReset();goHome();
+}
+function showScreen(id){
+  ["scrHome","scrLearn","scrQuiz","scrMistakes","scrSettings"].forEach(s=>document.getElementById(s).classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+function goHome(){showScreen("scrHome");renderStats();}
+
+/* confetti */
+function burst(emo){
+  const c=document.getElementById("celebrate");
+  for(let i=0;i<18;i++){
+    const s=document.createElement("div");s.className="confetti";
+    s.textContent=[emo,"✨","🎈","⭐"][i%4];
+    s.style.left=(Math.random()*100)+"%";s.style.animationDelay=(Math.random()*0.4)+"s";
+    c.appendChild(s);setTimeout(()=>s.remove(),2100);
+  }
+}
+function burstSmall(){
+  const c=document.getElementById("celebrate");
+  for(let i=0;i<5;i++){
+    const s=document.createElement("div");s.className="confetti";s.textContent="✨";
+    s.style.left=(30+Math.random()*40)+"%";c.appendChild(s);setTimeout(()=>s.remove(),1800);
+  }
+}
+
+/* boot */
+loadState();renderStats();
+const hr=new Date().getHours();
+document.getElementById("greeting").textContent =
+  hr<12?"Good morning Diksha! ☀️ Ready to explore how animals make babies? 🐣":
+  hr<17?"Hi Diksha! 🌤️ Let's learn about eggs, tadpoles and butterflies!":
+  "Good evening Diksha! 🌙 A little Science practice before bed?";
+_initialBoot = false;
+
+/* cross-device sync (optional, no-op until firebase-config.js is filled in) */
+if(typeof DikshaSync!=="undefined" && DikshaSync.init()){
+  DikshaSync.pull(LS_KEY).then(function(remote){
+    if(remote && (remote.updatedAt||0) > (S.updatedAt||0)){
+      S=Object.assign(S,remote);
+      renderStats();
+    }
+    DikshaSync.arm();
+    DikshaSync.push(LS_KEY, S);
+  });
+}
+</script>
+</body>
+</html>
