@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Special Classes - UDAI Test Series</title>
+<style>
+:root{
+  --night:#151238;
+  --dusk:#241a52;
+  --violet:#3d2a7a;
+  --gold:#ffc857;
+  --gold-deep:#e8a319;
+  --coral:#ff6b6b;
+  --mint:#3ddc97;
+  --cream:#fff6e6;
+  --ink:#100d2a;
+  --muted:#9d95c9;
+  --line:rgba(255,255,255,.14);
+  --r:18px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:'Segoe UI',Roboto,system-ui,-apple-system,sans-serif;
+  background:var(--night);
+  color:var(--cream);
+  min-height:100vh;
+  overflow-x:hidden;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.wrap{max-width:720px;margin:0 auto;padding:14px 14px 40px}
+h1,h2,h3,.disp{font-family:Georgia,'Times New Roman',serif;font-weight:700;letter-spacing:.01em}
+.mono{font-family:ui-monospace,'Courier New',monospace;font-variant-numeric:tabular-nums}
+
+/* ---------- sunrise signature ---------- */
+.sky{
+  position:relative;height:132px;border-radius:var(--r);overflow:hidden;
+  background:linear-gradient(180deg,#0d0a26 0%,#241a52 55%,#4a2f6e 100%);
+  border:1px solid var(--line);
+}
+.stars{position:absolute;inset:0;opacity:.75}
+.stars i{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.6;animation:tw 3s infinite ease-in-out}
+@keyframes tw{0%,100%{opacity:.15}50%{opacity:.85}}
+.horizon{position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(180deg,#5a3a7f,#2b1c53);border-top:2px solid rgba(255,200,87,.5)}
+.sun{
+  position:absolute;width:56px;height:56px;border-radius:50%;
+  background:radial-gradient(circle at 35% 35%,#fff3c4,var(--gold) 55%,var(--gold-deep));
+  box-shadow:0 0 34px 10px rgba(255,200,87,.35);
+  left:8%;bottom:-28px;transition:left .8s cubic-bezier(.2,.8,.3,1),bottom .8s cubic-bezier(.2,.8,.3,1);
+}
+.skytext{position:absolute;left:16px;top:14px;right:16px}
+.skytext .k{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);opacity:.9}
+.skytext .v{font-size:21px;margin-top:2px}
+.skytext .s{font-size:12px;color:var(--muted);margin-top:3px}
+
+/* ---------- cards / buttons ---------- */
+.card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:12px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.sect{
+  border:1px solid var(--line);border-radius:var(--r);padding:14px 12px;text-align:left;
+  background:var(--dusk);color:var(--cream);cursor:pointer;min-height:104px;
+  display:flex;flex-direction:column;justify-content:space-between;transition:transform .12s,box-shadow .12s;
+}
+.sect:active{transform:scale(.97)}
+.sect .em{font-size:26px;line-height:1}
+.sect .nm{font-family:Georgia,serif;font-size:17px;margin-top:6px}
+.sect .mt{font-size:11px;color:var(--muted);margin-top:4px}
+.bar{height:5px;border-radius:99px;background:rgba(255,255,255,.12);margin-top:8px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--gold);width:0;transition:width .5s}
+.s-reas{border-left:4px solid #7ee0ff}
+.s-math{border-left:4px solid var(--gold)}
+.s-sci{border-left:4px solid var(--mint)}
+.s-icso{border-left:4px solid var(--coral)}
+
+button{font-family:inherit;font-size:15px}
+.btn{
+  display:block;width:100%;padding:14px;border-radius:14px;border:none;cursor:pointer;
+  background:var(--gold);color:var(--ink);font-weight:700;margin-top:10px;transition:transform .1s
+}
+.btn:active{transform:scale(.98)}
+.btn.ghost{background:transparent;border:1px solid var(--line);color:var(--cream);font-weight:600}
+.btn.coral{background:var(--coral);color:#fff}
+.row{display:flex;gap:8px}
+.row .btn{margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.chip{padding:7px 12px;border-radius:99px;border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--cream);font-size:12.5px;cursor:pointer}
+.chip.on{background:var(--gold);color:var(--ink);border-color:var(--gold);font-weight:700}
+
+/* ---------- quiz ---------- */
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.back{background:none;border:1px solid var(--line);color:var(--cream);border-radius:11px;padding:8px 12px;cursor:pointer}
+.qmeta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-bottom:6px}
+.timer{height:6px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden;margin-bottom:12px}
+.timer span{display:block;height:100%;background:var(--mint);width:100%;transition:width 1s linear}
+.timer.warn span{background:var(--coral)}
+.qtext{font-size:18px;line-height:1.5;margin:4px 0 14px}
+.qtext .frac{font-family:ui-monospace,monospace}
+.opt{
+  display:block;width:100%;text-align:left;padding:14px;border-radius:14px;margin-top:9px;cursor:pointer;
+  background:rgba(255,255,255,.06);border:1.5px solid var(--line);color:var(--cream);font-size:15.5px;line-height:1.35
+}
+.opt .lb{display:inline-block;width:24px;height:24px;line-height:24px;text-align:center;border-radius:7px;background:rgba(255,255,255,.12);margin-right:9px;font-size:12.5px;font-weight:700}
+.opt.right{background:rgba(61,220,151,.18);border-color:var(--mint)}
+.opt.right .lb{background:var(--mint);color:var(--ink)}
+.opt.wrong{background:rgba(255,107,107,.16);border-color:var(--coral)}
+.opt.wrong .lb{background:var(--coral);color:#fff}
+.opt:disabled{cursor:default}
+.fb{margin-top:14px;padding:13px;border-radius:14px;font-size:14px;line-height:1.5;border:1px solid var(--line);background:rgba(255,255,255,.05)}
+.fb b{color:var(--gold)}
+.trapflag{display:inline-block;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink);background:var(--gold);padding:3px 8px;border-radius:99px;margin-bottom:8px;font-weight:700}
+
+/* ---------- misc ---------- */
+.stat{display:flex;gap:8px;margin-top:12px}
+.stat div{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.stat .n{font-size:20px;font-family:Georgia,serif}
+.stat .l{font-size:10.5px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-top:2px}
+.mb{border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:9px;background:rgba(255,255,255,.04)}
+.mb .qq{font-size:14px;line-height:1.45}
+.mb .aa{font-size:13px;color:var(--mint);margin-top:6px}
+.mb .ww{font-size:12.5px;color:var(--coral);margin-top:3px}
+.mb button{margin-top:9px;background:none;border:1px solid var(--line);color:var(--muted);border-radius:10px;padding:7px 12px;cursor:pointer;font-size:12.5px}
+textarea{width:100%;min-height:90px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.25);color:var(--cream);padding:10px;font-family:ui-monospace,monospace;font-size:12px}
+.hide{display:none}
+.note{font-size:12.5px;color:var(--muted);line-height:1.5;margin-top:8px}
+.confetti{position:fixed;top:-12px;width:9px;height:14px;z-index:99;pointer-events:none;border-radius:2px}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg);opacity:0}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+h2{font-size:22px;margin:2px 0 0}
+
+/* ---------- learn cards ---------- */
+.lcard{background:linear-gradient(180deg,#2b1f5e,#1d1544);border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:var(--r);padding:16px;margin-top:12px}
+.lcard h3{margin:0 0 8px;font-size:17px;color:var(--gold)}
+.lcard p{margin:0;font-size:15px;line-height:1.6}
+.lcard .eg{margin-top:10px;padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.28);font-family:ui-monospace,'Courier New',monospace;font-size:13.5px;line-height:1.7;white-space:pre-wrap}
+.lnav{display:flex;gap:8px;align-items:center;margin-top:12px}
+.lnav .btn{margin-top:0}
+.dots{display:flex;gap:5px;justify-content:center;margin-top:12px}
+.dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.2)}
+.dots i.on{background:var(--gold);width:18px;border-radius:99px}
+
+/* ---------- guess toggle ---------- */
+.guess{display:flex;align-items:center;gap:9px;margin-top:12px;padding:10px 12px;border-radius:12px;border:1px dashed var(--line);cursor:pointer;font-size:13.5px;color:var(--muted);background:none;width:100%;text-align:left}
+.guess.on{border-style:solid;border-color:var(--gold);color:var(--gold);background:rgba(255,200,87,.09)}
+.guess .bx{width:19px;height:19px;border-radius:6px;border:1.5px solid currentColor;flex:none;display:flex;align-items:center;justify-content:center;font-size:12px}
+
+/* ---------- omr sheet ---------- */
+.omr{background:#fff8ec;color:#1a1a1a;border-radius:var(--r);padding:14px;margin-top:12px}
+.omr .hd{font-family:Georgia,serif;font-size:14px;letter-spacing:.04em;border-bottom:2px solid #1a1a1a;padding-bottom:7px;margin-bottom:10px;display:flex;justify-content:space-between}
+.orow{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px dotted #c9bfa8;cursor:pointer}
+.orow .nu{width:26px;font-family:ui-monospace,monospace;font-size:12.5px;color:#555}
+.orow .bs{display:flex;gap:5px;flex:1}
+.orow .b{width:23px;height:23px;border-radius:50%;border:1.5px solid #8a8070;font-size:11px;display:flex;align-items:center;justify-content:center;color:#8a8070}
+.orow .b.mine{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.orow .b.key{border-color:#0a8a53;border-width:2.5px;color:#0a8a53;font-weight:700}
+.orow .b.mine.key{background:#0a8a53;border-color:#0a8a53;color:#fff}
+.orow .mk{width:20px;text-align:center;font-weight:700}
+.orow .mk.ok{color:#0a8a53}
+.orow .mk.no{color:#c0392b}
+.osec{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:#7a6f5c;margin:12px 0 3px;font-family:'Segoe UI',sans-serif}
+.expand{background:#efe5d0;border-radius:10px;padding:10px;font-size:13px;line-height:1.5;margin:6px 0 8px;color:#2a2418}
+
+/* ---------- topic breakdown ---------- */
+.tb{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--line);font-size:13.5px}
+.tb .nm{flex:1}
+.tb .sc{font-family:ui-monospace,monospace;font-size:13px}
+.tb .pill{width:52px;height:6px;border-radius:99px;background:rgba(255,255,255,.13);overflow:hidden}
+.tb .pill span{display:block;height:100%;background:var(--mint)}
+.tb.weak .pill span{background:var(--coral)}
+.tb.weak .nm{color:var(--coral)}
+.badge{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:99px;background:rgba(255,255,255,.12);color:var(--muted);margin-left:6px}
+.badge.new{background:var(--mint);color:var(--ink);font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+/* ============================================================
+   SPECIAL CLASSES - UDAI Test Series trainer
+   Built from Test Series-I (18 July 2026) error analysis.
+   ============================================================ */
+
+var BANK = {
+reasoning: [
+ {q:"Complete the analogy: Hospital is to Doctor as School is to ______",o:["Student","Teacher","Principal","Class"],a:1,t:"Analogy",w:"A doctor works in a hospital; a teacher works in a school. Match the worker to the workplace."},
+ {q:"Complete the analogy: Pen is to Write as Knife is to ______",o:["Sharp","Cut","Kitchen","Metal"],a:1,t:"Analogy",w:"Match the tool to its action, not to its material."},
+ {q:"Complete the analogy: Bird is to Nest as Bee is to ______",o:["Honey","Flower","Hive","Sting"],a:2,t:"Analogy",w:"Nest is a home, so look for the bee's home: the hive."},
+ {q:"Rahul is the brother of Sonia. Sonia is the mother of Keshav. How is Keshav related to Rahul?",o:["Son","Nephew","Father","Brother"],a:1,t:"Blood relations",w:"Sonia's son is Rahul's nephew, because Rahul is her brother."},
+ {q:"Meera is the daughter of Anil. Anil is the son of Kamala. How is Kamala related to Meera?",o:["Mother","Aunt","Grandmother","Sister"],a:2,t:"Blood relations",w:"Go up two steps: Meera to Anil to Kamala. That is a grandmother."},
+ {q:"Pointing to a photo, Ravi said 'She is the only daughter of my mother.' Who is in the photo?",o:["His sister","His mother","His daughter","Himself"],a:0,t:"Blood relations",w:"The only daughter of Ravi's mother is Ravi's sister."},
+ {q:"Find the missing letter: A, C, F, J, ______",o:["L","M","N","O"],a:3,t:"Letter series",w:"The gaps grow: +2, +3, +4, then +5. J is the 10th letter, 10+5=15, which is O."},
+ {q:"Find the missing letter: B, D, G, K, ______",o:["N","O","P","Q"],a:2,t:"Letter series",w:"Gaps are +2, +3, +4, +5. K is 11th, 11+5=16, which is P."},
+ {q:"Find the next term: 3, 6, 11, 18, ______",o:["25","27","29","24"],a:1,t:"Number series",w:"The differences are 3, 5, 7, so the next difference is 9. 18+9=27."},
+ {q:"Find the next term: 2, 6, 12, 20, 30, ______",o:["40","42","44","36"],a:1,t:"Number series",w:"Differences are 4, 6, 8, 10, so next is 12. 30+12=42."},
+ {q:"In a certain language, if POND is coded as RSTL, what would be the code for HEAR?",o:["JIGZ","GHIZ","GHIJ","JCLZ"],a:0,t:"Coding",w:"The shifts are +2, +4, +6, +8. H+2=J, E+4=I, A+6=G, R+8=Z."},
+ {q:"If CAT is coded as DBU, how is DOG coded?",o:["EPH","EPG","DPH","FQI"],a:0,t:"Coding",w:"Every letter moves forward by 1. D-E, O-P, G-H."},
+ {q:"If MOUSE is coded as 13-15-21-19-5, how is CAT coded?",o:["3-1-20","3-2-20","2-1-20","3-1-19"],a:0,t:"Coding",w:"Each letter becomes its position in the alphabet. C=3, A=1, T=20."},
+ {q:"If I double ______ and then subtract 50, I get 160.",o:["150","100","50","105"],a:3,t:"Work backwards",w:"Undo the steps in reverse: 160+50=210, then 210 divided by 2 = 105."},
+ {q:"I think of a number, add 15, then multiply by 3, and get 90. What was my number?",o:["15","20","25","30"],a:0,t:"Work backwards",w:"Reverse it: 90 divided by 3 = 30, then 30-15 = 15."},
+ {q:"If '+' means '-', '-' means 'x' and 'x' means '+', what is 23 - 45 x 6712 + 231 - 12 ?",o:["4975","6712","8841","2327"],a:0,t:"Symbol swap",w:"Rewrite first: 23 x 45 + 6712 - 231 x 12. Then BODMAS: 1035 + 6712 - 2772 = 4975."},
+ {q:"If '+' means 'divide' and 'divide' means '+', what is 36 + 6 divide 4 ?",o:["10","24","9","15"],a:0,t:"Symbol swap",w:"Rewrite: 36 divided by 6, then + 4. That is 6+4 = 10."},
+ {q:"If Kohli is not shorter than Dhoni, and Jadeja is shorter than Dhoni, who is the tallest?",o:["Kohli","Jadeja","Dhoni","Cannot be determined"],a:0,t:"Ranking",w:"'Not shorter than' means Kohli is taller than or equal to Dhoni, and Dhoni beats Jadeja. So Kohli is tallest."},
+ {q:"In a row of 20 children, Riya is 7th from the left. What is her position from the right?",o:["13th","14th","12th","15th"],a:1,t:"Ranking",w:"Total minus position plus 1: 20-7+1 = 14."},
+ {q:"If the day before yesterday was Saturday, what day will it be the day after tomorrow?",o:["Tuesday","Wednesday","Thursday","Friday"],a:1,t:"Calendar",w:"Saturday, then Sunday was yesterday, so today is Monday. Two days on is Wednesday."},
+ {q:"If today is Thursday, what day was it 16 days ago?",o:["Monday","Tuesday","Wednesday","Friday"],a:1,t:"Calendar",w:"16 divided by 7 leaves remainder 2. Go back 2 days from Thursday to get Tuesday."},
+ {q:"Find the missing value: (O 16 Q), (R 19 T), (U 22 W), (? ? ?)",o:["A 2 C","K 13 M","X 25 Z","M 14 O"],a:2,t:"Alphabet-number",w:"O=15 and Q=17, so 16 is the letter between them. The next group starts at X=24, Z=26, middle number 25."},
+ {q:"Which pair follows the same rule as (D 4 F)?",o:["G 7 I","H 9 J","K 12 M","P 15 R"],a:0,t:"Alphabet-number",w:"D is the 4th letter and F is two ahead. G is the 7th letter and I is two ahead."},
+ {q:"Which one does not belong: Square, Rectangle, Triangle, Cube?",o:["Square","Rectangle","Triangle","Cube"],a:3,t:"Odd one out",w:"A cube is a solid shape. The other three are flat shapes."},
+ {q:"Which one does not belong: Rose, Lotus, Mango, Sunflower?",o:["Rose","Lotus","Mango","Sunflower"],a:2,t:"Odd one out",w:"Mango is a fruit; the others are flowers."},
+ {q:"Which one does not belong: 27, 64, 100, 125?",o:["27","64","100","125"],a:2,t:"Odd one out",w:"27, 64 and 125 are cubes (3x3x3, 4x4x4, 5x5x5). 100 is not."},
+ {q:"A clock shows 3:00. What is the angle between the hands?",o:["60 degrees","90 degrees","120 degrees","45 degrees"],a:1,t:"Clock",w:"Each hour mark is 30 degrees apart. Three hour marks make 90 degrees."},
+ {q:"Ankit walks 4 km North, then 3 km East. How far is he from the start?",o:["7 km","5 km","6 km","4 km"],a:1,t:"Direction",w:"This makes a 3-4-5 right triangle, so the straight-line distance is 5 km."},
+ {q:"Facing North, Priya turns 90 degrees clockwise, then 180 degrees clockwise. Which way is she facing?",o:["North","South","East","West"],a:3,t:"Direction",w:"North to East is the first turn, then East plus 180 degrees is West."},
+ {q:"A cube is painted red on all faces and cut into 27 small cubes. How many small cubes have no paint at all?",o:["0","1","6","8"],a:1,t:"Cubes",w:"Only the single cube hidden right in the middle has no painted face."}
+],
+
+mathematics: [
+ {q:"5749 x 5 x 10 x 0 x 8 = ______",o:["229960","26675","0","2299600"],a:2,t:"Traps",trap:1,w:"Look for the zero before you start multiplying. Anything multiplied by 0 is 0."},
+ {q:"847 x 96 x 0 x 23 = ______",o:["0","1869","81312","1"],a:0,t:"Traps",trap:1,w:"A zero anywhere in a multiplication chain makes the whole answer 0."},
+ {q:"573 x 225 - 473 x 225 = ______",o:["22500","2250","225000","225"],a:0,t:"Traps",trap:1,w:"Both terms share 225. Take it out: (573-473) x 225 = 100 x 225 = 22500."},
+ {q:"495 x 192 + 505 x 192 = ______",o:["192000","1000192","1921000","192001"],a:0,t:"Traps",trap:1,w:"495+505 = 1000, so this is 1000 x 192 = 192000. No long multiplication needed."},
+ {q:"68 x 99 + 68 = ______",o:["6800","6732","6868","680"],a:0,t:"Traps",trap:1,w:"68 x 99 + 68 x 1 = 68 x 100 = 6800."},
+ {q:"236 x 8 x 125 = ______",o:["236000","23600","2360000","118000"],a:0,t:"Traps",trap:1,w:"Pair the friendly numbers first: 8 x 125 = 1000, then 236 x 1000."},
+ {q:"What must be added to 5678469 to make 6164324 ?",o:["458855","485855","487625","467825"],a:1,t:"Addition & subtraction",w:"Subtract: 6164324 - 5678469 = 485855. Then check by adding back."},
+ {q:"Solve: 4695132 + 69549 - 5905 - 132",o:["4758646","4758464","4758644","4578644"],a:2,t:"Addition & subtraction",trap:1,w:"4764681, then 4758776, then 4758644. Read the options slowly - two of them are the same digits in a swapped order."},
+ {q:"Subtract the predecessor of the greatest 7-digit number from the successor of the greatest 8-digit number.",o:["9000002","9000008","90000002","1000002"],a:2,t:"Numeration",w:"Successor of 99999999 is 100000000. Predecessor of 9999999 is 9999998. The difference is 90000002 - count the zeroes carefully."},
+ {q:"The numeral for ninety million ninety thousand ninety is ______",o:["90090090","9090090","909090","90900090"],a:0,t:"Numeration",w:"90 million = 90,000,000. Add 90,000 and 90 to get 90,090,090."},
+ {q:"The number of zeroes in 100 million is ______",o:["7","8","9","3"],a:1,t:"Numeration",w:"1 million has 6 zeroes, so 100 million is 100000000, which has 8 zeroes."},
+ {q:"How many 7-digit numbers are there in all?",o:["8999999","9000000","1000000","9999999"],a:1,t:"Numeration",w:"From 1000000 to 9999999. Count = 9999999 - 1000000 + 1 = 9000000."},
+ {q:"The place value of 8 in 185003 is ______",o:["8000","8","80000","800"],a:2,t:"Numeration",w:"The 8 sits in the ten-thousands place, so its value is 80000."},
+ {q:"The greatest 6-digit number formed using the digits 4, 0, 3 and 1 is ______",o:["443100","444310","443010","443110"],a:1,t:"Numeration",w:"Repeat the biggest digit as much as you can, then place the rest in descending order: 444310."},
+ {q:"Write 5 crore 6 lakh 40 thousand 8 in figures.",o:["50640008","5640008","506400008","50064008"],a:0,t:"Numeration",w:"5,06,40,008 in the Indian system, which is 50640008."},
+ {q:"1 million equals how many lakhs?",o:["1 lakh","10 lakh","100 lakh","5 lakh"],a:1,t:"Numeration",w:"1 million = 1000000 = 10 lakh."},
+ {q:"The quotient obtained on dividing 10920 by 56 is ______",o:["159","195","192","198"],a:1,t:"Division",w:"56 x 195 = 10920. Check by multiplying your answer back."},
+ {q:"765765 divided by 765 = ______",o:["11","101","1001","1111"],a:2,t:"Division",w:"765765 is 765 x 1001, because the digit pattern repeats."},
+ {q:"A number 56485 when divided by a certain number gives 1086 as quotient and 13 as remainder. Find the divisor.",o:["25","15","52","62"],a:2,t:"Division",w:"Subtract the remainder first: 56485 - 13 = 56472. Then 56472 divided by 1086 = 52."},
+ {q:"A number when divided by 46 gives 11 as quotient and 15 as remainder. The number is ______",o:["491","521","701","679"],a:1,t:"Division",w:"Number = divisor x quotient + remainder = 46 x 11 + 15 = 521."},
+ {q:"A machine fills 84 bottles of syrup in 1 minute. How many bottles can it fill in 2 hours?",o:["5040","10080","10800","50400"],a:1,t:"Word problems",w:"2 hours = 120 minutes. 84 x 120 = 10080."},
+ {q:"If the cost of 64 electric fans is Rs 8704, then the cost of 1 fan is ______",o:["Rs 1350","Rs 136","Rs 2176","Rs 185"],a:1,t:"Word problems",w:"Divide, do not multiply: 8704 divided by 64 = 136."},
+ {q:"A student multiplied 6235 by 75 instead of 57. How much greater was his answer than the correct answer?",o:["121230","112230","112320","121320"],a:1,t:"Word problems",trap:1,w:"The gap is 6235 x (75-57) = 6235 x 18 = 112230. Two options are the same digits shuffled, so check each digit."},
+ {q:"A shopkeeper packs 3456 pencils into boxes of 24. How many boxes does he fill?",o:["144","134","154","124"],a:0,t:"Word problems",w:"3456 divided by 24 = 144."},
+ {q:"Round off 69545 to the nearest thousand and divide the result by 200.",o:["70","350","160","700"],a:1,t:"Rounding",w:"69545 rounds to 70000 because 545 is more than 500. Then 70000 divided by 200 = 350."},
+ {q:"Round off 48672 to the nearest hundred.",o:["48600","48700","48000","49000"],a:1,t:"Rounding",w:"The tens digit is 7, which is 5 or more, so round up to 48700."},
+ {q:"What least number should replace * so that 653*47 is divisible by 11?",o:["9","6","2","1"],a:3,t:"Divisibility",w:"For 11, subtract the alternate digit sums. Here that gives * - 1, which must be 0, so * = 1."},
+ {q:"The number 600721 is exactly divisible by ______",o:["3","11","5","7"],a:1,t:"Divisibility",w:"Alternate digits: 1+7+0 = 8 and 2+0+6 = 8. The difference is 0, so it is divisible by 11."},
+ {q:"Which of the following numbers is divisible by 6?",o:["289358","198052","49830","84735"],a:2,t:"Divisibility",w:"Divisible by 6 means divisible by both 2 and 3. 49830 is even, and its digits add to 24, which is a multiple of 3."},
+ {q:"If the last two digits of a number are '00', the number is always divisible by ______",o:["2, 4, 7","2, 4, 5, 10","2, 3, 10","2, 8, 10, 20"],a:1,t:"Divisibility",w:"Ending in 00 means it is a multiple of 100, so 2, 4, 5 and 10 all divide it. 8 and 20 do not always."},
+ {q:"A number is divisible by 9 if ______",o:["it ends in 9","the sum of its digits is divisible by 9","it is even","it ends in 0"],a:1,t:"Divisibility",w:"Add all the digits. If that total is a multiple of 9, so is the number."},
+ {q:"Which number is divisible by 4?",o:["73218","51134","62516","40922"],a:2,t:"Divisibility",w:"Check only the last two digits. 16 is divisible by 4."},
+ {q:"Numbers which are divisible by 1 and itself only are called ______ numbers.",o:["odd","twin prime","coprime","prime"],a:3,t:"Primes & factors",w:"Exactly two factors, 1 and the number itself, means it is prime."},
+ {q:"Which of the following pairs of numbers are co-primes?",o:["8, 12","9, 10","6, 8","15, 18"],a:1,t:"Primes & factors",w:"Co-prime means their only common factor is 1. 9 and 10 share nothing else; 8 and 12 share 4."},
+ {q:"Which of the following pairs are twin primes?",o:["2, 3","3, 15","15, 45","71, 73"],a:3,t:"Primes & factors",w:"Twin primes are primes that differ by exactly 2. 71 and 73 fit; 2 and 3 differ by 1."},
+ {q:"A pair of consecutive prime numbers is ______",o:["5, 6","2, 3","19, 20","111, 112"],a:1,t:"Primes & factors",w:"Both numbers must be prime and next to each other in the prime list. 2 and 3 are both prime."},
+ {q:"When 19 is subtracted from the sum of all the factors of 18, the result is ______",o:["2","11","20","39"],a:2,t:"Primes & factors",w:"Factors of 18 are 1, 2, 3, 6, 9, 18 and they add to 39. Then 39-19 = 20."},
+ {q:"How many factors does 24 have?",o:["6","7","8","9"],a:2,t:"Primes & factors",w:"1, 2, 3, 4, 6, 8, 12, 24. That is 8 factors."},
+ {q:"The smallest prime number is ______",o:["0","1","2","3"],a:2,t:"Primes & factors",w:"1 has only one factor, so it is not prime. 2 is the smallest prime and the only even one."},
+ {q:"What is the HCF of 24 and 36?",o:["6","12","4","18"],a:1,t:"Primes & factors",w:"Common factors are 1, 2, 3, 4, 6, 12. The highest is 12."},
+ {q:"What is the LCM of 6 and 8?",o:["48","24","12","16"],a:1,t:"Primes & factors",w:"Multiples of 8: 8, 16, 24. 24 is the first one that 6 also divides."},
+ {q:"A number is a common multiple of 6 and 8 but not a multiple of 9. When 7 fives are added to it, the result is ______",o:["72","80","107","131"],a:3,t:"Primes & factors",w:"Common multiples of 6 and 8 are 24, 48, 72, 96. Drop 72 because it is a multiple of 9. 96 + 35 = 131."},
+ {q:"Simplify: 19 of 16 + 45 x 16 - 32 divided by 8",o:["1028","1020","1012","1008"],a:1,t:"BODMAS",w:"'of' comes first: 19 x 16 = 304. Then 45 x 16 = 720 and 32 divided by 8 = 4. So 304 + 720 - 4 = 1020."},
+ {q:"Simplify: 36 divided by 6 of 3 + 4",o:["6","22","10","2"],a:0,t:"BODMAS",trap:1,w:"'of' is done before dividing: 6 of 3 = 18. Then 36 divided by 18 = 2, plus 4 = 6."},
+ {q:"Simplify: 22 divided by [2 + {12 x (10 + 10) divided by 12}]",o:["24","1","14","0"],a:1,t:"BODMAS",w:"Inside out: 12 x 20 = 240, divided by 12 = 20. Then 2+20 = 22, and 22 divided by 22 = 1."},
+ {q:"Simplify: 257 - [128 - {26 - (6 - (4 - 1))}]",o:["26","105","152","200"],a:2,t:"BODMAS",trap:1,w:"Innermost first: 4-1 = 3, then 6-3 = 3, then 26-3 = 23, then 128-23 = 105, then 257-105 = 152. Now copy 152 onto the answer sheet exactly - this is where marks get thrown away."},
+ {q:"Simplify: 100 - [40 - {20 - (10 - 5)}]",o:["75","85","65","95"],a:0,t:"BODMAS",w:"10-5 = 5, then 20-5 = 15, then 40-15 = 25, then 100-25 = 75."},
+ {q:"The correct Roman numeral for 15979 is ______",o:["XVCMLXXIX","XVMCLXXIX","XVLCMXXIV","XV with bar, then CMLXXIX"],a:3,t:"Roman numerals",w:"A bar over XV multiplies it by 1000, giving 15000. Then 979 is CMLXXIX."},
+ {q:"Solve and write the answer in Roman numerals: 4235 + 1607 - 428",o:["V with bar, then IV","IV with bar, then CDXIV","V with bar, then DCIV","V with bar, then CDXIV"],a:3,t:"Roman numerals",w:"4235 + 1607 = 5842, minus 428 = 5414. That is 5000 (V with a bar) plus CDXIV."},
+ {q:"Which Roman numeral is written incorrectly?",o:["XL","IC","CM","XC"],a:1,t:"Roman numerals",w:"Only I, X and C can be subtracted, and only from the next two bigger symbols. IC is not allowed; 99 is XCIX."},
+ {q:"What is MMXXVI in figures?",o:["2026","2016","1926","2226"],a:0,t:"Roman numerals",w:"MM = 2000, XX = 20, VI = 6."},
+ {q:"The missing digits: 5 [a] 4 2 5 [b] 8 minus [c] 7 3 [d] 8 7 9 = 2605689. Find a, b, c, d.",o:["3, 6, 2, 6","6, 3, 2, 6","6, 2, 6, 3","3, 6, 6, 2"],a:0,t:"Missing digits",w:"Add the answer back to the number being subtracted, column by column, and the digits fall out: a=3, b=6, c=2, d=6."},
+ {q:"Find the missing digits: 32749[x] + 4[z]4[y]93 = 772390",o:["x=7, y=8, z=4","x=2, y=8, z=4","x=7, y=4, z=8","x=6, y=8, z=9"],a:0,t:"Missing digits",w:"Start at the units column: x+3 must end in 0, so x=7. Carry across and the rest follow."},
+ {q:"The product of the greatest and the smallest 3-digit number formed with the digits 6, 3 and 8 is ______",o:["327584","317584","347584","275846"],a:1,t:"Word problems",w:"Greatest is 863, smallest is 368. 863 x 368 = 317584."},
+ {q:"The greatest 5-digit number exactly divisible by 55 is ______",o:["99980","99918","99990","99999"],a:2,t:"Divisibility",w:"99999 divided by 55 gives 1818 with a remainder. 1818 x 55 = 99990."},
+ {q:"Subtract the sum of the 6th multiple of 7 and the 3rd multiple of 9 from the 11th multiple of 12. The result is the ______ multiple of 7.",o:["3rd","9th","7th","6th"],a:1,t:"Primes & factors",w:"11 x 12 = 132. 42 + 27 = 69. 132 - 69 = 63, and 63 is 9 x 7."},
+ {q:"Estimate 4987 + 3012 by rounding each number to the nearest thousand.",o:["8000","7000","9000","8500"],a:0,t:"Rounding",w:"4987 rounds to 5000 and 3012 rounds to 3000. Together, 8000."}
+],
+
+science: [
+ {q:"The rate of evaporation of water is lower when ______",o:["the temperature is higher","the wind is stronger","the area of exposed surface is greater","the humidity of surrounding air is higher"],a:3,t:"Evaporation",w:"Damp air is already full of water vapour, so it cannot take in much more. Heat, wind and a wide surface all speed evaporation up."},
+ {q:"In which condition does evaporation happen the slowest?",o:["When the air is humid as on a rainy day","When it is windy","When the air is dry","When it is hot and sunny"],a:0,t:"Evaporation",w:"Humid air slows evaporation the most, because it already holds a lot of water vapour."},
+ {q:"Equal water is poured into four containers. Evaporation is slowest in the one with ______",o:["the widest open top","the narrowest neck","the tallest sides","the thickest glass"],a:1,t:"Evaporation",w:"Less exposed surface means fewer water particles can escape, so a narrow-necked flask is slowest."},
+ {q:"Which of the following is NOT a greenhouse gas?",o:["Carbon dioxide","Methane","Water vapour","Oxygen"],a:3,t:"Weather & climate",w:"Oxygen does not trap heat in the atmosphere the way the other three do."},
+ {q:"What do we call the daily condition of the atmosphere at a place?",o:["Weather","Climate","Season","Forecast"],a:0,t:"Weather & climate",w:"Weather changes day to day. Climate is the average pattern over many years."},
+ {q:"Seasons on the Earth are mainly because of ______",o:["the presence of plants and animals","the tilt of Earth's axis","the spherical shape of the Earth","the varying distance between Earth and the Sun"],a:1,t:"Weather & climate",w:"The tilt changes how directly sunlight hits each half of the Earth through the year. Distance is not the main reason."},
+ {q:"Many countries signed an agreement to reduce greenhouse gases. It is called the ______",o:["Medical Protocol","Research Protocol","Kyoto Protocol","Data and Network Protocol"],a:2,t:"Weather & climate",w:"The Kyoto Protocol is the well-known agreement on cutting greenhouse gas emissions."},
+ {q:"During humid weather we feel ______",o:["cool and dry","hot and windy","sticky and uncomfortable","happy and joyful"],a:2,t:"Weather & climate",w:"Sweat cannot evaporate easily from the skin in damp air, so we feel sticky."},
+ {q:"At night, land cools faster than the sea. This causes ______",o:["a sea breeze","a land breeze","a cyclone","a monsoon"],a:1,t:"Weather & climate",w:"Air moves from the cooler land out to the warmer sea, which is a land breeze. In the day it is the other way round."},
+ {q:"Which clothes on a washing line dry fastest?",o:["Those spread out in sun and wind","Those folded in a bundle","Those in the shade","Those piled on top of each other"],a:0,t:"Evaporation",w:"More surface exposed to heat and moving air means faster evaporation."},
+ {q:"The bulb-like structure of the brain is known as the ______",o:["cerebrum","medulla","cerebellum","spine"],a:1,t:"Nervous system",w:"The medulla sits at the base of the brain and is shaped like a bulb, joining the brain to the spinal cord."},
+ {q:"Which part of the brain controls balance and body posture?",o:["Cerebrum","Cerebellum","Medulla","Spinal cord"],a:1,t:"Nervous system",w:"The cerebellum handles balance and coordinated movement."},
+ {q:"Which part of the brain is used for thinking, memory and reasoning?",o:["Cerebrum","Cerebellum","Medulla","Spinal cord"],a:0,t:"Nervous system",w:"The cerebrum is the largest part and does the thinking work."},
+ {q:"Which nerve carries sound vibrations to the brain?",o:["Olfactory nerve","Optic nerve","Sensory nerve","Auditory nerve"],a:3,t:"Nervous system",w:"'Auditory' relates to hearing. Optic is for sight and olfactory is for smell."},
+ {q:"______ nerves carry information from our sense organs to our brain.",o:["Motor","Mixed","Sensory","Both motor and mixed"],a:2,t:"Nervous system",w:"Sensory nerves carry messages in. Motor nerves carry commands out to the muscles."},
+ {q:"______ is the longest cell in the human body.",o:["Stem cell","Blood cell","Muscle cell","Neuron"],a:3,t:"Nervous system",w:"A neuron can stretch a very long way, carrying messages from the spinal cord to the toes."},
+ {q:"The medulla controls activities such as ______",o:["reading and writing","heartbeat and breathing","running and jumping","seeing colours"],a:1,t:"Nervous system",w:"The medulla runs the automatic jobs we never have to think about."},
+ {q:"What connects skeletal muscles to the bones?",o:["Ligaments","Tendons","Cartilage","Joints"],a:1,t:"Skeleton & muscles",w:"Tendons join muscle to bone. Ligaments join bone to bone."},
+ {q:"Knee and elbow joints are examples of ______",o:["Hinge joint","Pivot joint","Ball and socket joint","Fixed joint"],a:0,t:"Skeleton & muscles",w:"They swing one way only, like a door hinge. The shoulder and hip are ball and socket joints."},
+ {q:"The shoulder joint is an example of a ______",o:["Hinge joint","Ball and socket joint","Pivot joint","Fixed joint"],a:1,t:"Skeleton & muscles",w:"It rotates in almost every direction, which is what a ball and socket joint allows."},
+ {q:"The skull is made up of how many facial bones and flat bones?",o:["10 facial and 5 flat","14 facial and 8 flat","8 facial and 14 flat","12 facial and 12 flat"],a:1,t:"Skeleton & muscles",w:"14 facial bones and 8 flat cranial bones make up the skull."},
+ {q:"Which joint allows no movement at all?",o:["Hinge joint","Fixed joint","Pivot joint","Gliding joint"],a:1,t:"Skeleton & muscles",w:"Fixed joints, like those between the skull bones, lock together."},
+ {q:"Which organ is protected by the rib cage?",o:["Brain","Heart and lungs","Liver only","Kidneys"],a:1,t:"Skeleton & muscles",w:"The ribs form a cage around the heart and lungs."},
+ {q:"Muscles work in pairs because a muscle can only ______",o:["push","pull","twist","stretch by itself"],a:1,t:"Skeleton & muscles",w:"A muscle pulls when it contracts, so another muscle is needed to pull the bone back."},
+ {q:"What is the tough, white outer layer that maintains the shape of the eyeball?",o:["Sclera","Iris","Pupil","Cornea"],a:0,t:"Sense organs",w:"The sclera is the white of the eye. The cornea is the clear front window."},
+ {q:"The ______ controls the amount of light that enters the eye.",o:["eyelid","iris","cornea","retina"],a:1,t:"Sense organs",w:"The iris is the coloured ring that changes the size of the pupil."},
+ {q:"Where is the image formed inside the eye?",o:["Cornea","Iris","Retina","Pupil"],a:2,t:"Sense organs",w:"The retina at the back of the eye receives the image and sends it along the optic nerve."},
+ {q:"Which part of the tongue is not a taste region but helps in mixing food?",o:["Tip","Muscle of the tongue","Taste buds","Sides"],a:1,t:"Sense organs",w:"Taste buds detect flavour; the muscular body of the tongue moves the food around."},
+ {q:"The eardrum does which job?",o:["Produces sound","Vibrates when sound hits it","Controls balance only","Blocks all sound"],a:1,t:"Sense organs",w:"Sound waves make the eardrum vibrate, and those vibrations travel deeper into the ear."},
+ {q:"Which sense organ helps us detect smell?",o:["Skin","Nose","Ear","Tongue"],a:1,t:"Sense organs",w:"The nose contains smell receptors linked to the olfactory nerve."},
+ {q:"Water changing into water vapour without boiling is called ______",o:["condensation","evaporation","freezing","melting"],a:1,t:"Evaporation",w:"Evaporation happens slowly at the surface, at any temperature."},
+ {q:"Water vapour turning back into water droplets is called ______",o:["evaporation","condensation","sublimation","filtration"],a:1,t:"Evaporation",w:"Condensation is what forms dew on a cold glass."},
+ {q:"Which of these is a renewable source of energy?",o:["Coal","Petrol","Sunlight","Natural gas"],a:2,t:"Weather & climate",w:"Sunlight will not run out on any human timescale; fossil fuels will."},
+ {q:"Global warming mainly happens because ______",o:["the Sun is getting closer","greenhouse gases trap more heat","the Earth is spinning faster","there are more clouds"],a:1,t:"Weather & climate",w:"Extra greenhouse gases hold in heat that would otherwise escape to space."},
+ {q:"Which instrument measures temperature?",o:["Barometer","Thermometer","Anemometer","Rain gauge"],a:1,t:"Weather & climate",w:"A thermometer measures temperature; a barometer measures air pressure."}
+],
+
+icso: [
+ {q:"Second-Generation computers depended on ______ technology.",o:["Vacuum Tubes","Transistors","Microprocessors","Integrated Circuits"],a:1,t:"Generations",w:"First generation used vacuum tubes, second used transistors, third used ICs, fourth used microprocessors."},
+ {q:"First-Generation computers used ______",o:["Transistors","Vacuum tubes","Microprocessors","Artificial intelligence"],a:1,t:"Generations",w:"Vacuum tubes made these machines huge and very hot."},
+ {q:"Which of the following is true about UNIVAC?",o:["It was developed by Charles Babbage","It uses fourth generation technology","It was the first computer made available for commercial use","It was the first electro-mechanical computer"],a:2,t:"Generations",w:"UNIVAC was the first computer sold commercially. Charles Babbage designed the much earlier Analytical Engine."},
+ {q:"Who is known as the Father of the Computer?",o:["Charles Babbage","Bill Gates","Alan Turing","Blaise Pascal"],a:0,t:"Generations",w:"Charles Babbage designed the Analytical Engine, the first design for a general computer."},
+ {q:"Which generation of computers introduced the microprocessor?",o:["First","Second","Third","Fourth"],a:3,t:"Generations",w:"The microprocessor arrived in the fourth generation and made personal computers possible."},
+ {q:"Which device is used to print vector graphical output on paper?",o:["Inkjet printer","Plotter","Monitor","Projector"],a:1,t:"Devices",w:"A plotter draws lines with a moving pen, which suits maps and engineering drawings."},
+ {q:"Which machine reads the information printed at the bottom of a cheque?",o:["Magnetic Ink Code Reader","Magnetic Ink Character Recognition","Mechanical Ink Character Recognition","Magnetic Inc Character Registration"],a:1,t:"Devices",w:"MICR stands for Magnetic Ink Character Recognition. Read every word of the options - three of them are near-misses."},
+ {q:"OMR is mainly used for ______",o:["printing photos","checking objective type answer sheets","scanning fingerprints","playing sound"],a:1,t:"Devices",w:"Optical Mark Recognition reads the shaded bubbles on answer sheets."},
+ {q:"OCR is used to ______",o:["convert scanned images of text into digital format","record video","print in colour","measure processor speed"],a:0,t:"Devices",w:"Optical Character Recognition turns pictures of letters into editable text."},
+ {q:"Megahertz or Gigahertz units are used to measure the ______",o:["speed of a processor","speed of a printer","speed of typing on a keyboard","size of a monitor"],a:0,t:"Devices",w:"Hertz counts cycles per second, which is how processor speed is measured."},
+ {q:"A touchscreen lets the user ______",o:["only display images","interact directly with the screen without a mouse or keyboard","print documents","store files permanently"],a:1,t:"Devices",w:"It is both an input and an output device, which is what makes it unusual."},
+ {q:"Which of these is an input device?",o:["Speaker","Monitor","Webcam","Printer"],a:2,t:"Devices",w:"A webcam sends pictures into the computer, so it is an input device."},
+ {q:"Which of these is an output device?",o:["Scanner","Plotter","Joystick","Barcode reader"],a:1,t:"Devices",w:"A plotter puts information out onto paper."},
+ {q:"Which option in MS Paint changes the colours of an image to their opposite colours?",o:["Crop","Convert Color","Change Color","Invert Color"],a:3,t:"MS Paint",w:"Invert Color flips every colour to its opposite, so white becomes black."},
+ {q:"In MS Paint, to move an object without the background colour covering the new area, you must check ______",o:["Rectangular Selection","Free-Form Selection","Transparent Selection","Invert Selection"],a:2,t:"MS Paint",w:"Transparent Selection leaves the background out when you drag the shape."},
+ {q:"In MS Paint, which tool picks up a colour from an existing image?",o:["Fill with color","Color picker","Eraser","Magnifier"],a:1,t:"MS Paint",w:"The colour picker, or eyedropper, copies a colour so you can paint with it."},
+ {q:"Rotating an image by 90 degrees right and then flipping it vertically will ______",o:["return it to the original","turn and mirror the image","only make it larger","delete the image"],a:1,t:"MS Paint",w:"Rotating turns the image, and flipping mirrors it. Together they do both."},
+ {q:"Which MS Paint tool removes an unwanted part from the edges of a picture?",o:["Crop","Resize","Rotate","Skew"],a:0,t:"MS Paint",w:"Crop trims the picture down to the part you select."},
+ {q:"ROM is ______",o:["volatile memory that loses data when power is off","non-volatile memory that keeps data when power is off","a type of printer","an input device"],a:1,t:"Memory & storage",w:"ROM keeps its contents without power. RAM is the volatile one."},
+ {q:"RAM is called volatile memory because ______",o:["it is very fast","it loses its contents when the computer is switched off","it cannot be written to","it stores the operating system permanently"],a:1,t:"Memory & storage",w:"Volatile means the contents vanish when the power goes."},
+ {q:"A Memory Card is also known as a ______",o:["SD Card","Hard disk","CPU","Modem"],a:0,t:"Memory & storage",w:"SD stands for Secure Digital, the common memory card format."},
+ {q:"Which of these is a secondary storage device?",o:["RAM","Cache","Pen drive","ALU"],a:2,t:"Memory & storage",w:"A pen drive stores data permanently outside the main memory."},
+ {q:"1 kilobyte is equal to ______",o:["1000 bits","1024 bytes","1024 bits","100 bytes"],a:1,t:"Memory & storage",w:"Computer units go up in steps of 1024, not 1000."},
+ {q:"Which unit of the CPU performs calculations and comparisons?",o:["Control Unit","Arithmetic Logic Unit","Memory Unit","Output Unit"],a:1,t:"CPU",w:"The ALU does the actual arithmetic and logic. The Control Unit directs traffic."},
+ {q:"Which unit of the CPU directs the flow of instructions?",o:["Arithmetic Logic Unit","Control Unit","Register","Hard disk"],a:1,t:"CPU",w:"The Control Unit tells the other parts what to do and when."},
+ {q:"The brain of the computer is the ______",o:["Monitor","CPU","Keyboard","Printer"],a:1,t:"CPU",w:"The Central Processing Unit does the processing work."},
+ {q:"Which of these statements is INCORRECT?",o:["OMR is used for checking objective type answer sheets","A Memory Card is also known as an SD Card","ROM is volatile memory that stores data temporarily","OCR converts scanned text images into digital format"],a:2,t:"Memory & storage",trap:1,w:"The question asks which is wrong. ROM is non-volatile, so that statement is the incorrect one."},
+ {q:"Software that runs the computer and manages its hardware is called the ______",o:["application software","operating system","utility program","spreadsheet"],a:1,t:"Software",w:"Windows, Android and Linux are operating systems."},
+ {q:"MS Paint is an example of ______",o:["system software","application software","an operating system","hardware"],a:1,t:"Software",w:"Applications are the programs you open to do a particular job."},
+ {q:"Which of these is NOT hardware?",o:["Keyboard","Mouse","Windows","Monitor"],a:2,t:"Software",w:"Windows is software. Hardware is the part you can touch."}
+]
+};
+
+var LEARN = {
+mathematics:{
+ "Traps":[
+  {h:"Scan before you calculate",b:"Every paper hides a few questions that look like heavy arithmetic but collapse in one second. Before you pick up the pencil, read the whole line once. You are hunting for a zero, a repeated number, or a pair that adds to a round number.",e:"5749 x 5 x 10 x 0 x 8\n\nThere is a 0 in the chain.\nAnswer = 0. No working needed."},
+  {h:"The shared-number shortcut",b:"When the same number appears in both halves of a plus or minus, pull it out to the front. This turns three long multiplications into one easy one.",e:"573 x 225 - 473 x 225\n= (573 - 473) x 225\n= 100 x 225\n= 22500\n\n495 x 192 + 505 x 192\n= (495 + 505) x 192\n= 1000 x 192 = 192000"},
+  {h:"Friendly pairs",b:"Some numbers multiply into round numbers. Spot them and reorder, because multiplication can be done in any order.",e:"8 x 125 = 1000\n4 x 25 = 100\n2 x 50 = 100\n\n236 x 8 x 125\n= 236 x 1000 = 236000"},
+  {h:"Read all four options",b:"Examiners write wrong options using the same digits in a different order. 112230 and 121230 look almost identical on a tired reading. Once you have your answer, find it in the list digit by digit, left to right."}
+ ],
+ "Divisibility":[
+  {h:"The quick rules",b:"You never need to divide to test these. Learn the checks and the whole topic becomes fast.",e:"By 2  : last digit is even\nBy 3  : digit sum divides by 3\nBy 4  : last TWO digits divide by 4\nBy 5  : ends in 0 or 5\nBy 6  : passes 2 AND 3\nBy 9  : digit sum divides by 9\nBy 10 : ends in 0"},
+  {h:"The rule for 11",b:"Starting from the right, add the digits in odd positions, then add the digits in even positions. If the difference is 0 or a multiple of 11, the number divides by 11.",e:"600721\nfrom right: 1, 2, 7, 0, 0, 6\nodd places : 1 + 7 + 0 = 8\neven places: 2 + 0 + 6 = 8\ndifference = 0  ->  divisible by 11"},
+  {h:"Finding a missing digit",b:"Apply the rule with the star left in, then solve the small equation it gives you.",e:"653*47 divisible by 11?\nodd places : 7 + * + 5 = 12 + *\neven places: 4 + 3 + 6 = 13\n(12 + *) - 13 = * - 1\nSet * - 1 = 0, so * = 1"},
+  {h:"Greatest number divisible by n",b:"Take the biggest number with that many digits, divide, throw away the remainder, then multiply back.",e:"Greatest 5-digit multiple of 55\n99999 / 55 = 1818 remainder 9\n1818 x 55 = 99990"}
+ ],
+ "Primes & factors":[
+  {h:"The four words",b:"These four get mixed up constantly, and the paper tests all of them. Learn the difference precisely.",e:"PRIME     : exactly 2 factors (1 and itself)\n            2, 3, 5, 7, 11, 13...\nCO-PRIME  : a PAIR whose only\n            common factor is 1 (9 and 10)\nTWIN PRIME: a pair of primes\n            exactly 2 apart (71, 73)\nCONSECUTIVE PRIMES: primes next to\n            each other in the list (2, 3)"},
+  {h:"Two traps to remember",b:"1 is not prime, because it has only one factor. 2 is the only even prime. Co-primes do not have to be prime themselves: 8 and 9 are co-prime, and neither is prime.",e:"Is 8, 12 co-prime?\nCommon factors: 1, 2, 4\nNo - they share 4.\n\nIs 9, 10 co-prime?\nCommon factor: 1 only\nYes."},
+  {h:"Listing factors in pairs",b:"Work upward and write both members of each pair. Stop when the pair turns back on itself. This way you never miss one.",e:"Factors of 18\n1 x 18\n2 x 9\n3 x 6\n(next would be 6 x 3, repeating)\n\n1, 2, 3, 6, 9, 18  -> six factors\nSum = 39"},
+  {h:"Multiples, HCF and LCM",b:"The nth multiple of a number is simply n times it. HCF is the biggest number that divides both. LCM is the smallest number both divide into.",e:"6th multiple of 7  = 42\n11th multiple of 12 = 132\n\nHCF of 24, 36 = 12\nLCM of 6, 8    = 24"}
+ ],
+ "BODMAS":[
+  {h:"The order",b:"Brackets first, then Of, then Divide and Multiply left to right, then Add and Subtract left to right. The word 'of' means multiply, but it jumps the queue ahead of divide.",e:"B - brackets\nO - of\nD - divide  }  left to right\nM - multiply}\nA - add     }  left to right\nS - subtract}"},
+  {h:"Why 'of' matters",b:"This single rule decides several marks. Do the 'of' before any division sitting next to it.",e:"36 / 6 of 3 + 4\n= 36 / 18 + 4     (of first)\n= 2 + 4\n= 6\n\nNOT 6 x 3 + 4 = 22"},
+  {h:"Nested brackets: work outward",b:"Solve the innermost bracket, write the whole line again with that part replaced, then repeat. Rewriting the full line each time is what stops mistakes.",e:"257 - [128 - {26 - (6 - (4 - 1))}]\n= 257 - [128 - {26 - (6 - 3)}]\n= 257 - [128 - {26 - 3}]\n= 257 - [128 - 23]\n= 257 - 105\n= 152"},
+  {h:"The bar (vinculum)",b:"A bar drawn over part of a sum acts exactly like a bracket. Do everything under the bar first, before anything else.",e:"6 - (bar over 4 - 1)\nThe bar makes 4 - 1 = 3\nSo 6 - 3 = 3"}
+ ],
+ "Numeration":[
+  {h:"Indian and international",b:"The two systems group digits differently. The paper uses both, so know where the commas fall.",e:"INDIAN\nones, tens, hundreds,\nthousands, ten thousands,\nlakhs, ten lakhs, crores\n12,34,567\n\nINTERNATIONAL\nones, tens, hundreds,\nthousands, ten thousands,\nhundred thousands, millions\n1,234,567"},
+  {h:"Millions and lakhs",b:"The test series goes past lakhs into millions, which school work may not have covered yet. Learn these three conversions.",e:"1 million     = 10 lakh = 1,000,000\n10 million    = 1 crore = 10,000,000\n100 million   = 100,000,000 (8 zeroes)"},
+  {h:"Writing a numeral from words",b:"Place each named part into its own slot, then fill every empty slot with a zero. Do not let the zeroes go missing.",e:"ninety million ninety thousand ninety\n90 million  -> 90,000,000\n90 thousand ->     90,000\nninety      ->         90\n            = 90,090,090"},
+  {h:"Greatest, smallest, successor, predecessor",b:"Successor means add 1. Predecessor means subtract 1. For the greatest number with n digits, write 9 n times.",e:"greatest 7-digit  = 9999999\ngreatest 8-digit  = 99999999\nsuccessor of 8-digit = 100000000\npredecessor of 7-digit = 9999998\ndifference = 90000002"},
+  {h:"Building the greatest number",b:"To make the biggest number, put the largest digit first and repeat it as often as the digit count allows, then place the rest in falling order.",e:"Greatest 6-digit using 4, 0, 3, 1\nrepeat the 4: 4 4 4\nthen 3, then 1, then 0\n= 444310"}
+ ],
+ "Roman numerals":[
+  {h:"The symbols",b:"Seven letters build every Roman numeral. A bar drawn over a letter multiplies it by 1000.",e:"I = 1     L = 50    M = 1000\nV = 5     C = 100\nX = 10    D = 500\n\nbar over V = 5000\nbar over X = 10000\nbar over XV = 15000"},
+  {h:"The subtraction rules",b:"Only I, X and C may be subtracted, and only from the next two larger symbols. V, L and D are never subtracted. No symbol repeats more than three times.",e:"Allowed: IV, IX, XL, XC, CD, CM\nNot allowed: IC, IL, VX, LC\n\n99 is XCIX, not IC\n45 is XLV, not VL"},
+  {h:"Converting a large number",b:"Split the number into thousands and the rest. Put a bar over the thousands part.",e:"15979\n= 15000 + 979\n15000 -> bar over XV\n979   -> CMLXXIX\nAnswer: XV (barred) CMLXXIX\n\n5414 = 5000 + 414\n= V (barred) CDXIV"}
+ ],
+ "Division":[
+  {h:"The division formula",b:"Every division question with a remainder uses this one relationship. Learn it in both directions and most of these questions become one step.",e:"Dividend = Divisor x Quotient + Remainder\n\nFind the number:\n46 x 11 + 15 = 521\n\nFind the divisor:\n(56485 - 13) / 1086\n= 56472 / 1086 = 52"},
+  {h:"Always check by multiplying back",b:"Division answers are easy to check and this catches nearly every slip. If your answer times the divisor does not return the original number, it is wrong."},
+  {h:"Repeating patterns",b:"A six-digit number made of a repeated three-digit block is always that block times 1001. This shows up regularly.",e:"765765 = 765 x 1001\n432432 = 432 x 1001"}
+ ],
+ "Rounding":[
+  {h:"Look at one digit only",b:"To round to a place, look at the single digit immediately to its right. 5 or more rounds up, 4 or less stays. Then all digits to the right become zero.",e:"69545 to nearest thousand\nhundreds digit is 5\n5 or more -> round up\n= 70000\n\nThen 70000 / 200 = 350"},
+  {h:"Round then calculate",b:"When a question says estimate, round first and then work. Do not do the exact sum and round at the end - that is slower and often gives a different option."}
+ ],
+ "Missing digits":[
+  {h:"Turn subtraction into addition",b:"A subtraction puzzle is easier as an addition. Add the answer back to the number being taken away, and the missing digits appear column by column.",e:"5 a 4 2 5 b 8\n-  c 7 3 d 8 7 9\n= 2 6 0 5 6 8 9\n\nInstead add:\nc73d879 + 2605689 = 5a425b8\nunits: 9 + 9 = 18 -> 8, carry 1"},
+  {h:"Always start at the units",b:"Work right to left and track every carry. Never guess a middle digit before the ones to its right are settled.",e:"32749x + 4z4y93 = 772390\nunits: x + 3 must end in 0\nso x = 7, carry 1\ntens : 9 + 9 + 1 = 19 -> 9, carry 1"}
+ ],
+ "Word problems":[
+  {h:"Decide the operation first",b:"Before touching any numbers, say out loud what is happening. Cost of many to cost of one means divide. Rate per minute to a longer time means multiply.",e:"64 fans cost 8704.\nOne fan costs LESS.\nLess -> divide\n8704 / 64 = 136"},
+  {h:"Convert units before calculating",b:"Hours to minutes, rupees to paise, metres to centimetres. Do the conversion as a separate first line so you cannot forget it.",e:"84 bottles per minute, for 2 hours\n2 hours = 120 minutes\n84 x 120 = 10080"},
+  {h:"Difference questions",b:"When a question asks how much bigger one result is than another, you rarely need both answers. Multiply the original number by the gap.",e:"6235 x 75 instead of 6235 x 57\nGap = 6235 x (75 - 57)\n    = 6235 x 18\n    = 112230"}
+ ],
+ "Addition & subtraction":[
+  {h:"Line up the places",b:"With six and seven digit numbers, one misaligned column ruins everything. Write the digits in neat vertical columns and keep the carries small and above the line."},
+  {h:"Work left to right through a chain",b:"When a question has several plus and minus signs, do them strictly in order from left to right, writing the running total each time.",e:"4695132 + 69549 - 5905 - 132\n= 4764681\n= 4758776\n= 4758644"}
+ ]
+},
+reasoning:{
+ "Analogy":[{h:"Name the link",b:"Say the relationship in words first, then apply the same words to the second pair. If you cannot say the link, you cannot pick the option.",e:"Hospital is to Doctor\nlink: the place where that worker works\n\nSchool is to ___\nwho works there? Teacher"}],
+ "Blood relations":[{h:"Draw the family",b:"Never do these in your head. Draw a small tree with each person as a dot, generations on separate rows, then read the answer off the picture.",e:"Sonia --- Rahul   (same row: brother/sister)\n  |\nKeshav            (row below: her son)\n\nKeshav to Rahul = nephew"}],
+ "Letter series":[{h:"Write the position numbers",b:"Convert every letter to its number in the alphabet, find the pattern in the numbers, then convert back. Trying to see the pattern in letters alone is much harder.",e:"A  C  F  J  ?\n1  3  6  10 ?\ngaps: +2 +3 +4 +5\n10 + 5 = 15 -> O"},
+ {h:"Know your alphabet numbers",b:"A few landmarks make conversion fast. Count from the nearest landmark instead of from A every time.",e:"A=1   F=6   K=11  P=16  U=21\nE=5   J=10  O=15  T=20  Z=26"}],
+ "Number series":[{h:"Find the differences",b:"Write the gap between each pair underneath. If the gaps are not obviously patterned, take the gaps of the gaps.",e:"3   6   11   18   ?\n  3   5    7\ngaps rise by 2, next gap is 9\n18 + 9 = 27"}],
+ "Coding":[{h:"Map letter by letter",b:"Write the code word directly under the original and find the shift for each position. The shift is often different for each letter.",e:"P O N D\nR S T L\n+2 +4 +6 +8\n\nH E A R\n+2 +4 +6 +8\nJ I G Z"}],
+ "Work backwards":[{h:"Undo each step in reverse",b:"Start from the final answer and reverse every operation in the opposite order. Add becomes subtract, multiply becomes divide.",e:"double it, subtract 50, get 160\nreverse: 160 + 50 = 210\n         210 / 2 = 105"}],
+ "Symbol swap":[{h:"Rewrite the whole line first",b:"Do not try to substitute while calculating. Copy the sum out again with every symbol replaced, then apply normal BODMAS to the new line.",e:"'+' means '-', '-' means 'x', 'x' means '+'\n23 - 45 x 6712 + 231 - 12\nrewrite:\n23 x 45 + 6712 - 231 x 12\n= 1035 + 6712 - 2772\n= 4975"}],
+ "Ranking":[{h:"The row formula",b:"Position from the other end equals total minus position plus 1. The plus 1 is the part everyone forgets.",e:"20 children, 7th from left\n20 - 7 + 1 = 14th from right"},
+ {h:"Careful with 'not shorter than'",b:"'Not shorter than' means taller than or the same height. It does not mean taller. Read these phrases twice."}],
+ "Calendar":[{h:"Use remainders",b:"Days repeat every 7. Divide the number of days by 7 and move only by the remainder.",e:"16 days before Thursday\n16 / 7 = 2 remainder 2\ngo back 2 days from Thursday\n= Tuesday"},
+ {h:"Anchor to today",b:"Write the days out in a line and mark today. Day before yesterday, yesterday, today, tomorrow, day after tomorrow.",e:"day before yesterday = Saturday\nSat  Sun  Mon  Tue  Wed\n     yest today tom  d.a.t\nAnswer: Wednesday"}],
+ "Alphabet-number":[{h:"The number is usually the middle",b:"In groups like (O 16 Q), convert the outer letters and check what the number does. Here O=15 and Q=17, so 16 sits between them.",e:"O 16 Q -> 15, 16, 17\nR 19 T -> 18, 19, 20\nU 22 W -> 21, 22, 23\nnext:  X 25 Z -> 24, 25, 26"}],
+ "Odd one out":[{h:"Find the group of three",b:"Do not look for the odd one directly. Find what three of them share, and the fourth is your answer.",e:"27, 64, 100, 125\n27 = 3x3x3\n64 = 4x4x4\n125 = 5x5x5\n100 is not a cube -> odd one"}],
+ "Direction":[{h:"Draw the compass",b:"Sketch a small cross with N, E, S, W before reading the question. Clockwise from North goes N to E to S to W."},
+ {h:"The 3-4-5 shortcut",b:"When someone walks 3 in one direction and 4 at a right angle, the straight-line distance is 5. This pair appears constantly.",e:"4 km North then 3 km East\ndistance = 5 km"}],
+ "Clock":[{h:"Thirty degrees per hour",b:"The clock face is 360 degrees split into 12 hour marks, so each mark is 30 degrees. Count the marks between the hands and multiply by 30.",e:"3 o'clock: hands are 3 marks apart\n3 x 30 = 90 degrees"}],
+ "Cubes":[{h:"Think about position",b:"In a cube cut into 27 smaller cubes, corners have 3 painted faces, edges have 2, face centres have 1, and the single cube in the very middle has none."}]
+},
+science:{
+ "Evaporation":[
+  {h:"What speeds it up",b:"Four things make water evaporate faster: more heat, more wind, more exposed surface, and drier air. Reverse any one of them and evaporation slows.",e:"FASTER          SLOWER\nhot             cold\nwindy           still\nwide open dish  narrow neck\ndry air         humid air"},
+  {h:"The humidity trap",b:"The exam loves this one. Humid air is already carrying a lot of water vapour, so it cannot accept much more. That is why washing does not dry on a rainy day and why we feel sticky."},
+  {h:"Evaporation and condensation",b:"Evaporation is liquid turning to vapour, slowly, at the surface, at any temperature. Condensation is the reverse, and it is what forms dew on a cold glass."}
+ ],
+ "Weather & climate":[
+  {h:"Weather versus climate",b:"Weather is what the sky is doing today at one place. Climate is the average pattern of that place over many years. Daily means weather."},
+  {h:"Why we have seasons",b:"The Earth's axis is tilted. That tilt changes how directly sunlight strikes each half of the planet through the year. It is NOT because the Earth moves closer to or further from the Sun.",e:"Correct : tilt of the axis\nWrong   : varying distance to Sun"},
+  {h:"Greenhouse gases",b:"Carbon dioxide, methane and water vapour trap heat in the atmosphere. Oxygen and nitrogen do not. The Kyoto Protocol is the agreement to reduce these gases."},
+  {h:"Land and sea breezes",b:"Land heats and cools faster than water. In the day the land is hotter, so air blows in from the sea. At night the land is cooler, so air blows out to the sea.",e:"DAY  : sea breeze (sea -> land)\nNIGHT: land breeze (land -> sea)"}
+ ],
+ "Nervous system":[
+  {h:"The three brain parts",b:"Learn these by their job, because the exam asks by job and by shape.",e:"CEREBRUM   largest part\n           thinking, memory, senses\nCEREBELLUM balance and posture\nMEDULLA    bulb-shaped, at the base\n           heartbeat, breathing"},
+  {h:"Nerves in and out",b:"Sensory nerves carry messages IN from sense organs to the brain. Motor nerves carry commands OUT to the muscles. Mixed nerves do both.",e:"sense organ -> SENSORY -> brain\nbrain -> MOTOR -> muscle"},
+  {h:"The longest cell",b:"A neuron is the longest cell in the human body. A single one can run from the spinal cord all the way to a toe."}
+ ],
+ "Skeleton & muscles":[
+  {h:"Joints by movement",b:"Name the joint from how it moves, not from where it is.",e:"HINGE          one direction only\n               knee, elbow\nBALL & SOCKET  moves all round\n               shoulder, hip\nPIVOT          rotates\n               neck\nFIXED          no movement\n               skull bones"},
+  {h:"Tendons and ligaments",b:"Tendons tie muscle to bone. Ligaments tie bone to bone. Remember: tendon and 'to bone from muscle'.",e:"muscle -> TENDON -> bone\nbone   -> LIGAMENT -> bone"},
+  {h:"The skull",b:"The skull has 14 facial bones and 8 flat cranial bones. Muscles work in pairs because a muscle can only pull, never push."}
+ ],
+ "Sense organs":[
+  {h:"Parts of the eye",b:"Each part has one job. Learn the job and the name together.",e:"SCLERA  tough white outer coat,\n        holds the eye's shape\nCORNEA  clear front window\nIRIS    coloured ring, controls\n        how much light enters\nPUPIL   the opening itself\nRETINA  back screen, image forms here"},
+  {h:"From eye to brain",b:"Light enters through the cornea and pupil, the image forms on the retina, and the optic nerve carries it to the brain. Sound makes the eardrum vibrate and the auditory nerve carries it."}
+ ]
+},
+icso:{
+ "Generations":[
+  {h:"The five generations",b:"Each generation is defined by the technology inside it. This is nearly always what the question asks.",e:"1st  Vacuum tubes\n2nd  Transistors\n3rd  Integrated Circuits (IC)\n4th  Microprocessors\n5th  Artificial Intelligence"},
+  {h:"Names to know",b:"Charles Babbage is the Father of the Computer and designed the Analytical Engine. UNIVAC was the first computer sold for commercial use."}
+ ],
+ "Devices":[
+  {h:"Input, output, or both",b:"Input sends information into the computer. Output brings it out. A touchscreen does both, which is why it appears in trick questions.",e:"INPUT  keyboard, mouse, scanner,\n       webcam, joystick, mic,\n       barcode reader, OMR, OCR\nOUTPUT monitor, printer, plotter,\n       speaker, projector\nBOTH   touchscreen"},
+  {h:"The recognition machines",b:"Three sets of initials that get confused. Read the full expansion in the options carefully - wrong answers change one word.",e:"MICR Magnetic Ink Character\n     Recognition - reads cheques\nOMR  Optical Mark Recognition\n     - reads shaded bubbles\nOCR  Optical Character Recognition\n     - turns pictures of text\n     into editable text"},
+  {h:"Plotter versus printer",b:"A plotter draws with a moving pen and is used for maps and engineering drawings (vector output). A printer builds the page from dots."},
+  {h:"Speed units",b:"Megahertz and Gigahertz measure processor speed. Hertz counts cycles per second."}
+ ],
+ "MS Paint":[
+  {h:"The options that get tested",b:"Learn the exact menu names, because the wrong options are near-misses of the real ones.",e:"Invert Color   flips every colour\n               to its opposite\nTransparent Selection\n               moves a shape without\n               carrying its background\nCrop           trims the edges away\nResize / Skew  changes size or slant\nColor picker   copies a colour from\n               the image"},
+  {h:"Rotate and flip are different",b:"Rotate turns the picture around. Flip mirrors it. A question that does both will look reversed AND turned."}
+ ],
+ "Memory & storage":[
+  {h:"RAM versus ROM",b:"This single distinction appears in almost every paper, usually inside a 'which statement is INCORRECT' question.",e:"RAM  Random Access Memory\n     VOLATILE - loses everything\n     when power is off\n     temporary working memory\n\nROM  Read Only Memory\n     NON-VOLATILE - keeps its\n     contents without power"},
+  {h:"Storage units",b:"Computer units climb in steps of 1024, not 1000.",e:"8 bits    = 1 byte\n1024 bytes = 1 kilobyte (KB)\n1024 KB    = 1 megabyte (MB)\n1024 MB    = 1 gigabyte (GB)"},
+  {h:"Secondary storage",b:"Pen drives, hard disks, CDs and memory cards store data permanently outside main memory. A memory card is also called an SD card."}
+ ],
+ "CPU":[
+  {h:"The three parts",b:"The CPU is the brain of the computer and has three units. Know which one calculates and which one directs.",e:"ALU  Arithmetic Logic Unit\n     does the sums and comparisons\nCU   Control Unit\n     directs the flow of instructions\nMU   Memory Unit\n     holds data being worked on"}
+ ],
+ "Software":[
+  {h:"Hardware and software",b:"Hardware is anything you can physically touch. Software is the instructions. An operating system such as Windows or Android runs the machine; applications such as MS Paint do one particular job."}
+ ]
+}
+};
+
+var META = {
+  reasoning:{name:"Reasoning",em:"\uD83E\uDDE9",cls:"s-reas",n:10},
+  mathematics:{name:"Mathematics",em:"\uD83D\uDD22",cls:"s-math",n:40},
+  science:{name:"Science",em:"\uD83D\uDD2C",cls:"s-sci",n:20},
+  icso:{name:"ICSO",em:"\uD83D\uDCBB",cls:"s-icso",n:10}
+};
+
+/* ================= persistence ================= */
+var KEY="udai_special_v2";
+var S={stars:0,streak:0,last:"",best:{},qs:{},learned:{},mistakes:[],answered:0,correct:0,mocks:[]};
+
+function ck(n,v){
+  try{
+    if(v===undefined){
+      var m=document.cookie.match(new RegExp("(^| )"+n+"=([^;]+)"));
+      return m?decodeURIComponent(m[2]):null;
+    }
+    var d=new Date();d.setFullYear(d.getFullYear()+2);
+    document.cookie=n+"="+encodeURIComponent(v)+";expires="+d.toUTCString()+";path=/;SameSite=Lax";
+  }catch(e){}
+  return null;
+}
+function save(){
+  var j=JSON.stringify(S);
+  try{localStorage.setItem(KEY,j);}catch(e){}
+  try{if(j.length<3500)ck(KEY,j);}catch(e){}
+}
+function load(){
+  var j=null;
+  try{j=localStorage.getItem(KEY);}catch(e){}
+  if(!j)j=ck(KEY);
+  if(j){try{var o=JSON.parse(j);for(var k in o)S[k]=o[k];}catch(e){}}
+  if(!S.best)S.best={};
+  if(!S.qs)S.qs={};
+  if(!S.learned)S.learned={};
+  if(!S.mistakes)S.mistakes=[];
+  if(!S.mocks)S.mocks=[];
+}
+function today(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function touchStreak(){
+  var t=today();
+  if(S.last===t)return;
+  var y=new Date();y.setDate(y.getDate()-1);
+  var ys=y.getFullYear()+"-"+(y.getMonth()+1)+"-"+y.getDate();
+  S.streak=(S.last===ys)?(S.streak||0)+1:1;
+  S.last=t;save();
+}
+
+/* ================= index the bank ================= */
+var SECS=["reasoning","mathematics","science","icso"];
+var IDX={};
+SECS.forEach(function(sec){
+  BANK[sec].forEach(function(it,i){
+    it._k=sec+":"+i; it._s=sec;
+    IDX[it._k]=it;
+  });
+});
+
+/* ================= helpers ================= */
+function el(id){return document.getElementById(id);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function greet(){
+  var h=new Date().getHours();
+  if(h<12)return "Good morning";
+  if(h<17)return "Good afternoon";
+  if(h<21)return "Good evening";
+  return "Still awake";
+}
+function topics(sec){
+  var seen={},out=[];
+  BANK[sec].forEach(function(q){if(!seen[q.t]){seen[q.t]=1;out.push(q.t);}});
+  return out;
+}
+function stat(k){var s=S.qs[k];return s?s:{r:0,w:0,g:0};}
+function topicAcc(sec,t){
+  var r=0,w=0;
+  BANK[sec].forEach(function(it){
+    if(it.t!==t)return;
+    var s=stat(it._k); r+=s.r; w+=s.w;
+  });
+  return {r:r,w:w,n:r+w,pct:(r+w)?Math.round(r/(r+w)*100):null};
+}
+function isLearned(sec,t){return !!S.learned[sec+"|"+t];}
+function confetti(){
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  var c=["#ffc857","#3ddc97","#ff6b6b","#7ee0ff","#fff6e6"];
+  for(var i=0;i<26;i++){
+    var d=document.createElement("div");
+    d.className="confetti";
+    d.style.left=Math.random()*100+"vw";
+    d.style.background=c[i%c.length];
+    d.style.animation="fall "+(1.4+Math.random()*1.1)+"s linear forwards";
+    d.style.animationDelay=(Math.random()*.25)+"s";
+    document.body.appendChild(d);
+    (function(n){setTimeout(function(){if(n.parentNode)n.parentNode.removeChild(n);},3000);})(d);
+  }
+}
+function starfield(){
+  var s="";
+  for(var i=0;i<26;i++){
+    s+='<i style="left:'+(Math.random()*100).toFixed(1)+'%;top:'+(Math.random()*62).toFixed(1)+'%;animation-delay:'+(Math.random()*3).toFixed(1)+'s"></i>';
+  }
+  return s;
+}
+function sky(title,sub,pct){
+  var left=6+pct*.82,bottom=-28+pct*.62;
+  return '<div class="sky"><div class="stars">'+starfield()+'</div>'+
+    '<div class="sun" style="left:'+left+'%;bottom:'+bottom+'px"></div>'+
+    '<div class="horizon"></div>'+
+    '<div class="skytext"><div class="k">Special Classes &middot; UDAI</div>'+
+    '<div class="v disp">'+esc(title)+'</div><div class="s">'+esc(sub)+'</div></div></div>';
+}
+function show(h){el("app").innerHTML=h;window.scrollTo(0,0);}
+
+/* ================= state ================= */
+var V={sec:null,mode:"practice",topic:"All",len:10,list:[],i:0,right:0,locked:false,
+       tid:null,left:0,guess:false,log:[],mock:false,retest:null,L:null};
+
+/* ================= home ================= */
+function home(){
+  if(V.tid)clearInterval(V.tid);
+  V.retest=null;
+  touchStreak();
+  var acc=S.answered?Math.round(S.correct/S.answered*100):0;
+  var h=sky(greet()+", Diksha","The sun rises with your accuracy. Right now it is at "+acc+"%.",Math.min(acc,100));
+  h+='<div class="stat"><div><div class="n mono">'+(S.stars||0)+'</div><div class="l">Stars</div></div>'+
+     '<div><div class="n mono">'+(S.streak||0)+'</div><div class="l">Day streak</div></div>'+
+     '<div><div class="n mono">'+acc+'%</div><div class="l">Accuracy</div></div></div>';
+  h+='<div class="grid">';
+  SECS.forEach(function(k){
+    var m=META[k],tot=BANK[k].length;
+    var tried=0;
+    BANK[k].forEach(function(it){var s=stat(it._k);if(s.r+s.w)tried++;});
+    var pct=tot?Math.round(tried/tot*100):0;
+    h+='<button class="sect '+m.cls+'" onclick="openSec(\''+k+'\')">'+
+       '<div><div class="em">'+m.em+'</div><div class="nm">'+m.name+'</div>'+
+       '<div class="mt">'+m.n+' marks in the paper &middot; '+tried+'/'+tot+' tried</div></div>'+
+       '<div class="bar"><span style="width:'+pct+'%"></span></div></button>';
+  });
+  h+='</div>';
+  h+='<button class="btn coral" onclick="startMock()">Mixed mock &middot; 20 questions, no feedback until the end</button>';
+  h+='<button class="btn ghost" onclick="bank()">Mistakes Bank ('+S.mistakes.length+')</button>';
+  h+='<button class="btn ghost" onclick="backup()">Backup &amp; restore progress</button>';
+  h+='<div class="note">Mixed mock copies the real paper: all four subjects jumbled together, answers withheld until an OMR-style sheet at the end. That is the only mode that trains the transfer step.</div>';
+  show(h);
+}
+
+/* ================= section screen ================= */
+function openSec(k){V.sec=k;V.topic="All";drawSec();}
+function drawSec(){
+  var k=V.sec,m=META[k],tot=BANK[k].length;
+  var tried=0;
+  BANK[k].forEach(function(it){var s=stat(it._k);if(s.r+s.w)tried++;});
+  var h='<div class="top"><button class="back" onclick="home()">&larr;</button><h2>'+m.em+' '+m.name+'</h2></div>';
+  h+=sky(m.name,tried+" of "+tot+" questions tried",tot?Math.round(tried/tot*100):0);
+
+  h+='<div class="card"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold)">Choose a topic</div>';
+  h+='<div class="chips"><button class="chip'+(V.topic==="All"?" on":"")+'" onclick="setTopic(\'All\')">All topics</button>';
+  topics(k).forEach(function(t){
+    var a=topicAcc(k,t),lab=esc(t);
+    if(a.pct!==null)lab+=" "+a.pct+"%";
+    h+='<button class="chip'+(V.topic===t?" on":"")+'" onclick="setTopic(\''+t.replace(/'/g,"\\'")+'\')">'+lab+
+       (isLearned(k,t)?"":' <span style="opacity:.75">&#9733;</span>')+'</button>';
+  });
+  h+='</div><div class="note">A star means you have not opened the Learn cards for that topic yet.</div></div>';
+
+  if(V.topic!=="All"){
+    var nc=(LEARN[k]&&LEARN[k][V.topic])?LEARN[k][V.topic].length:0;
+    h+='<button class="btn ghost" onclick="learn(\''+V.topic.replace(/'/g,"\\'")+'\',0)">Learn '+esc(V.topic)+' &middot; '+nc+' cards</button>';
+  }
+
+  h+='<div class="card"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px">Session length</div>'+
+     '<div class="chips">'+
+     '<button class="chip'+(V.len===10?" on":"")+'" onclick="setLen(10)">10 questions</button>'+
+     '<button class="chip'+(V.len===20?" on":"")+'" onclick="setLen(20)">20 &middot; long session</button>'+
+     '</div></div>';
+
+  h+='<button class="btn" onclick="go(\'practice\')">Practice &middot; no clock</button>';
+  h+='<button class="btn coral" onclick="go(\'timed\')">Timed drill &middot; 95 seconds each</button>';
+  var mn=S.mistakes.filter(function(x){return IDX[x.k]&&IDX[x.k]._s===k;}).length;
+  if(mn)h+='<div class="note">'+mn+' question'+(mn>1?"s":"")+' from your Mistakes Bank will be mixed into the next session automatically.</div>';
+  h+='<div class="note">Questions you keep getting wrong come up more often than ones you have already mastered.</div>';
+  show(h);
+}
+function setTopic(t){V.topic=t;drawSec();}
+function setLen(n){V.len=n;drawSec();}
+
+/* ================= learn mode ================= */
+function learn(topic,i,thenGo){
+  var cards=(LEARN[V.sec]&&LEARN[V.sec][topic])?LEARN[V.sec][topic]:[];
+  if(!cards.length){if(thenGo)return begin(thenGo);return drawSec();}
+  V.L={topic:topic,i:i,cards:cards,then:thenGo||null};
+  drawLearn();
+}
+function drawLearn(){
+  var L=V.L,c=L.cards[L.i];
+  var h='<div class="top"><button class="back" onclick="exitLearn()">&larr;</button>'+
+        '<div style="flex:1"><div class="qmeta"><span>Learn &middot; '+esc(L.topic)+'</span>'+
+        '<span class="mono">'+(L.i+1)+' / '+L.cards.length+'</span></div></div></div>';
+  h+='<div class="lcard"><h3>'+esc(c.h)+'</h3>';
+  if(c.b)h+='<p>'+esc(c.b)+'</p>';
+  if(c.e)h+='<div class="eg">'+esc(c.e)+'</div>';
+  h+='</div>';
+  h+='<div class="dots">';
+  L.cards.forEach(function(x,n){h+='<i class="'+(n===L.i?"on":"")+'"></i>';});
+  h+='</div>';
+  h+='<div class="lnav">';
+  if(L.i>0)h+='<button class="btn ghost" style="flex:1" onclick="lnav(-1)">Back</button>';
+  if(L.i<L.cards.length-1)h+='<button class="btn" style="flex:2" onclick="lnav(1)">Next card</button>';
+  else h+='<button class="btn" style="flex:2" onclick="doneLearn()">'+(L.then?"Start practising":"Done")+'</button>';
+  h+='</div>';
+  show(h);
+}
+function lnav(d){V.L.i+=d;drawLearn();}
+function exitLearn(){var t=V.L?V.L.then:null;V.L=null;if(t)return drawSec();drawSec();}
+function doneLearn(){
+  S.learned[V.sec+"|"+V.L.topic]=1;save();
+  var t=V.L.then;V.L=null;
+  if(t)return begin(t);
+  drawSec();
+}
+
+/* ================= session building ================= */
+function weight(it){
+  var s=stat(it._k),n=s.r+s.w;
+  if(!n)return 2.5;                        // unseen material still circulates
+  var acc=s.r/n;
+  var w=1+5*(1-acc)+1.5*Math.min(s.w,5);   // repeated misses dominate the draw
+  if(s.g)w+=2;                             // ever guessed it right -> not mastered
+  if(n===1&&acc===1)w+=0.8;                // one lucky pass is not proof
+  return w;
+}
+function weightedPick(pool,n){
+  var src=pool.slice(),out=[];
+  while(out.length<n&&src.length){
+    var tot=0,i;
+    for(i=0;i<src.length;i++)tot+=weight(src[i]);
+    var r=Math.random()*tot,acc=0,chosen=src.length-1;
+    for(i=0;i<src.length;i++){acc+=weight(src[i]);if(r<=acc){chosen=i;break;}}
+    out.push(src.splice(chosen,1)[0]);
+  }
+  return out;
+}
+function go(mode){
+  if(V.topic!=="All"&&!isLearned(V.sec,V.topic))return learn(V.topic,0,mode);
+  begin(mode);
+}
+function begin(mode){
+  V.mode=mode;V.mock=false;
+  var pool=(V.topic==="All")?BANK[V.sec].slice():BANK[V.sec].filter(function(q){return q.t===V.topic;});
+  // force-requeue mistakes from this section (and topic, if one is chosen)
+  var due=[];
+  S.mistakes.forEach(function(m){
+    var it=IDX[m.k];
+    if(!it||it._s!==V.sec)return;
+    if(V.topic!=="All"&&it.t!==V.topic)return;
+    due.push(it);
+  });
+  due=shuffle(due).slice(0,Math.min(3,Math.floor(V.len/3)));
+  var dueKeys={};due.forEach(function(it){dueKeys[it._k]=1;});
+  var rest=pool.filter(function(it){return !dueKeys[it._k];});
+  var picked=due.concat(weightedPick(rest,Math.max(0,V.len-due.length)));
+  V.list=shuffle(picked).map(prep);
+  V.i=0;V.right=0;V.log=[];
+  q();
+}
+function startMock(){
+  V.mock=true;V.mode="mock";V.sec=null;V.topic="All";
+  var plan={reasoning:2,mathematics:10,science:5,icso:3};
+  var out=[];
+  SECS.forEach(function(sec){
+    out=out.concat(weightedPick(BANK[sec].slice(),plan[sec]));
+  });
+  // keep subject blocks in paper order, like the real booklet
+  V.list=out.map(prep);
+  V.i=0;V.right=0;V.log=[];
+  q();
+}
+function prep(it){
+  var pairs=it.o.map(function(txt,i){return {txt:txt,ok:(i===it.a)};});
+  shuffle(pairs);
+  var ans=0;
+  pairs.forEach(function(p,i){if(p.ok)ans=i;});
+  return {k:it._k,sec:it._s,q:it.q,o:pairs.map(function(p){return p.txt;}),a:ans,t:it.t,trap:it.trap,w:it.w};
+}
+
+/* ================= quiz ================= */
+function q(){
+  if(V.tid)clearInterval(V.tid);
+  if(V.i>=V.list.length)return V.mock?mockResults():done();
+  V.locked=false;V.guess=false;
+  var item=V.list[V.i];
+  var label=V.mock?(META[item.sec].name):(META[V.sec].name+" \u00B7 "+item.t);
+  var h='<div class="top"><button class="back" onclick="quitQuiz()">&larr;</button>'+
+        '<div style="flex:1"><div class="qmeta"><span>'+esc(label)+'</span>'+
+        '<span class="mono">'+(V.i+1)+' / '+V.list.length+'</span></div>'+
+        '<div class="bar"><span style="width:'+(V.i/V.list.length*100)+'%"></span></div></div></div>';
+  if(V.mode==="timed"||V.mock)h+='<div class="timer" id="tw"><span id="tb"></span></div>';
+  if(item.trap&&!V.mock)h+='<div class="trapflag">Look before you calculate</div>';
+  h+='<div class="qtext">'+esc(item.q)+'</div><div id="opts">';
+  var L=["A","B","C","D"];
+  item.o.forEach(function(o,idx){
+    h+='<button class="opt" id="o'+idx+'" onclick="pick('+idx+')"><span class="lb">'+L[idx]+'</span>'+esc(o)+'</button>';
+  });
+  h+='</div>';
+  h+='<button class="guess" id="gz" onclick="toggleGuess()"><span class="bx" id="gb"></span>'+
+     '<span>I am not sure - I am guessing this one</span></button>';
+  h+='<div id="fb"></div>';
+  show(h);
+  if(V.mode==="timed"||V.mock){
+    V.left=95;
+    V.tid=setInterval(function(){
+      V.left--;
+      var b=el("tb"),w=el("tw");
+      if(!b){clearInterval(V.tid);return;}
+      b.style.width=(V.left/95*100)+"%";
+      if(V.left<=20&&w)w.className="timer warn";
+      if(V.left<=0){clearInterval(V.tid);pick(-1);}
+    },1000);
+  }
+}
+function toggleGuess(){
+  if(V.locked)return;
+  V.guess=!V.guess;
+  var g=el("gz"),b=el("gb");
+  if(g)g.className="guess"+(V.guess?" on":"");
+  if(b)b.innerHTML=V.guess?"&#10003;":"";
+}
+function record(item,idx,ok){
+  var s=S.qs[item.k]||{r:0,w:0,g:0};
+  if(ok){s.r++;if(V.guess)s.g++;}else{s.w++;}
+  S.qs[item.k]=s;
+  S.answered=(S.answered||0)+1;
+  if(ok){S.correct=(S.correct||0)+1;S.stars=(S.stars||0)+1;}
+  var pickedTxt=(idx===-1)?"Ran out of time":item.o[idx];
+  if(!ok){
+    var dup=S.mistakes.some(function(m){return m.k===item.k;});
+    if(!dup)S.mistakes.unshift({k:item.k,p:pickedTxt});
+    if(S.mistakes.length>80)S.mistakes.length=80;
+  }else if(!V.guess){
+    S.mistakes=S.mistakes.filter(function(m){return m.k!==item.k;});
+  }
+  V.log.push({item:item,idx:idx,ok:ok,guess:V.guess});
+  save();
+  return pickedTxt;
+}
+function pick(idx){
+  if(V.locked)return;
+  V.locked=true;
+  if(V.tid)clearInterval(V.tid);
+  var item=V.list[V.i],ok=(idx===item.a);
+  if(ok)V.right++;
+  var pickedTxt=record(item,idx,ok);
+
+  if(V.mock){ V.i++; return q(); }   // feedback withheld in mock
+
+  for(var n=0;n<item.o.length;n++){
+    var b=el("o"+n);
+    if(!b)continue;
+    b.disabled=true;
+    if(n===item.a)b.className="opt right";
+    else if(n===idx)b.className="opt wrong";
+  }
+  var msg;
+  if(ok){
+    confetti();
+    msg=V.guess
+      ? '<b>Correct - but you guessed it.</b> '+esc(item.w)+' This one will come back soon so you can get it for the right reason.'
+      : '<b>Correct.</b> '+esc(item.w);
+  }else{
+    var head=(idx===-1)?"<b>Time ran out.</b> The answer is ":"<b>Not quite.</b> The answer is ";
+    msg=head+'<b>'+esc(item.o[item.a])+'</b>. '+esc(item.w);
+  }
+  var lt=(LEARN[item.sec]&&LEARN[item.sec][item.t])?item.t:null;
+  el("fb").innerHTML='<div class="fb">'+msg+'</div>'+
+    (!ok&&lt?'<button class="btn ghost" onclick="learn(\''+lt.replace(/'/g,"\\'")+'\',0)">Read the '+esc(lt)+' cards</button>':'')+
+    '<button class="btn" onclick="next()">'+((V.i+1>=V.list.length)?"See results":"Next question")+'</button>';
+  el("fb").scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function next(){V.i++;q();}
+function quitQuiz(){
+  if(V.tid)clearInterval(V.tid);
+  if(V.mock)return home();
+  drawSec();
+}
+
+/* ================= practice results ================= */
+function done(){
+  if(V.tid)clearInterval(V.tid);
+  var pct=Math.round(V.right/V.list.length*100);
+  var bk=V.sec+"_"+V.mode,b=S.best[bk]||0;
+  if(pct>b){S.best[bk]=pct;save();}
+  var line;
+  if(pct>=90)line="Exam-ready on this topic.";
+  else if(pct>=70)line="Solid. Clear the Mistakes Bank and run it again.";
+  else if(pct>=50)line="Half there. Read the Learn cards for the weak topics below.";
+  else line="This topic needs a slower pass. Read the Learn cards, then try 10 questions on one topic at a time.";
+
+  // topic breakdown
+  var by={};
+  V.log.forEach(function(L){
+    var t=L.item.t;
+    if(!by[t])by[t]={r:0,n:0,g:0};
+    by[t].n++;if(L.ok)by[t].r++;if(L.guess&&L.ok)by[t].g++;
+  });
+  var rows=Object.keys(by).sort(function(a,c){return (by[a].r/by[a].n)-(by[c].r/by[c].n);});
+
+  var h=sky(pct+"%",V.right+" right out of "+V.list.length,pct);
+  h+='<div class="card"><h3 style="margin:0 0 6px">'+esc(line)+'</h3>'+
+     '<div class="note">Best so far in '+esc(META[V.sec].name)+' '+esc(V.mode)+': '+Math.max(pct,b)+'%</div></div>';
+  h+='<div class="card"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px">How each topic went</div>';
+  rows.forEach(function(t){
+    var d=by[t],p=Math.round(d.r/d.n*100),weak=p<70;
+    h+='<div class="tb'+(weak?" weak":"")+'"><span class="nm">'+esc(t)+
+       (d.g?'<span class="badge">'+d.g+' guessed</span>':'')+'</span>'+
+       '<span class="pill"><span style="width:'+p+'%"></span></span>'+
+       '<span class="sc">'+d.r+'/'+d.n+'</span></div>';
+  });
+  h+='</div>';
+  var worst=rows.length?rows[0]:null;
+  if(worst&&by[worst].r/by[worst].n<0.7&&LEARN[V.sec]&&LEARN[V.sec][worst]){
+    h+='<button class="btn" onclick="learn(\''+worst.replace(/'/g,"\\'")+'\',0)">Read the '+esc(worst)+' cards</button>';
+    h+='<button class="btn ghost" onclick="V.topic=\''+worst.replace(/'/g,"\\'")+'\';begin(\'practice\')">Practise only '+esc(worst)+'</button>';
+  }else{
+    if(pct>=70)confetti();
+    h+='<button class="btn" onclick="begin(\''+V.mode+'\')">Run it again</button>';
+  }
+  h+='<button class="btn ghost" onclick="bank()">Mistakes Bank ('+S.mistakes.length+')</button>';
+  h+='<button class="btn ghost" onclick="drawSec()">Back to '+esc(META[V.sec].name)+'</button>';
+  h+='<button class="btn ghost" onclick="home()">Home</button>';
+  show(h);
+}
+
+/* ================= mock results: OMR sheet ================= */
+function mockResults(){
+  if(V.tid)clearInterval(V.tid);
+  var pct=Math.round(V.right/V.list.length*100);
+  S.mocks.unshift({d:today(),r:V.right,n:V.list.length});
+  if(S.mocks.length>20)S.mocks.length=20;
+  var b=S.best.mock||0;
+  if(pct>b){S.best.mock=pct;}
+  save();
+
+  var h=sky(V.right+" / "+V.list.length,"Mixed mock \u00B7 "+pct+"%",pct);
+  var byS={};
+  V.log.forEach(function(L){
+    var s=L.item.sec;
+    if(!byS[s])byS[s]={r:0,n:0};
+    byS[s].n++;if(L.ok)byS[s].r++;
+  });
+  h+='<div class="card"><div style="font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Section by section</div>';
+  SECS.forEach(function(s){
+    if(!byS[s])return;
+    var d=byS[s],p=Math.round(d.r/d.n*100);
+    h+='<div class="tb'+(p<70?" weak":"")+'"><span class="nm">'+esc(META[s].name)+'</span>'+
+       '<span class="pill"><span style="width:'+p+'%"></span></span>'+
+       '<span class="sc">'+d.r+'/'+d.n+'</span></div>';
+  });
+  h+='</div>';
+
+  h+='<div class="omr"><div class="hd"><span>ANSWER SHEET</span><span>UDAI &middot; Mock</span></div>';
+  var lastSec=null;
+  V.log.forEach(function(L,n){
+    if(L.item.sec!==lastSec){
+      lastSec=L.item.sec;
+      h+='<div class="osec">'+esc(META[lastSec].name)+'</div>';
+    }
+    var lb=["A","B","C","D"],bs="";
+    for(var i=0;i<4;i++){
+      var cls="b";
+      if(i===L.idx)cls+=" mine";
+      if(i===L.item.a)cls+=" key";
+      bs+='<span class="'+cls+'">'+lb[i]+'</span>';
+    }
+    h+='<div class="orow" onclick="tog('+n+')"><span class="nu">'+(n+1)+'</span>'+
+       '<span class="bs">'+bs+'</span>'+
+       '<span class="mk '+(L.ok?"ok":"no")+'">'+(L.ok?"&#10003;":"&#10007;")+'</span></div>'+
+       '<div class="expand hide" id="x'+n+'"><b>'+esc(L.item.q)+'</b><br>'+
+       'Correct: '+esc(L.item.o[L.item.a])+'<br>'+esc(L.item.w)+'</div>';
+  });
+  h+='<div class="note" style="color:#6b6152">Tap any row to see the question and why.</div></div>';
+  h+='<div class="note">Green ring is the correct bubble, filled black is what you chose. On the real sheet nobody tells you - which is why you solve in the booklet, circle your answer, then transfer.</div>';
+  h+='<button class="btn" onclick="startMock()">Another mock</button>';
+  h+='<button class="btn ghost" onclick="bank()">Mistakes Bank ('+S.mistakes.length+')</button>';
+  h+='<button class="btn ghost" onclick="home()">Home</button>';
+  show(h);
+}
+function tog(n){
+  var e=el("x"+n);
+  if(e)e.className=(e.className.indexOf("hide")>=0)?"expand":"expand hide";
+}
+
+/* ================= mistakes bank: cold recall to clear ================= */
+function bank(){
+  V.retest=null;
+  var h='<div class="top"><button class="back" onclick="home()">&larr;</button><h2>Mistakes Bank</h2></div>';
+  if(!S.mistakes.length){
+    h+='<div class="card"><div class="note">Nothing here. Questions you get wrong land in this list, and the only way out is to answer one correctly without seeing the options first.</div></div>';
+    h+='<button class="btn ghost" onclick="home()">Home</button>';
+    return show(h);
+  }
+  h+='<div class="note">'+S.mistakes.length+' saved. Reading the explanation is not enough - tap Test me and answer it cold. Get it right and it leaves the list.</div>';
+  S.mistakes.forEach(function(m,i){
+    var it=IDX[m.k];
+    if(!it)return;
+    var s=stat(m.k);
+    h+='<div class="mb"><div class="qq">'+esc(it.q)+'</div>'+
+       '<div class="ww">You put: '+esc(m.p)+'</div>'+
+       '<div class="note">'+esc(META[it._s].name)+' &middot; '+esc(it.t)+
+       (s.w>1?' &middot; missed '+s.w+' times':'')+'</div>'+
+       '<div class="row" style="gap:8px">'+
+       '<button style="flex:1" onclick="retest('+i+')">Test me</button>'+
+       (LEARN[it._s]&&LEARN[it._s][it.t]?'<button style="flex:1" onclick="bankLearn(\''+it._s+'\',\''+it.t.replace(/'/g,"\\'")+'\')">Learn cards</button>':'')+
+       '</div></div>';
+  });
+  show(h);
+}
+function bankLearn(sec,t){V.sec=sec;learn(t,0);}
+function retest(i){
+  var m=S.mistakes[i];
+  var it=IDX[m.k];
+  if(!it)return bank();
+  V.retest={i:i,item:prep(it)};
+  drawRetest(null);
+}
+function drawRetest(result){
+  var R=V.retest,item=R.item;
+  var h='<div class="top"><button class="back" onclick="bank()">&larr;</button><h2>Test me</h2></div>';
+  h+='<div class="note">'+esc(META[item.sec].name)+' &middot; '+esc(item.t)+'</div>';
+  h+='<div class="qtext">'+esc(item.q)+'</div>';
+  var L=["A","B","C","D"];
+  item.o.forEach(function(o,idx){
+    var cls="opt";
+    if(result!==null){
+      if(idx===item.a)cls="opt right";
+      else if(idx===result)cls="opt wrong";
+    }
+    h+='<button class="'+cls+'"'+(result!==null?" disabled":"")+' onclick="answerRetest('+idx+')"><span class="lb">'+L[idx]+'</span>'+esc(o)+'</button>';
+  });
+  if(result!==null){
+    var ok=(result===item.a);
+    h+='<div class="fb">'+(ok
+      ?'<b>Correct, cold.</b> '+esc(item.w)+' Removed from the bank.'
+      :'<b>Still not there.</b> The answer is <b>'+esc(item.o[item.a])+'</b>. '+esc(item.w)+' It stays in the bank.')+'</div>';
+    h+='<button class="btn" onclick="bank()">Back to the bank</button>';
+  }
+  show(h);
+}
+function answerRetest(idx){
+  var R=V.retest;
+  if(!R||R.done)return;
+  R.done=true;
+  var ok=(idx===R.item.a);
+  var s=S.qs[R.item.k]||{r:0,w:0,g:0};
+  if(ok){s.r++;}else{s.w++;}
+  S.qs[R.item.k]=s;
+  S.answered=(S.answered||0)+1;
+  if(ok){
+    S.correct=(S.correct||0)+1;
+    S.stars=(S.stars||0)+2;
+    S.mistakes=S.mistakes.filter(function(m){return m.k!==R.item.k;});
+    confetti();
+  }else{
+    var e=S.mistakes.filter(function(m){return m.k===R.item.k;})[0];
+    if(e)e.p=R.item.o[idx];
+  }
+  save();
+  drawRetest(idx);
+}
+
+/* ================= backup ================= */
+function backup(){
+  var code="";
+  try{code=btoa(unescape(encodeURIComponent(JSON.stringify(S))));}catch(e){code="";}
+  var h='<div class="top"><button class="back" onclick="home()">&larr;</button><h2>Backup &amp; restore</h2></div>';
+  h+='<div class="card"><div class="note">Copy this code somewhere safe. Paste it back on a new device or after clearing browser data.</div>'+
+     '<textarea id="code" readonly>'+esc(code)+'</textarea>'+
+     '<button class="btn" onclick="copyCode()">Copy code</button></div>';
+  h+='<div class="card"><div class="note">Paste a saved code here to restore progress. This replaces what is stored now.</div>'+
+     '<textarea id="restore" placeholder="Paste code here"></textarea>'+
+     '<button class="btn coral" onclick="doRestore()">Restore from code</button>'+
+     '<div id="rmsg" class="note"></div></div>';
+  show(h);
+}
+function copyCode(){
+  var t=el("code");t.select();t.setSelectionRange(0,999999);
+  try{document.execCommand("copy");t.blur();el("rmsg")&&0;alert("Code copied.");}
+  catch(e){alert("Select the text and copy it manually.");}
+}
+function doRestore(){
+  var v=el("restore").value.trim();
+  if(!v){el("rmsg").textContent="Paste a code first.";return;}
+  try{
+    var o=JSON.parse(decodeURIComponent(escape(atob(v))));
+    for(var k in o)S[k]=o[k];
+    save();
+    el("rmsg").textContent="Progress restored.";
+    setTimeout(home,700);
+  }catch(e){
+    el("rmsg").textContent="That code could not be read. Check it was copied in full.";
+  }
+}
+
+/* ================= go ================= */
+load();
+home();
+</script>
+</body>
+</html>
