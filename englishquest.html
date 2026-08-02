@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Quest - Class 4</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<style>
+:root{
+  --bg:#F6F4FF; --card:#FFFFFF; --ink:#2E2A3B;
+  --violet:#6C4FD6; --violet-dark:#4F35AC;
+  --orange:#FF8C42; --orange-dark:#E56E22;
+  --berry:#C94F7C; --lilac:#9B8CFF;
+  --teal:#0FA3A3;
+  --good:#3BB273; --bad:#E4572E;
+  --shadow:0 4px 0 rgba(46,42,59,.14);
+  --r:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;
+  background-image:radial-gradient(circle at 12% 8%, rgba(108,79,214,.10) 0 90px, transparent 91px),
+  radial-gradient(circle at 88% 20%, rgba(255,140,66,.10) 0 70px, transparent 71px),
+  radial-gradient(circle at 20% 90%, rgba(201,79,124,.09) 0 80px, transparent 81px);}
+h1,h2,h3,.disp{font-family:'Baloo 2',cursive}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 90px}
+header{display:flex;align-items:center;gap:10px;padding:10px 4px}
+.mascot{font-size:38px;line-height:1;filter:drop-shadow(0 2px 0 rgba(0,0,0,.12));transition:transform .3s}
+.mascot.happy{transform:rotate(-8deg) scale(1.15)}
+.mascot.sad{transform:rotate(8deg) scale(.95)}
+.title-block h1{font-size:24px;color:var(--violet-dark);line-height:1.05}
+.title-block .sub{font-size:12px;font-weight:700;color:var(--berry)}
+.statbar{display:flex;gap:8px;margin:6px 0 14px}
+.stat{flex:1;background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:8px;text-align:center}
+.stat .n{font-family:'Baloo 2';font-size:20px;font-weight:800;color:var(--orange-dark)}
+.stat .l{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:#8A8496}
+.card{background:var(--card);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+button{font-family:'Nunito';font-weight:800;border:none;cursor:pointer}
+.big-btn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:var(--card);
+  border-radius:var(--r);box-shadow:var(--shadow);padding:14px 16px;margin-bottom:12px;font-size:16px;color:var(--ink);
+  transition:transform .1s}
+.big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(46,42,59,.14)}
+.big-btn .ico{font-size:30px}
+.big-btn .desc{font-size:12px;font-weight:700;color:#8A8496;display:block}
+.big-btn.hot{border-left:6px solid var(--berry)}
+.pill{display:inline-block;background:var(--lilac);color:#fff;font-size:11px;font-weight:800;border-radius:99px;padding:2px 10px}
+.pill.o{background:var(--orange)}
+.pill.t{background:var(--teal)}
+.opt{display:block;width:100%;text-align:left;background:#EFEBFF;border:3px solid transparent;border-radius:14px;
+  padding:12px 14px;margin-bottom:10px;font-size:16px;font-weight:700;color:var(--ink)}
+.opt:active{transform:scale(.99)}
+.opt.correct{background:#E4F6EC;border-color:var(--good)}
+.opt.wrong{background:#FBE9E2;border-color:var(--bad)}
+.opt.locked{pointer-events:none;opacity:.85}
+.qtext{font-size:18px;font-weight:800;margin-bottom:14px;line-height:1.4}
+.qtext u{text-decoration:none;background:#FFE9C9;border-bottom:3px solid var(--orange);padding:0 3px;border-radius:4px}
+.qtag{font-size:11px;font-weight:800;color:#fff;background:var(--berry);display:inline-block;border-radius:99px;padding:3px 10px;margin-bottom:10px}
+details.passage{background:#FFF8EC;border:2px solid #F5D9A8;border-radius:14px;padding:10px 12px;margin-bottom:12px}
+details.passage summary{font-family:'Baloo 2';font-weight:800;font-size:15px;color:var(--orange-dark);cursor:pointer;list-style:none}
+details.passage summary::before{content:"📖 "}
+details.passage p{font-size:14px;font-weight:700;line-height:1.55;color:#4A4459;margin-top:8px}
+.fb{font-size:14px;font-weight:700;line-height:1.45;border-radius:12px;padding:10px 12px;margin-top:4px;display:none}
+.fb.show{display:block}
+.fb.ok{background:#E4F6EC;color:#1F6B45}
+.fb.no{background:#FBE9E2;color:#9B3418}
+.bar{height:10px;background:#E3DDF5;border-radius:99px;overflow:hidden;margin-bottom:12px}
+.bar>i{display:block;height:100%;background:var(--violet);width:0;transition:width .3s}
+.nav{display:flex;gap:8px;margin-top:10px}
+.nav button{flex:1;background:var(--violet);color:#fff;border-radius:14px;padding:13px;font-size:15px;box-shadow:0 4px 0 var(--violet-dark)}
+.nav button:active{transform:translateY(3px);box-shadow:none}
+.nav button.ghost{background:#fff;color:var(--violet-dark);box-shadow:var(--shadow)}
+.flash{background:linear-gradient(180deg,#fff,#F3EFFF);border-radius:var(--r);box-shadow:var(--shadow);padding:18px;margin-bottom:12px}
+.flash h3{color:var(--violet-dark);font-size:19px;margin-bottom:6px}
+.flash p{font-size:14px;font-weight:700;line-height:1.5;color:#4A4459}
+.flash .eg{font-size:13px;font-weight:700;color:var(--teal);margin-top:6px}
+table.deg{width:100%;border-collapse:collapse;font-size:13px;font-weight:700;margin-top:8px}
+table.deg th{background:#EFEBFF;color:var(--violet-dark);padding:6px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.4px}
+table.deg td{padding:6px;border-top:1px solid #EEE9FA}
+.field{margin-bottom:12px}
+.field label{display:block;font-size:13px;font-weight:800;color:var(--violet-dark);margin-bottom:5px}
+.field .hint{font-size:11px;font-weight:700;color:#8A8496;display:block;margin-bottom:5px}
+.field textarea{width:100%;border:2px solid #E3DDF5;border-radius:12px;padding:10px;font-family:'Nunito';font-size:15px;
+  font-weight:700;color:var(--ink);resize:vertical;min-height:56px;background:#FDFCFF}
+.field textarea:focus{outline:none;border-color:var(--violet)}
+.para-out{background:#FFFDF5;border:2px dashed var(--orange);border-radius:14px;padding:14px;font-size:15px;
+  font-weight:700;line-height:1.7;white-space:pre-wrap}
+.check{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:700;margin-bottom:7px;line-height:1.4}
+.check .m{font-size:15px;line-height:1.2}
+.check.no{color:#9B3418}
+.check.ok{color:#1F6B45}
+.mini{font-size:12px;font-weight:700;color:#8A8496;line-height:1.5}
+.progress-code{display:block;background:#EFEBFF;border-radius:10px;padding:8px;font-size:14px;font-weight:800;
+  color:var(--violet-dark);text-align:center;letter-spacing:1px;margin-top:8px}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mascot" id="mascot">🦉</div>
+    <div class="title-block">
+      <h1>English Quest</h1>
+      <div class="sub">Class 4 &middot; Unit II &middot; W.T.-II</div>
+    </div>
+  </header>
+
+  <div class="statbar">
+    <div class="stat"><div class="n" id="stStars">0</div><div class="l">Stars</div></div>
+    <div class="stat"><div class="n" id="stToday">0</div><div class="l">Today</div></div>
+    <div class="stat"><div class="n" id="stFix">0</div><div class="l">To fix</div></div>
+  </div>
+
+  <!-- ============ HOME ============ -->
+  <div id="home">
+    <button class="big-btn hot" onclick="startQuiz('mix')">
+      <span class="ico">🎯</span><span><b>Full Test Practice</b><span class="desc">Everything mixed - just like tomorrow's paper</span></span>
+    </button>
+    <button class="big-btn" onclick="startQuiz('comp')">
+      <span class="ico">🍽️</span><span><b>Comprehension - The Waitress</b><span class="desc">Read the passage, then answer like Section A</span></span>
+    </button>
+    <button class="big-btn" onclick="startQuiz('adj')">
+      <span class="ico">🌈</span><span><b>Adjectives &amp; Kinds</b><span class="desc">Quality, Quantity, Number, Demonstrative, Interrogative</span></span>
+    </button>
+    <button class="big-btn" onclick="startQuiz('deg')">
+      <span class="ico">📏</span><span><b>Degrees of Comparison</b><span class="desc">tall - taller - tallest, more/most, irregulars</span></span>
+    </button>
+    <button class="big-btn" onclick="startQuiz('neg')">
+      <span class="ico">🚫</span><span><b>Negative Sentences</b><span class="desc">not / no / do not - change the sentence</span></span>
+    </button>
+    <button class="big-btn" onclick="startQuiz('zoo')">
+      <span class="ico">🐯</span><span><b>L-4 : Zoo</b><span class="desc">Tigers, cubs, questions and spellings</span></span>
+    </button>
+    <button class="big-btn" onclick="showWrite()">
+      <span class="ico">✍️</span><span><b>Paragraph Builder</b><span class="desc">Answer 10 hints, get your own paragraph + a marks check</span></span>
+    </button>
+    <button class="big-btn" onclick="showLearn()">
+      <span class="ico">📚</span><span><b>Quick Learn</b><span class="desc">All the rules on cards - read before you practise</span></span>
+    </button>
+    <button class="big-btn" id="fixBtn" onclick="startQuiz('fix')">
+      <span class="ico">🔁</span><span><b>Fix My Mistakes</b><span class="desc">Only the ones you got wrong</span></span>
+    </button>
+
+    <div class="card" id="syncCard" style="display:none">
+      <h3 style="color:var(--violet-dark);font-size:17px;margin-bottom:4px">Same progress on both phones</h3>
+      <p class="mini">Enter this code on the other device to keep progress together.</p>
+      <code class="progress-code" id="syncCodeDisplay"></code>
+      <div class="nav"><button class="ghost" onclick="changeSync()">Use another code</button></div>
+    </div>
+  </div>
+
+  <!-- ============ QUIZ ============ -->
+  <div id="quiz" class="hidden">
+    <div class="bar"><i id="barFill"></i></div>
+    <div class="card">
+      <span class="qtag" id="qTag">Question</span>
+      <div id="passageBox"></div>
+      <div class="qtext" id="qText"></div>
+      <div id="qOpts"></div>
+      <div class="fb" id="qFb"></div>
+    </div>
+    <div class="nav">
+      <button class="ghost" onclick="goHome()">Stop</button>
+      <button id="nextBtn" onclick="nextQuestion()">Next</button>
+    </div>
+  </div>
+
+  <!-- ============ RESULT ============ -->
+  <div id="result" class="hidden">
+    <div class="card" style="text-align:center">
+      <div style="font-size:52px" id="rIcon">🎉</div>
+      <h2 style="color:var(--violet-dark);font-size:26px" id="rTitle">Done!</h2>
+      <p style="font-weight:800;font-size:17px;margin:6px 0" id="rScore"></p>
+      <p class="mini" id="rNote"></p>
+    </div>
+    <div class="nav">
+      <button class="ghost" onclick="goHome()">Home</button>
+      <button onclick="startQuiz(currentMode)">Play again</button>
+    </div>
+  </div>
+
+  <!-- ============ LEARN ============ -->
+  <div id="learn" class="hidden">
+    <div id="learnBody"></div>
+    <div class="nav"><button onclick="goHome()">Back home</button></div>
+  </div>
+
+  <!-- ============ WRITE ============ -->
+  <div id="write" class="hidden">
+    <div class="card">
+      <h2 style="color:var(--violet-dark);font-size:20px">Descriptive Paragraph</h2>
+      <p class="mini">Topic: a visit to a temple during a festival. Answer in short phrases - the app joins them into a paragraph. Everything is saved on this phone.</p>
+    </div>
+    <div id="writeFields"></div>
+    <div class="nav">
+      <button class="ghost" onclick="goHome()">Back</button>
+      <button onclick="buildParagraph()">Build my paragraph</button>
+    </div>
+    <div id="writeOut" class="hidden">
+      <div class="card">
+        <h3 style="color:var(--violet-dark);font-size:18px;margin-bottom:8px">Your paragraph</h3>
+        <div class="para-out" id="paraText"></div>
+        <p class="mini" style="margin-top:8px" id="paraCount"></p>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--violet-dark);font-size:18px;margin-bottom:10px">Marks check</h3>
+        <div id="paraCheck"></div>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--violet-dark);font-size:18px;margin-bottom:8px">A model to compare with</h3>
+        <div class="para-out" style="border-color:var(--lilac)" id="modelPara"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* =====================================================================
+   English Quest - Class 4, Unit II (2026-27), W.T.-II
+   Sections covered: C (Adjectives, Degrees of Comparison, Negative
+   Sentences), D (L-4 Zoo), and an offline Section B paragraph builder.
+   No network calls. Works fully offline once loaded.
+   ===================================================================== */
+
+var LS_KEY = "diksha_eng_v1";
+var DATE_FMT_DAY = "en-CA";           /* yyyy-mm-dd, used for the daily reset key */
+var ROUND_LEN = 12;
+
+var S = {
+  stars: 0,
+  day: "",
+  today: 0,
+  seen: {},      /* id -> times shown */
+  wrong: {},     /* id -> hits still needed before it clears */
+  write: {},     /* paragraph builder answers */
+  best: 0
+};
+
+function saveState(){
+  var raw = JSON.stringify(S);
+  try{ localStorage.setItem(LS_KEY, raw); }catch(e){}
+  try{ document.cookie = LS_KEY + "=" + encodeURIComponent(btoa(unescape(encodeURIComponent(raw)))) + ";max-age=31536000;path=/;SameSite=Lax"; }catch(e){}
+  if(typeof DikshaSync !== "undefined") DikshaSync.push(LS_KEY, S);
+}
+function loadState(){
+  var raw = null;
+  try{ raw = localStorage.getItem(LS_KEY); }catch(e){}
+  if(!raw){
+    try{
+      var m = document.cookie.match(new RegExp(LS_KEY + "=([^;]+)"));
+      if(m) raw = decodeURIComponent(escape(atob(decodeURIComponent(m[1]))));
+    }catch(e){}
+  }
+  if(raw){
+    try{ var o = JSON.parse(raw); for(var k in S){ if(o[k] !== undefined) S[k] = o[k]; } }catch(e){}
+  }
+}
+function todayKey(){ return new Date().toLocaleDateString(DATE_FMT_DAY); }
+function dailyReset(){
+  var t = todayKey();
+  if(S.day !== t){ S.day = t; S.today = 0; saveState(); }
+}
+
+/* ---------------------------------------------------------------
+   CONTENT 1 - Adjectives and their kinds
+   Each row: sentence with %a% marking the adjective, plus its kind.
+   --------------------------------------------------------------- */
+var KINDS = ["Quality", "Quantity", "Number", "Demonstrative", "Interrogative"];
+
+var ADJ = [
+  ["The %a% boy solved the problem quickly.", "clever", "Quality"],
+  ["She has %a% patience to finish the task.", "enough", "Quantity"],
+  ["%a% houses have red roofs.", "Those", "Demonstrative"],
+  ["%a% painting did you choose?", "Which", "Interrogative"],
+  ["There is %a% water in the bottle.", "no", "Quantity"],
+  ["The %a% girl won the prize.", "tall", "Quality"],
+  ["I have to do %a% work today.", "some", "Quantity"],
+  ["She won the %a% prize.", "second", "Number"],
+  ["I have %a% mangoes in my bag.", "three", "Number"],
+  ["%a% rice is in the pan.", "Some", "Quantity"],
+  ["%a% cat is very big.", "This", "Demonstrative"],
+  ["%a% bat is kept on the table?", "Whose", "Interrogative"],
+  ["The peacock has %a% feathers.", "beautiful", "Quality"],
+  ["There is a %a% milk in the jug.", "little", "Quantity"],
+  ["%a% book do you want to read?", "What", "Interrogative"],
+  ["%a% shoes are mine.", "These", "Demonstrative"],
+  ["My grandfather is an %a% man.", "old", "Quality"],
+  ["The horse was %a% and strong.", "brown", "Quality"],
+  ["He is a %a% kid who disturbs everyone.", "naughty", "Quality"],
+  ["Mrs Sen has a %a% cat in her house.", "fluffy", "Quality"],
+  ["The sky looks %a% today.", "cloudy", "Quality"],
+  ["The book was long but %a%.", "interesting", "Quality"],
+  ["There are %a% books on the shelf.", "many", "Quantity"],
+  ["I bought %a% pencils yesterday.", "six", "Number"],
+  ["%a% is the tenth question.", "This", "Demonstrative"],
+  ["%a% way should we go?", "Which", "Interrogative"],
+  ["We saw %a% elephants at the zoo.", "four", "Number"],
+  ["%a% mangoes are sweeter than those.", "These", "Demonstrative"],
+  ["He has %a% money left in his pocket.", "little", "Quantity"],
+  ["%a% pen is this?", "Whose", "Interrogative"],
+  ["The tiger has black %a% on its body.", "sharp", "Quality"],
+  ["He was the %a% boy to reach school.", "first", "Number"],
+  ["%a% chair is broken.", "That", "Demonstrative"],
+  ["Give me %a% sugar, please.", "some", "Quantity"],
+  ["It was a %a% morning in December.", "cold", "Quality"],
+  ["%a% colour do you like the most?", "What", "Interrogative"]
+];
+
+/* ---------------------------------------------------------------
+   CONTENT 2 - Degrees of comparison
+   [positive, comparative, superlative, ruleId]
+   --------------------------------------------------------------- */
+var DEG = [
+  ["tall","taller","tallest","er"], ["small","smaller","smallest","er"],
+  ["long","longer","longest","er"], ["short","shorter","shortest","er"],
+  ["kind","kinder","kindest","er"], ["clean","cleaner","cleanest","er"],
+  ["quick","quicker","quickest","er"], ["young","younger","youngest","er"],
+  ["old","older","oldest","er"], ["strong","stronger","strongest","er"],
+  ["bright","brighter","brightest","er"], ["dark","darker","darkest","er"],
+  ["soft","softer","softest","er"], ["warm","warmer","warmest","er"],
+  ["sweet","sweeter","sweetest","er"], ["cold","colder","coldest","er"],
+  ["deep","deeper","deepest","er"], ["high","higher","highest","er"],
+  ["fast","faster","fastest","er"], ["slow","slower","slowest","er"],
+  ["weak","weaker","weakest","er"], ["thick","thicker","thickest","er"],
+  ["rich","richer","richest","er"], ["near","nearer","nearest","er"],
+
+  ["brave","braver","bravest","e"], ["nice","nicer","nicest","e"],
+  ["large","larger","largest","e"], ["safe","safer","safest","e"],
+  ["wise","wiser","wisest","e"], ["fine","finer","finest","e"],
+  ["close","closer","closest","e"], ["late","later","latest","e"],
+  ["cute","cuter","cutest","e"], ["white","whiter","whitest","e"],
+  ["pale","paler","palest","e"], ["simple","simpler","simplest","e"],
+
+  ["happy","happier","happiest","y"], ["lazy","lazier","laziest","y"],
+  ["heavy","heavier","heaviest","y"], ["easy","easier","easiest","y"],
+  ["pretty","prettier","prettiest","y"], ["dirty","dirtier","dirtiest","y"],
+  ["funny","funnier","funniest","y"], ["busy","busier","busiest","y"],
+  ["tiny","tinier","tiniest","y"], ["angry","angrier","angriest","y"],
+  ["hungry","hungrier","hungriest","y"], ["noisy","noisier","noisiest","y"],
+  ["silly","sillier","silliest","y"], ["tidy","tidier","tidiest","y"],
+  ["healthy","healthier","healthiest","y"], ["early","earlier","earliest","y"],
+
+  ["big","bigger","biggest","dbl"], ["hot","hotter","hottest","dbl"],
+  ["thin","thinner","thinnest","dbl"], ["fat","fatter","fattest","dbl"],
+  ["sad","sadder","saddest","dbl"], ["wet","wetter","wettest","dbl"],
+  ["red","redder","reddest","dbl"], ["flat","flatter","flattest","dbl"],
+  ["slim","slimmer","slimmest","dbl"],
+
+  ["beautiful","more beautiful","most beautiful","more"],
+  ["interesting","more interesting","most interesting","more"],
+  ["careful","more careful","most careful","more"],
+  ["famous","more famous","most famous","more"],
+  ["comfortable","more comfortable","most comfortable","more"],
+  ["difficult","more difficult","most difficult","more"],
+  ["expensive","more expensive","most expensive","more"],
+  ["important","more important","most important","more"],
+  ["dangerous","more dangerous","most dangerous","more"],
+  ["delicious","more delicious","most delicious","more"],
+  ["intelligent","more intelligent","most intelligent","more"],
+  ["wonderful","more wonderful","most wonderful","more"],
+  ["helpful","more helpful","most helpful","more"],
+  ["popular","more popular","most popular","more"],
+  ["useful","more useful","most useful","more"],
+  ["crowded","more crowded","most crowded","more"],
+  ["colourful","more colourful","most colourful","more"],
+
+  ["good","better","best","irr"], ["bad","worse","worst","irr"],
+  ["little","less","least","irr"], ["much","more","most","irr"],
+  ["many","more","most","irr"], ["far","farther","farthest","irr"]
+];
+
+var RULE_TEXT = {
+  er:  "Short word - just add -er / -est.",
+  e:   "Word ends in -e - add only -r / -st.",
+  y:   "Word ends in -y - change y to i, then add -er / -est.",
+  dbl: "Short word ending in one vowel + one consonant - double the last letter.",
+  more:"Long word - use more / most in front. Never add -er.",
+  irr: "Irregular word - it changes completely. Learn it by heart."
+};
+
+var COMP_TEMPLATES = [
+  "Riya is %s% than Meena.",
+  "My bag is %s% than your bag.",
+  "Today is %s% than yesterday.",
+  "This book is %s% than that one.",
+  "The blue box is %s% than the red box."
+];
+var SUPER_TEMPLATES = [
+  "Riya is the %s% girl in the class.",
+  "This is the %s% book in the library.",
+  "That was the %s% day of the whole year.",
+  "He is the %s% boy in the team."
+];
+
+/* ---------------------------------------------------------------
+   CONTENT 3 - Negative sentences
+   [positive, correct negative, wrong1, wrong2, ruleId]
+   --------------------------------------------------------------- */
+var NEG = [
+  ["He is doing his work.","He is not doing his work.","He is doing not his work.","He does not doing his work.","aux"],
+  ["They have a pet dog in their home.","They have no pet dog in their home.","They have not a pet dog in their home.","They do not have no pet dog in their home.","have"],
+  ["Sheela was in the library last evening.","Sheela was not in the library last evening.","Sheela not was in the library last evening.","Sheela was no in the library last evening.","be"],
+  ["She can play the tabla beautifully.","She cannot play the tabla beautifully.","She can play not the tabla beautifully.","She does not can play the tabla beautifully.","aux"],
+  ["Reema and Ramesh are appearing for the exam.","Reema and Ramesh are not appearing for the exam.","Reema and Ramesh are appearing not for the exam.","Reema and Ramesh no are appearing for the exam.","aux"],
+  ["Get out of the room.","Do not get out of the room.","Get not out of the room.","You are not get out of the room.","cmd"],
+  ["I am playing.","I am not playing.","I not am playing.","I am no playing.","be"],
+  ["He is present.","He is not present.","He not is present.","He is no present.","be"],
+  ["There are many books.","There are not many books.","There no are many books.","There are many books not.","be"],
+  ["She has a flute.","She has no flute.","She has not flute.","She not has a flute.","have"],
+  ["They have a car.","They have no car.","They have not a car.","They no have a car.","have"],
+  ["He had a piano.","He had no piano.","He had not a piano.","He not had a piano.","have"],
+  ["They are swimming.","They are not swimming.","They are swimming not.","They no are swimming.","aux"],
+  ["Arifa can recite beautifully.","Arifa cannot recite beautifully.","Arifa can not recite beautifully well.","Arifa does not can recite beautifully.","aux"],
+  ["Finish your homework.","Do not finish your homework.","Finish not your homework.","You do not finish homework your.","cmd"],
+  ["Clean your room.","Do not clean your room.","Clean not your room.","Not clean your room.","cmd"],
+  ["Stand up.","Do not stand up.","Stand not up.","No stand up.","cmd"],
+  ["The children are singing on the stage.","The children are not singing on the stage.","The children are singing not on the stage.","The children no are singing on the stage.","aux"],
+  ["Mother has a red saree.","Mother has no red saree.","Mother has not a red saree.","Mother not has a red saree.","have"],
+  ["The tigers were sleeping in the cage.","The tigers were not sleeping in the cage.","The tigers were sleeping no in the cage.","The tigers not were sleeping in the cage.","aux"],
+  ["Open the window.","Do not open the window.","Open not the window.","Not open the window.","cmd"],
+  ["We had a big garden.","We had no big garden.","We had not a big garden.","We not had a big garden.","have"],
+  ["It is raining today.","It is not raining today.","It is raining not today.","It no is raining today.","be"],
+  ["Rohit can swim across the river.","Rohit cannot swim across the river.","Rohit can swim not across the river.","Rohit does not can swim across the river.","aux"],
+  ["The zoo was crowded on Sunday.","The zoo was not crowded on Sunday.","The zoo no was crowded on Sunday.","The zoo was crowded not on Sunday.","be"],
+  ["Switch off the fan.","Do not switch off the fan.","Switch not off the fan.","No switch off the fan.","cmd"]
+];
+
+var NEG_RULE = {
+  be:  "With is / am / are / was / were, put 'not' straight after the verb.",
+  aux: "When the verb has two words, 'not' goes after the FIRST word. can + not = cannot.",
+  have:"With has / have / had, we use 'no' before the thing.",
+  cmd: "An order sentence starts with Do not / Don't."
+};
+
+/* ---------------------------------------------------------------
+   CONTENT 4 - L-4 Zoo
+   Built from the worksheet's own questions plus tiger facts that the
+   lesson's questions rest on.
+   --------------------------------------------------------------- */
+var ZOO = [
+  ["Why did Rohit and Rima go to the zoo with their father?",
+   ["To watch a film about animals","To see the animals and learn about them","To buy a pet tiger"],1,
+   "They went to the zoo to see the animals and learn about them."],
+  ["Tigers usually hunt during the ______.",
+   ["day","night","afternoon"],1,
+   "Tigers hunt at night."],
+  ["The cubs were kept in a ______.",
+   ["cage","box","house"],0,
+   "The cubs were kept in a cage."],
+  ["Tigers take their prey to a ______.",
+   ["river","playground","hidden place"],2,
+   "A tiger drags its prey to a hidden place before eating."],
+  ["Who fed the tiger cubs?",
+   ["The zookeeper","The tigress, their mother","Rohit and Rima"],1,
+   "The tigress fed her cubs."],
+  ["Who told the children about the tigers?",
+   ["Their teacher","The zookeeper","A visitor"],1,
+   "The zookeeper explained everything about the tigers."],
+  ["What does the word 'prey' mean?",
+   ["An animal that is hunted for food","A place where animals sleep","A baby animal"],0,
+   "Prey means an animal that is hunted and eaten by another animal."],
+  ["A baby tiger is called a ______.",
+   ["calf","cub","kid"],1,
+   "A baby tiger is a cub."],
+  ["A female tiger is called a ______.",
+   ["tigress","lioness","doe"],0,
+   "A female tiger is called a tigress."],
+  ["No two tigers look alike because ______.",
+   ["they all have the same stripes","each tiger has different kinds of stripes","they change colour every year"],1,
+   "Like human beings, no two tigers look alike - each one has different kinds of stripes."],
+  ["Tigers eat ______.",
+   ["only plants","meat","grass and leaves"],1,
+   "A tiger is a carnivore - it eats meat."],
+  ["Which is the national animal of India?",
+   ["The lion","The tiger","The peacock"],1,
+   "The tiger is the national animal of India."],
+  ["Why must we protect tigers?",
+   ["Their number is falling and they may disappear","They are easy to keep at home","They make good pets"],0,
+   "Tigers are becoming fewer, so they need protection."],
+  ["A group of animals kept for people to see is a ______.",
+   ["farm","zoo","forest"],1,
+   "A zoo is where animals are kept so people can see them."],
+  ["What is a zookeeper's work?",
+   ["To sell tickets","To feed and look after the animals","To drive the zoo bus"],1,
+   "A zookeeper feeds the animals and takes care of them."],
+  ["Tick the correct spelling.",["strypes","stripps","stripes"],2,"The correct spelling is stripes."],
+  ["Tick the correct spelling.",["hunting","huntting","huntiing"],0,"The correct spelling is hunting."],
+  ["Tick the correct spelling.",["protecton","protetction","protection"],2,"The correct spelling is protection."],
+  ["Tick the correct spelling.",["tigriss","tigress","tygress"],1,"The correct spelling is tigress."],
+  ["Tick the correct spelling.",["zookeeper","zoocaper","zookiper"],0,"The correct spelling is zookeeper."],
+  ["Tick the correct spelling.",["carnivor","carnivore","carnivour"],1,"The correct spelling is carnivore."],
+  ["Which sentence uses 'prey' correctly?",
+   ["The tiger carried its prey away.","The tiger prey in the cage.","We prey to the tiger."],0,
+   "Prey is a naming word - the animal that is hunted."],
+  ["Which sentence uses 'cub' correctly?",
+   ["The cub is the mother tiger.","The tigress licked her cub.","The cub keeps the zoo clean."],1,
+   "A cub is the baby, and the tigress is its mother."],
+  ["Which word describes a tiger best?",
+   ["gentle","fierce","tiny"],1,
+   "Fierce means wild and strong - it fits a tiger."],
+  ["Tigers rest during the day because ______.",
+   ["they hunt at night","they are lazy","the zoo is closed"],0,
+   "They save their energy in the day and hunt at night."],
+  ["What did the children feel when they saw the tigers?",
+   ["bored","excited","angry"],1,
+   "They were excited to see the tigers so close."],
+  ["What was the name of the tigress at the zoo?",
+   ["Amrita","Rani","Sundari"],0,
+   "The zookeeper told the children that the tigress's name was Amrita."],
+  ["How much did Amrita the tigress weigh?",
+   ["About 15 kilograms","About 150 kilograms","About 500 kilograms"],1,
+   "Amrita weighed about 150 kilograms."],
+  ["Amrita was a ______ tigress.",
+   ["Royal Bengal","Siberian","White"],0,
+   "The mother tiger was a Royal Bengal tigress with a reddish-orange coat and black stripes."],
+  ["What colour were Amrita's cubs?",
+   ["Light brown","Reddish-orange","Black and white"],0,
+   "The cubs were light brown; the mother had a reddish-orange coat with black stripes."],
+  ["What did the tigress catch in the pool to feed her young ones?",
+   ["A fish","A frog","A duck"],0,
+   "In a flash, the tigress caught a fish and fed its young ones."],
+  ["Why did Amrita not allow other tigers into her enclosure?",
+   ["She liked to be by herself after her cubs were born","There was no space","The zookeeper stopped them"],0,
+   "Amrita liked to be by itself, and since its cubs were born it did not allow any other tiger into its enclosure."],
+  ["A tiger's most favourite food is ______.",
+   ["deer and wild pigs","grass and leaves","fish and frogs"],0,
+   "In the wild, a tiger's most favourite food is deer and wild pigs."],
+  ["The tiger's favourite kind of deer is the ______.",
+   ["gaur","reindeer","musk deer"],0,
+   "Their favourite kind of deer is the gaur."],
+  ["After killing an animal, a tiger eats it over a ______.",
+   ["day","week","month"],1,
+   "Tigers eat a kill over a week, taking it into a hidden spot or their cave."],
+  ["Silently following prey from behind is called ______.",
+   ["stalking","pouncing","grasping"],0,
+   "A tiger silently follows its prey from behind - this is called stalking."],
+  ["According to a Chinese saying, tigers have the mark of ______ or king on their forehead.",
+   ["Wang","Ming","Chang"],0,
+   "Tigers have the mark of Wang, or king, on their forehead - so the Indian tiger is called the Royal Bengal Tiger."],
+  ["Where are tigers protected so their numbers can grow?",
+   ["In sanctuaries","In circuses","In farms"],0,
+   "No one is allowed to hunt in a sanctuary, so tigers there have started growing in numbers."],
+  ["'Elated' means ______.",
+   ["overjoyed","frightened","sleepy"],0,
+   "Elated means overjoyed - Rima and Rohit were elated to share their zoo visit experience with their friends."],
+  ["An 'enclosure' is ______.",
+   ["an area surrounded by a fence or wall","a small cave","a kind of net"],0,
+   "An enclosure is an area surrounded by a fence or wall."],
+  ["Which of these did Rima and Rohit also see at the zoo?",
+   ["Black bucks, giraffes and pelicans","Polar bears and penguins","Kangaroos and koalas"],0,
+   "They also saw black bucks, crocodiles, gibbons, giraffes, deer, rhinoceros, peacocks, pelicans and African parrots."]
+];
+
+/* ---------------------------------------------------------------
+   CONTENT 5 - Comprehension: "The Waitress" (Section A of the
+   assignment booklet). Trains technique: fact-finding, true/false,
+   adjective-from-passage, and Aid to Vocabulary words.
+   --------------------------------------------------------------- */
+var PASSAGE_TITLE = "The Waitress";
+var PASSAGE = [
+  "Mrs Wobble was a cheerful waitress who loved serving customers at the busy restaurant where she worked. She always smiled politely and tried her best to make everyone happy. However, there was one problem - Mrs Wobble wobbled whenever she carried food. Sometimes cups rattled on the tray, and sometimes plates slipped from her hands. The customers found her funny, but the manager was not pleased at all.",
+  "One afternoon, Mrs Wobble accidentally spilled hot soup on a customer. The next day, while carrying a roast chicken, she stumbled and the chicken flew into the air and landed on a man's head. Everyone in the crowded restaurant burst into laughter except the angry manager. A few days later, Mrs Wobble dropped jelly right on the manager's head. That was the final mistake, and the manager told her to leave the job. Mrs Wobble went home feeling sad and worried about her family.",
+  "When Mr Wobble heard what had happened, he comforted his wife and came up with a clever idea. 'Why don't we open our own cafe?' he said. The whole Wobble family became excited at once. They cleaned the house, painted the walls, and decorated the cafe with colourful lights and flowers. The children bought roller skates and carried a fishing net to catch falling dishes. On the opening day, many people came to visit the new cafe. Mrs Wobble served food while wobbling from side to side, and the children quickly skated around to catch plates and cups before they fell. The customers laughed loudly and enjoyed the unusual service. Soon, news of the famous juggling waitress spread across the town, and more and more people visited the cafe every day. In a short time, the little cafe became the most popular place in town, and the Wobble family lived happily together once again."
+];
+
+var COMP = [
+  ["Mrs Wobble worked in a ______.",
+   ["hospital","restaurant","library"],1,
+   "Paragraph 1 says she served customers at the busy restaurant."],
+  ["The waitress felt ______ after losing her job.",
+   ["excited and calm","sad and worried","lazy and careless"],1,
+   "She went home feeling sad and worried about her family."],
+  ["True or False: Mrs Wobble wobbled whenever she carried food.",
+   ["True","False"],0,
+   "Paragraph 1 says exactly this - it is True."],
+  ["True or False: The customers were unhappy with the service at the restaurant.",
+   ["True","False"],1,
+   "False - the customers found her funny. It was the MANAGER who was not pleased."],
+  ["Write one adjective for 'waitress' from paragraph 1.",
+   ["cheerful","angry","tall"],0,
+   "Paragraph 1: 'Mrs Wobble was a cheerful waitress'. The describing word sits just before the noun."],
+  ["Write one adjective for 'restaurant' from paragraph 2.",
+   ["empty","crowded","small"],1,
+   "Paragraph 2: 'everyone in the crowded restaurant'."],
+  ["What was Mrs Wobble's one problem?",
+   ["She was rude to customers","She wobbled whenever she carried food","She came late every day"],1,
+   "Her wobbling made cups rattle and plates slip."],
+  ["What did Mrs Wobble spill on a customer?",
+   ["Cold juice","Hot soup","Jelly"],1,
+   "One afternoon she accidentally spilled hot soup on a customer."],
+  ["Where did the roast chicken land?",
+   ["On the floor","On a man's head","On the manager's table"],1,
+   "She stumbled, the chicken flew into the air and landed on a man's head."],
+  ["What was Mrs Wobble's FINAL mistake?",
+   ["Spilling hot soup","Dropping the chicken","Dropping jelly on the manager's head"],2,
+   "The jelly on the manager's head was the last straw - he told her to leave."],
+  ["Who thought of opening a cafe?",
+   ["The manager","Mr Wobble","The children"],1,
+   "Mr Wobble comforted his wife and came up with the clever idea."],
+  ["Why did the children buy roller skates and a fishing net?",
+   ["To play in the park","To catch falling dishes quickly","To go fishing in the river"],1,
+   "They skated around and caught plates and cups before they fell."],
+  ["Why did more and more people visit the cafe?",
+   ["The food was free","News of the famous juggling waitress spread across the town","It was the only cafe in town"],1,
+   "The unusual, funny service made the cafe famous."],
+  ["What happened to the cafe in the end?",
+   ["It closed down","It became the most popular place in town","The manager bought it"],1,
+   "In a short time it became the most popular place in town."],
+  ["In this passage, 'rattled' means ______.",
+   ["made a shaking noise, or nervous and disturbed","sang loudly","broke into pieces"],0,
+   "Aid to Vocabulary: rattled - nervous or disturbed; here the cups shook and made noise."],
+  ["'Stumbled' means ______.",
+   ["lost balance while walking","ran very fast","fell asleep"],0,
+   "Aid to Vocabulary: stumbled - lost balance while walking."],
+  ["'Burst into laughter' means ______.",
+   ["cried quietly","started laughing suddenly","stopped laughing"],1,
+   "Aid to Vocabulary: burst - happen suddenly with force or emotion."],
+  ["Which word from the passage tells us the lights in the cafe were of many colours?",
+   ["colourful","clever","crowded"],0,
+   "They decorated the cafe with colourful lights and flowers."],
+  ["The customers ______ the unusual service at the new cafe.",
+   ["hated","enjoyed","ignored"],1,
+   "The customers laughed loudly and enjoyed the unusual service."],
+  ["What is the best lesson from this story?",
+   ["Never work in a restaurant","A weakness can become a strength if you use it cleverly","Managers are always angry"],1,
+   "The family turned her wobbling into the thing that made the cafe famous."]
+];
+
+
+var WRITE_Q = [
+  {k:"when",  q:"When did you visit the temple?",           h:"Example: last month, during Navratri", must:true},
+  {k:"fest",  q:"Which festival was it?",                    h:"One or two words", must:true},
+  {k:"where", q:"Where was the temple?",                     h:"Near our house, in Faridabad...", must:true},
+  {k:"look",  q:"How did the temple look?",                  h:"Colour, size, decorations, lights", must:true},
+  {k:"people",q:"Who went with you, and what were people doing?", h:"Family, long queues, priest...", must:true},
+  {k:"sound", q:"What did you hear and smell?",              h:"Bells, bhajans, flowers, incense", must:true},
+  {k:"do",    q:"What did you do there, step by step?",      h:"Stood in queue, prayed, took prasad", must:true},
+  {k:"best",  q:"What did you enjoy the most?",              h:"The one best moment", must:true},
+  {k:"feel",  q:"How did you feel?",                         h:"Happy, peaceful, excited, amazed", must:true},
+  {k:"end",   q:"What will you remember or what did you learn?", h:"Your closing line", must:true}
+];
+
+var MODEL_PARA =
+"Last October, during Navratri, I visited the old temple near our colony with my parents and my grandmother. " +
+"The temple was made of white marble and it looked beautiful in the evening, because tiny golden lights hung " +
+"all around the gate and fresh marigold garlands covered the doorway. A long queue of people waited outside, " +
+"and everyone was carrying flowers and sweets. Inside, I could hear loud bells and sweet bhajans, and the air " +
+"smelled of incense and jasmine. We stood in the queue for almost an hour, then folded our hands before the " +
+"goddess and prayed quietly. After that the priest gave us some warm prasad. The part I enjoyed the most was " +
+"the aarti, when hundreds of little lamps glowed together in the dark hall. I felt calm and very happy. It was " +
+"a memorable evening, and I learnt that a festival is happiest when the whole family celebrates it together.";
+
+/* ---------------------------------------------------------------
+   Helpers
+   --------------------------------------------------------------- */
+function el(id){ return document.getElementById(id); }
+function shuffle(a){
+  var i, j, t;
+  for(i = a.length - 1; i > 0; i--){ j = Math.floor(Math.random() * (i + 1)); t = a[i]; a[i] = a[j]; a[j] = t; }
+  return a;
+}
+function pick(a){ return a[Math.floor(Math.random() * a.length)]; }
+function esc(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+function cap(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
+/* Picks the least-seen entries so rounds do not repeat day after day. */
+function freshPick(list, prefix, n){
+  var scored = list.map(function(item, i){
+    var id = prefix + i;
+    return { item: item, id: id, n: (S.seen[id] || 0), r: Math.random() };
+  });
+  scored.sort(function(a, b){ return (a.n - b.n) || (a.r - b.r); });
+  return scored.slice(0, n);
+}
+
+/* ---------------------------------------------------------------
+   Question builders - each returns
+   {id, tag, html, options:[strings], correct:index, explain}
+   --------------------------------------------------------------- */
+function qAdjective(row, id){
+  var sent = row[0], word = row[1], kind = row[2];
+  var shown = sent.replace("%a%", "<u>" + esc(word) + "</u>");
+  var opts = [kind];
+  var others = shuffle(KINDS.filter(function(k){ return k !== kind; })).slice(0, 3);
+  opts = shuffle(opts.concat(others));
+  return {
+    id: id,
+    tag: "Adjectives",
+    html: shown + "<br><span style='font-size:14px;font-weight:700;color:#8A8496'>Which kind of adjective is this?</span>",
+    options: opts,
+    correct: opts.indexOf(kind),
+    explain: "'" + word + "' is an Adjective of " + kind + "."
+  };
+}
+
+function qDegreeForm(row, id){
+  var pos = row[0], comp = row[1], sup = row[2], rule = row[3];
+  var wantComp = Math.random() < 0.5;
+  var answer = wantComp ? comp : sup;
+  var opts = [answer];
+  if(rule === "more"){
+    opts.push(pos + (wantComp ? "er" : "est"));
+    opts.push(wantComp ? ("most " + pos) : ("more " + pos));
+  } else if(rule === "irr"){
+    opts.push(pos + (wantComp ? "er" : "est"));
+    opts.push((wantComp ? "more " : "most ") + pos);
+  } else {
+    opts.push(wantComp ? sup : comp);
+    opts.push((wantComp ? "more " : "most ") + pos);
+  }
+  opts = shuffle(opts.filter(function(v, i, arr){ return arr.indexOf(v) === i; }));
+  return {
+    id: id,
+    tag: "Degrees",
+    html: "Write the <b>" + (wantComp ? "comparative" : "superlative") + "</b> degree of <u>" + esc(pos) + "</u>.",
+    options: opts,
+    correct: opts.indexOf(answer),
+    explain: pos + " - " + comp + " - " + sup + ". " + RULE_TEXT[rule]
+  };
+}
+
+var NO_SENTENCE = ["much", "many", "little"];
+
+function qDegreeSentence(row, id){
+  var pos = row[0], comp = row[1], sup = row[2], rule = row[3];
+  /* much / many / little do not sit in these templates - ask the form instead */
+  if(NO_SENTENCE.indexOf(pos) > -1) return qDegreeForm(row, id.replace("degs:", "degf:"));
+  var wantComp = Math.random() < 0.5;
+  var answer = wantComp ? comp : sup;
+  var tpl = wantComp ? pick(COMP_TEMPLATES) : pick(SUPER_TEMPLATES);
+  var opts = [answer, pos, wantComp ? sup : comp];
+  opts = shuffle(opts.filter(function(v, i, arr){ return arr.indexOf(v) === i; }));
+  var blanked = tpl.replace("%s%", "<u>______</u>");
+  return {
+    id: id,
+    tag: "Degrees",
+    html: blanked + "<br><span style='font-size:14px;font-weight:700;color:#8A8496'>Use the right degree of: " + esc(pos) + "</span>",
+    options: opts,
+    correct: opts.indexOf(answer),
+    explain: tpl.replace("%s%", answer) + " " + RULE_TEXT[rule]
+  };
+}
+
+function qNegative(row, id){
+  var opts = shuffle([row[1], row[2], row[3]]);
+  return {
+    id: id,
+    tag: "Negative",
+    html: "Change into a negative sentence:<br><b>" + esc(row[0]) + "</b>",
+    options: opts,
+    correct: opts.indexOf(row[1]),
+    explain: NEG_RULE[row[4]]
+  };
+}
+
+function qZoo(row, id){
+  var correctText = row[1][row[2]];
+  var opts = shuffle(row[1].slice());
+  return {
+    id: id,
+    tag: "Zoo",
+    html: esc(row[0]),
+    options: opts,
+    correct: opts.indexOf(correctText),
+    explain: row[3]
+  };
+}
+
+function qComp(row, id){
+  var correctText = row[1][row[2]];
+  /* keep True/False order fixed; shuffle everything else */
+  var opts = (row[1].length === 2) ? row[1].slice() : shuffle(row[1].slice());
+  return {
+    id: id,
+    tag: "Comprehension",
+    html: esc(row[0]),
+    options: opts,
+    correct: opts.indexOf(correctText),
+    explain: row[3]
+  };
+}
+
+/* Rebuilds a question from its stored id, so the mistakes bank
+   re-asks the same item with fresh option order. */
+function buildById(id){
+  var parts = id.split(":");
+  var kind = parts[0], i = parseInt(parts[1], 10);
+  if(kind === "adj" && ADJ[i])  return qAdjective(ADJ[i], id);
+  if(kind === "degf" && DEG[i]) return qDegreeForm(DEG[i], id);
+  if(kind === "degs" && DEG[i]) return qDegreeSentence(DEG[i], id);
+  if(kind === "neg" && NEG[i])  return qNegative(NEG[i], id);
+  if(kind === "zoo" && ZOO[i])  return qZoo(ZOO[i], id);
+  if(kind === "comp" && COMP[i]) return qComp(COMP[i], id);
+  return null;
+}
+
+/* ---------------------------------------------------------------
+   Round assembly
+   --------------------------------------------------------------- */
+var currentMode = "mix";
+var round = [];
+var qIdx = 0;
+var roundRight = 0;
+var answered = false;
+var passageSeen = false;
+
+function buildRound(mode){
+  var out = [], i, chosen;
+  if(mode === "adj"){
+    chosen = freshPick(ADJ, "adj:", ROUND_LEN);
+    for(i = 0; i < chosen.length; i++) out.push(qAdjective(chosen[i].item, chosen[i].id));
+  } else if(mode === "deg"){
+    chosen = freshPick(DEG, "degf:", ROUND_LEN);
+    for(i = 0; i < chosen.length; i++){
+      if(i % 2 === 0) out.push(qDegreeForm(chosen[i].item, chosen[i].id));
+      else out.push(qDegreeSentence(chosen[i].item, "degs:" + chosen[i].id.split(":")[1]));
+    }
+  } else if(mode === "neg"){
+    chosen = freshPick(NEG, "neg:", ROUND_LEN);
+    for(i = 0; i < chosen.length; i++) out.push(qNegative(chosen[i].item, chosen[i].id));
+  } else if(mode === "zoo"){
+    chosen = freshPick(ZOO, "zoo:", ROUND_LEN);
+    for(i = 0; i < chosen.length; i++) out.push(qZoo(chosen[i].item, chosen[i].id));
+  } else if(mode === "comp"){
+    chosen = freshPick(COMP, "comp:", ROUND_LEN);
+    for(i = 0; i < chosen.length; i++) out.push(qComp(chosen[i].item, chosen[i].id));
+  } else if(mode === "fix"){
+    var ids = Object.keys(S.wrong);
+    shuffle(ids);
+    for(i = 0; i < ids.length && out.length < ROUND_LEN; i++){
+      var q = buildById(ids[i]);
+      if(q) out.push(q);
+    }
+  } else {
+    /* mix - weighted the way the paper is weighted */
+    var c = freshPick(COMP, "comp:", 3);
+    for(i = 0; i < c.length; i++) out.push(qComp(c[i].item, c[i].id));
+    var a = freshPick(ADJ, "adj:", 3);
+    for(i = 0; i < a.length; i++) out.push(qAdjective(a[i].item, a[i].id));
+    var d = freshPick(DEG, "degf:", 4);
+    for(i = 0; i < d.length; i++){
+      if(i % 2 === 0) out.push(qDegreeForm(d[i].item, d[i].id));
+      else out.push(qDegreeSentence(d[i].item, "degs:" + d[i].id.split(":")[1]));
+    }
+    var n = freshPick(NEG, "neg:", 3);
+    for(i = 0; i < n.length; i++) out.push(qNegative(n[i].item, n[i].id));
+    var z = freshPick(ZOO, "zoo:", 3);
+    for(i = 0; i < z.length; i++) out.push(qZoo(z[i].item, z[i].id));
+    shuffle(out);
+  }
+  return out;
+}
+
+function startQuiz(mode){
+  currentMode = mode;
+  round = buildRound(mode);
+  if(!round.length){
+    alert("Nothing to fix right now - play a round first.");
+    return;
+  }
+  qIdx = 0; roundRight = 0; passageSeen = false;
+  show("quiz");
+  renderQuestion();
+}
+
+function renderQuestion(){
+  answered = false;
+  var q = round[qIdx];
+  el("qTag").textContent = q.tag + "  " + (qIdx + 1) + " / " + round.length;
+  el("qText").innerHTML = q.html;
+
+  /* comprehension questions carry the passage with them */
+  var pb = el("passageBox");
+  if(q.tag === "Comprehension"){
+    var openAttr = passageSeen ? "" : " open";
+    var paras = PASSAGE.map(function(p){ return "<p>" + esc(p) + "</p>"; }).join("");
+    pb.innerHTML = "<details class='passage'" + openAttr + "><summary>" + esc(PASSAGE_TITLE) +
+      " - tap to read the passage</summary>" + paras + "</details>";
+    passageSeen = true;
+  } else {
+    pb.innerHTML = "";
+  }
+
+  el("barFill").style.width = Math.round((qIdx / round.length) * 100) + "%";
+  var fb = el("qFb");
+  fb.className = "fb";
+  fb.textContent = "";
+  el("nextBtn").textContent = (qIdx === round.length - 1) ? "Finish" : "Next";
+
+  var box = el("qOpts");
+  box.innerHTML = "";
+  q.options.forEach(function(text, i){
+    var b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = text;
+    b.onclick = function(){ answer(i, b); };
+    box.appendChild(b);
+  });
+}
+
+function answer(i, btn){
+  if(answered) return;
+  answered = true;
+  var q = round[qIdx];
+  var kids = el("qOpts").children;
+  var k;
+  for(k = 0; k < kids.length; k++) kids[k].className = "opt locked";
+  kids[q.correct].className = "opt correct locked";
+
+  S.seen[q.id] = (S.seen[q.id] || 0) + 1;
+  var fb = el("qFb");
+
+  if(i === q.correct){
+    roundRight++;
+    S.stars++; S.today++;
+    if(S.wrong[q.id]){
+      S.wrong[q.id]--;
+      if(S.wrong[q.id] <= 0) delete S.wrong[q.id];
+    }
+    fb.className = "fb ok show";
+    fb.textContent = "Correct! " + q.explain;
+    mascot("happy");
+  } else {
+    btn.className = "opt wrong locked";
+    S.wrong[q.id] = 2;
+    fb.className = "fb no show";
+    fb.textContent = "Answer: " + q.options[q.correct] + ". " + q.explain;
+    mascot("sad");
+  }
+  saveState();
+  paintStats();
+}
+
+function nextQuestion(){
+  if(!answered){
+    var fb = el("qFb");
+    fb.className = "fb no show";
+    fb.textContent = "Choose an answer first.";
+    return;
+  }
+  qIdx++;
+  if(qIdx >= round.length){ finishRound(); return; }
+  renderQuestion();
+}
+
+function finishRound(){
+  show("result");
+  var pct = Math.round((roundRight / round.length) * 100);
+  if(pct > S.best){ S.best = pct; saveState(); }
+  el("rScore").textContent = roundRight + " out of " + round.length + "  (" + pct + "%)";
+  if(pct === 100){
+    el("rIcon").textContent = "🏆"; el("rTitle").textContent = "All correct!";
+    el("rNote").textContent = "Nothing left to fix from this round. Try another section.";
+  } else if(pct >= 70){
+    el("rIcon").textContent = "🎉"; el("rTitle").textContent = "Well done!";
+    el("rNote").textContent = "The ones you missed are waiting in Fix My Mistakes.";
+  } else {
+    el("rIcon").textContent = "💪"; el("rTitle").textContent = "Keep going";
+    el("rNote").textContent = "Read the rule cards in Quick Learn, then try this section again.";
+  }
+}
+
+function mascot(mood){
+  var m = el("mascot");
+  m.className = "mascot " + mood;
+  setTimeout(function(){ m.className = "mascot"; }, 600);
+}
+
+/* ---------------------------------------------------------------
+   Quick Learn
+   --------------------------------------------------------------- */
+function degRows(rule){
+  var rows = DEG.filter(function(r){ return r[3] === rule; }).slice(0, 6);
+  var html = "<table class='deg'><tr><th>Positive</th><th>Comparative</th><th>Superlative</th></tr>";
+  rows.forEach(function(r){ html += "<tr><td>" + r[0] + "</td><td>" + r[1] + "</td><td>" + r[2] + "</td></tr>"; });
+  return html + "</table>";
+}
+
+function showLearn(){
+  var h = "";
+  h += "<div class='flash'><h3>What is an adjective?</h3><p>A describing word. It tells us more about a naming word - its colour, size, shape, number, feeling or quality.</p><p class='eg'>a beautiful flower &middot; a tall boy &middot; a brown horse</p><p style='margin-top:8px'>It usually comes before the noun, but it can also come after it: <i>Meeta is very sad.</i></p></div>";
+
+  h += "<div class='flash'><h3>The five kinds</h3>";
+  h += "<p><b>Quality</b> - what kind? <span class='eg'>Flowers smell sweet.</span></p>";
+  h += "<p><b>Quantity</b> - how much? <span class='eg'>Some rice is in the pan.</span></p>";
+  h += "<p><b>Number</b> - how many, exactly? <span class='eg'>I have three mangoes.</span></p>";
+  h += "<p><b>Demonstrative</b> - points out. this, that, these, those <span class='eg'>This cat is very big.</span></p>";
+  h += "<p><b>Interrogative</b> - asks. whose, what, which <span class='eg'>Whose bat is on the table?</span></p>";
+  h += "<p style='margin-top:8px;color:var(--berry)'>Trick to remember: if it can be counted exactly it is Number; if it is vague like some, many, little, enough, no - it is Quantity.</p></div>";
+
+  h += "<div class='flash'><h3>Degrees of comparison</h3><p><b>Positive</b> - one thing, no comparing. <i>This mango is sweet.</i><br><b>Comparative</b> - two things, uses <i>than</i>. <i>sweeter than</i><br><b>Superlative</b> - more than two, uses <i>the</i>. <i>the sweetest</i></p></div>";
+
+  h += "<div class='flash'><h3>Rule 1 - add -er / -est</h3>" + degRows("er") + "</div>";
+  h += "<div class='flash'><h3>Rule 2 - ends in -e, add -r / -st</h3>" + degRows("e") + "</div>";
+  h += "<div class='flash'><h3>Rule 3 - ends in -y, change y to i</h3>" + degRows("y") + "</div>";
+  h += "<div class='flash'><h3>Rule 4 - double the last consonant</h3>" + degRows("dbl") + "</div>";
+  h += "<div class='flash'><h3>Rule 5 - long words use more / most</h3>" + degRows("more") + "<p style='margin-top:8px;color:var(--berry)'>Never write beautifuller. Long word, so: more beautiful.</p></div>";
+  h += "<div class='flash'><h3>Irregular - learn by heart</h3>" + degRows("irr") + "</div>";
+
+  h += "<div class='flash'><h3>Negative sentences</h3>";
+  h += "<p><b>is / am / are / was / were</b> - put <i>not</i> after the verb.<span class='eg'>He is present. - He is not present.</span></p>";
+  h += "<p><b>has / have / had</b> - use <i>no</i>.<span class='eg'>She has a flute. - She has no flute.</span></p>";
+  h += "<p><b>Two-word verb</b> - <i>not</i> after the first word.<span class='eg'>He is playing. - He is not playing.</span></p>";
+  h += "<p><b>can</b> - becomes <i>cannot</i>.<span class='eg'>Arifa can recite. - Arifa cannot recite.</span></p>";
+  h += "<p><b>An order</b> - start with <i>Do not / Don't</i>.<span class='eg'>Stand up. - Do not stand up.</span></p></div>";
+
+  h += "<div class='flash'><h3>Paragraph in 5 steps</h3><p>1. Topic line - when and what.<br>2. Where it was.<br>3. What you saw - colour, size, decoration.<br>4. What you heard, smelt, did.<br>5. Closing line - how you felt or what you learnt.</p><p style='margin-top:8px;color:var(--berry)'>Use adjectives everywhere. That is what earns the marks.</p></div>";
+
+  h += "<div class='flash'><h3>In the comprehension</h3><p>Read the question first, then hunt for it in the passage. When it asks for an adjective from a paragraph, look for the describing word right before the noun. Answer in a full sentence, using words from the question.</p></div>";
+
+  el("learnBody").innerHTML = h;
+  show("learn");
+}
+
+/* ---------------------------------------------------------------
+   Paragraph builder - fully offline
+   --------------------------------------------------------------- */
+function showWrite(){
+  var h = "";
+  WRITE_Q.forEach(function(f){
+    var val = S.write[f.k] || "";
+    h += "<div class='card field'><label>" + esc(f.q) + "</label>";
+    h += "<span class='hint'>" + esc(f.h) + "</span>";
+    h += "<textarea id='w_" + f.k + "' oninput='saveWrite(\"" + f.k + "\")'>" + esc(val) + "</textarea></div>";
+  });
+  el("writeFields").innerHTML = h;
+  el("writeOut").className = "hidden";
+  show("write");
+}
+
+function saveWrite(k){
+  var node = el("w_" + k);
+  if(!node) return;
+  S.write[k] = node.value;
+  saveState();
+}
+
+function w(k){ return String(S.write[k] || "").trim().replace(/\.$/, ""); }
+
+function buildParagraph(){
+  var missing = WRITE_Q.filter(function(f){ return f.must && !w(f.k); });
+  if(missing.length){
+    alert("Still empty: " + missing[0].q);
+    return;
+  }
+  var p = "";
+  p += cap(w("when")) + ", during " + w("fest") + ", I visited a temple " + w("where") + ". ";
+  p += "The temple " + w("look") + ". ";
+  p += "I went with " + w("people") + ". ";
+  p += "I could hear and smell " + w("sound") + ". ";
+  p += "First we " + w("do") + ". ";
+  p += "The part I enjoyed the most was " + w("best") + ". ";
+  p += "I felt " + w("feel") + ". ";
+  p += cap(w("end")) + ".";
+
+  el("paraText").textContent = p;
+  el("modelPara").textContent = MODEL_PARA;
+
+  var words = p.split(/\s+/).filter(Boolean).length;
+  var sents = p.split(/[.!?]+/).filter(function(s){ return s.trim().length > 2; }).length;
+  el("paraCount").textContent = words + " words, " + sents + " sentences. Copy this into your notebook in your own handwriting and improve it as you write.";
+
+  el("paraCheck").innerHTML = checkParagraph(p, words, sents);
+  el("writeOut").className = "";
+  el("writeOut").scrollIntoView({ behavior: "smooth" });
+}
+
+var ADJ_WORDS = ["beautiful","big","small","bright","colourful","colorful","old","new","white","golden","huge",
+  "tiny","sweet","loud","quiet","peaceful","crowded","long","tall","warm","cold","lovely","shiny","clean",
+  "holy","grand","pretty","fresh","dark","happy","noisy","narrow","wide","red","yellow","green","blue","marble"];
+var SENSE_WORDS = ["saw","see","looked","heard","hear","smell","smelt","smelled","sound","sounds","bell","bells",
+  "music","bhajan","bhajans","incense","flowers","taste","tasted","touch","felt","fragrance","aroma"];
+var FEEL_WORDS = ["happy","excited","nervous","surprised","amazed","joyful","peaceful","calm","proud","thrilled","glad"];
+
+function countHits(text, list){
+  var low = " " + text.toLowerCase().replace(/[^a-z ]/g, " ") + " ";
+  var n = 0;
+  list.forEach(function(word){ if(low.indexOf(" " + word + " ") > -1) n++; });
+  return n;
+}
+
+function line(ok, text){
+  return "<div class='check " + (ok ? "ok" : "no") + "'><span class='m'>" + (ok ? "✅" : "⚠️") + "</span><span>" + text + "</span></div>";
+}
+
+function checkParagraph(p, words, sents){
+  var h = "";
+  var adjN = countHits(p, ADJ_WORDS);
+  var senseN = countHits(p, SENSE_WORDS);
+  var feelN = countHits(p, FEEL_WORDS);
+  var low = p.toLowerCase();
+  var firstSent = low.split(/[.!?]/)[0] || "";
+  var hasTime = /(last |during |one day|ago|january|february|march|april|may |june|july|august|september|october|november|december|holiday|vacation|birthday)/.test(firstSent);
+  var hasEnd = /(never forget|memorable|learnt|learned|remember|wonderful day|happiest)/.test(low);
+
+  h += line(words >= 60, words >= 60
+      ? "Length is good (" + words + " words)."
+      : "Only " + words + " words. Aim for 60 to 100 - add more detail to the short answers.");
+  h += line(sents >= 6, sents >= 6
+      ? sents + " sentences - a proper paragraph."
+      : "Only " + sents + " sentences. A descriptive paragraph needs at least 6.");
+  h += line(adjN >= 4, adjN >= 4
+      ? "Good use of describing words (" + adjN + " found)."
+      : "Only " + adjN + " describing words. This is the marks section - add colour, size and feeling words.");
+  h += line(senseN >= 2, senseN >= 2
+      ? "You wrote about what you saw, heard or smelt."
+      : "Add what you HEARD and SMELT - bells, bhajans, incense, flowers.");
+  h += line(feelN >= 1, feelN >= 1
+      ? "You said how you felt."
+      : "Say how you felt - happy, excited, peaceful.");
+  h += line(hasTime, hasTime
+      ? "Your opening tells when it happened."
+      : "Start with when it happened: Last month... / During Diwali...");
+  h += line(hasEnd, hasEnd
+      ? "You have a proper closing line."
+      : "End with a closing line: It was a memorable day and I will never forget it.");
+  h += "<p class='mini' style='margin-top:10px'>Last check by yourself: capital letter at the start of every sentence, a full stop at the end, and no line written in Hindi word order.</p>";
+  return h;
+}
+
+/* ---------------------------------------------------------------
+   Screens and boot
+   --------------------------------------------------------------- */
+var SCREENS = ["home", "quiz", "result", "learn", "write"];
+function show(name){
+  SCREENS.forEach(function(s){ el(s).className = (s === name) ? "" : "hidden"; });
+  window.scrollTo(0, 0);
+}
+function goHome(){ paintStats(); show("home"); }
+
+function paintStats(){
+  el("stStars").textContent = S.stars;
+  el("stToday").textContent = S.today;
+  var fixN = Object.keys(S.wrong).length;
+  el("stFix").textContent = fixN;
+  el("fixBtn").style.opacity = fixN ? "1" : ".55";
+}
+
+function changeSync(){
+  var input = window.prompt("Enter the sync code from her other device (e.g. TIGER-4271):");
+  if(!input) return;
+  if(DikshaSync.setCode(input)){
+    window.alert("Linked. Reloading to bring in progress from that code...");
+    window.location.reload();
+  }
+}
+
+(function boot(){
+  loadState();
+  dailyReset();
+  paintStats();
+  show("home");
+
+  if(typeof DikshaSync !== "undefined" && DikshaSync.init()){
+    el("syncCard").style.display = "";
+    var disp = el("syncCodeDisplay");
+    disp.textContent = DikshaSync.getCode();
+    disp.onclick = function(){
+      try{
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(DikshaSync.getCode());
+          disp.textContent = "Copied! " + DikshaSync.getCode();
+          setTimeout(function(){ disp.textContent = DikshaSync.getCode(); }, 1500);
+          return;
+        }
+      }catch(e){}
+      window.prompt("Your sync code (copy it):", DikshaSync.getCode());
+    };
+    DikshaSync.pull(LS_KEY).then(function(remote){
+      if(remote && (remote.stars || 0) > (S.stars || 0)){
+        for(var k in S){ if(remote[k] !== undefined) S[k] = remote[k]; }
+        dailyReset();
+        paintStats();
+      }
+      DikshaSync.arm();
+      DikshaSync.push(LS_KEY, S);
+    });
+  }
+})();
+</script>
+</body>
+</html>
