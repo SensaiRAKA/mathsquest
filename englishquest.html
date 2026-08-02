@@ -312,65 +312,74 @@ var ADJ = [
 
 /* ---------------------------------------------------------------
    CONTENT 2 - Degrees of comparison
-   [positive, comparative, superlative, ruleId]
+   [positive, comparative, superlative, ruleId, fits]
+
+   "fits" lists the kinds of subject the word can sensibly describe,
+   so a word never lands in a sentence it does not belong in
+   ("my bag is more dangerous than your bag").
+     p = a person   g = a girl (words we would not use for the boy
+     sentences)     t = a bag     x = a box   b = a book
+     d = a day      f = food      l = a place
+   An empty string means no sentence template suits the word, so it
+   is only ever asked as a form question.
    --------------------------------------------------------------- */
 var DEG = [
-  ["tall","taller","tallest","er"], ["small","smaller","smallest","er"],
-  ["long","longer","longest","er"], ["short","shorter","shortest","er"],
-  ["kind","kinder","kindest","er"], ["clean","cleaner","cleanest","er"],
-  ["quick","quicker","quickest","er"], ["young","younger","youngest","er"],
-  ["old","older","oldest","er"], ["strong","stronger","strongest","er"],
-  ["bright","brighter","brightest","er"], ["dark","darker","darkest","er"],
-  ["soft","softer","softest","er"], ["warm","warmer","warmest","er"],
-  ["sweet","sweeter","sweetest","er"], ["cold","colder","coldest","er"],
-  ["deep","deeper","deepest","er"], ["high","higher","highest","er"],
-  ["fast","faster","fastest","er"], ["slow","slower","slowest","er"],
-  ["weak","weaker","weakest","er"], ["thick","thicker","thickest","er"],
-  ["rich","richer","richest","er"], ["near","nearer","nearest","er"],
+  ["tall","taller","tallest","er","p"], ["small","smaller","smallest","er","ptxbl"],
+  ["long","longer","longest","er","txbd"], ["short","shorter","shortest","er","ptxbd"],
+  ["kind","kinder","kindest","er","p"], ["clean","cleaner","cleanest","er","txbl"],
+  ["quick","quicker","quickest","er","p"], ["young","younger","youngest","er","p"],
+  ["old","older","oldest","er","ptxb"], ["strong","stronger","strongest","er","ptx"],
+  ["bright","brighter","brightest","er","txdl"], ["dark","darker","darkest","er","txdl"],
+  ["soft","softer","softest","er","tf"], ["warm","warmer","warmest","er","d"],
+  ["sweet","sweeter","sweetest","er","pf"], ["cold","colder","coldest","er","d"],
+  ["deep","deeper","deepest","er","tx"], ["high","higher","highest","er",""],
+  ["fast","faster","fastest","er","p"], ["slow","slower","slowest","er","p"],
+  ["weak","weaker","weakest","er","p"], ["thick","thicker","thickest","er","txb"],
+  ["rich","richer","richest","er","p"], ["near","nearer","nearest","er","l"],
 
-  ["brave","braver","bravest","e"], ["nice","nicer","nicest","e"],
-  ["large","larger","largest","e"], ["safe","safer","safest","e"],
-  ["wise","wiser","wisest","e"], ["fine","finer","finest","e"],
-  ["close","closer","closest","e"], ["late","later","latest","e"],
-  ["cute","cuter","cutest","e"], ["white","whiter","whitest","e"],
-  ["pale","paler","palest","e"], ["simple","simpler","simplest","e"],
+  ["brave","braver","bravest","e","p"], ["nice","nicer","nicest","e","ptxbdfl"],
+  ["large","larger","largest","e","txbl"], ["safe","safer","safest","e","txl"],
+  ["wise","wiser","wisest","e","p"], ["fine","finer","finest","e","d"],
+  ["close","closer","closest","e","l"], ["late","later","latest","e",""],
+  ["cute","cuter","cutest","e","p"], ["white","whiter","whitest","e","tx"],
+  ["pale","paler","palest","e",""], ["simple","simpler","simplest","e","b"],
 
-  ["happy","happier","happiest","y"], ["lazy","lazier","laziest","y"],
-  ["heavy","heavier","heaviest","y"], ["easy","easier","easiest","y"],
-  ["pretty","prettier","prettiest","y"], ["dirty","dirtier","dirtiest","y"],
-  ["funny","funnier","funniest","y"], ["busy","busier","busiest","y"],
-  ["tiny","tinier","tiniest","y"], ["angry","angrier","angriest","y"],
-  ["hungry","hungrier","hungriest","y"], ["noisy","noisier","noisiest","y"],
-  ["silly","sillier","silliest","y"], ["tidy","tidier","tidiest","y"],
-  ["healthy","healthier","healthiest","y"], ["early","earlier","earliest","y"],
+  ["happy","happier","happiest","y","pd"], ["lazy","lazier","laziest","y","p"],
+  ["heavy","heavier","heaviest","y","txb"], ["easy","easier","easiest","y","b"],
+  ["pretty","prettier","prettiest","y","g"], ["dirty","dirtier","dirtiest","y","txbl"],
+  ["funny","funnier","funniest","y","pb"], ["busy","busier","busiest","y","pdl"],
+  ["tiny","tinier","tiniest","y","txbf"], ["angry","angrier","angriest","y","p"],
+  ["hungry","hungrier","hungriest","y","p"], ["noisy","noisier","noisiest","y","pl"],
+  ["silly","sillier","silliest","y","pb"], ["tidy","tidier","tidiest","y","p"],
+  ["healthy","healthier","healthiest","y","pf"], ["early","earlier","earliest","y",""],
 
-  ["big","bigger","biggest","dbl"], ["hot","hotter","hottest","dbl"],
-  ["thin","thinner","thinnest","dbl"], ["fat","fatter","fattest","dbl"],
-  ["sad","sadder","saddest","dbl"], ["wet","wetter","wettest","dbl"],
-  ["red","redder","reddest","dbl"], ["flat","flatter","flattest","dbl"],
-  ["slim","slimmer","slimmest","dbl"],
+  ["big","bigger","biggest","dbl","ptxbl"], ["hot","hotter","hottest","dbl","d"],
+  ["thin","thinner","thinnest","dbl","ptxb"], ["fat","fatter","fattest","dbl",""],
+  ["sad","sadder","saddest","dbl","pdb"], ["wet","wetter","wettest","dbl","d"],
+  ["red","redder","reddest","dbl","txf"], ["flat","flatter","flattest","dbl","x"],
+  ["slim","slimmer","slimmest","dbl","p"],
 
-  ["beautiful","more beautiful","most beautiful","more"],
-  ["interesting","more interesting","most interesting","more"],
-  ["careful","more careful","most careful","more"],
-  ["famous","more famous","most famous","more"],
-  ["comfortable","more comfortable","most comfortable","more"],
-  ["difficult","more difficult","most difficult","more"],
-  ["expensive","more expensive","most expensive","more"],
-  ["important","more important","most important","more"],
-  ["dangerous","more dangerous","most dangerous","more"],
-  ["delicious","more delicious","most delicious","more"],
-  ["intelligent","more intelligent","most intelligent","more"],
-  ["wonderful","more wonderful","most wonderful","more"],
-  ["helpful","more helpful","most helpful","more"],
-  ["popular","more popular","most popular","more"],
-  ["useful","more useful","most useful","more"],
-  ["crowded","more crowded","most crowded","more"],
-  ["colourful","more colourful","most colourful","more"],
+  ["beautiful","more beautiful","most beautiful","more","gtxbdl"],
+  ["interesting","more interesting","most interesting","more","b"],
+  ["careful","more careful","most careful","more","p"],
+  ["famous","more famous","most famous","more","pbl"],
+  ["comfortable","more comfortable","most comfortable","more","t"],
+  ["difficult","more difficult","most difficult","more","bd"],
+  ["expensive","more expensive","most expensive","more","txbf"],
+  ["important","more important","most important","more","bd"],
+  ["dangerous","more dangerous","most dangerous","more","l"],
+  ["delicious","more delicious","most delicious","more","f"],
+  ["intelligent","more intelligent","most intelligent","more","p"],
+  ["wonderful","more wonderful","most wonderful","more","bdl"],
+  ["helpful","more helpful","most helpful","more","pb"],
+  ["popular","more popular","most popular","more","pbl"],
+  ["useful","more useful","most useful","more","txb"],
+  ["crowded","more crowded","most crowded","more","l"],
+  ["colourful","more colourful","most colourful","more","txb"],
 
-  ["good","better","best","irr"], ["bad","worse","worst","irr"],
-  ["little","less","least","irr"], ["much","more","most","irr"],
-  ["many","more","most","irr"], ["far","farther","farthest","irr"]
+  ["good","better","best","irr","ptxbdfl"], ["bad","worse","worst","irr","txbdfl"],
+  ["little","less","least","irr",""], ["much","more","most","irr",""],
+  ["many","more","most","irr",""], ["far","farther","farthest","irr","l"]
 ];
 
 var RULE_TEXT = {
@@ -382,19 +391,36 @@ var RULE_TEXT = {
   irr: "Irregular word - it changes completely. Learn it by heart."
 };
 
+/* [sentence, kinds of word this sentence accepts] - see "fits" above. */
 var COMP_TEMPLATES = [
-  "Riya is %s% than Meena.",
-  "My bag is %s% than your bag.",
-  "Today is %s% than yesterday.",
-  "This book is %s% than that one.",
-  "The blue box is %s% than the red box."
+  ["Riya is %s% than Meena.", "pg"],
+  ["Rohit is %s% than his brother.", "p"],
+  ["My bag is %s% than your bag.", "t"],
+  ["This box is %s% than that one.", "x"],
+  ["This book is %s% than that one.", "b"],
+  ["Today is %s% than yesterday.", "d"],
+  ["This mango is %s% than that one.", "f"],
+  ["The park is %s% than the market.", "l"]
 ];
 var SUPER_TEMPLATES = [
-  "Riya is the %s% girl in the class.",
-  "This is the %s% book in the library.",
-  "That was the %s% day of the whole year.",
-  "He is the %s% boy in the team."
+  ["Riya is the %s% girl in the class.", "pg"],
+  ["He is the %s% boy in the team.", "p"],
+  ["That is the %s% bag in the shop.", "t"],
+  ["This is the %s% book in the library.", "b"],
+  ["That was the %s% day of the whole year.", "d"],
+  ["This is the %s% mango in the basket.", "f"],
+  ["It is the %s% place in our city.", "l"]
 ];
+
+/* Sentences whose subject suits this word. */
+function templatesFor(fits, list){
+  return list.filter(function(t){
+    for(var i = 0; i < t[1].length; i++){
+      if(fits.indexOf(t[1].charAt(i)) > -1) return true;
+    }
+    return false;
+  });
+}
 
 /* ---------------------------------------------------------------
    CONTENT 3 - Negative sentences
@@ -725,15 +751,17 @@ function qDegreeForm(row, id){
   };
 }
 
-var NO_SENTENCE = ["much", "many", "little"];
-
 function qDegreeSentence(row, id){
-  var pos = row[0], comp = row[1], sup = row[2], rule = row[3];
-  /* much / many / little do not sit in these templates - ask the form instead */
-  if(NO_SENTENCE.indexOf(pos) > -1) return qDegreeForm(row, id.replace("degs:", "degf:"));
-  var wantComp = Math.random() < 0.5;
+  var pos = row[0], comp = row[1], sup = row[2], rule = row[3], fits = row[4] || "";
+  /* Words with no suitable sentence (much, many, little, fat ...) are
+     asked as a form question instead. */
+  var compList = templatesFor(fits, COMP_TEMPLATES);
+  var superList = templatesFor(fits, SUPER_TEMPLATES);
+  if(!compList.length && !superList.length) return qDegreeForm(row, id.replace("degs:", "degf:"));
+
+  var wantComp = compList.length && superList.length ? (Math.random() < 0.5) : !!compList.length;
   var answer = wantComp ? comp : sup;
-  var tpl = wantComp ? pick(COMP_TEMPLATES) : pick(SUPER_TEMPLATES);
+  var tpl = pick(wantComp ? compList : superList)[0];
   var opts = [answer, pos, wantComp ? sup : comp];
   opts = shuffle(opts.filter(function(v, i, arr){ return arr.indexOf(v) === i; }));
   var blanked = tpl.replace("%s%", "<u>______</u>");
