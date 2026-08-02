@@ -46,6 +46,12 @@ button{font-family:'Nunito';font-weight:800;border:none;cursor:pointer}
 .big-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(46,42,59,.14)}
 .big-btn .ico{font-size:30px}
 .big-btn .desc{font-size:12px;font-weight:700;color:#8A8496;display:block}
+.big-btn .cov{font-size:12px;font-weight:800;color:var(--violet-dark);display:block;margin-top:3px}
+.big-btn .cov .bar-mini{display:inline-block;vertical-align:middle;width:52px;height:6px;border-radius:99px;
+  background:#E6E1F5;margin-right:6px;overflow:hidden}
+.big-btn .cov .bar-mini i{display:block;height:100%;background:var(--lilac);border-radius:99px}
+.big-btn .cov.done{color:var(--teal)}
+.big-btn .cov.resume{color:var(--orange)}
 .big-btn.hot{border-left:6px solid var(--berry)}
 .pill{display:inline-block;background:var(--lilac);color:#fff;font-size:11px;font-weight:800;border-radius:99px;padding:2px 10px}
 .pill.o{background:var(--orange)}
@@ -117,25 +123,25 @@ table.deg td{padding:6px;border-top:1px solid #EEE9FA}
   <!-- ============ HOME ============ -->
   <div id="home">
     <button class="big-btn hot" onclick="startQuiz('mix')">
-      <span class="ico">🎯</span><span><b>Full Test Practice</b><span class="desc">Everything mixed - just like tomorrow's paper</span></span>
+      <span class="ico">🎯</span><span><b>Full Test Practice</b><span class="desc">Everything mixed - just like tomorrow's paper</span><span class="cov" id="cov_mix"></span></span>
     </button>
     <button class="big-btn" onclick="startQuiz('comp')">
-      <span class="ico">🍽️</span><span><b>Comprehension - The Waitress</b><span class="desc">Read the passage, then answer like Section A</span></span>
+      <span class="ico">🍽️</span><span><b>Comprehension - The Waitress</b><span class="desc">Read the passage, then answer like Section A</span><span class="cov" id="cov_comp"></span></span>
     </button>
     <button class="big-btn" onclick="startQuiz('adj')">
-      <span class="ico">🌈</span><span><b>Adjectives &amp; Kinds</b><span class="desc">Quality, Quantity, Number, Demonstrative, Interrogative</span></span>
+      <span class="ico">🌈</span><span><b>Adjectives &amp; Kinds</b><span class="desc">Quality, Quantity, Number, Demonstrative, Interrogative</span><span class="cov" id="cov_adj"></span></span>
     </button>
     <button class="big-btn" onclick="startQuiz('deg')">
-      <span class="ico">📏</span><span><b>Degrees of Comparison</b><span class="desc">tall - taller - tallest, more/most, irregulars</span></span>
+      <span class="ico">📏</span><span><b>Degrees of Comparison</b><span class="desc">tall - taller - tallest, more/most, irregulars</span><span class="cov" id="cov_deg"></span></span>
     </button>
     <button class="big-btn" onclick="startQuiz('neg')">
-      <span class="ico">🚫</span><span><b>Negative Sentences</b><span class="desc">not / no / do not - change the sentence</span></span>
+      <span class="ico">🚫</span><span><b>Negative Sentences</b><span class="desc">not / no / do not - change the sentence</span><span class="cov" id="cov_neg"></span></span>
     </button>
     <button class="big-btn" onclick="startQuiz('zoo')">
-      <span class="ico">🐯</span><span><b>L-4 : Zoo</b><span class="desc">Tigers, cubs, questions and spellings</span></span>
+      <span class="ico">🐯</span><span><b>L-4 : Zoo</b><span class="desc">Tigers, cubs, questions and spellings</span><span class="cov" id="cov_zoo"></span></span>
     </button>
     <button class="big-btn" onclick="showWrite()">
-      <span class="ico">✍️</span><span><b>Paragraph Builder</b><span class="desc">Answer 10 hints, get your own paragraph + a marks check</span></span>
+      <span class="ico">✍️</span><span><b>Paragraph Builder</b><span class="desc">Answer 10 hints, get your own paragraph + a marks check</span><span class="cov" id="cov_write"></span></span>
     </button>
     <button class="big-btn" onclick="showLearn()">
       <span class="ico">📚</span><span><b>Quick Learn</b><span class="desc">All the rules on cards - read before you practise</span></span>
@@ -237,6 +243,8 @@ var S = {
   seen: {},      /* id -> times shown */
   wrong: {},     /* id -> hits still needed before it clears */
   write: {},     /* paragraph builder answers */
+  built: false,  /* paragraph has been built at least once */
+  round: null,   /* {mode, ids, qIdx, right} - the round she is part way through */
   best: 0
 };
 
@@ -885,14 +893,53 @@ function buildRound(mode){
   return out;
 }
 
+/* Remembers where she is, so closing the app or the phone dropping the
+   tab does not throw the round away. */
+function saveRound(){
+  if(!round.length){ S.round = null; saveState(); return; }
+  S.round = {
+    mode: currentMode,
+    ids: round.map(function(q){ return q.id; }),
+    qIdx: qIdx,
+    right: roundRight
+  };
+  saveState();
+}
+
+function clearRound(){ S.round = null; saveState(); }
+
+/* Rebuilds a saved round from its ids. Returns null if it can no
+   longer be rebuilt (the mistakes bank may have moved on). */
+function restoreRound(mode){
+  var saved = S.round;
+  if(!saved || saved.mode !== mode || !saved.ids || !saved.ids.length) return null;
+  if(saved.qIdx >= saved.ids.length) return null;
+  var out = [], i, q;
+  for(i = 0; i < saved.ids.length; i++){
+    q = buildById(saved.ids[i]);
+    if(!q) return null;
+    out.push(q);
+  }
+  return out;
+}
+
 function startQuiz(mode){
   currentMode = mode;
-  round = buildRound(mode);
-  if(!round.length){
-    alert("Nothing to fix right now - play a round first.");
-    return;
+  var resumed = restoreRound(mode);
+  if(resumed){
+    round = resumed;
+    qIdx = S.round.qIdx;
+    roundRight = S.round.right || 0;
+  } else {
+    round = buildRound(mode);
+    if(!round.length){
+      alert("Nothing to fix right now - play a round first.");
+      return;
+    }
+    qIdx = 0; roundRight = 0;
   }
-  qIdx = 0; roundRight = 0; passageSeen = false;
+  passageSeen = false;
+  saveRound();
   show("quiz");
   renderQuestion();
 }
@@ -974,10 +1021,12 @@ function nextQuestion(){
   }
   qIdx++;
   if(qIdx >= round.length){ finishRound(); return; }
+  saveRound();
   renderQuestion();
 }
 
 function finishRound(){
+  clearRound();
   show("result");
   var pct = Math.round((roundRight / round.length) * 100);
   if(pct > S.best){ S.best = pct; saveState(); }
@@ -1060,6 +1109,10 @@ function showWrite(){
   el("writeFields").innerHTML = h;
   el("writeOut").className = "hidden";
   show("write");
+  /* She built it before - show her work again instead of a blank start. */
+  if(S.built && !WRITE_Q.filter(function(f){ return f.must && !w(f.k); }).length){
+    buildParagraph(true);
+  }
 }
 
 function saveWrite(k){
@@ -1071,10 +1124,11 @@ function saveWrite(k){
 
 function w(k){ return String(S.write[k] || "").trim().replace(/\.$/, ""); }
 
-function buildParagraph(){
+/* quiet = redrawing her saved work on re-entry, so do not scroll or nag. */
+function buildParagraph(quiet){
   var missing = WRITE_Q.filter(function(f){ return f.must && !w(f.k); });
   if(missing.length){
-    alert("Still empty: " + missing[0].q);
+    if(!quiet) alert("Still empty: " + missing[0].q);
     return;
   }
   var p = "";
@@ -1096,7 +1150,8 @@ function buildParagraph(){
 
   el("paraCheck").innerHTML = checkParagraph(p, words, sents);
   el("writeOut").className = "";
-  el("writeOut").scrollIntoView({ behavior: "smooth" });
+  if(!quiet) el("writeOut").scrollIntoView({ behavior: "smooth" });
+  if(!S.built){ S.built = true; saveState(); }
 }
 
 var ADJ_WORDS = ["beautiful","big","small","bright","colourful","colorful","old","new","white","golden","huge",
@@ -1162,12 +1217,88 @@ function show(name){
 }
 function goHome(){ paintStats(); show("home"); }
 
+/* ---------------------------------------------------------------
+   How much of each section she has actually seen, so "the round
+   ended" is never mistaken for "I have finished this section".
+   --------------------------------------------------------------- */
+var COV_SECTIONS = ["comp", "adj", "deg", "neg", "zoo"];
+
+function sectionIds(mode){
+  var ids = [], i, fits;
+  if(mode === "comp"){ for(i = 0; i < COMP.length; i++) ids.push("comp:" + i); }
+  else if(mode === "adj"){ for(i = 0; i < ADJ.length; i++) ids.push("adj:" + i); }
+  else if(mode === "neg"){ for(i = 0; i < NEG.length; i++) ids.push("neg:" + i); }
+  else if(mode === "zoo"){ for(i = 0; i < ZOO.length; i++) ids.push("zoo:" + i); }
+  else if(mode === "deg"){
+    for(i = 0; i < DEG.length; i++){
+      ids.push("degf:" + i);
+      /* a word with no suitable sentence is only ever asked as a form
+         question, so its "degs" id can never be reached */
+      fits = DEG[i][4] || "";
+      if(templatesFor(fits, COMP_TEMPLATES).length || templatesFor(fits, SUPER_TEMPLATES).length){
+        ids.push("degs:" + i);
+      }
+    }
+  }
+  return ids;
+}
+
+function coverage(mode){
+  var ids = [];
+  if(mode === "mix"){
+    COV_SECTIONS.forEach(function(m){ ids = ids.concat(sectionIds(m)); });
+  } else {
+    ids = sectionIds(mode);
+  }
+  var n = 0;
+  ids.forEach(function(id){ if(S.seen[id]) n++; });
+  return { seen: n, total: ids.length };
+}
+
+function paintCoverage(mode){
+  var node = el("cov_" + mode);
+  if(!node) return;
+  if(S.round && S.round.mode === mode){
+    node.className = "cov resume";
+    node.innerHTML = "⏳ Tap to carry on - question " + (S.round.qIdx + 1) + " of " + S.round.ids.length;
+    return;
+  }
+  var c = coverage(mode);
+  if(c.seen >= c.total){
+    node.className = "cov done";
+    node.innerHTML = "✓ all " + c.total + " seen - go again to revise";
+    return;
+  }
+  var pct = c.total ? Math.round((c.seen / c.total) * 100) : 0;
+  node.className = "cov";
+  node.innerHTML = "<span class='bar-mini'><i style='width:" + pct + "%'></i></span>seen " +
+    c.seen + " / " + c.total;
+}
+
+function paintWriteCoverage(){
+  var node = el("cov_write");
+  if(!node) return;
+  var filled = WRITE_Q.filter(function(f){ return w(f.k); }).length;
+  if(S.built && filled === WRITE_Q.length){
+    node.className = "cov done";
+    node.innerHTML = "✓ built - tap to read it again or change an answer";
+    return;
+  }
+  var pct = Math.round((filled / WRITE_Q.length) * 100);
+  node.className = "cov";
+  node.innerHTML = "<span class='bar-mini'><i style='width:" + pct + "%'></i></span>answered " +
+    filled + " / " + WRITE_Q.length;
+}
+
 function paintStats(){
   el("stStars").textContent = S.stars;
   el("stToday").textContent = S.today;
   var fixN = Object.keys(S.wrong).length;
   el("stFix").textContent = fixN;
   el("fixBtn").style.opacity = fixN ? "1" : ".55";
+  paintCoverage("mix");
+  COV_SECTIONS.forEach(paintCoverage);
+  paintWriteCoverage();
 }
 
 function changeSync(){
