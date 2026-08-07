@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Maths | Class IV Unit II</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Karla:wght@400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --slate:#123B3F;
+  --slate-2:#0C2A2D;
+  --chalk:#F3F7F2;
+  --marigold:#F2A03D;
+  --coral:#EF6461;
+  --mint:#5BC8A0;
+  --dust:rgba(243,247,242,.55);
+  --line:rgba(243,247,242,.14);
+  --display:'Baloo 2',system-ui,sans-serif;
+  --body:'Karla',system-ui,sans-serif;
+  --mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--slate);
+  background-image:
+    linear-gradient(var(--line) 1px,transparent 1px),
+    linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:28px 28px;
+  color:var(--chalk);
+  font-family:var(--body);
+  font-size:17px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:760px;margin:0 auto;padding:20px 18px 80px}
+a{color:var(--marigold)}
+
+/* ---------- header ---------- */
+header{padding:14px 0 10px}
+.back{font-size:14px;color:var(--dust);text-decoration:none;letter-spacing:.04em}
+.back:hover{color:var(--marigold)}
+h1{
+  font-family:var(--display);font-weight:800;font-size:clamp(30px,7vw,46px);
+  margin:8px 0 2px;line-height:1.05;letter-spacing:-.01em;
+}
+.sub{color:var(--dust);font-size:14px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ---------- signature: abacus streak ---------- */
+.abacus{
+  margin:18px 0 6px;padding:14px 16px;border:1px solid var(--line);
+  border-radius:14px;background:rgba(0,0,0,.18);
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+}
+.rod{flex:1;min-width:180px}
+.rod-label{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dust);margin-bottom:8px}
+.beads{display:flex;gap:7px;align-items:center}
+.bead{
+  width:16px;height:16px;border-radius:50%;
+  border:1.5px solid var(--dust);background:transparent;
+  transition:transform .25s ease,background .25s ease;
+}
+.bead.on{background:var(--marigold);border-color:var(--marigold);transform:scale(1.14)}
+.bead.today{box-shadow:0 0 0 4px rgba(242,160,61,.22)}
+.stat{text-align:right}
+.stat .n{font-family:var(--mono);font-weight:700;font-size:26px;color:var(--mint);line-height:1}
+.stat .l{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--dust)}
+
+/* ---------- mode tabs ---------- */
+.tabs{display:flex;gap:8px;margin:22px 0 6px;flex-wrap:wrap}
+.tab{
+  font-family:var(--display);font-weight:700;font-size:16px;
+  padding:9px 16px;border-radius:999px;cursor:pointer;
+  border:1.5px solid var(--line);background:transparent;color:var(--dust);
+}
+.tab:hover{color:var(--chalk);border-color:var(--dust)}
+.tab.active{background:var(--chalk);color:var(--slate-2);border-color:var(--chalk)}
+.tab:focus-visible,button:focus-visible,.opt:focus-visible{outline:3px solid var(--marigold);outline-offset:2px}
+
+/* ---------- cards ---------- */
+.card{
+  border:1px solid var(--line);border-radius:16px;background:rgba(0,0,0,.2);
+  padding:18px;margin:14px 0;
+}
+.card h2{font-family:var(--display);font-weight:700;font-size:22px;margin:0 0 4px}
+.card p.meta{margin:0 0 12px;color:var(--dust);font-size:14px}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--marigold);font-weight:700}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+button.go{
+  font-family:var(--display);font-weight:700;font-size:16px;
+  padding:10px 20px;border-radius:999px;border:none;cursor:pointer;
+  background:var(--marigold);color:var(--slate-2);
+}
+button.go:hover{filter:brightness(1.08)}
+button.ghost{background:transparent;color:var(--chalk);border:1.5px solid var(--line)}
+button.ghost:hover{border-color:var(--dust)}
+.pill{
+  display:inline-block;font-size:12px;padding:3px 10px;border-radius:999px;
+  background:rgba(91,200,160,.16);color:var(--mint);font-weight:700;letter-spacing:.04em;
+}
+.pill.warn{background:rgba(239,100,97,.16);color:var(--coral)}
+
+/* ---------- quiz ---------- */
+.qhead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:10px}
+.qcount{font-family:var(--mono);font-size:13px;color:var(--dust)}
+.bar{height:5px;border-radius:999px;background:rgba(243,247,242,.12);overflow:hidden;margin-bottom:16px}
+.bar i{display:block;height:100%;background:var(--mint);width:0;transition:width .3s ease}
+.qtext{font-family:var(--display);font-weight:500;font-size:21px;line-height:1.35;margin:0 0 16px}
+.qtext .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;font-size:.72em;line-height:1.1;margin:0 3px}
+.qtext .frac b{border-bottom:1.5px solid currentColor;padding:0 3px;font-weight:500}
+.opts{display:grid;gap:9px}
+.opt{
+  text-align:left;font-family:var(--body);font-size:17px;
+  padding:13px 15px;border-radius:11px;cursor:pointer;
+  border:1.5px solid var(--line);background:rgba(243,247,242,.03);color:var(--chalk);
+  transition:border-color .15s ease,background .15s ease;
+}
+.opt:hover:not(:disabled){border-color:var(--dust)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--mint);background:rgba(91,200,160,.14)}
+.opt.wrong{border-color:var(--coral);background:rgba(239,100,97,.14)}
+.typed{display:flex;gap:8px;flex-wrap:wrap}
+.typed input{
+  flex:1;min-width:160px;font-family:var(--mono);font-size:18px;
+  padding:12px 14px;border-radius:11px;border:1.5px solid var(--line);
+  background:rgba(243,247,242,.03);color:var(--chalk);
+}
+.typed input:focus{outline:none;border-color:var(--marigold)}
+.fb{margin-top:14px;padding:13px 15px;border-radius:11px;font-size:16px;display:none}
+.fb.show{display:block}
+.fb.ok{background:rgba(91,200,160,.13);border-left:3px solid var(--mint)}
+.fb.no{background:rgba(239,100,97,.13);border-left:3px solid var(--coral)}
+.fb .why{color:var(--dust);font-size:14px;margin-top:5px;display:block}
+
+/* ---------- dodging ---------- */
+.dodge-q{font-family:var(--mono);font-weight:700;font-size:clamp(40px,12vw,64px);text-align:center;margin:10px 0 18px;letter-spacing:.02em}
+.timer{height:6px;border-radius:999px;background:rgba(243,247,242,.12);overflow:hidden;margin-bottom:18px}
+.timer i{display:block;height:100%;background:var(--marigold);width:100%}
+.timer.low i{background:var(--coral)}
+
+/* ---------- results ---------- */
+.score{font-family:var(--mono);font-weight:700;font-size:52px;color:var(--marigold);line-height:1}
+.badges{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.badge{
+  border:1.5px dashed var(--line);border-radius:12px;padding:9px 12px;
+  font-size:13px;color:var(--dust);min-width:96px;text-align:center;
+}
+.badge.won{border-style:solid;border-color:var(--marigold);color:var(--chalk);background:rgba(242,160,61,.1)}
+.badge .ic{font-size:22px;display:block;margin-bottom:2px}
+.hidden{display:none}
+ul.notes{margin:10px 0 0;padding-left:18px;color:var(--dust);font-size:14px}
+ul.notes li{margin-bottom:5px}
+footer{margin-top:34px;color:var(--dust);font-size:13px;text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <a class="back" href="index.html">&larr; back to modules</a>
+  <h1>Maths</h1>
+  <div class="sub">Class IV &middot; Unit II &middot; 2026&ndash;27</div>
+</header>
+
+<div class="abacus">
+  <div class="rod">
+    <div class="rod-label">Practice streak</div>
+    <div class="beads" id="beads"></div>
+  </div>
+  <div class="stat"><div class="n" id="xp">0</div><div class="l">XP earned</div></div>
+  <div class="stat"><div class="n" id="streak">0</div><div class="l">Day streak</div></div>
+</div>
+
+<div class="tabs" role="tablist">
+  <button class="tab active" data-view="prep" role="tab">Test prep</button>
+  <button class="tab" data-view="daily" role="tab">Daily practice</button>
+  <button class="tab" data-view="fix" role="tab">Fix my mistakes <span id="fixn"></span></button>
+</div>
+
+<!-- ================= HOME: TEST PREP ================= -->
+<div id="view-prep">
+  <div class="card">
+    <div class="eyebrow">Weekly test II &middot; Monday 10 August</div>
+    <h2>Chapter 3 &mdash; Multiplication and Division</h2>
+    <p class="meta">Everything on the paper, straight from the Unit II assignment. 33 questions.</p>
+    <div class="row">
+      <button class="go" data-start="ch3">Start practice</button>
+      <button class="go ghost" data-start="ch3short">Quick 10</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Subject enrichment</div>
+    <h2>Dodging tables</h2>
+    <p class="meta">Tables 2&ndash;15, with 12 to 15 asked far more often. Six seconds each &mdash; no working out, just recall.</p>
+    <div class="row">
+      <button class="go" data-start="dodge">Start drill</button>
+      <span class="pill" id="dodgebest">Best: &mdash;</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Also marked</div>
+    <h2>Notebook assessment</h2>
+    <p class="meta">Neatness, regularity, upkeep. Nothing to practise here &mdash; just keep the notebook tidy and complete.</p>
+  </div>
+</div>
+
+<!-- ================= HOME: DAILY ================= -->
+<div id="view-daily" class="hidden">
+  <div class="card">
+    <div class="eyebrow">Half-yearly syllabus &middot; a little every day</div>
+    <h2>Chapter 4 &mdash; Factors and Multiples</h2>
+    <p class="meta">Primes, composites, HCF, LCM, divisibility rules. 26 questions.</p>
+    <div class="row">
+      <button class="go" data-start="ch4">Practise</button>
+      <button class="go ghost" data-start="ch4short">Quick 10</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Half-yearly syllabus</div>
+    <h2>Chapter 5 &mdash; Fractions</h2>
+    <p class="meta">Proper, improper, mixed, like, unlike, unit. Simplest form, equivalents, ordering, adding. 22 questions.</p>
+    <div class="row">
+      <button class="go" data-start="ch5">Practise</button>
+      <button class="go ghost" data-start="ch5short">Quick 10</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="eyebrow">Everything, mixed up</div>
+    <h2>Daily mix</h2>
+    <p class="meta">15 questions pulled from every chapter you have done. This is the one that keeps the streak going.</p>
+    <div class="row"><button class="go" data-start="mix">Start today's mix</button></div>
+  </div>
+</div>
+
+<!-- ================= HOME: FIX ================= -->
+<div id="view-fix" class="hidden">
+  <div class="card">
+    <h2>Questions you got wrong</h2>
+    <p class="meta" id="fixmeta">Nothing here yet. Anything you miss comes back the next day until you get it right twice.</p>
+    <div class="row"><button class="go" data-start="fix" id="fixbtn">Start review</button></div>
+  </div>
+</div>
+
+<!-- ================= QUIZ ================= -->
+<div id="view-quiz" class="hidden">
+  <div class="card">
+    <div class="qhead">
+      <span class="eyebrow" id="qset"></span>
+      <span class="qcount" id="qcount"></span>
+    </div>
+    <div class="bar"><i id="qbar"></i></div>
+
+    <div id="dodgewrap" class="hidden">
+      <div class="timer" id="timerbar"><i id="timerfill"></i></div>
+      <div class="dodge-q" id="dodgeq"></div>
+    </div>
+
+    <p class="qtext" id="qtext"></p>
+    <div class="opts" id="qopts"></div>
+    <div class="typed hidden" id="qtyped">
+      <input type="text" id="qinput" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="type your answer">
+      <button class="go" id="qcheck">Check</button>
+    </div>
+    <div class="fb" id="qfb"></div>
+    <div class="row"><button class="go ghost hidden" id="qnext">Next</button>
+      <button class="go ghost" id="qquit">Stop</button></div>
+  </div>
+</div>
+
+<!-- ================= RESULT ================= -->
+<div id="view-done" class="hidden">
+  <div class="card">
+    <div class="eyebrow" id="rset"></div>
+    <div class="score" id="rscore"></div>
+    <p class="meta" id="rline"></p>
+    <div class="badges" id="rbadges"></div>
+    <ul class="notes" id="rmiss"></ul>
+    <div class="row">
+      <button class="go" id="ragain">Go again</button>
+      <button class="go ghost" id="rhome">Back</button>
+    </div>
+  </div>
+</div>
+
+<footer>Modern Delhi International School &middot; Unit II assignment, 2026&ndash;27</footer>
+</div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   DATA
+   type: "mcq"  -> opts array, ans index
+   type: "txt"  -> ans array of accepted strings (lowercased, trimmed)
+   why: shown after answering
+   ============================================================ */
+
+var CH3 = [
+  {q:"12 x 900 = ?", type:"txt", ans:["10800","10,800"], why:"12 x 9 = 108, then add the two zeros."},
+  {q:"88 x 100 = ?", type:"txt", ans:["8800","8,800"], why:"Multiplying by 100 adds two zeros."},
+  {q:"678 &divide; ____ = 1", type:"txt", ans:["678"], why:"Any number divided by itself is 1."},
+  {q:"There are ____ sixes in 30.", type:"txt", ans:["5","five"], why:"30 &divide; 6 = 5."},
+  {q:"If the divisor is 1, the quotient is equal to the ____.", type:"mcq", opts:["dividend","divisor","remainder","product"], ans:0, why:"Dividing by 1 leaves the number unchanged."},
+  {q:"427 x (25 + ____) = 427 x 25 + 427 x 68", type:"txt", ans:["68"], why:"Distributive property: the same number sits inside the bracket."},
+  {q:"The product of all odd numbers between 2 and 10 is ____.", type:"txt", ans:["945"], why:"3 x 5 x 7 x 9 = 945."},
+  {q:"4 bananas cost Rs 32. The cost of each banana is ____.", type:"txt", ans:["8","rs 8","rs8","8 rs"], why:"32 &divide; 4 = 8. This is the unitary method."},
+  {q:"0 &divide; 3947 = ?", type:"txt", ans:["0","zero"], why:"Zero divided by any number is zero."},
+  {q:"65 x 0 x 287 = ?", type:"txt", ans:["0","zero"], why:"Any number multiplied by 0 gives 0."},
+  {q:"Unitary method is also called the method of ____.", type:"mcq", opts:["one","many","zero","tens"], ans:0, why:"You find the value of one unit first, then multiply."},
+  {q:"2 x 716 x 50 = ?", type:"mcq", opts:["71600","7160","716000","716"], ans:0, why:"2 x 50 = 100, and 716 x 100 = 71600."},
+  {q:"How many times is the number 17 there in 867?", type:"mcq", opts:["51","50","61","71"], ans:0, why:"867 &divide; 17 = 51."},
+  {q:"If 1 hour = 60 mins, then 2 days = ____ minutes.", type:"mcq", opts:["3600","2880","1200","1600"], ans:1, why:"48 hours x 60 = 2880 minutes."},
+  {q:"The remainder obtained on dividing 400 by 9 is ____.", type:"mcq", opts:["5","4","3","6"], ans:1, why:"9 x 44 = 396, and 400 - 396 = 4."},
+  {q:"The quotient of 11111 &divide; 11 is ____.", type:"mcq", opts:["1001","1010","1000","1002"], ans:1, why:"11 x 1010 = 11110, remainder 1. Quotient is 1010."},
+  {q:"If 12 bags cost Rs 8400, then the cost of 3 bags is ____.", type:"mcq", opts:["700","800","2100","3600"], ans:2, why:"One bag is 8400 &divide; 12 = 700, so 3 bags = 2100."},
+  {q:"Divide 3857 &divide; 8. What is the quotient?", type:"txt", ans:["482"], why:"3857 = 8 x 482 + 1."},
+  {q:"Divide 3857 &divide; 8. What is the remainder?", type:"txt", ans:["1"], why:"Check it: 8 x 482 + 1 = 3857."},
+  {q:"Break the multiplicand: 1425 x 3 = ?", type:"txt", ans:["4275","4,275"], why:"(1000 + 400 + 20 + 5) x 3 = 3000 + 1200 + 60 + 15 = 4275."},
+  {q:"Break the multiplicand: 625 x 4 = ?", type:"txt", ans:["2500","2,500"], why:"(600 + 20 + 5) x 4 = 2400 + 80 + 20 = 2500."},
+  {q:"Multiply 175 by 42.", type:"txt", ans:["7350","7,350"], why:"175 x 40 = 7000, plus 175 x 2 = 350."},
+  {q:"Multiply 1652 by 125.", type:"txt", ans:["206500","206,500"], why:"1652 x 125 = 1652 x 1000 &divide; 8 = 206500."},
+  {q:"6281 &divide; 9. What is the quotient?", type:"txt", ans:["697"], why:"9 x 697 = 6273."},
+  {q:"6281 &divide; 9. What is the remainder?", type:"txt", ans:["8"], why:"6281 - 6273 = 8."},
+  {q:"9289 &divide; 34. What is the quotient?", type:"txt", ans:["273"], why:"34 x 273 = 9282."},
+  {q:"9289 &divide; 34. What is the remainder?", type:"txt", ans:["7"], why:"9289 - 9282 = 7."},
+  {q:"A number divided by 24 gives 362 as the quotient and 12 as the remainder. Find the number.", type:"txt", ans:["8700","8,700"], why:"Dividend = divisor x quotient + remainder = 24 x 362 + 12 = 8700."},
+  {q:"A football weighs 292 grams. What is the weight of 155 such footballs, in grams?", type:"txt", ans:["45260","45,260"], why:"292 x 155 = 45260 g."},
+  {q:"Monthly fees are Rs 2650. How much will a student pay in one year?", type:"txt", ans:["31800","31,800"], why:"2650 x 12 = 31800."},
+  {q:"The product of two numbers is 4560. One of them is 15. Find the other.", type:"txt", ans:["304"], why:"4560 &divide; 15 = 304."},
+  {q:"If 15 cans of juice cost Rs 7515, find the cost of 8 cans.", type:"txt", ans:["4008","4,008"], why:"One can is 501, so 8 cans cost 4008."},
+  {q:"HOTS: 472 &divide; 12. Quotient?", type:"txt", ans:["39"], why:"12 x 39 = 468."},
+  {q:"HOTS: 472 &divide; 12. Remainder?", type:"txt", ans:["4"], why:"472 - 468 = 4."}
+];
+
+var CH4 = [
+  {q:"6 x 4 = 24, so 6 and 4 are ____ of 24.", type:"mcq", opts:["factors","multiples","primes","products"], ans:0, why:"Numbers that divide a number exactly are its factors."},
+  {q:"The HCF of two co-prime numbers is always ____.", type:"txt", ans:["1","one"], why:"Co-prime means they share no common factor except 1. This one is worth remembering."},
+  {q:"Numbers having more than two factors are called ____.", type:"mcq", opts:["prime","composite","co-prime","twin prime"], ans:1, why:"Exactly two factors means prime. More than two means composite."},
+  {q:"____ is the largest 2-digit prime number.", type:"txt", ans:["97"], why:"98, 99 and 100 are all composite."},
+  {q:"The LCM of 3 and 12 is ____.", type:"txt", ans:["12"], why:"12 is already a multiple of 3."},
+  {q:"There are ____ prime numbers from 1 to 20.", type:"txt", ans:["8","eight"], why:"2, 3, 5, 7, 11, 13, 17, 19."},
+  {q:"____ is the smallest number that is a multiple of both 6 and 7.", type:"txt", ans:["42"], why:"6 and 7 are co-prime, so the LCM is 6 x 7 = 42."},
+  {q:"A multiple of a number is always ____ the given number.", type:"mcq", opts:["less than","equal to or greater than","less than or equal to","exactly double"], ans:1, why:"The first multiple is the number itself."},
+  {q:"The HCF of 5 and 6 is ____.", type:"mcq", opts:["30","1","24","36"], ans:1, why:"5 and 6 are co-prime."},
+  {q:"The 8th multiple of 5 plus the 4th multiple of 8 is ____.", type:"mcq", opts:["64","92","72","82"], ans:2, why:"40 + 32 = 72."},
+  {q:"Every factor of a number is ____ the number.", type:"mcq", opts:["greater than or equal to","less than or equal to","greater than or less than","none of these"], ans:1, why:"The largest factor of a number is the number itself."},
+  {q:"Which pair is NOT a twin prime?", type:"mcq", opts:["3 and 5","11 and 13","7 and 9","17 and 19"], ans:2, why:"9 is not prime (3 x 3), so 7 and 9 cannot be twin primes."},
+  {q:"The smallest prime number is ____.", type:"txt", ans:["2","two"], why:"1 has only one factor, so it is not prime."},
+  {q:"The only even prime number is ____.", type:"txt", ans:["2","two"], why:"Every other even number is divisible by 2."},
+  {q:"The smallest composite number is ____.", type:"txt", ans:["4","four"], why:"4 has factors 1, 2 and 4."},
+  {q:"Find the prime factors of 108.", type:"mcq", opts:["2 x 2 x 3 x 3 x 3","2 x 3 x 3 x 6","2 x 2 x 27","3 x 4 x 9"], ans:0, why:"108 = 2 x 54 = 2 x 2 x 27 = 2 x 2 x 3 x 3 x 3. Prime factors only."},
+  {q:"How many factors does 72 have?", type:"txt", ans:["12","twelve"], why:"1, 2, 3, 4, 6, 8, 9, 12, 18, 24, 36, 72 &mdash; twelve in all."},
+  {q:"Is 8 a factor of 72?", type:"mcq", opts:["Yes","No"], ans:0, why:"72 &divide; 8 = 9, exactly."},
+  {q:"Find the HCF of 25, 45 and 50.", type:"txt", ans:["5","five"], why:"25 = 5x5, 45 = 3x3x5, 50 = 2x5x5. Only 5 is common."},
+  {q:"Find the HCF of 32 and 46.", type:"txt", ans:["2","two"], why:"32 = 2x2x2x2x2, 46 = 2x23. Only one 2 is common."},
+  {q:"Using the divisibility rule, is 1336 divisible by 3?", type:"mcq", opts:["Yes","No"], ans:1, why:"1+3+3+6 = 13, which is not divisible by 3."},
+  {q:"Using the divisibility rule, is 3785 divisible by 10?", type:"mcq", opts:["Yes","No"], ans:1, why:"A number is divisible by 10 only if it ends in 0."},
+  {q:"Write the first five multiples of 17. What is the fifth one?", type:"txt", ans:["85"], why:"17, 34, 51, 68, 85."},
+  {q:"Find the LCM of 76 and 120.", type:"txt", ans:["2280","2,280"], why:"76 = 2x2x19, 120 = 2x2x2x3x5. LCM = 2x2x2x3x5x19 = 2280."},
+  {q:"Find the LCM of 15, 24 and 18.", type:"txt", ans:["360"], why:"LCM = 2x2x2x3x3x5 = 360."},
+  {q:"Find the prime factors of 80 using the factor tree.", type:"mcq", opts:["2 x 2 x 2 x 2 x 5","2 x 5 x 8","4 x 4 x 5","2 x 40"], ans:0, why:"80 = 8 x 10 = (2x2x2) x (2x5)."}
+];
+
+var CH5 = [
+  {q:"____ one-thirds make a whole.", type:"txt", ans:["3","three"], why:"1/3 + 1/3 + 1/3 = 1."},
+  {q:"3/8 is an example of a ____ fraction.", type:"mcq", opts:["proper","improper","mixed","unit"], ans:0, why:"Numerator is smaller than denominator."},
+  {q:"One-fifth of 25 is ____.", type:"txt", ans:["5","five"], why:"25 &divide; 5 = 5."},
+  {q:"When numerator = denominator, the value of the fraction is equal to ____.", type:"txt", ans:["1","one"], why:"5/5, 9/9 and so on are all one whole."},
+  {q:"7/11 and 9/11 are ____ fractions.", type:"mcq", opts:["like","unlike","mixed","unit"], ans:0, why:"Same denominator means like fractions."},
+  {q:"The simplest form of 18/36 is ____. (write as a/b)", type:"txt", ans:["1/2"], why:"Divide both by 18."},
+  {q:"2/7 = ?/49. What goes on top?", type:"txt", ans:["14"], why:"7 x 7 = 49, so 2 x 7 = 14."},
+  {q:"The equivalent fraction of 3/5 with denominator 30 is ____. (write as a/b)", type:"txt", ans:["18/30"], why:"5 x 6 = 30, so 3 x 6 = 18."},
+  {q:"____ fractions have numerator as 1.", type:"mcq", opts:["like","unlike","unit","whole"], ans:2, why:"1/3, 1/5, 1/7 are unit fractions."},
+  {q:"7/3 ____ 8/3", type:"mcq", opts:["greater than","less than","equal to","none of these"], ans:1, why:"Same denominator, so compare the numerators."},
+  {q:"29/7 is an example of a ____ fraction.", type:"mcq", opts:["like","unlike","unit","improper"], ans:3, why:"Numerator is bigger than denominator."},
+  {q:"The simplest form of 14/21 is ____. (write as a/b)", type:"txt", ans:["2/3"], why:"Divide both by 7."},
+  {q:"Arrange 8/9, 8/3, 8/7, 8/6, 8/5 in descending order. Which comes first?", type:"txt", ans:["8/3"], why:"Same numerator: the smaller the denominator, the bigger the fraction."},
+  {q:"Convert 90/4 into a mixed fraction. What is the whole number part?", type:"txt", ans:["22"], why:"90 &divide; 4 = 22 with remainder 2, so 22 1/2."},
+  {q:"Convert 36/5 into a mixed fraction. What is the whole number part?", type:"txt", ans:["7","seven"], why:"36 &divide; 5 = 7 remainder 1, so 7 1/5."},
+  {q:"Convert 4 3/5 into an improper fraction. (write as a/b)", type:"txt", ans:["23/5"], why:"(4 x 5) + 3 = 23, keep the denominator."},
+  {q:"Express 75/80 in its simplest form. (write as a/b)", type:"txt", ans:["15/16"], why:"Divide both by 5."},
+  {q:"Write the first equivalent fraction for 4/9. (write as a/b)", type:"txt", ans:["8/18"], why:"Multiply top and bottom by 2. Next ones are 12/27 and 16/36."},
+  {q:"Arrange 3/7, 5/7, 2/7, 6/7, 1/7 in ascending order. Which comes first?", type:"txt", ans:["1/7"], why:"Like fractions: just order the numerators."},
+  {q:"Subtract: 15/20 - 4/20. (write as a/b)", type:"txt", ans:["11/20"], why:"Like fractions: subtract numerators, keep the denominator."},
+  {q:"Add: 5/3 + 4/3 + 1/3. (write as a/b or a mixed number)", type:"txt", ans:["10/3","3 1/3","3 1/3"], why:"5+4+1 = 10, so 10/3, which is 3 1/3."},
+  {q:"Shalini reads 2/9 of a book on Monday and 5/9 on Tuesday. How much has she read? (write as a/b)", type:"txt", ans:["7/9"], why:"Like fractions, so just add the numerators."},
+  {q:"Mahi bought 2/5 m of ribbon, Soham bought 3/5 m. Who bought longer ribbon?", type:"mcq", opts:["Mahi","Soham","Both the same"], ans:1, why:"3/5 is greater than 2/5. Soham has 1/5 m more."},
+  {q:"Rachit spent 4/5 of his money on car repair and 1/5 on food. On which did he spend more, and by how much? (write as a/b)", type:"txt", ans:["3/5"], why:"Car repair, by 4/5 - 1/5 = 3/5."}
+];
+
+/* ---------- dodging tables: 2-15, weighted to 12-15 ---------- */
+function buildDodge(n){
+  var pool=[],t,m,i;
+  for(t=2;t<=15;t++){
+    var weight = (t>=12) ? 4 : 1;
+    for(m=1;m<=10;m++){ for(i=0;i<weight;i++){ pool.push([t,m]); } }
+  }
+  shuffle(pool);
+  var out=[],seen={};
+  for(i=0;i<pool.length && out.length<n;i++){
+    var k=pool[i][0]+"x"+pool[i][1];
+    if(seen[k]) continue;
+    seen[k]=1;
+    out.push({q:pool[i][0]+" x "+pool[i][1], type:"dodge", ans:[String(pool[i][0]*pool[i][1])], why:""});
+  }
+  return out;
+}
+
+var SETS = {
+  ch3:      {name:"Chapter 3 &middot; Multiplication and Division", items:function(){return CH3.slice();}},
+  ch3short: {name:"Chapter 3 &middot; Quick 10", items:function(){return pick(CH3,10);}},
+  ch4:      {name:"Chapter 4 &middot; Factors and Multiples", items:function(){return CH4.slice();}},
+  ch4short: {name:"Chapter 4 &middot; Quick 10", items:function(){return pick(CH4,10);}},
+  ch5:      {name:"Chapter 5 &middot; Fractions", items:function(){return CH5.slice();}},
+  ch5short: {name:"Chapter 5 &middot; Quick 10", items:function(){return pick(CH5,10);}},
+  mix:      {name:"Daily mix", items:function(){return pick(CH3.concat(CH4).concat(CH5),15);}},
+  dodge:    {name:"Dodging tables", items:function(){return buildDodge(20);}},
+  fix:      {name:"Fixing mistakes", items:function(){return reviewItems();}}
+};
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+var KEY = "mathsquest.maths.v1";
+var DATE_KEY = "en-CA";   /* yyyy-mm-dd */
+var DODGE_SECONDS = 6;
+
+function today(){ return new Date().toLocaleDateString(DATE_KEY); }
+function daysBetween(a,b){
+  var d1=new Date(a+"T00:00:00"), d2=new Date(b+"T00:00:00");
+  return Math.round((d2-d1)/86400000);
+}
+function loadState(){
+  var s;
+  try{ s = JSON.parse(localStorage.getItem(KEY)); }catch(e){ s=null; }
+  if(!s || typeof s!=="object") s={};
+  if(typeof s.xp!=="number") s.xp=0;
+  if(typeof s.streak!=="number") s.streak=0;
+  if(typeof s.dodgeBest!=="number") s.dodgeBest=0;
+  if(!s.last) s.last="";
+  if(!s.days) s.days=[];
+  if(!s.wrong) s.wrong={};
+  if(!s.badges) s.badges={};
+  return s;
+}
+function saveState(s){
+  try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){}
+}
+var S = loadState();
+
+function markPractised(){
+  var t = today();
+  if(S.last === t) return;
+  if(S.last && daysBetween(S.last,t) === 1) S.streak += 1;
+  else S.streak = 1;
+  S.last = t;
+  S.days.push(t);
+  if(S.days.length > 60) S.days = S.days.slice(-60);
+  saveState(S);
+}
+
+/* wrong-answer queue: comes back the next day, needs 2 clean hits to clear */
+function qid(item){ return item.q.replace(/[^a-z0-9]/gi,"").slice(0,60); }
+function noteWrong(item){
+  var id = qid(item);
+  var e = S.wrong[id] || {hits:0};
+  e.hits = 0;
+  e.due = today();
+  e.item = {q:item.q, type:item.type, opts:item.opts, ans:item.ans, why:item.why};
+  S.wrong[id] = e;
+  saveState(S);
+}
+function noteRight(item){
+  var id = qid(item);
+  if(!S.wrong[id]) return;
+  S.wrong[id].hits += 1;
+  if(S.wrong[id].hits >= 2){ delete S.wrong[id]; }
+  else { S.wrong[id].due = today(); }
+  saveState(S);
+}
+function reviewItems(){
+  var out=[],k;
+  for(k in S.wrong){ if(S.wrong.hasOwnProperty(k)) out.push(S.wrong[k].item); }
+  shuffle(out);
+  return out;
+}
+function reviewCount(){ return Object.keys(S.wrong).length; }
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+function $(id){ return document.getElementById(id); }
+function shuffle(a){
+  var i,j,t;
+  for(i=a.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function pick(arr,n){ var c=arr.slice(); shuffle(c); return c.slice(0,n); }
+function norm(v){
+  return String(v).toLowerCase().trim()
+    .replace(/,/g,"").replace(/\s+/g," ")
+    .replace(/^rs\.?\s*/,"").replace(/\s*(rs|grams?|g|m|minutes?)$/,"");
+}
+function matches(input, answers){
+  var v = norm(input), i;
+  for(i=0;i<answers.length;i++){ if(norm(answers[i]) === v) return true; }
+  return false;
+}
+
+/* ============================================================
+   HEADER RENDER
+   ============================================================ */
+function renderHeader(){
+  $("xp").textContent = S.xp;
+  $("streak").textContent = S.streak;
+  $("dodgebest").textContent = S.dodgeBest ? ("Best: " + S.dodgeBest + "/20") : "Best: --";
+
+  var beads = $("beads"); beads.innerHTML = "";
+  var t = today(), i, d, b;
+  for(i=6;i>=0;i--){
+    d = new Date(); d.setDate(d.getDate()-i);
+    d = d.toLocaleDateString(DATE_KEY);
+    b = document.createElement("div");
+    b.className = "bead" + (S.days.indexOf(d)>-1 ? " on" : "") + (d===t ? " today" : "");
+    b.title = d;
+    beads.appendChild(b);
+  }
+  var n = reviewCount();
+  $("fixn").textContent = n ? "(" + n + ")" : "";
+  $("fixmeta").textContent = n
+    ? n + " question" + (n===1?"":"s") + " waiting. Get each one right twice and it leaves the list for good."
+    : "Nothing here yet. Anything you miss comes back the next day until you get it right twice.";
+  $("fixbtn").disabled = !n;
+  $("fixbtn").style.opacity = n ? "1" : ".4";
+}
+
+/* ============================================================
+   VIEWS
+   ============================================================ */
+var VIEWS = ["prep","daily","fix","quiz","done"];
+function show(v){
+  var i;
+  for(i=0;i<VIEWS.length;i++){ $("view-"+VIEWS[i]).classList.add("hidden"); }
+  $("view-"+v).classList.remove("hidden");
+  window.scrollTo(0,0);
+}
+var tabs = document.querySelectorAll(".tab");
+Array.prototype.forEach.call(tabs, function(t){
+  t.addEventListener("click", function(){
+    Array.prototype.forEach.call(tabs, function(x){ x.classList.remove("active"); });
+    t.classList.add("active");
+    show(t.getAttribute("data-view"));
+  });
+});
+
+/* ============================================================
+   QUIZ ENGINE
+   ============================================================ */
+var run = null;
+var timerHandle = null;
+
+Array.prototype.forEach.call(document.querySelectorAll("[data-start]"), function(b){
+  b.addEventListener("click", function(){ startSet(b.getAttribute("data-start")); });
+});
+
+function startSet(key){
+  var set = SETS[key];
+  var items = set.items();
+  if(!items.length) return;
+  run = {key:key, name:set.name, items:items, i:0, correct:0, missed:[], answered:false};
+  show("quiz");
+  renderQ();
+}
+
+function renderQ(){
+  clearInterval(timerHandle);
+  var it = run.items[run.i];
+  run.answered = false;
+
+  $("qset").innerHTML = run.name;
+  $("qcount").textContent = (run.i+1) + " / " + run.items.length;
+  $("qbar").style.width = (run.i / run.items.length * 100) + "%";
+  $("qfb").className = "fb";
+  $("qnext").classList.add("hidden");
+
+  var isDodge = (it.type === "dodge");
+  $("dodgewrap").classList.toggle("hidden", !isDodge);
+  $("qtext").classList.toggle("hidden", isDodge);
+
+  if(isDodge){
+    $("dodgeq").textContent = it.q;
+    $("qopts").innerHTML = "";
+    $("qtyped").classList.remove("hidden");
+    $("qinput").value = ""; $("qinput").focus();
+    startTimer(it);
+    return;
+  }
+
+  $("qtext").innerHTML = it.q;
+
+  if(it.type === "mcq"){
+    $("qtyped").classList.add("hidden");
+    var box = $("qopts"); box.innerHTML = "";
+    var order = [], i;
+    for(i=0;i<it.opts.length;i++) order.push(i);
+    shuffle(order);
+    order.forEach(function(oi){
+      var b = document.createElement("button");
+      b.className = "opt"; b.type = "button"; b.innerHTML = it.opts[oi];
+      b.addEventListener("click", function(){ answerMcq(b, oi, it); });
+      box.appendChild(b);
+    });
+  } else {
+    $("qopts").innerHTML = "";
+    $("qtyped").classList.remove("hidden");
+    $("qinput").value = ""; $("qinput").focus();
+  }
+}
+
+function startTimer(it){
+  var left = DODGE_SECONDS * 10;
+  $("timerbar").classList.remove("low");
+  $("timerfill").style.width = "100%";
+  timerHandle = setInterval(function(){
+    left -= 1;
+    $("timerfill").style.width = Math.max(0,(left / (DODGE_SECONDS*10) * 100)) + "%";
+    if(left <= DODGE_SECONDS*10*0.33) $("timerbar").classList.add("low");
+    if(left <= 0){
+      clearInterval(timerHandle);
+      grade(false, it, "Time up. " + it.q + " = " + it.ans[0]);
+    }
+  }, 100);
+}
+
+function answerMcq(btn, oi, it){
+  if(run.answered) return;
+  var ok = (oi === it.ans);
+  Array.prototype.forEach.call($("qopts").children, function(b){ b.disabled = true; });
+  btn.classList.add(ok ? "right" : "wrong");
+  if(!ok){
+    Array.prototype.forEach.call($("qopts").children, function(b){
+      if(b.innerHTML === it.opts[it.ans]) b.classList.add("right");
+    });
+  }
+  grade(ok, it, ok ? "" : "The answer is " + it.opts[it.ans] + ".");
+}
+
+function checkTyped(){
+  if(run.answered) return;
+  var it = run.items[run.i];
+  var val = $("qinput").value;
+  if(!val.trim()) return;
+  clearInterval(timerHandle);
+  var ok = matches(val, it.ans);
+  grade(ok, it, ok ? "" : "The answer is " + it.ans[0] + ".");
+}
+$("qcheck").addEventListener("click", checkTyped);
+$("qinput").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    if(run && run.answered) nextQ(); else checkTyped();
+  }
+});
+
+function grade(ok, it, correction){
+  run.answered = true;
+  var fb = $("qfb");
+  if(ok){
+    run.correct += 1;
+    noteRight(it);
+    fb.className = "fb show ok";
+    fb.innerHTML = "<strong>Correct.</strong>" + (it.why ? "<span class='why'>" + it.why + "</span>" : "");
+  } else {
+    run.missed.push(it);
+    noteWrong(it);
+    fb.className = "fb show no";
+    fb.innerHTML = "<strong>" + correction + "</strong>" + (it.why ? "<span class='why'>" + it.why + "</span>" : "");
+  }
+  $("qnext").classList.remove("hidden");
+  $("qnext").textContent = (run.i + 1 >= run.items.length) ? "See result" : "Next";
+  $("qnext").focus();
+}
+
+function nextQ(){
+  run.i += 1;
+  if(run.i >= run.items.length) finish();
+  else renderQ();
+}
+$("qnext").addEventListener("click", nextQ);
+$("qquit").addEventListener("click", function(){
+  clearInterval(timerHandle);
+  show("prep");
+  Array.prototype.forEach.call(tabs, function(x){ x.classList.remove("active"); });
+  tabs[0].classList.add("active");
+});
+
+/* ============================================================
+   RESULT + BADGES
+   ============================================================ */
+var BADGES = [
+  {id:"first",   ic:"\u2726", label:"First run",     test:function(r){ return true; }},
+  {id:"clean",   ic:"\u2605", label:"All correct",   test:function(r){ return r.correct === r.items.length; }},
+  {id:"eight",   ic:"\u25B2", label:"80% or more",   test:function(r){ return r.correct/r.items.length >= 0.8; }},
+  {id:"tables",  ic:"\u2716", label:"Table master",  test:function(r){ return r.key==="dodge" && r.correct >= 18; }},
+  {id:"week",    ic:"\u25C6", label:"7 day streak",  test:function(r){ return S.streak >= 7; }},
+  {id:"clear",   ic:"\u2713", label:"Mistakes clear",test:function(r){ return r.key==="fix" && reviewCount()===0; }}
+];
+
+function finish(){
+  clearInterval(timerHandle);
+  markPractised();
+
+  var gained = run.correct * (run.key === "dodge" ? 3 : 2);
+  if(run.correct === run.items.length) gained += 10;
+  S.xp += gained;
+  if(run.key === "dodge" && run.correct > S.dodgeBest) S.dodgeBest = run.correct;
+  saveState(S);
+
+  $("rset").innerHTML = run.name;
+  $("rscore").textContent = run.correct + " / " + run.items.length;
+  $("rline").textContent = "+" + gained + " XP" +
+    (run.missed.length ? ". " + run.missed.length + " question" + (run.missed.length===1?"":"s") + " added to Fix my mistakes." : ". Nothing to review.");
+
+  var bw = $("rbadges"); bw.innerHTML = "";
+  BADGES.forEach(function(b){
+    var won = b.test(run);
+    if(won) S.badges[b.id] = 1;
+    var d = document.createElement("div");
+    d.className = "badge" + ((won || S.badges[b.id]) ? " won" : "");
+    d.innerHTML = "<span class='ic'>" + b.ic + "</span>" + b.label;
+    bw.appendChild(d);
+  });
+  saveState(S);
+
+  var ul = $("rmiss"); ul.innerHTML = "";
+  run.missed.slice(0,6).forEach(function(m){
+    var li = document.createElement("li");
+    li.innerHTML = m.q + " &rarr; <strong>" + (m.type==="mcq" ? m.opts[m.ans] : m.ans[0]) + "</strong>";
+    ul.appendChild(li);
+  });
+
+  renderHeader();
+  show("done");
+}
+$("ragain").addEventListener("click", function(){ startSet(run.key); });
+$("rhome").addEventListener("click", function(){
+  var v = (run.key.indexOf("ch3")===0 || run.key==="dodge") ? "prep" : (run.key==="fix" ? "fix" : "daily");
+  Array.prototype.forEach.call(tabs, function(x){ x.classList.remove("active"); });
+  Array.prototype.forEach.call(tabs, function(x){ if(x.getAttribute("data-view")===v) x.classList.add("active"); });
+  show(v);
+});
+
+renderHeader();
+</script>
+</body>
+</html>
