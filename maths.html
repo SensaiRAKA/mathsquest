@@ -195,7 +195,7 @@ footer{margin-top:34px;color:var(--dust);font-size:13px;text-align:center}
   <div class="card">
     <div class="eyebrow">Subject enrichment</div>
     <h2>Dodging tables</h2>
-    <p class="meta">Tables 2&ndash;15, with 12 to 15 asked far more often. Six seconds each &mdash; no working out, just recall.</p>
+    <p class="meta">Tables 2&ndash;15, with 12 to 15 asked far more often. Thirty seconds each, a full minute for the 12s to 15s.</p>
     <div class="row">
       <button class="go" data-start="dodge">Start drill</button>
       <span class="pill" id="dodgebest">Best: &mdash;</span>
@@ -408,7 +408,7 @@ function buildDodge(n){
     var k=pool[i][0]+"x"+pool[i][1];
     if(seen[k]) continue;
     seen[k]=1;
-    out.push({q:pool[i][0]+" x "+pool[i][1], type:"dodge", ans:[String(pool[i][0]*pool[i][1])], why:""});
+    out.push({q:pool[i][0]+" x "+pool[i][1], type:"dodge", table:pool[i][0], ans:[String(pool[i][0]*pool[i][1])], why:""});
   }
   return out;
 }
@@ -430,7 +430,15 @@ var SETS = {
    ============================================================ */
 var KEY = "mathsquest.maths.v1";
 var DATE_KEY = "en-CA";   /* yyyy-mm-dd */
-var DODGE_SECONDS = 6;
+/* Time allowed per dodging question. Tables 12-15 are the ones the
+   Subject Enrichment syllabus leans on, so they get the longer end. */
+var DODGE_SECONDS = 30;        /* tables 2-11  */
+var DODGE_SECONDS_HARD = 60;   /* tables 12-15 */
+var DODGE_LOW_SECONDS = 5;     /* bar turns red for the last few seconds */
+
+function dodgeSeconds(it){
+  return (it && it.table >= 12) ? DODGE_SECONDS_HARD : DODGE_SECONDS;
+}
 
 function today(){ return new Date().toLocaleDateString(DATE_KEY); }
 function daysBetween(a,b){
@@ -625,13 +633,14 @@ function renderQ(){
 }
 
 function startTimer(it){
-  var left = DODGE_SECONDS * 10;
+  var total = dodgeSeconds(it) * 10;
+  var left = total;
   $("timerbar").classList.remove("low");
   $("timerfill").style.width = "100%";
   timerHandle = setInterval(function(){
     left -= 1;
-    $("timerfill").style.width = Math.max(0,(left / (DODGE_SECONDS*10) * 100)) + "%";
-    if(left <= DODGE_SECONDS*10*0.33) $("timerbar").classList.add("low");
+    $("timerfill").style.width = Math.max(0,(left / total * 100)) + "%";
+    if(left <= DODGE_LOW_SECONDS*10) $("timerbar").classList.add("low");
     if(left <= 0){
       clearInterval(timerHandle);
       grade(false, it, "Time up. " + it.q + " = " + it.ans[0]);
