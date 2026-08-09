@@ -395,32 +395,32 @@ var CH5 = [
   {q:"Rachit spent 4/5 of his money on car repair and 1/5 on food. On which did he spend more, and by how much? (write as a/b)", type:"txt", ans:["3/5"], why:"Car repair, by 4/5 - 1/5 = 3/5."}
 ];
 
-/* ---------- dodging tables: 2-15, weighted to 12-15 ---------- */
-function buildDodge(n){
-  var pool=[],t,m,i;
-  for(t=2;t<=15;t++){
-    var weight = (t>=12) ? 4 : 1;
-    for(m=1;m<=10;m++){ for(i=0;i<weight;i++){ pool.push([t,m]); } }
-  }
-  shuffle(pool);
-  var out=[],seen={};
-  for(i=0;i<pool.length && out.length<n;i++){
-    var k=pool[i][0]+"x"+pool[i][1];
-    if(seen[k]) continue;
-    seen[k]=1;
-    out.push({q:pool[i][0]+" x "+pool[i][1], type:"dodge", table:pool[i][0], ans:[String(pool[i][0]*pool[i][1])], why:""});
+/* ---------- dodging tables: 2-15, weighted to 12-15 ----------
+   Roughly 60% of a drill comes from the 12-15 tables, per the Subject
+   Enrichment syllabus. Within each group the least-asked facts come
+   first, so she works through all 140 before any of them repeat. */
+function dodgeFacts(lo,hi){
+  var out=[],t,m;
+  for(t=lo;t<=hi;t++){
+    for(m=1;m<=10;m++){
+      out.push({q:t+" x "+m, type:"dodge", table:t, ans:[String(t*m)], why:""});
+    }
   }
   return out;
 }
+function buildDodge(n){
+  var hardN = Math.round(n * 0.6), easyN = n - hardN;
+  return shuffle(rotate(dodgeFacts(12,15), hardN).concat(rotate(dodgeFacts(2,11), easyN)));
+}
 
 var SETS = {
-  ch3:      {name:"Chapter 3 &middot; Multiplication and Division", items:function(){return CH3.slice();}},
-  ch3short: {name:"Chapter 3 &middot; Quick 10", items:function(){return pick(CH3,10);}},
-  ch4:      {name:"Chapter 4 &middot; Factors and Multiples", items:function(){return CH4.slice();}},
-  ch4short: {name:"Chapter 4 &middot; Quick 10", items:function(){return pick(CH4,10);}},
-  ch5:      {name:"Chapter 5 &middot; Fractions", items:function(){return CH5.slice();}},
-  ch5short: {name:"Chapter 5 &middot; Quick 10", items:function(){return pick(CH5,10);}},
-  mix:      {name:"Daily mix", items:function(){return pick(CH3.concat(CH4).concat(CH5),15);}},
+  ch3:      {name:"Chapter 3 &middot; Multiplication and Division", items:function(){return shuffle(CH3.slice());}},
+  ch3short: {name:"Chapter 3 &middot; Quick 10", items:function(){return rotate(CH3,10);}},
+  ch4:      {name:"Chapter 4 &middot; Factors and Multiples", items:function(){return shuffle(CH4.slice());}},
+  ch4short: {name:"Chapter 4 &middot; Quick 10", items:function(){return rotate(CH4,10);}},
+  ch5:      {name:"Chapter 5 &middot; Fractions", items:function(){return shuffle(CH5.slice());}},
+  ch5short: {name:"Chapter 5 &middot; Quick 10", items:function(){return rotate(CH5,10);}},
+  mix:      {name:"Daily mix", items:function(){return shuffle(rotate(CH3.concat(CH4).concat(CH5),15));}},
   dodge:    {name:"Dodging tables", items:function(){return buildDodge(20);}},
   fix:      {name:"Fixing mistakes", items:function(){return reviewItems();}}
 };
@@ -456,6 +456,7 @@ function loadState(){
   if(!s.days) s.days=[];
   if(!s.wrong) s.wrong={};
   if(!s.badges) s.badges={};
+  if(!s.seen) s.seen={};
   return s;
 }
 function saveState(s){
@@ -500,6 +501,26 @@ function reviewItems(){
   return out;
 }
 function reviewCount(){ return Object.keys(S.wrong).length; }
+
+/* ---------- rotation: serve the least-asked questions first ----------
+   Without this a set is just a fresh random draw each time, so the same
+   questions come round again while others are never asked at all. Counts
+   live in S.seen, keyed the same way as the wrong-answer queue. */
+function seenCount(item){ return S.seen[qid(item)] || 0; }
+function rotate(arr, n){
+  var c = shuffle(arr.slice());
+  /* stable sort, so shuffle order survives inside each equal-count tier */
+  c.sort(function(a,b){ return seenCount(a) - seenCount(b); });
+  return c.slice(0, n);
+}
+function markSeen(items){
+  var i, id;
+  for(i=0;i<items.length;i++){
+    id = qid(items[i]);
+    S.seen[id] = (S.seen[id] || 0) + 1;
+  }
+  saveState(S);
+}
 
 /* ============================================================
    HELPERS
@@ -582,6 +603,8 @@ function startSet(key){
   var set = SETS[key];
   var items = set.items();
   if(!items.length) return;
+  /* the review queue is meant to repeat, so it stays out of the rotation */
+  if(key !== "fix") markSeen(items);
   run = {key:key, name:set.name, items:items, i:0, correct:0, missed:[], answered:false};
   show("quiz");
   renderQ();
