@@ -1,0 +1,1658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+<title>Bharat Explorer — Social Studies</title>
+<style>
+  :root{
+    --sand:#f4a259;
+    --sand-dark:#d9822b;
+    --terracotta:#e07a5f;
+    --terracotta-dark:#b85a44;
+    --plateau:#4a9d7f;
+    --plateau-dark:#357a63;
+    --sky:#5aa9d6;
+    --sky-dark:#3d84ac;
+    --cream:#fff8ee;
+    --ink:#3a2e2a;
+    --muted:#8a7a6f;
+    --gold:#f2c14e;
+    --gold-dark:#c99a1f;
+    --wrong:#e2574c;
+    --right:#4caf50;
+    --shadow: 0 6px 0 rgba(0,0,0,0.10);
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color: transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Trebuchet MS','Segoe UI',Verdana,sans-serif;
+    background:linear-gradient(180deg,#fff3de 0%,#ffe8c9 45%,#f7d9b0 100%);
+    background-attachment:fixed;
+    color:var(--ink); min-height:100vh; overflow-x:hidden;
+  }
+  button{font-family:inherit;}
+  .app{max-width:540px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:92px;}
+
+  /* ---------- top bar ---------- */
+  .topbar{padding:14px 16px 6px;display:flex;align-items:center;gap:12px;}
+  .mascot{font-size:40px;animation:bob 3s ease-in-out infinite;line-height:1;}
+  @keyframes bob{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-6px) rotate(3deg);}}
+  .greet{flex:1;min-width:0;}
+  .greet h1{font-size:17px;margin:0 0 2px;}
+  .greet p{margin:0;font-size:12px;color:var(--muted);}
+  .sound-btn{background:#fff;border:none;border-radius:50%;width:38px;height:38px;font-size:17px;box-shadow:var(--shadow);cursor:pointer;}
+
+  /* ---------- level card ---------- */
+  .level-card{
+    background:linear-gradient(135deg,#fff,#fffaf2);border-radius:20px;padding:14px 16px;
+    box-shadow:var(--shadow);margin:8px 0 14px;
+  }
+  .level-top{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .level-badge{
+    background:linear-gradient(135deg,var(--gold),var(--sand-dark));color:#fff;
+    width:44px;height:44px;border-radius:14px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:bold;line-height:1;flex-shrink:0;
+    box-shadow:0 3px 0 var(--gold-dark);
+  }
+  .level-badge .lv-num{font-size:18px;}
+  .level-badge .lv-lbl{font-size:8px;opacity:.9;letter-spacing:.5px;}
+  .level-info{flex:1;min-width:0;}
+  .level-info .rank{font-size:15px;font-weight:bold;}
+  .level-info .xp-text{font-size:11px;color:var(--muted);}
+  .xp-track{background:#f0e4d2;border-radius:10px;height:12px;overflow:hidden;}
+  .xp-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--sand-dark));width:0%;transition:width .5s ease;}
+  .streak-chip{
+    display:inline-flex;align-items:center;gap:4px;background:#fff2d8;border-radius:20px;
+    padding:5px 11px;font-size:12px;font-weight:bold;color:#8a5a10;margin-top:10px;
+  }
+
+  /* ---------- generic ---------- */
+  .screen{padding:6px 16px 16px;flex:1;}
+  .hidden{display:none !important;}
+  h2.section-title{font-size:18px;margin:16px 0 8px;}
+  .sub-note{font-size:12px;color:var(--muted);margin:0 0 8px;}
+
+  .panel{background:#fff;border-radius:20px;padding:14px 16px;box-shadow:var(--shadow);margin-bottom:14px;}
+  .panel h3{margin:0 0 10px;font-size:15px;display:flex;align-items:center;gap:6px;}
+
+  /* ---------- quests ---------- */
+  .quest{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #f5ede0;}
+  .quest:last-child{border-bottom:none;}
+  .quest-ico{font-size:20px;width:26px;text-align:center;flex-shrink:0;}
+  .quest-mid{flex:1;min-width:0;}
+  .quest-label{font-size:13px;font-weight:bold;}
+  .quest-bar{background:#f0e4d2;border-radius:8px;height:8px;margin-top:4px;overflow:hidden;}
+  .quest-fill{height:100%;background:var(--plateau);width:0%;transition:width .4s;}
+  .quest-count{font-size:11px;color:var(--muted);flex-shrink:0;font-weight:bold;}
+  .quest.done .quest-label{color:var(--plateau-dark);}
+  .quest.done .quest-fill{background:var(--gold);}
+
+  /* ---------- mastery rings ---------- */
+  .mastery-row{display:flex;gap:12px;}
+  .mastery-item{flex:1;text-align:center;}
+  .ring-wrap{position:relative;width:78px;height:78px;margin:0 auto 4px;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:#f0e4d2;stroke-width:9;}
+  .ring-fg{fill:none;stroke-width:9;stroke-linecap:round;transition:stroke-dashoffset .7s ease;}
+  .ring-txt{
+    position:absolute;inset:0;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:bold;font-size:16px;
+  }
+  .ring-txt small{font-size:9px;font-weight:normal;color:var(--muted);}
+  .mastery-item .m-name{font-size:11px;color:var(--muted);line-height:1.3;}
+
+  /* ---------- mode cards ---------- */
+  .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .mode-card{
+    background:#fff;border-radius:18px;padding:16px 12px;text-align:center;
+    box-shadow:var(--shadow);border:3px solid transparent;cursor:pointer;transition:transform .1s;
+  }
+  .mode-card:active{transform:scale(.96);}
+  .mode-card .ico{font-size:32px;display:block;margin-bottom:4px;}
+  .mode-card h3{margin:2px 0;font-size:14px;line-height:1.2;}
+  .mode-card p{margin:0;font-size:10px;color:var(--muted);}
+  .mode-card.desert{border-color:var(--sand);}
+  .mode-card.plateau{border-color:var(--plateau);}
+  .mode-card.mixed{border-color:var(--terracotta);}
+  .mode-card.learn{border-color:var(--sky);}
+
+  .full-btn{
+    display:block;width:100%;text-align:center;background:var(--plateau);color:#fff;border:none;
+    border-radius:16px;padding:14px;font-size:15px;font-weight:bold;
+    box-shadow:0 5px 0 var(--plateau-dark);cursor:pointer;margin-top:12px;
+  }
+  .full-btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--plateau-dark);}
+  .full-btn.secondary{background:#fff;color:var(--ink);box-shadow:0 5px 0 #e6dccd;}
+  .full-btn.secondary:active{box-shadow:0 2px 0 #e6dccd;}
+  .full-btn.challenge{background:var(--terracotta);box-shadow:0 5px 0 var(--terracotta-dark);}
+  .full-btn.challenge:active{box-shadow:0 2px 0 var(--terracotta-dark);}
+  .full-btn.danger{background:#fff;color:var(--wrong);box-shadow:0 5px 0 #e6dccd;}
+  .full-btn[disabled]{opacity:.45;pointer-events:none;}
+
+  /* ---------- quiz ---------- */
+  .quiz-hud{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+  .quiz-hud .back{background:none;border:none;font-size:20px;cursor:pointer;padding:2px 4px;color:var(--muted);}
+  .progress-wrap{flex:1;background:#fff;border-radius:12px;height:14px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.08);}
+  .progress-bar{height:100%;background:linear-gradient(90deg,var(--gold),var(--sand-dark));width:0%;transition:width .3s;}
+  .combo-chip{
+    background:linear-gradient(135deg,#ff9a3c,#ff5f4d);color:#fff;border-radius:14px;
+    padding:4px 10px;font-size:12px;font-weight:bold;white-space:nowrap;
+    opacity:0;transform:scale(.6);transition:all .25s;
+  }
+  .combo-chip.show{opacity:1;transform:scale(1);}
+  .timer-chip{
+    background:#fff;border-radius:14px;padding:4px 10px;font-size:13px;font-weight:bold;
+    box-shadow:var(--shadow);white-space:nowrap;
+  }
+  .timer-chip.low{background:#fbe0dd;color:var(--wrong);animation:pulse .6s infinite;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+
+  .qcard{background:#fff;border-radius:22px;padding:18px 16px;box-shadow:var(--shadow);animation:pop .25s ease;}
+  @keyframes pop{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .q-chip{display:inline-block;background:var(--cream);border-radius:10px;padding:3px 10px;font-size:11px;font-weight:bold;color:var(--sand-dark);margin-bottom:8px;}
+  .q-chip.review{background:#fbe4e1;color:#9b3626;}
+  .q-text{font-size:17px;font-weight:bold;line-height:1.45;margin-bottom:14px;}
+  .q-hint{font-size:12px;color:var(--muted);margin:-8px 0 12px;}
+
+  .opt-list{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    background:var(--cream);border:2px solid #eee0cc;border-radius:14px;padding:13px 14px;
+    font-size:15px;text-align:left;cursor:pointer;min-height:48px;width:100%;color:var(--ink);
+  }
+  .opt:active{transform:scale(.98);}
+  .opt.correct{background:#dff5df;border-color:var(--right);}
+  .opt.wrong{background:#fbe0dd;border-color:var(--wrong);}
+
+  .tf-row{display:flex;gap:12px;}
+  .tf-btn{flex:1;padding:16px;border-radius:16px;border:2px solid #eee0cc;background:var(--cream);font-size:16px;font-weight:bold;cursor:pointer;color:var(--ink);}
+  .tf-btn.correct{background:#dff5df;border-color:var(--right);}
+  .tf-btn.wrong{background:#fbe0dd;border-color:var(--wrong);}
+
+  .type-row{display:flex;gap:8px;}
+  .type-input{flex:1;min-width:0;padding:14px;border-radius:14px;border:2px solid #eee0cc;font-size:16px;background:var(--cream);font-family:inherit;color:var(--ink);}
+  .check-btn{background:var(--terracotta);color:#fff;border:none;border-radius:14px;padding:0 18px;font-weight:bold;font-size:15px;box-shadow:0 4px 0 var(--terracotta-dark);cursor:pointer;}
+  .check-btn:active{transform:translateY(3px);box-shadow:none;}
+
+  .match-cols{display:flex;gap:10px;}
+  .match-col{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .match-item{
+    background:var(--cream);border:2px solid #eee0cc;border-radius:12px;padding:10px 6px;
+    font-size:12.5px;text-align:center;cursor:pointer;min-height:46px;width:100%;
+    display:flex;align-items:center;justify-content:center;line-height:1.25;color:var(--ink);
+  }
+  .match-item.sel{border-color:var(--sky);background:#e2f1fa;}
+  .match-item.done{background:#dff5df;border-color:var(--right);opacity:.8;}
+  .match-item.wrongflash{background:#fbe0dd;border-color:var(--wrong);}
+
+  .sort-pool{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;min-height:44px;}
+  .sort-chip{background:var(--gold);border:none;border-radius:12px;padding:9px 12px;font-size:13px;font-weight:bold;cursor:pointer;box-shadow:0 3px 0 var(--gold-dark);color:var(--ink);}
+  .sort-chip.sel{outline:3px solid var(--sky);outline-offset:2px;}
+  .sort-chip.placed{display:none;}
+  .bucket-row{display:flex;gap:10px;}
+  .bucket{flex:1;min-height:96px;background:var(--cream);border:2px dashed #d8c6a8;border-radius:14px;padding:8px;cursor:pointer;transition:background .2s;}
+  .bucket.flash-bad{background:#fbe0dd;}
+  .bucket h4{margin:0 0 6px;font-size:11.5px;text-align:center;color:var(--sand-dark);}
+  .placed-chip{background:#fff;border-radius:8px;padding:5px 7px;margin:3px 0;font-size:11.5px;box-shadow:0 2px 0 #f0e4d2;text-align:center;}
+
+  .feedback{margin-top:12px;border-radius:14px;padding:12px 14px;font-size:13.5px;line-height:1.45;}
+  .feedback.right{background:#e4f7e4;color:#2c6b2c;}
+  .feedback.close{background:#fff4d9;color:#8a5a10;}
+  .feedback.wrong{background:#fbe4e1;color:#9b3626;}
+  .feedback b{display:block;margin-bottom:3px;}
+  .feedback b.inline{display:inline;margin:0;}
+  .xp-pop{
+    display:inline-block;background:var(--gold);color:#5a3d0f;border-radius:10px;
+    padding:2px 8px;font-size:12px;font-weight:bold;margin-top:6px;
+  }
+
+  /* ---------- results ---------- */
+  .result-hero{text-align:center;padding:6px 0 4px;}
+  .result-hero .big{font-size:54px;line-height:1;}
+  .result-hero h2{margin:8px 0 2px;font-size:22px;}
+  .result-hero p{margin:0;color:var(--muted);font-size:13px;}
+  .score-ring{position:relative;width:110px;height:110px;margin:10px auto;}
+  .result-stats{display:flex;gap:10px;margin:12px 0;}
+  .rstat{flex:1;background:var(--cream);border-radius:14px;padding:10px 6px;text-align:center;}
+  .rstat .v{font-size:18px;font-weight:bold;}
+  .rstat .k{font-size:10px;color:var(--muted);}
+  .review-item{background:#fff6f4;border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:13px;}
+  .review-item .rq{font-weight:bold;margin-bottom:2px;line-height:1.35;}
+  .review-item .ra{color:#2c6b2c;}
+
+  /* ---------- awards ---------- */
+  .badge-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .badge{
+    background:#fff;border:none;border-radius:16px;padding:12px 6px;text-align:center;
+    box-shadow:var(--shadow);cursor:pointer;color:var(--ink);
+  }
+  .badge .b-ico{font-size:28px;display:block;margin-bottom:3px;}
+  .badge .b-name{font-size:10.5px;font-weight:bold;line-height:1.2;display:block;}
+  .badge.locked{opacity:.4;filter:grayscale(1);}
+
+  /* ---------- mistakes ---------- */
+  .mistake-item{background:#fff;border-radius:16px;padding:12px 40px 12px 14px;margin-bottom:10px;box-shadow:var(--shadow);position:relative;}
+  .mistake-item .m-q{font-weight:bold;font-size:13.5px;margin-bottom:3px;line-height:1.35;}
+  .mistake-item .m-a{font-size:12.5px;color:#2c6b2c;}
+  .dismiss-btn{position:absolute;top:9px;right:9px;background:#f3ece2;border:none;border-radius:50%;width:26px;height:26px;font-size:13px;cursor:pointer;color:#8a7a6f;}
+  .empty-note{text-align:center;color:var(--muted);font-size:14px;margin-top:34px;line-height:1.6;}
+
+  /* ---------- learn ---------- */
+  .chip-row{display:flex;gap:8px;margin-bottom:10px;}
+  .chip-tab{
+    flex:1;background:#fff;border:2px solid transparent;border-radius:14px;padding:9px 6px;
+    font-size:12px;font-weight:bold;cursor:pointer;box-shadow:var(--shadow);color:var(--ink);
+  }
+  .chip-tab.active{border-color:var(--sky);background:#e2f1fa;}
+  .flash-card{
+    background:#fff;border-radius:22px;padding:24px 20px;min-height:230px;
+    display:flex;flex-direction:column;justify-content:center;text-align:center;
+    box-shadow:var(--shadow);position:relative;animation:pop .25s ease;
+  }
+  .flash-ch{font-size:10.5px;color:var(--sand-dark);font-weight:bold;margin-bottom:8px;letter-spacing:.4px;}
+  .flash-title{font-size:19px;font-weight:bold;margin-bottom:10px;}
+  .flash-body{font-size:14.5px;color:#5a4c42;line-height:1.55;}
+  .flash-seen{position:absolute;top:12px;right:14px;font-size:14px;}
+  .flash-nav{display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:10px;}
+  .flash-nav button{background:var(--sky);color:#fff;border:none;border-radius:12px;padding:11px 20px;font-weight:bold;box-shadow:0 4px 0 var(--sky-dark);cursor:pointer;}
+  .flash-nav button:active{transform:translateY(3px);box-shadow:none;}
+  .flash-count{font-size:12px;color:var(--muted);text-align:center;line-height:1.4;}
+
+  /* ---------- bottom nav ---------- */
+  .bottomnav{
+    position:fixed;bottom:0;left:0;right:0;background:#fff;box-shadow:0 -3px 12px rgba(0,0,0,.08);
+    display:flex;justify-content:space-around;padding:6px 2px calc(6px + env(safe-area-inset-bottom));
+    max-width:540px;margin:0 auto;z-index:20;
+  }
+  .navbtn{background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:1px;font-size:9.5px;color:#a3968a;padding:6px 4px;cursor:pointer;position:relative;}
+  .navbtn.active{color:var(--sand-dark);font-weight:bold;}
+  .navbtn .navico{font-size:19px;}
+  .nav-dot{position:absolute;top:3px;right:2px;background:var(--wrong);color:#fff;border-radius:10px;font-size:9px;min-width:15px;height:15px;line-height:15px;padding:0 3px;}
+
+  /* ---------- modal / toast / celebration ---------- */
+  .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px;}
+  .modal{background:#fff;border-radius:20px;padding:20px;max-width:400px;width:100%;max-height:82vh;overflow-y:auto;}
+  .modal h3{margin-top:0;}
+  .modal textarea{width:100%;height:72px;border-radius:10px;border:2px solid #eee0cc;padding:8px;font-size:11px;font-family:monospace;}
+  .modal-close{float:right;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);}
+
+  .toast{
+    position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;border-radius:14px;padding:11px 18px;font-size:13.5px;
+    z-index:80;opacity:0;transition:all .3s;max-width:88%;text-align:center;pointer-events:none;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .celebrate{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:70;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+  }
+  .celebrate-box{
+    background:#fff;border-radius:24px;padding:26px 22px;text-align:center;max-width:340px;width:100%;
+    animation:zoomIn .4s cubic-bezier(.2,1.4,.4,1);
+  }
+  @keyframes zoomIn{from{transform:scale(.5);opacity:0;}to{transform:scale(1);opacity:1;}}
+  .celebrate-box .c-ico{font-size:62px;line-height:1;}
+  .celebrate-box h2{margin:10px 0 4px;font-size:21px;}
+  .celebrate-box p{margin:0 0 14px;color:var(--muted);font-size:13.5px;line-height:1.5;}
+
+  .confetti{position:fixed;top:-24px;pointer-events:none;font-size:20px;z-index:100;animation:fall linear forwards;}
+  @keyframes fall{to{transform:translateY(110vh) rotate(400deg);opacity:.15;}}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="mascot">&#129434;</div>
+    <div class="greet">
+      <h1 id="greetText">Hello!</h1>
+      <p>Class 4 &middot; Social Studies &middot; Unit II</p>
+    </div>
+    <button class="sound-btn" id="soundBtn" onclick="toggleSound()">&#128266;</button>
+  </div>
+
+  <!-- ================= HOME ================= -->
+  <div class="screen" id="screen-home">
+    <div class="level-card">
+      <div class="level-top">
+        <div class="level-badge"><span class="lv-num" id="lvNum">1</span><span class="lv-lbl">LVL</span></div>
+        <div class="level-info">
+          <div class="rank" id="rankName">Village Scout</div>
+          <div class="xp-text" id="xpText">0 / 100 XP</div>
+        </div>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xpFill"></div></div>
+      <div class="streak-chip" id="streakChip">Practise today to start a streak</div>
+    </div>
+
+    <div class="panel">
+      <h3>&#127919; Today's Quests</h3>
+      <div id="questList"></div>
+    </div>
+
+    <div class="panel">
+      <h3>&#128506;&#65039; Your Map Mastery</h3>
+      <div class="mastery-row" id="masteryRow"></div>
+    </div>
+
+    <h2 class="section-title">Practise</h2>
+    <div class="card-grid">
+      <button class="mode-card desert" onclick="startPractice(4)">
+        <span class="ico">&#127964;&#65039;</span><h3>Great Indian Desert</h3><p>Chapter 4</p>
+      </button>
+      <button class="mode-card plateau" onclick="startPractice(5)">
+        <span class="ico">&#9968;&#65039;</span><h3>Peninsular Plateau</h3><p>Chapter 5</p>
+      </button>
+      <button class="mode-card mixed" onclick="startPractice('all')">
+        <span class="ico">&#128221;</span><h3>Mixed Practice</h3><p>Both chapters</p>
+      </button>
+      <button class="mode-card learn" onclick="openLearn()">
+        <span class="ico">&#128218;</span><h3>Learn Mode</h3><p>Flashcards</p>
+      </button>
+    </div>
+
+    <button class="full-btn challenge" onclick="startChallenge()">&#9201;&#65039; Beat the Clock &mdash; 10 questions, 2 min</button>
+    <button class="full-btn secondary" id="fixMistakesBtn" onclick="startMistakePractice()">&#129657; Fix My Mistakes (<span id="mistakeCountHome">0</span>)</button>
+  </div>
+
+  <!-- ================= QUIZ ================= -->
+  <div class="screen hidden" id="screen-quiz">
+    <div class="quiz-hud">
+      <button class="back" onclick="quitSession()">&#10005;</button>
+      <div class="progress-wrap"><div class="progress-bar" id="progBar"></div></div>
+      <div class="timer-chip hidden" id="timerChip">2:00</div>
+      <div class="combo-chip" id="comboChip">&#128293; 0</div>
+    </div>
+    <div id="quizArea"></div>
+  </div>
+
+  <!-- ================= LEARN ================= -->
+  <div class="screen hidden" id="screen-learn">
+    <h2 class="section-title">&#128218; Learn Mode</h2>
+    <div class="chip-row">
+      <button class="chip-tab active" data-deck="4" onclick="setDeck(4)">&#127964;&#65039; Chapter 4</button>
+      <button class="chip-tab" data-deck="5" onclick="setDeck(5)">&#9968;&#65039; Chapter 5</button>
+    </div>
+    <div class="flash-card" id="flashCardArea"></div>
+    <div class="flash-nav">
+      <button onclick="flashPrev()">&#9664;</button>
+      <div class="flash-count" id="flashCount"></div>
+      <button onclick="flashNext()">&#9654;</button>
+    </div>
+  </div>
+
+  <!-- ================= MISTAKES ================= -->
+  <div class="screen hidden" id="screen-mistakes">
+    <h2 class="section-title">&#129657; Mistakes Bank</h2>
+    <p class="sub-note">Get one right in practice and it leaves this list by itself.</p>
+    <button class="full-btn" id="fixMistakesBtn2" onclick="startMistakePractice()" style="margin-top:0;">&#9654; Practise these now</button>
+    <div id="mistakeList" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- ================= AWARDS ================= -->
+  <div class="screen hidden" id="screen-awards">
+    <h2 class="section-title">&#127941; Trophy Case</h2>
+    <p class="sub-note" id="badgeProgressNote"></p>
+    <div class="badge-grid" id="badgeGrid"></div>
+  </div>
+
+  <!-- ================= STATS ================= -->
+  <div class="screen hidden" id="screen-stats">
+    <h2 class="section-title">&#128202; Your Progress</h2>
+    <div class="panel">
+      <div class="result-stats">
+        <div class="rstat"><div class="v" id="statLevel">1</div><div class="k">Level</div></div>
+        <div class="rstat"><div class="v" id="statXp">0</div><div class="k">Total XP</div></div>
+        <div class="rstat"><div class="v" id="statStreak">0</div><div class="k">Day streak</div></div>
+      </div>
+      <div class="result-stats">
+        <div class="rstat"><div class="v" id="statAnswered">0</div><div class="k">Answered</div></div>
+        <div class="rstat"><div class="v" id="statAccuracy">0%</div><div class="k">Accuracy</div></div>
+        <div class="rstat"><div class="v" id="statBestCombo">0</div><div class="k">Best combo</div></div>
+      </div>
+      <div class="result-stats">
+        <div class="rstat"><div class="v" id="statMastered">0</div><div class="k">Mastered</div></div>
+        <div class="rstat"><div class="v" id="statMistakes">0</div><div class="k">To fix</div></div>
+        <div class="rstat"><div class="v" id="statBadges">0</div><div class="k">Badges</div></div>
+      </div>
+    </div>
+    <button class="full-btn secondary" onclick="openBackupModal()">&#128190; Backup / Restore Progress</button>
+    <button class="full-btn danger" id="resetBtn" onclick="handleReset()">&#9888;&#65039; Reset all progress</button>
+  </div>
+
+  <div class="bottomnav">
+    <button class="navbtn active" data-tab="home" onclick="showScreen('home')"><span class="navico">&#127968;</span>Home</button>
+    <button class="navbtn" data-tab="learn" onclick="openLearn()"><span class="navico">&#128218;</span>Learn</button>
+    <button class="navbtn" data-tab="mistakes" onclick="showScreen('mistakes')"><span class="navico">&#129657;</span>Fix<span class="nav-dot hidden" id="navDot">0</span></button>
+    <button class="navbtn" data-tab="awards" onclick="showScreen('awards')"><span class="navico">&#127941;</span>Awards</button>
+    <button class="navbtn" data-tab="stats" onclick="showScreen('stats')"><span class="navico">&#128202;</span>Stats</button>
+  </div>
+</div>
+
+<div class="modal-bg hidden" id="backupModalBg">
+  <div class="modal">
+    <button class="modal-close" onclick="closeBackupModal()">&#10005;</button>
+    <h3>Backup / Restore</h3>
+    <p style="font-size:12.5px;color:#8a7a6f;">Copy this code to save progress, or paste a code below to restore it on another device.</p>
+    <textarea id="backupCodeOut" readonly></textarea>
+    <button class="full-btn secondary" style="margin-top:8px;" onclick="copyBackupCode()">&#128203; Copy code</button>
+    <p style="font-size:12.5px;color:#8a7a6f;margin-top:16px;">Restore from a code:</p>
+    <textarea id="backupCodeIn" placeholder="Paste code here"></textarea>
+    <button class="full-btn" style="margin-top:8px;" onclick="restoreFromCode()">Restore</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div id="celebrateHost"></div>
+
+<script>
+/* ==========================================================================
+   1. CONTENT
+   ========================================================================== */
+var LEARN_CARDS = [
+  {ch:4, title:"The Thar Desert", body:"The Great Indian Desert (Thar Desert) lies to the west of the Northern Plains, mostly in Rajasthan. It is about 500 km long and 100-300 km wide, and is partly rocky and partly sandy."},
+  {ch:4, title:"Climate", body:"The desert has a hot and dry climate. It receives very little rainfall and has scanty vegetation. Strong winds cause dust storms."},
+  {ch:4, title:"Sand Dunes", body:"Small hills of sand formed by wind are called sand dunes. Strong winds keep the sand particles moving, so sand dunes do not stay in one place."},
+  {ch:4, title:"Deserts of the World", body:"The Sahara, in Africa, is the largest hot desert on Earth. Antarctica is the largest cold desert on Earth. Ladakh is the cold desert of India."},
+  {ch:4, title:"Desert Plants", body:"Cactus, Keekar and Babool are common desert plants. They have deep roots and can store water, which helps them survive with very little rain."},
+  {ch:4, title:"The Camel", body:"The camel is called the 'Ship of the Desert'. It has broad padded feet that do not sink in sand, and can stay without water and food for a long time. Long eyelashes and closing nostrils protect it during dust storms."},
+  {ch:4, title:"The Luni River", body:"The Luni is the only river that flows through the Great Indian Desert. It is a seasonal river, which means it only has water during the rainy season."},
+  {ch:4, title:"Indira Gandhi Canal", body:"The Indira Gandhi Canal brings water from the Satluj river to the Thar Desert. It has greatly improved irrigation and farming in Rajasthan."},
+  {ch:4, title:"Nomads and Banjaras", body:"People who do not stay in one place for long, and keep moving from place to place with their belongings, are called nomads or banjaras."},
+  {ch:4, title:"Oasis", body:"An oasis is an area in a desert that has water and greenery. It gives water for drinking and daily use, and food and shelter for people and animals."},
+  {ch:4, title:"Life in Rajasthan", body:"Rajasthan is the largest state in India. Its capital is Jaipur. Farming and cattle rearing are the main occupations. Men wear dhoti-kurta with colourful turbans, and women wear lehenga-choli and odhni."},
+  {ch:4, title:"Languages and Festivals", body:"The main languages of Rajasthan are Hindi and Rajasthani. Gangaur, a harvest festival, and Teej are the main festivals of the state."},
+  {ch:4, title:"Famous Cities", body:"Jaipur is the 'Pink City', famous for Hawa Mahal, Jal Mahal, City Palace, Amer Fort and Nahargarh Fort. Udaipur is the 'City of Lakes'. Jaisalmer is famous for the Desert Festival. Ajmer is famous for the Urs of Sufi Saint Khwaja Moinuddin Chishti and the nearby Pushkar Mela."},
+  {ch:4, title:"Palace on Wheels", body:"The famous train 'Palace on Wheels' takes tourists on a trip to all the main tourist places in Rajasthan."},
+
+  {ch:5, title:"What is a Plateau?", body:"A plateau is a raised stretch of land that is generally flat at the top, so it is also called a tableland. The Peninsular Plateau lies to the south of the Northern Plains and is triangular in shape."},
+  {ch:5, title:"Size and Boundaries", body:"The Peninsular Plateau stretches about 1,600 km from north to south and 1,400 km from east to west. It is surrounded by hills on all sides: the Aravali Hills in the north-west and the Rajmahal Hills in the north-east. The Eastern Ghats and Western Ghats are its eastern and western boundaries."},
+  {ch:5, title:"Two Main Parts", body:"The river Narmada and the Satpura range divide the whole plateau region into two parts: the Central Highlands in the north, and the Deccan Plateau in the south."},
+  {ch:5, title:"The Malwa Plateau", body:"The Malwa Plateau lies towards the north-west of the Central Highlands, between the Aravali Hills and the Vindhya Hills, covering Madhya Pradesh and south-east Rajasthan. It has black soil, good for cotton and oilseeds. Jowar and wheat are also grown."},
+  {ch:5, title:"The Chotanagpur Plateau", body:"The Chotanagpur Plateau is the north-east part of the Central Highlands, covering Jharkhand, Chhattisgarh and parts of Odisha and West Bengal. It is very rich in minerals such as coal, iron, manganese, mica and bauxite. Main coal-mining centres are Jharia, Giridih, Bokaro and Raniganj."},
+  {ch:5, title:"The Deccan Plateau", body:"The Deccan Plateau covers the largest part of the Southern Plateaus. Its highest peak is Anamudi. The land is uneven, and it has black soil which is good for growing cotton and sugarcane."},
+  {ch:5, title:"Rivers of the Deccan", body:"Rivers like the Mahanadi, Godavari (also called Dakshin Ganga), Krishna and Kaveri have their origin in the Deccan Plateau. They flow from west to east and fall into the Bay of Bengal, because the general slope is from west to east."},
+  {ch:5, title:"Narmada and Tapi", body:"Two rivers are different from the rest: the Narmada and the Tapi flow from east to west and fall into the Arabian Sea."},
+  {ch:5, title:"Waterfalls", body:"The land of the Deccan Plateau is uneven, so its rivers flow fast and form many waterfalls. Jog Falls, on the river Sharavati, is one of the highest waterfalls in India."},
+  {ch:5, title:"Important Dams", body:"Most Deccan rivers are rain-fed and seasonal, so many dams have been built on them. The Mettur Dam is on the Kaveri, the Nagarjuna Sagar Dam is on the Krishna, and the Hirakud Dam is on the Mahanadi."},
+  {ch:5, title:"Storehouse of Minerals", body:"The Deccan Plateau is very rich in minerals and precious stones such as coal, iron ore, manganese and bauxite, so it is also called the 'store house of minerals'. This mineral wealth led many rulers, including the Mauryan and Gupta dynasties, to fight over it."},
+  {ch:5, title:"Mohs Scale", body:"Minerals can be grouped by their hardness using the Mohs Scale, developed by Friedrich Mohs. Diamond is the hardest mineral and sits at the top of this scale."},
+  {ch:5, title:"Madhya Pradesh", body:"Capital: Bhopal. Indore, Gwalior and Jabalpur are other important cities. Kanha and Bandhavgarh National Parks protect tigers. Pachmarhi, Sanchi Stupa and the Khajuraho temples attract tourists. Panna is famous for diamond mines. Wheat and cotton are the main crops."},
+  {ch:5, title:"Chhattisgarh", body:"Capital: Raipur. It is rich in minerals - coal, iron and manganese are mined here. The Bhilai Steel Plant is located in this state. Farmers grow rice, mustard, maize and jowar."},
+  {ch:5, title:"Jharkhand", body:"Capital: Ranchi. It is sometimes called the 'Mineral State of India' because it is rich in mineral and forest reserves. Jamshedpur, Bokaro and Dhanbad are its main industrial towns."},
+  {ch:5, title:"Odisha", body:"Capital: Bhubaneswar. Cuttack and Rourkela are the main industrial cities. Odisha is famous for textiles and handicrafts, and is very rich in mineral reserves. Rice and pulses are the main crops. Odissi is the popular classical dance, and the Jagannath Temple and Rath Yatra at Puri attract many tourists."},
+  {ch:5, title:"Maharashtra", body:"Capital: Mumbai. It lies in the north-western part of the Deccan Plateau. The Godavari and Krishna rivers pass through it, and the soil is good for cotton and sugarcane. Ganesh Chaturthi is the most important festival. Ajanta and Ellora Caves are famous. Lavani is the folk dance and Tamasha the folk theatre. Marathi is the main language."},
+  {ch:5, title:"Karnataka", body:"Capital: Bengaluru, called the 'Garden City' and the 'Silicon Valley of the East' because of its IT industry. The Tungabhadra and Kaveri rivers flow through the state. Ragi, cotton, coffee, sugarcane and spices are the main crops. Mysuru is famous for Mysore Palace, and the state is known for sandalwood, silk and handicrafts. Kannada is the main language."},
+  {ch:5, title:"Telangana and Andhra Pradesh", body:"Telangana's capital is Hyderabad, famous for the Charminar and for Bidri work, which is inlaying silver on brass or copper. Andhra Pradesh's capital is Amaravati. Farming is the main occupation - rice, jowar, sugarcane, tobacco and groundnut. Tirupati is the most famous pilgrimage centre. Telugu is the main language and Kuchipudi the famous dance."},
+  {ch:5, title:"Tamil Nadu", body:"Capital: Chennai. Famous temple towns are Madurai, Thanjavur, Tiruchirappalli and Kanchipuram, which is known for silk sarees. Rice, sugarcane, cotton and groundnut are grown, with tea and coffee on the Nilgiri Hills. Pongal is the harvest festival and Bharatnatyam the traditional dance. Tamil is the main language."},
+  {ch:5, title:"Kerala", body:"Capital: Thiruvananthapuram. Kerala is called 'God's Own Country', famous for its backwaters and tea gardens. Cash crops include coffee, tea, cardamom, cashew nut, coconut and ginger; the main food crops are rice, pulses and tapioca. Onam and Vishu are the famous festivals, and Kathakali and Mohiniyattam are its classical dances. Malayalam is the language."}
+];
+
+var QUESTIONS = [
+/* ---- Ch4 MCQ ---- */
+{t:'mcq',ch:4,q:"Which is the cold desert of India?",o:["Gulmarg","Ladakh","Auli","Manali"],a:1,note:"Ladakh is India's cold desert."},
+{t:'mcq',ch:4,q:"What type of vegetation is commonly found in the desert?",o:["Deodars","Thorny bushes and cactus","Mangroves","Silver firs"],a:1,note:"Desert plants need very little water."},
+{t:'mcq',ch:4,q:"Which city is known as the 'City of Lakes'?",o:["Udaipur","Jaipur","Jaisalmer","Ajmer"],a:0,note:"Udaipur is famous for its many lakes."},
+{t:'mcq',ch:4,q:"The climate of the Thar Desert is generally...",o:["cold and wet","warm and rainy","hot and dry","cold and humid"],a:2},
+{t:'mcq',ch:4,q:"In which state does most of the Great Indian Desert lie?",o:["Bihar","Haryana","Kerala","Rajasthan"],a:3},
+{t:'mcq',ch:4,q:"Which is the only river that flows through the Great Indian Desert?",o:["Ganga","Yamuna","Luni","Satluj"],a:2,note:"The Luni is a seasonal river."},
+{t:'mcq',ch:4,q:"The Indira Gandhi Canal brings water to the desert from which river?",o:["Ganga","Yamuna","Chenab","Satluj"],a:3},
+{t:'mcq',ch:4,q:"Which is the largest hot desert on Earth?",o:["Thar","Sahara","Gobi","Kalahari"],a:1,note:"The Sahara is in Africa."},
+{t:'mcq',ch:4,q:"Which is the largest cold desert on Earth?",o:["Ladakh","Gobi","Antarctica","Sahara"],a:2},
+{t:'mcq',ch:4,q:"Which train tours the important tourist places of Rajasthan?",o:["Palace on Wheels","Rajdhani Express","Desert Queen","Deccan Odyssey"],a:0},
+{t:'mcq',ch:4,q:"Which of these is a main festival of Rajasthan?",o:["Lohri","Bihu","Baisakhi","Teej"],a:3,note:"Gangaur and Teej are Rajasthan's main festivals."},
+{t:'mcq',ch:4,q:"Which animal is called the 'Ship of the Desert'?",o:["Horse","Camel","Donkey","Ox"],a:1},
+/* ---- Ch4 TF ---- */
+{t:'tf',ch:4,q:"The Great Indian Desert lies to the west of the Northern Plains.",a:true},
+{t:'tf',ch:4,q:"Jaipur is famous for the Pushkar Mela.",a:false,note:"Pushkar Mela is held near Ajmer."},
+{t:'tf',ch:4,q:"The Great Indian Desert is about 700 km long.",a:false,note:"It is about 500 km long."},
+{t:'tf',ch:4,q:"Small hills of sand are called sand dunes.",a:true},
+{t:'tf',ch:4,q:"A desert is a sandy area that gets very little rain.",a:true},
+{t:'tf',ch:4,q:"Cactus and Keekar are common desert plants.",a:true},
+{t:'tf',ch:4,q:"Dust storms do not affect the vision of camels.",a:true,note:"Long eyelashes and closing nostrils protect them."},
+{t:'tf',ch:4,q:"Rajasthan is the largest state of India.",a:true},
+{t:'tf',ch:4,q:"The Thar Desert receives heavy rainfall all year.",a:false,note:"It receives very little rainfall."},
+{t:'tf',ch:4,q:"Sand dunes always stay in the same place.",a:false,note:"Strong winds keep the sand moving."},
+/* ---- Ch4 FILL ---- */
+{t:'fill',ch:4,q:"The city of ___ is famous for the Desert Festival.",a:["jaisalmer"]},
+{t:'fill',ch:4,q:"The ___ Canal provides water to the Thar Desert.",a:["indira gandhi","indira gandhi canal"]},
+{t:'fill',ch:4,q:"___ is the tourist train that covers the important places of Rajasthan.",a:["palace on wheels"]},
+{t:'fill',ch:4,q:"The ___ is the largest hot desert on Earth.",a:["sahara","sahara desert"]},
+{t:'fill',ch:4,q:"___ is the largest cold desert on Earth.",a:["antarctica"]},
+{t:'fill',ch:4,q:"People who move from place to place in the desert are called nomads or ___.",a:["banjaras","banjara"]},
+{t:'fill',ch:4,q:"An area in a desert with water and greenery is called an ___.",a:["oasis"]},
+{t:'fill',ch:4,q:"The main languages of Rajasthan are Hindi and ___.",a:["rajasthani"]},
+/* ---- Ch4 ONE WORD ---- */
+{t:'one',ch:4,q:"Another name for the Great Indian Desert",a:["thar desert","thar"]},
+{t:'one',ch:4,q:"The largest state of India by area",a:["rajasthan"]},
+{t:'one',ch:4,q:"The capital of Rajasthan",a:["jaipur"]},
+{t:'one',ch:4,q:"The only river flowing through the Thar Desert",a:["luni","luni river"]},
+{t:'one',ch:4,q:"The 'Ship of the Desert'",a:["camel"]},
+{t:'one',ch:4,q:"The nickname given to the city of Jaipur",a:["pink city"]},
+{t:'one',ch:4,q:"Small hills of sand in a desert",a:["sand dunes","dunes","sand dune"]},
+{t:'one',ch:4,q:"The cold desert of India",a:["ladakh"]},
+/* ---- Ch4 MATCH ---- */
+{t:'match',ch:4,title:"Match each city with what it is famous for",pairs:[["Jaisalmer","Desert Festival"],["Udaipur","City of Lakes"],["Ajmer","Urs of Khwaja Chishti"],["Jaipur","Pink City"],["Pushkar","Camel Fair"]]},
+{t:'match',ch:4,title:"Match the word with its meaning",pairs:[["Desert","Sandy area, very little rain"],["Oasis","Place in a desert with water"],["Dust storm","Wind carrying sand a long way"],["Sand dunes","Small hills of sand"],["Nomads","People who move place to place"]]},
+/* ---- Ch4 SORT ---- */
+{t:'sort',ch:4,title:"Sort these: found in the desert or not?",buckets:["In the desert","Not in the desert"],items:[["Cactus","In the desert"],["Camel","In the desert"],["Keekar","In the desert"],["Mangroves","Not in the desert"],["Deodar","Not in the desert"],["Silver fir","Not in the desert"]]},
+
+/* ---- Ch5 MCQ ---- */
+{t:'mcq',ch:5,q:"The ___ Plateau is located towards the north-west of the Central Highlands.",o:["Malwa","Chotanagpur","Deccan","Bundelkhand"],a:0},
+{t:'mcq',ch:5,q:"Pachmarhi is a famous hill station in...",o:["Telangana","Andhra Pradesh","Madhya Pradesh","Odisha"],a:2},
+{t:'mcq',ch:5,q:"Which is the famous pilgrimage centre of Andhra Pradesh?",o:["Badrinath","Gangotri","Kedarnath","Tirupati"],a:3},
+{t:'mcq',ch:5,q:"The Mettur Dam is built on the ___ river.",o:["Mahanadi","Krishna","Kaveri","Narmada"],a:2},
+{t:'mcq',ch:5,q:"The highest peak of the Deccan Plateau is...",o:["Dhaulagiri","Nandadevi","Kanchenjunga","Anamudi"],a:3},
+{t:'mcq',ch:5,q:"Which river flows westwards into the Arabian Sea?",o:["Narmada","Mahanadi","Krishna","Kaveri"],a:0,note:"The Narmada and Tapi flow east to west."},
+{t:'mcq',ch:5,q:"Which city is also named the 'Garden City'?",o:["Jabalpur","Bokaro","Chennai","Bengaluru"],a:3},
+{t:'mcq',ch:5,q:"The Hirakud Dam is built across the river...",o:["Mahanadi","Krishna","Tapi","Godavari"],a:0},
+{t:'mcq',ch:5,q:"Ganesh Chaturthi is a popular festival of...",o:["Kerala","Odisha","Karnataka","Maharashtra"],a:3},
+{t:'mcq',ch:5,q:"Which range, along with the Narmada, divides the plateau into two parts?",o:["Aravali","Satpura","Vindhya","Rajmahal"],a:1},
+{t:'mcq',ch:5,q:"The Chotanagpur Plateau is famous for huge deposits of...",o:["gold","coal","salt","marble"],a:1},
+{t:'mcq',ch:5,q:"Bidri work, inlaying silver on brass, is famous in...",o:["Hyderabad","Chennai","Bhopal","Mumbai"],a:0},
+{t:'mcq',ch:5,q:"The capital of Madhya Pradesh is...",o:["Indore","Bhopal","Gwalior","Jabalpur"],a:1},
+{t:'mcq',ch:5,q:"The capital of Odisha is...",o:["Cuttack","Rourkela","Bhubaneswar","Puri"],a:2},
+{t:'mcq',ch:5,q:"The capital of Karnataka is...",o:["Mysuru","Chennai","Bengaluru","Hyderabad"],a:2},
+{t:'mcq',ch:5,q:"The capital of Kerala is...",o:["Kochi","Thiruvananthapuram","Kozhikode","Kannur"],a:1},
+{t:'mcq',ch:5,q:"The capital of Telangana is...",o:["Amaravati","Bengaluru","Hyderabad","Chennai"],a:2},
+/* ---- Ch5 TF ---- */
+{t:'tf',ch:5,q:"The surface of the plateau region is rocky and uneven.",a:true},
+{t:'tf',ch:5,q:"Raipur is the capital of Odisha.",a:false,note:"Raipur is the capital of Chhattisgarh."},
+{t:'tf',ch:5,q:"The harvest festival of Andhra Pradesh is Pongal.",a:false,note:"Pongal belongs to Tamil Nadu. Andhra Pradesh celebrates Ugadi."},
+{t:'tf',ch:5,q:"The Godavari is also known as Dakshin Ganga.",a:true},
+{t:'tf',ch:5,q:"The Peninsular Plateau is triangular in shape.",a:true},
+{t:'tf',ch:5,q:"Sanchi Stupa is in Jharkhand.",a:false,note:"Sanchi Stupa is in Madhya Pradesh."},
+{t:'tf',ch:5,q:"The Jagannath Temple is in Odisha.",a:true},
+{t:'tf',ch:5,q:"Most rivers in the Deccan Plateau are seasonal.",a:true,note:"They are rain-fed, so they dry up partly in summer."},
+{t:'tf',ch:5,q:"Madurai and Thanjavur are in Tamil Nadu.",a:true},
+{t:'tf',ch:5,q:"The Aravali Hills are in the north-east of the Peninsular Plateau.",a:false,note:"The Aravali Hills are in the north-west; the Rajmahal Hills are in the north-east."},
+/* ---- Ch5 FILL ---- */
+{t:'fill',ch:5,q:"Amaravati is the capital of ___.",a:["andhra pradesh"]},
+{t:'fill',ch:5,q:"The ___ Plateau covers the largest part of the Southern Plateaus.",a:["deccan"]},
+{t:'fill',ch:5,q:"The ___ Plateau has huge deposits of coal.",a:["chotanagpur"]},
+{t:'fill',ch:5,q:"___ soil is found in the Malwa Plateau.",a:["black"]},
+{t:'fill',ch:5,q:"Rourkela and ___ are the industrial cities of Odisha.",a:["cuttack"]},
+{t:'fill',ch:5,q:"Bengaluru is called the Silicon Valley of the ___.",a:["east"]},
+{t:'fill',ch:5,q:"Jog Falls is on the river ___.",a:["sharavati"]},
+{t:'fill',ch:5,q:"___ is the classical dance form of Tamil Nadu.",a:["bharatnatyam"]},
+{t:'fill',ch:5,q:"Jharkhand is called the ___ State of India.",a:["mineral"]},
+{t:'fill',ch:5,q:"The hardest mineral, at the top of the Mohs Scale, is ___.",a:["diamond"]},
+/* ---- Ch5 ONE WORD ---- */
+{t:'one',ch:5,q:"Highest peak of the Deccan Plateau",a:["anamudi"]},
+{t:'one',ch:5,q:"City famous for diamond mines",a:["panna"]},
+{t:'one',ch:5,q:"One of the highest waterfalls in India",a:["jog falls","jog"]},
+{t:'one',ch:5,q:"River that divides the Peninsular Plateau into two parts",a:["narmada","narmada river"]},
+{t:'one',ch:5,q:"Capital of Madhya Pradesh",a:["bhopal"]},
+{t:'one',ch:5,q:"The longest dam in India",a:["hirakud","hirakud dam"]},
+{t:'one',ch:5,q:"Steel plant located in Chhattisgarh",a:["bhilai","bhilai steel plant"]},
+{t:'one',ch:5,q:"Another name for the Godavari river",a:["dakshin ganga"]},
+{t:'one',ch:5,q:"Classical dance form of Odisha",a:["odissi"]},
+{t:'one',ch:5,q:"Harvest festival of Kerala",a:["onam"]},
+/* ---- Ch5 MATCH ---- */
+{t:'match',ch:5,title:"Match each state with its capital",pairs:[["Madhya Pradesh","Bhopal"],["Chhattisgarh","Raipur"],["Jharkhand","Ranchi"],["Odisha","Bhubaneswar"],["Maharashtra","Mumbai"]]},
+{t:'match',ch:5,title:"Match these states with their capitals",pairs:[["Karnataka","Bengaluru"],["Telangana","Hyderabad"],["Andhra Pradesh","Amaravati"],["Tamil Nadu","Chennai"],["Kerala","Thiruvananthapuram"]]},
+{t:'match',ch:5,title:"Match the landmark with its state",pairs:[["Sanchi Stupa","Madhya Pradesh"],["Charminar","Telangana"],["Jagannath Temple","Odisha"],["Ajanta Caves","Maharashtra"],["Mysore Palace","Karnataka"]]},
+{t:'match',ch:5,title:"Match the dam or falls with its river",pairs:[["Mettur Dam","Kaveri"],["Hirakud Dam","Mahanadi"],["Nagarjuna Sagar Dam","Krishna"],["Jog Falls","Sharavati"]]},
+/* ---- Ch5 SORT ---- */
+{t:'sort',ch:5,title:"Central Highlands or Deccan Plateau?",buckets:["Central Highlands","Deccan Plateau"],items:[["Malwa Plateau","Central Highlands"],["Chotanagpur Plateau","Central Highlands"],["Anamudi peak","Deccan Plateau"],["Jharkhand","Central Highlands"],["Karnataka","Deccan Plateau"],["Tamil Nadu","Deccan Plateau"]]},
+{t:'sort',ch:5,title:"Which way do these rivers flow?",buckets:["East to West","West to East"],items:[["Narmada","East to West"],["Tapi","East to West"],["Godavari","West to East"],["Krishna","West to East"],["Kaveri","West to East"],["Mahanadi","West to East"]]}
+];
+
+/* stable ids so mastery survives reloads */
+(function assignIds(){
+  var counters = {};
+  QUESTIONS.forEach(function(q){
+    var key = q.ch + '-' + q.t;
+    counters[key] = (counters[key] || 0) + 1;
+    q.id = key + '-' + counters[key];
+    q.prompt = q.q || q.title;
+  });
+})();
+
+var RANKS = [
+  "Village Scout","Desert Walker","Dune Rider","River Tracker",
+  "Hill Climber","Plateau Ranger","Map Maker","Master Explorer"
+];
+
+var BADGES = [
+  {id:'first',      ico:'\uD83C\uDF31', name:'First Steps',    desc:'Answer your very first question.'},
+  {id:'correct10',  ico:'\uD83C\uDFAF', name:'Sharp Eye',      desc:'Get 10 answers correct in total.'},
+  {id:'correct50',  ico:'\uD83C\uDFF9', name:'Sharpshooter',   desc:'Get 50 answers correct in total.'},
+  {id:'combo5',     ico:'\uD83D\uDD25', name:'On Fire',        desc:'Get 5 correct in a row.'},
+  {id:'combo10',    ico:'\u26A1',       name:'Unstoppable',    desc:'Get 10 correct in a row.'},
+  {id:'perfect',    ico:'\uD83D\uDCAF', name:'Perfect Round',  desc:'Finish a round with no mistakes.'},
+  {id:'streak3',    ico:'\uD83D\uDCC5', name:'Three in a Row', desc:'Practise 3 days in a row.'},
+  {id:'streak7',    ico:'\uD83D\uDDD3', name:'Week Warrior',   desc:'Practise 7 days in a row.'},
+  {id:'desert',     ico:'\uD83C\uDFDC', name:'Desert Master',  desc:'Master every Chapter 4 question.'},
+  {id:'plateau',    ico:'\u26F0',       name:'Plateau Master', desc:'Master every Chapter 5 question.'},
+  {id:'cleanslate', ico:'\uD83E\uDE79', name:'Clean Slate',    desc:'Empty a Mistakes Bank of 3 or more.'},
+  {id:'clock',      ico:'\u23F1',       name:'Beat the Clock', desc:'Score 8 or more in a timed round.'},
+  {id:'bookworm',   ico:'\uD83D\uDCD6', name:'Bookworm',       desc:'Read every flashcard in both chapters.'},
+  {id:'quests',     ico:'\u2B50',       name:'Quest Champion', desc:'Finish all 3 daily quests in one day.'},
+  {id:'level5',     ico:'\uD83D\uDC51', name:'High Flyer',     desc:'Reach Level 5.'}
+];
+
+var QUEST_POOL = [
+  {id:'answer12', ico:'\u270D\uFE0F',   label:'Answer 12 questions',     metric:'answered', target:12, xp:40},
+  {id:'answer20', ico:'\u270D\uFE0F',   label:'Answer 20 questions',     metric:'answered', target:20, xp:60},
+  {id:'correct10',ico:'\u2705',         label:'Get 10 answers right',    metric:'correct',  target:10, xp:50},
+  {id:'correct15',ico:'\u2705',         label:'Get 15 answers right',    metric:'correct',  target:15, xp:70},
+  {id:'combo5',   ico:'\uD83D\uDD25',   label:'Reach a 5-answer combo',  metric:'combo',    target:5,  xp:45},
+  {id:'combo8',   ico:'\uD83D\uDD25',   label:'Reach an 8-answer combo', metric:'combo',    target:8,  xp:65},
+  {id:'master5',  ico:'\uD83D\uDDFA',   label:'Master 5 new questions',  metric:'mastered', target:5,  xp:55},
+  {id:'fix2',     ico:'\uD83E\uDE79',   label:'Fix 2 mistakes',          metric:'fixed',    target:2,  xp:50},
+  {id:'learn6',   ico:'\uD83D\uDCDA',   label:'Read 6 flashcards',       metric:'learned',  target:6,  xp:35}
+];
+
+/* ==========================================================================
+   2. PURE LOGIC
+   ========================================================================== */
+function normalize(s){
+  return String(s).toLowerCase()
+    .replace(/[.,!?'"`;:()\-]/g,'')
+    .replace(/\s+/g,' ')
+    .replace(/^the /,'')
+    .trim();
+}
+function levenshtein(a,b){
+  var m=a.length, n=b.length, i, j;
+  if(!m) return n;
+  if(!n) return m;
+  var prev = new Array(n+1);
+  for(j=0;j<=n;j++) prev[j]=j;
+  for(i=1;i<=m;i++){
+    var cur = new Array(n+1);
+    cur[0]=i;
+    for(j=1;j<=n;j++){
+      cur[j] = Math.min(prev[j]+1, cur[j-1]+1, prev[j-1] + (a.charAt(i-1)===b.charAt(j-1)?0:1));
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+/* Every exact answer in the bank. Used to stop fuzzy matching from quietly
+   accepting a DIFFERENT question's real answer (e.g. "Rajasthan" typed for
+   "Rajasthani"), which would teach the wrong distinction. */
+var ALL_EXACT_ANSWERS = (function(){
+  var set = {};
+  QUESTIONS.forEach(function(q){
+    if(q.t==='fill' || q.t==='one'){
+      q.a.forEach(function(ans){ set[normalizeRaw(ans)] = true; });
+    }
+  });
+  return set;
+})();
+function normalizeRaw(s){
+  return String(s).toLowerCase()
+    .replace(/[.,!?'"`;:()\-]/g,'')
+    .replace(/\s+/g,' ')
+    .replace(/^the /,'')
+    .trim();
+}
+/* 'exact' | 'close' (small spelling slip) | 'wrong' */
+function checkTyped(input, accepted){
+  var user = normalize(input), i, target, allowed, isOwn;
+  if(!user) return 'wrong';
+  for(i=0;i<accepted.length;i++){
+    if(user === normalize(accepted[i])) return 'exact';
+  }
+  /* if what they typed is itself a real answer to some other question,
+     it is a wrong answer, not a typo - do not soften it */
+  isOwn = false;
+  for(i=0;i<accepted.length;i++){
+    if(normalize(accepted[i]) === user){ isOwn = true; break; }
+  }
+  if(!isOwn && ALL_EXACT_ANSWERS[user]) return 'wrong';
+
+  for(i=0;i<accepted.length;i++){
+    target = normalize(accepted[i]);
+    allowed = target.length>=9 ? 2 : (target.length>=5 ? 1 : 0);
+    if(allowed>0 && levenshtein(user,target)<=allowed) return 'close';
+  }
+  return 'wrong';
+}
+function xpNeededFor(level){ return 100 + (level-1)*60; }
+function levelFromXp(totalXp){
+  var level=1, remaining=totalXp;
+  while(level<99 && remaining >= xpNeededFor(level)){
+    remaining -= xpNeededFor(level);
+    level++;
+  }
+  return {level:level, into:remaining, need:xpNeededFor(level)};
+}
+function rankName(level){ return RANKS[Math.min(level-1, RANKS.length-1)]; }
+function dayKey(d){ var t = d || new Date(); return t.getFullYear()+'-'+(t.getMonth()+1)+'-'+t.getDate(); }
+function hashStr(s){ var h=0,i; for(i=0;i<s.length;i++){ h=(h*31 + s.charCodeAt(i))|0; } return Math.abs(h); }
+function pickDailyQuests(key){
+  var h = hashStr(key), picked = [], used = {}, i, idx, c;
+  for(i=0; i<QUEST_POOL.length && picked.length<3; i++){
+    idx = (h + i*7) % QUEST_POOL.length;
+    c = QUEST_POOL[idx];
+    if(used[c.metric]) continue;
+    used[c.metric] = true;
+    picked.push({id:c.id, ico:c.ico, label:c.label, metric:c.metric, target:c.target, xp:c.xp, progress:0, done:false});
+  }
+  return picked;
+}
+function shuffle(a){
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+}
+function getQuestionById(id){
+  for(var i=0;i<QUESTIONS.length;i++){ if(QUESTIONS[i].id===id) return QUESTIONS[i]; }
+  return null;
+}
+
+/* ==========================================================================
+   3. STATE
+   ========================================================================== */
+var SAVE_KEY = 'sst_progress_v2';
+var DEFAULT_STATE = {
+  v:2, xp:0, totalAnswered:0, totalCorrect:0, bestCombo:0,
+  streak:0, lastPracticeDate:null,
+  mastered:[], mistakes:[], badges:[], learnSeen:[],
+  quests:{date:null, items:[]},
+  sound:true, roundsPlayed:0
+};
+var state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+var session = null;
+var learnDeckCh = 4, learnIdx = 0;
+var resetArmed = false, resetTimer = null;
+
+function loadState(){
+  var raw = null;
+  try{ raw = localStorage.getItem(SAVE_KEY); }catch(e){}
+  if(!raw){
+    var m = document.cookie.match(new RegExp(SAVE_KEY+'=([^;]+)'));
+    if(m){ try{ raw = decodeURIComponent(m[1]); }catch(e2){} }
+  }
+  if(raw){
+    try{
+      var parsed = JSON.parse(raw);
+      Object.keys(DEFAULT_STATE).forEach(function(k){
+        if(parsed[k] !== undefined && parsed[k] !== null) state[k] = parsed[k];
+      });
+    }catch(e3){}
+  } else {
+    /* migrate from v1 if it exists */
+    try{
+      var old = localStorage.getItem('sst_progress_v1');
+      if(old){
+        var o = JSON.parse(old);
+        state.xp = (o.stars||0)*10;
+        state.totalAnswered = o.totalAnswered||0;
+        state.totalCorrect = o.stars||0;
+        state.streak = o.streak||0;
+        state.mistakes = (o.mistakes||[]).filter(function(x){ return x && x.q; })
+                          .map(function(x){ return {id:null, q:x.q, a:x.a, ch:x.ch}; });
+      }
+    }catch(e4){}
+  }
+  if(!state.quests || typeof state.quests !== 'object') state.quests = {date:null, items:[]};
+  ensureQuests();
+  checkStreakBreak();
+}
+function saveState(){
+  var raw = JSON.stringify(state);
+  try{ localStorage.setItem(SAVE_KEY, raw); }catch(e){}
+  try{ document.cookie = SAVE_KEY+'='+encodeURIComponent(raw)+';max-age=31536000;path=/;SameSite=Lax'; }catch(e2){}
+}
+/* streak advances ONLY when a question is actually answered */
+function recordPracticeDay(){
+  var today = dayKey();
+  if(state.lastPracticeDate === today) return;
+  var y = new Date(); y.setDate(y.getDate()-1);
+  if(state.lastPracticeDate === dayKey(y)) state.streak += 1;
+  else state.streak = 1;
+  state.lastPracticeDate = today;
+}
+function checkStreakBreak(){
+  if(!state.lastPracticeDate){ state.streak = 0; return; }
+  var today = dayKey();
+  var y = new Date(); y.setDate(y.getDate()-1);
+  if(state.lastPracticeDate !== today && state.lastPracticeDate !== dayKey(y)) state.streak = 0;
+}
+function ensureQuests(){
+  var today = dayKey();
+  if(state.quests.date !== today || !state.quests.items || !state.quests.items.length){
+    state.quests = {date: today, items: pickDailyQuests(today)};
+  }
+}
+
+/* ==========================================================================
+   4. XP / QUESTS / BADGES
+   ========================================================================== */
+function addXp(amount){
+  var before = levelFromXp(state.xp).level;
+  state.xp += amount;
+  var after = levelFromXp(state.xp).level;
+  return after > before ? after : 0;
+}
+function bumpQuest(metric, value, isAbsolute){
+  ensureQuests();
+  state.quests.items.forEach(function(qt){
+    if(qt.metric !== metric || qt.done) return;
+    qt.progress = isAbsolute ? Math.max(qt.progress, value) : qt.progress + value;
+    if(qt.progress >= qt.target){
+      qt.progress = qt.target;
+      qt.done = true;
+      state.xp += qt.xp;
+    }
+  });
+}
+function masteredCount(ch){
+  return QUESTIONS.filter(function(q){ return q.ch===ch && state.mastered.indexOf(q.id)>=0; }).length;
+}
+function totalCount(ch){
+  return QUESTIONS.filter(function(q){ return q.ch===ch; }).length;
+}
+function checkBadges(ctx){
+  ctx = ctx || {};
+  var earned = [];
+  function give(id){
+    if(state.badges.indexOf(id) < 0){
+      state.badges.push(id);
+      var b = null;
+      for(var i=0;i<BADGES.length;i++){ if(BADGES[i].id===id){ b=BADGES[i]; break; } }
+      if(b) earned.push(b);
+    }
+  }
+  if(state.totalAnswered >= 1) give('first');
+  if(state.totalCorrect >= 10) give('correct10');
+  if(state.totalCorrect >= 50) give('correct50');
+  if(state.bestCombo >= 5) give('combo5');
+  if(state.bestCombo >= 10) give('combo10');
+  if(ctx.perfectRound) give('perfect');
+  if(state.streak >= 3) give('streak3');
+  if(state.streak >= 7) give('streak7');
+  if(masteredCount(4) === totalCount(4)) give('desert');
+  if(masteredCount(5) === totalCount(5)) give('plateau');
+  if(ctx.clearedBank) give('cleanslate');
+  if(ctx.challengeScore !== undefined && ctx.challengeScore >= 8) give('clock');
+  if(state.learnSeen.length >= LEARN_CARDS.length) give('bookworm');
+  if(state.quests.items.length > 0 && state.quests.items.every(function(q){ return q.done; })) give('quests');
+  if(levelFromXp(state.xp).level >= 5) give('level5');
+  return earned;
+}
+
+/* ==========================================================================
+   5. SOUND
+   ========================================================================== */
+var audioCtx = null;
+function tone(freqs, dur, type){
+  if(!state.sound) return;
+  try{
+    var AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    if(!audioCtx) audioCtx = new AC();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    freqs.forEach(function(f,i){
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = f;
+      var start = audioCtx.currentTime + i*(dur*0.8);
+      gain.gain.setValueAtTime(0.0001, start);
+      gain.gain.exponentialRampToValueAtTime(0.16, start+0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, start+dur);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(start); osc.stop(start+dur+0.02);
+    });
+  }catch(e){}
+}
+var sfx = {
+  right: function(){ tone([660,880],0.13); },
+  close: function(){ tone([560,620],0.13); },
+  wrong: function(){ tone([200,150],0.18,'triangle'); },
+  level: function(){ tone([523,659,784,1046],0.16); },
+  tick:  function(){ tone([440],0.06); }
+};
+function toggleSound(){
+  state.sound = !state.sound;
+  document.getElementById('soundBtn').innerHTML = state.sound ? '&#128266;' : '&#128263;';
+  saveState();
+  if(state.sound) sfx.tick();
+  showToast(state.sound ? 'Sound on' : 'Sound off');
+}
+
+/* ==========================================================================
+   6. UI HELPERS
+   ========================================================================== */
+function esc(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                  .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+var toastTimer = null;
+function showToast(msg){
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 2400);
+}
+function celebrate(ico, title, body, onClose){
+  var div = document.createElement('div');
+  div.className = 'celebrate';
+  div.innerHTML = '<div class="celebrate-box"><div class="c-ico">'+ico+'</div>'+
+    '<h2>'+esc(title)+'</h2><p>'+esc(body)+'</p>'+
+    '<button class="full-btn" style="margin-top:0;">Yay!</button></div>';
+  div.querySelector('button').onclick = function(){
+    div.parentNode && div.parentNode.removeChild(div);
+    if(onClose) onClose();
+  };
+  document.getElementById('celebrateHost').appendChild(div);
+  launchConfetti(18);
+}
+function celebrateQueue(items){
+  if(!items || !items.length) return;
+  var next = items.shift();
+  celebrate(next.ico, next.title, next.body, function(){ celebrateQueue(items); });
+}
+function launchConfetti(n){
+  var emojis = ['\uD83C\uDF89','\u2B50','\uD83C\uDF8A','\u2728','\uD83C\uDFC5'];
+  for(var i=0;i<(n||10);i++){
+    (function(){
+      var el = document.createElement('div');
+      el.className = 'confetti';
+      el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      el.style.left = Math.random()*100+'vw';
+      el.style.animationDuration = (1.4+Math.random()*1.1)+'s';
+      document.body.appendChild(el);
+      setTimeout(function(){ el.parentNode && el.parentNode.removeChild(el); }, 3200);
+    })();
+  }
+}
+function ringSvg(pct, colour, size){
+  var s = size || 78, r = (s/2)-6, c = 2*Math.PI*r;
+  var off = c*(1 - pct/100);
+  return '<svg width="'+s+'" height="'+s+'">'+
+    '<circle class="ring-bg" cx="'+(s/2)+'" cy="'+(s/2)+'" r="'+r+'"></circle>'+
+    '<circle class="ring-fg" cx="'+(s/2)+'" cy="'+(s/2)+'" r="'+r+'" stroke="'+colour+'" '+
+    'stroke-dasharray="'+c.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"></circle></svg>';
+}
+
+/* ==========================================================================
+   7. HOME RENDER
+   ========================================================================== */
+function renderAll(){ renderHeader(); renderLevel(); renderQuests(); renderMastery(); renderNavDot(); }
+function renderHeader(){
+  var h = new Date().getHours();
+  var greet = h<12 ? 'Good morning!' : (h<17 ? 'Good afternoon!' : 'Good evening!');
+  document.getElementById('greetText').textContent = greet;
+  document.getElementById('soundBtn').innerHTML = state.sound ? '&#128266;' : '&#128263;';
+}
+function renderLevel(){
+  var L = levelFromXp(state.xp);
+  document.getElementById('lvNum').textContent = L.level;
+  document.getElementById('rankName').textContent = rankName(L.level);
+  document.getElementById('xpText').textContent = L.into+' / '+L.need+' XP  \u00B7  '+state.xp+' total';
+  document.getElementById('xpFill').style.width = Math.round((L.into/L.need)*100)+'%';
+  var chip = document.getElementById('streakChip');
+  if(state.streak > 0){
+    chip.innerHTML = '\uD83D\uDD25 '+state.streak+' day streak'+
+      (state.lastPracticeDate===dayKey() ? ' \u2014 done today!' : ' \u2014 practise to keep it!');
+  } else {
+    chip.innerHTML = '\uD83D\uDD25 Practise today to start a streak';
+  }
+}
+function renderQuests(){
+  ensureQuests();
+  document.getElementById('questList').innerHTML = state.quests.items.map(function(q){
+    var pct = Math.round((q.progress/q.target)*100);
+    return '<div class="quest'+(q.done?' done':'')+'">'+
+      '<div class="quest-ico">'+(q.done?'\u2705':q.ico)+'</div>'+
+      '<div class="quest-mid"><div class="quest-label">'+esc(q.label)+'</div>'+
+      '<div class="quest-bar"><div class="quest-fill" style="width:'+pct+'%"></div></div></div>'+
+      '<div class="quest-count">'+q.progress+'/'+q.target+'</div></div>';
+  }).join('');
+}
+function renderMastery(){
+  var data = [
+    {ch:4, name:'Great Indian Desert', colour:'#f4a259'},
+    {ch:5, name:'Peninsular Plateau',  colour:'#4a9d7f'}
+  ];
+  document.getElementById('masteryRow').innerHTML = data.map(function(d){
+    var done = masteredCount(d.ch), tot = totalCount(d.ch);
+    var pct = tot ? Math.round((done/tot)*100) : 0;
+    return '<div class="mastery-item"><div class="ring-wrap">'+ringSvg(pct, d.colour)+
+      '<div class="ring-txt">'+pct+'%<small>'+done+' / '+tot+'</small></div></div>'+
+      '<div class="m-name">'+esc(d.name)+'</div></div>';
+  }).join('');
+}
+function renderNavDot(){
+  var n = state.mistakes.length;
+  var dot = document.getElementById('navDot');
+  dot.textContent = n;
+  dot.classList.toggle('hidden', n===0);
+  document.getElementById('mistakeCountHome').textContent = n;
+  document.getElementById('fixMistakesBtn').disabled = (n===0);
+  var b2 = document.getElementById('fixMistakesBtn2');
+  if(b2) b2.disabled = (n===0);
+}
+
+/* ==========================================================================
+   8. NAVIGATION
+   ========================================================================== */
+function showScreen(name){
+  ['home','quiz','learn','mistakes','awards','stats'].forEach(function(s){
+    document.getElementById('screen-'+s).classList.toggle('hidden', s!==name);
+  });
+  var navMap = {home:'home', learn:'learn', mistakes:'mistakes', awards:'awards', stats:'stats'};
+  document.querySelectorAll('.navbtn').forEach(function(b){
+    b.classList.toggle('active', b.dataset.tab === navMap[name]);
+  });
+  try{ window.scrollTo(0,0); }catch(e){}
+  if(name==='home')     renderAll();
+  if(name==='mistakes') renderMistakes();
+  if(name==='awards')   renderAwards();
+  if(name==='stats')    renderStats();
+}
+
+/* ==========================================================================
+   9. SESSIONS
+   ========================================================================== */
+function newSession(list, opts){
+  opts = opts || {};
+  session = {
+    list:list, idx:0, answered:false, correct:0, combo:0, xpEarned:0,
+    missed:[], mode:opts.mode||'practice', timed:!!opts.timed,
+    timeLeft:opts.seconds||0, timerId:null,
+    bankSizeAtStart:state.mistakes.length,
+    match:null, sort:null, errored:false
+  };
+  showScreen('quiz');
+  document.getElementById('timerChip').classList.toggle('hidden', !session.timed);
+  updateCombo();
+  if(session.timed) startTimer();
+  renderQuestion();
+}
+function startPractice(ch){
+  var pool = (ch==='all') ? QUESTIONS.slice() : QUESTIONS.filter(function(q){ return q.ch===ch; });
+  /* not-yet-mastered questions come first, so practice targets weak spots */
+  var weak = shuffle(pool.filter(function(q){ return state.mastered.indexOf(q.id)<0; }));
+  var strong = shuffle(pool.filter(function(q){ return state.mastered.indexOf(q.id)>=0; }));
+  var list = weak.concat(strong).slice(0, Math.min(12, pool.length));
+  newSession(shuffle(list), {mode:'practice'});
+}
+function startChallenge(){
+  var pool = QUESTIONS.filter(function(q){ return ['mcq','tf','fill','one'].indexOf(q.t)>=0; });
+  newSession(shuffle(pool.slice()).slice(0,10), {mode:'challenge', timed:true, seconds:120});
+}
+function startMistakePractice(){
+  var list = state.mistakes.map(function(m){ return m.id ? getQuestionById(m.id) : null; })
+                           .filter(function(q){ return !!q; });
+  if(!list.length){ showToast('No mistakes to fix \u2014 great work!'); return; }
+  newSession(shuffle(list).slice(0,12), {mode:'fix'});
+}
+function quitSession(){
+  if(session && session.timerId){ clearInterval(session.timerId); session.timerId = null; }
+  session = null;
+  document.getElementById('timerChip').classList.add('hidden');
+  document.getElementById('comboChip').classList.remove('show');
+  showScreen('home');
+}
+function startTimer(){
+  var chip = document.getElementById('timerChip');
+  function paint(){
+    var m = Math.floor(session.timeLeft/60), s = session.timeLeft%60;
+    chip.textContent = m+':'+(s<10?'0':'')+s;
+    chip.classList.toggle('low', session.timeLeft<=15);
+  }
+  paint();
+  session.timerId = setInterval(function(){
+    if(!session){ return; }
+    session.timeLeft--;
+    paint();
+    if(session.timeLeft<=10 && session.timeLeft>0) sfx.tick();
+    if(session.timeLeft<=0){
+      clearInterval(session.timerId);
+      session.timerId = null;
+      finishSession(true);
+    }
+  }, 1000);
+}
+function updateCombo(){
+  var chip = document.getElementById('comboChip');
+  if(!session){ chip.classList.remove('show'); return; }
+  chip.innerHTML = '\uD83D\uDD25 '+session.combo;
+  chip.classList.toggle('show', session.combo>=2);
+}
+
+function renderQuestion(){
+  var q = session.list[session.idx];
+  session.answered = false;
+  session.errored = false;
+  document.getElementById('progBar').style.width = Math.round((session.idx/session.list.length)*100)+'%';
+
+  var chLabel = q.ch===4 ? 'Ch.4 \u00B7 Desert' : 'Ch.5 \u00B7 Plateau';
+  var chipClass = (session.mode==='fix') ? 'q-chip review' : 'q-chip';
+  var chipText  = (session.mode==='fix') ? '\uD83E\uDE79 Fixing a mistake' : chLabel;
+  var html = '<div class="qcard"><div class="'+chipClass+'">'+chipText+'</div>';
+
+  if(q.t==='mcq'){
+    html += '<div class="q-text">'+esc(q.q)+'</div><div class="opt-list">';
+    q.o.forEach(function(opt,i){ html += '<button class="opt" data-i="'+i+'">'+esc(opt)+'</button>'; });
+    html += '</div>';
+  } else if(q.t==='tf'){
+    html += '<div class="q-text">'+esc(q.q)+'</div><div class="tf-row">'+
+      '<button class="tf-btn" data-v="1">\u2705 True</button>'+
+      '<button class="tf-btn" data-v="0">\u274C False</button></div>';
+  } else if(q.t==='fill' || q.t==='one'){
+    html += '<div class="q-text">'+esc(q.q)+'</div>'+
+      '<div class="q-hint">Small spelling slips are okay \u2014 just get close.</div>'+
+      '<div class="type-row"><input class="type-input" id="typeInput" placeholder="Type your answer" '+
+      'autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">'+
+      '<button class="check-btn" id="checkBtn">Check</button></div>';
+  } else if(q.t==='match'){
+    var rights = shuffle(q.pairs.map(function(p){ return p[1]; }));
+    html += '<div class="q-text">'+esc(q.title)+'</div>'+
+            '<div class="q-hint">Tap one on the left, then its partner on the right.</div>'+
+            '<div class="match-cols"><div class="match-col" id="matchLeft">';
+    q.pairs.forEach(function(p,i){ html += '<button class="match-item" data-l="'+i+'">'+esc(p[0])+'</button>'; });
+    html += '</div><div class="match-col" id="matchRight">';
+    rights.forEach(function(r,i){ html += '<button class="match-item" data-r="'+i+'">'+esc(r)+'</button>'; });
+    html += '</div></div>';
+    session.match = {pairs:q.pairs, rights:rights, doneL:{}, selL:null, doneCount:0};
+  } else if(q.t==='sort'){
+    var items = shuffle(q.items.map(function(it,i){ return {label:it[0], bucket:it[1], i:i}; }));
+    html += '<div class="q-text">'+esc(q.title)+'</div>'+
+            '<div class="q-hint">Tap a word, then tap the box it belongs in.</div>'+
+            '<div class="sort-pool" id="sortPool">';
+    items.forEach(function(it){ html += '<button class="sort-chip" data-i="'+it.i+'">'+esc(it.label)+'</button>'; });
+    html += '</div><div class="bucket-row">';
+    q.buckets.forEach(function(b,bi){
+      html += '<div class="bucket" data-b="'+bi+'"><h4>'+esc(b)+'</h4><div class="bucket-items"></div></div>';
+    });
+    html += '</div>';
+    session.sort = {items:items, buckets:q.buckets, placed:0, total:items.length, sel:null};
+  }
+
+  html += '<div id="feedbackArea"></div></div>';
+  document.getElementById('quizArea').innerHTML = html;
+  wireQuestion(q);
+}
+function wireQuestion(q){
+  var area = document.getElementById('quizArea');
+  if(q.t==='mcq'){
+    area.querySelectorAll('.opt').forEach(function(btn){
+      btn.onclick = function(){ answerMCQ(parseInt(btn.dataset.i,10)); };
+    });
+  } else if(q.t==='tf'){
+    area.querySelectorAll('.tf-btn').forEach(function(btn){
+      btn.onclick = function(){ answerTF(btn.dataset.v==='1'); };
+    });
+  } else if(q.t==='fill' || q.t==='one'){
+    var input = document.getElementById('typeInput');
+    document.getElementById('checkBtn').onclick = answerTyped;
+    input.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); answerTyped(); }
+    });
+    setTimeout(function(){ try{ input.focus(); }catch(e){} }, 60);
+  } else if(q.t==='match'){
+    area.querySelectorAll('#matchLeft .match-item').forEach(function(btn){
+      btn.onclick = function(){ pickLeft(parseInt(btn.dataset.l,10), btn); };
+    });
+    area.querySelectorAll('#matchRight .match-item').forEach(function(btn){
+      btn.onclick = function(){ pickRight(parseInt(btn.dataset.r,10), btn); };
+    });
+  } else if(q.t==='sort'){
+    area.querySelectorAll('.sort-chip').forEach(function(btn){
+      btn.onclick = function(){ pickSortChip(parseInt(btn.dataset.i,10), btn); };
+    });
+    area.querySelectorAll('.bucket').forEach(function(bk){
+      bk.onclick = function(){ dropInBucket(parseInt(bk.dataset.b,10), bk); };
+    });
+  }
+}
+
+/* ---------- answer handlers ---------- */
+function answerMCQ(i){
+  if(!session || session.answered) return;
+  session.answered = true;
+  var q = session.list[session.idx];
+  var opts = document.querySelectorAll('.opt');
+  opts[q.a].classList.add('correct');
+  var ok = (i===q.a);
+  if(!ok) opts[i].classList.add('wrong');
+  resolve(ok?'exact':'wrong', q, q.o[q.a]);
+}
+function answerTF(v){
+  if(!session || session.answered) return;
+  session.answered = true;
+  var q = session.list[session.idx];
+  var btns = document.querySelectorAll('.tf-btn');
+  btns.forEach(function(b){ if((b.dataset.v==='1')===q.a) b.classList.add('correct'); });
+  var ok = (v===q.a);
+  if(!ok) btns.forEach(function(b){ if((b.dataset.v==='1')===v) b.classList.add('wrong'); });
+  resolve(ok?'exact':'wrong', q, q.a ? 'True' : 'False');
+}
+function answerTyped(){
+  if(!session || session.answered) return;
+  var input = document.getElementById('typeInput');
+  if(!input || !input.value.trim()) return;
+  session.answered = true;
+  var q = session.list[session.idx];
+  var verdict = checkTyped(input.value, q.a);
+  input.style.borderColor = (verdict==='wrong') ? 'var(--wrong)'
+                          : (verdict==='close') ? 'var(--gold-dark)' : 'var(--right)';
+  input.disabled = true;
+  resolve(verdict, q, q.a[0]);
+}
+function pickLeft(i, el){
+  if(!session || session.answered) return;
+  var m = session.match;
+  if(m.doneL[i]) return;
+  document.querySelectorAll('#matchLeft .match-item').forEach(function(x){ x.classList.remove('sel'); });
+  m.selL = i;
+  el.classList.add('sel');
+}
+function pickRight(ri, el){
+  if(!session || session.answered) return;
+  var m = session.match;
+  if(m.selL===null || el.classList.contains('done')) return;
+  if(m.rights[ri] === m.pairs[m.selL][1]){
+    var leftEl = document.querySelector('#matchLeft [data-l="'+m.selL+'"]');
+    leftEl.classList.remove('sel');
+    leftEl.classList.add('done');
+    el.classList.add('done');
+    m.doneL[m.selL] = true;
+    m.doneCount++;
+    m.selL = null;
+    sfx.tick();
+    if(m.doneCount === m.pairs.length){
+      session.answered = true;
+      resolve(session.errored ? 'wrong' : 'exact', session.list[session.idx], 'All pairs matched');
+    }
+  } else {
+    session.errored = true;
+    sfx.wrong();
+    el.classList.add('wrongflash');
+    setTimeout(function(){ el.classList.remove('wrongflash'); }, 420);
+  }
+}
+function pickSortChip(i, el){
+  if(!session || session.answered) return;
+  document.querySelectorAll('.sort-chip').forEach(function(c){ c.classList.remove('sel'); });
+  session.sort.sel = {i:i, el:el};
+  el.classList.add('sel');
+}
+function dropInBucket(bi, bucketEl){
+  if(!session || session.answered) return;
+  var s = session.sort;
+  if(!s.sel) return;
+  var chosen = s.sel;
+  var item = null;
+  for(var k=0;k<s.items.length;k++){ if(s.items[k].i===chosen.i){ item = s.items[k]; break; } }
+  if(!item) return;
+  if(item.bucket === s.buckets[bi]){
+    var div = document.createElement('div');
+    div.className = 'placed-chip';
+    div.textContent = item.label;
+    bucketEl.querySelector('.bucket-items').appendChild(div);
+    chosen.el.classList.add('placed');
+    s.sel = null;
+    s.placed++;
+    sfx.tick();
+    if(s.placed === s.total){
+      session.answered = true;
+      resolve(session.errored ? 'wrong' : 'exact', session.list[session.idx], 'All sorted correctly');
+    }
+  } else {
+    session.errored = true;
+    sfx.wrong();
+    bucketEl.classList.add('flash-bad');
+    setTimeout(function(){ bucketEl.classList.remove('flash-bad'); }, 420);
+  }
+}
+
+/* ---------- scoring ---------- */
+function resolve(verdict, q, correctText){
+  var ok = (verdict==='exact' || verdict==='close');
+  var pending = [];
+  var xpGain = 0;
+  var i;
+
+  state.totalAnswered++;
+  recordPracticeDay();
+  bumpQuest('answered', 1);
+
+  if(ok){
+    session.correct++;
+    session.combo++;
+    state.totalCorrect++;
+    if(session.combo > state.bestCombo) state.bestCombo = session.combo;
+
+    xpGain = (verdict==='close') ? 7 : 10;
+    xpGain += Math.min(session.combo-1, 5) * 2;
+    if(state.mastered.indexOf(q.id) < 0){
+      state.mastered.push(q.id);
+      xpGain += 5;
+      bumpQuest('mastered', 1);
+    }
+    if(session.mode==='challenge') xpGain = Math.round(xpGain*1.5);
+    session.xpEarned += xpGain;
+
+    var before = state.mistakes.length;
+    state.mistakes = state.mistakes.filter(function(m){ return m.id !== q.id; });
+    if(state.mistakes.length < before) bumpQuest('fixed', 1);
+
+    bumpQuest('correct', 1);
+    bumpQuest('combo', session.combo, true);
+    if(verdict==='close') sfx.close(); else sfx.right();
+    if(session.combo>=3) launchConfetti(session.combo>=6 ? 14 : 8);
+  } else {
+    session.combo = 0;
+    session.missed.push({q:q.prompt, a:correctText});
+    var dup = false;
+    for(i=0;i<state.mistakes.length;i++){ if(state.mistakes[i].id===q.id){ dup=true; break; } }
+    if(!dup) state.mistakes.push({id:q.id, q:q.prompt, a:correctText, ch:q.ch});
+    /* getting it wrong un-masters it, so the mastery ring reflects what she
+       actually knows right now rather than what she once got right */
+    var mi = state.mastered.indexOf(q.id);
+    if(mi >= 0) state.mastered.splice(mi, 1);
+    sfx.wrong();
+  }
+
+  var leveledTo = addXp(xpGain);
+  if(leveledTo){
+    sfx.level();
+    pending.push({ico:'\uD83D\uDC51', title:'Level '+leveledTo+'!', body:'You are now a '+rankName(leveledTo)+'.'});
+  }
+  var clearedBank = (session.bankSizeAtStart>=3 && state.mistakes.length===0);
+  checkBadges({clearedBank:clearedBank}).forEach(function(b){
+    pending.push({ico:b.ico, title:'Badge unlocked!', body:b.name+' \u2014 '+b.desc});
+  });
+  saveState();
+  updateCombo();
+  renderNavDot();
+
+  var cls, msg;
+  if(verdict==='exact'){
+    cls='right'; msg='<b>Correct!</b>'+(q.note?esc(q.note):'');
+  } else if(verdict==='close'){
+    cls='close'; msg='<b>Almost \u2014 your spelling was close!</b>The full spelling is <b class="inline">'+esc(correctText)+'</b>. '+(q.note?esc(q.note):'');
+  } else {
+    cls='wrong'; msg='<b>Not quite. Answer: '+esc(correctText)+'</b>'+(q.note?esc(q.note):'');
+  }
+  var html = '<div class="feedback '+cls+'">'+msg;
+  if(xpGain>0){
+    html += '<div class="xp-pop">+'+xpGain+' XP'+(session.combo>=2 ? ' \u00B7 \uD83D\uDD25'+session.combo+' combo' : '')+'</div>';
+  }
+  html += '</div>';
+  var last = (session.idx+1 >= session.list.length);
+  html += '<button class="full-btn" id="nextBtn">'+(last ? 'Finish' : 'Next \u25B6')+'</button>';
+  document.getElementById('feedbackArea').innerHTML = html;
+  document.getElementById('nextBtn').onclick = nextQuestion;
+
+  if(pending.length) setTimeout(function(){ celebrateQueue(pending); }, 450);
+}
+function nextQuestion(){
+  if(!session) return;
+  session.idx++;
+  if(session.idx >= session.list.length) finishSession(false);
+  else renderQuestion();
+}
+
+/* ---------- results ---------- */
+function finishSession(ranOutOfTime){
+  if(!session) return;
+  if(session.timerId){ clearInterval(session.timerId); session.timerId = null; }
+  document.getElementById('progBar').style.width = '100%';
+  document.getElementById('timerChip').classList.add('hidden');
+  document.getElementById('comboChip').classList.remove('show');
+
+  var attempted = ranOutOfTime ? session.idx : session.list.length;
+  var pct = attempted ? Math.round((session.correct/attempted)*100) : 0;
+  var perfect = (session.correct === session.list.length && session.list.length > 0);
+
+  state.roundsPlayed++;
+  var ctx = {perfectRound: perfect};
+  if(session.mode==='challenge') ctx.challengeScore = session.correct;
+  var newBadges = checkBadges(ctx);
+  saveState();
+
+  var hero  = ranOutOfTime ? '\u23F0' : (pct>=90?'\uD83C\uDFC6':pct>=70?'\uD83C\uDF89':pct>=40?'\uD83D\uDC4D':'\uD83D\uDCAA');
+  var title = ranOutOfTime ? "Time's up!" : (pct>=90?'Brilliant!':pct>=70?'Well done!':pct>=40?'Good effort!':'Keep going!');
+  var ringColour = pct>=70 ? '#4caf50' : (pct>=40 ? '#f2c14e' : '#e2574c');
+
+  var html = '<div class="qcard"><div class="result-hero"><div class="big">'+hero+'</div>'+
+    '<h2>'+title+'</h2><p>'+session.correct+' out of '+attempted+' correct</p></div>'+
+    '<div class="score-ring">'+ringSvg(pct, ringColour, 110)+
+      '<div class="ring-txt" style="font-size:22px;">'+pct+'%</div></div>'+
+    '<div class="result-stats">'+
+      '<div class="rstat"><div class="v">+'+session.xpEarned+'</div><div class="k">XP earned</div></div>'+
+      '<div class="rstat"><div class="v">'+state.bestCombo+'</div><div class="k">Best combo</div></div>'+
+      '<div class="rstat"><div class="v">'+state.mistakes.length+'</div><div class="k">To fix</div></div>'+
+    '</div>';
+
+  if(newBadges.length){
+    html += '<p style="font-size:13px;font-weight:bold;margin:6px 0;">\uD83C\uDFC5 New badge'+
+            (newBadges.length>1?'s':'')+': '+
+            newBadges.map(function(b){ return esc(b.ico+' '+b.name); }).join(', ')+'</p>';
+  }
+  if(session.missed.length){
+    html += '<h3 style="font-size:14px;margin:14px 0 8px;">\uD83D\uDCD6 Worth another look</h3>';
+    session.missed.forEach(function(m){
+      html += '<div class="review-item"><div class="rq">'+esc(m.q)+'</div><div class="ra">\u2705 '+esc(m.a)+'</div></div>';
+    });
+  }
+  html += '<button class="full-btn" id="againBtn">\u25B6 Practise again</button>'+
+          '<button class="full-btn secondary" id="homeBtn">\uD83C\uDFE0 Back home</button></div>';
+
+  document.getElementById('quizArea').innerHTML = html;
+  var mode = session.mode;
+  document.getElementById('againBtn').onclick = function(){
+    if(mode==='challenge') startChallenge();
+    else if(mode==='fix' && state.mistakes.length) startMistakePractice();
+    else startPractice('all');
+  };
+  document.getElementById('homeBtn').onclick = function(){ session = null; showScreen('home'); };
+
+  if(pct>=70) launchConfetti(24);
+  if(newBadges.length){
+    setTimeout(function(){
+      celebrateQueue(newBadges.map(function(b){
+        return {ico:b.ico, title:'Badge unlocked!', body:b.name+' \u2014 '+b.desc};
+      }));
+    }, 700);
+  }
+}
+
+/* ==========================================================================
+   10. LEARN MODE
+   ========================================================================== */
+function deckCards(){ return LEARN_CARDS.filter(function(c){ return c.ch===learnDeckCh; }); }
+function cardGlobalIndex(card){ return LEARN_CARDS.indexOf(card); }
+function openLearn(){ showScreen('learn'); renderFlash(); }
+function setDeck(ch){
+  learnDeckCh = ch; learnIdx = 0;
+  document.querySelectorAll('.chip-tab').forEach(function(t){
+    t.classList.toggle('active', parseInt(t.dataset.deck,10)===ch);
+  });
+  renderFlash();
+}
+function renderFlash(){
+  var deck = deckCards();
+  if(learnIdx >= deck.length) learnIdx = 0;
+  var c = deck[learnIdx];
+  var gi = cardGlobalIndex(c);
+  var firstView = false;
+  if(state.learnSeen.indexOf(gi) < 0){
+    state.learnSeen.push(gi);
+    firstView = true;
+    bumpQuest('learned', 1);
+    var earned = checkBadges({});
+    saveState();
+    renderQuests();
+    if(earned.length){
+      setTimeout(function(){
+        celebrateQueue(earned.map(function(b){
+          return {ico:b.ico, title:'Badge unlocked!', body:b.name+' \u2014 '+b.desc};
+        }));
+      }, 300);
+    }
+  }
+  var seenCount = deck.filter(function(x){ return state.learnSeen.indexOf(cardGlobalIndex(x))>=0; }).length;
+  document.getElementById('flashCardArea').innerHTML =
+    '<div class="flash-seen">'+(firstView?'\u2728':'\u2705')+'</div>'+
+    '<div class="flash-ch">'+(c.ch===4 ? 'CHAPTER 4 \u00B7 THE GREAT INDIAN DESERT' : 'CHAPTER 5 \u00B7 THE PENINSULAR PLATEAU')+'</div>'+
+    '<div class="flash-title">'+esc(c.title)+'</div>'+
+    '<div class="flash-body">'+esc(c.body)+'</div>';
+  document.getElementById('flashCount').innerHTML =
+    (learnIdx+1)+' / '+deck.length+'<br><span style="font-size:10.5px;">'+seenCount+' read in this chapter</span>';
+}
+function flashNext(){ var d=deckCards(); learnIdx=(learnIdx+1)%d.length; renderFlash(); }
+function flashPrev(){ var d=deckCards(); learnIdx=(learnIdx-1+d.length)%d.length; renderFlash(); }
+
+/* ==========================================================================
+   11. MISTAKES / AWARDS / STATS
+   ========================================================================== */
+function renderMistakes(){
+  renderNavDot();
+  var host = document.getElementById('mistakeList');
+  if(!state.mistakes.length){
+    host.innerHTML = '<div class="empty-note">Nothing to fix right now!<br>Mistakes you make in practice will show up here.</div>';
+    return;
+  }
+  host.innerHTML = state.mistakes.slice().reverse().map(function(m,i){
+    var real = state.mistakes.length-1-i;
+    return '<div class="mistake-item"><button class="dismiss-btn" data-i="'+real+'">\u2715</button>'+
+      '<div class="m-q">'+esc(m.q)+'</div><div class="m-a">\u2705 '+esc(m.a)+'</div></div>';
+  }).join('');
+  host.querySelectorAll('.dismiss-btn').forEach(function(b){
+    b.onclick = function(){
+      state.mistakes.splice(parseInt(b.dataset.i,10),1);
+      saveState();
+      renderMistakes();
+    };
+  });
+}
+function renderAwards(){
+  document.getElementById('badgeProgressNote').textContent =
+    state.badges.length+' of '+BADGES.length+' badges earned';
+  document.getElementById('badgeGrid').innerHTML = BADGES.map(function(b){
+    var has = state.badges.indexOf(b.id)>=0;
+    return '<button class="badge'+(has?'':' locked')+'" data-id="'+b.id+'">'+
+      '<span class="b-ico">'+b.ico+'</span><span class="b-name">'+esc(b.name)+'</span></button>';
+  }).join('');
+  document.querySelectorAll('.badge').forEach(function(el){
+    el.onclick = function(){
+      var b = null, i;
+      for(i=0;i<BADGES.length;i++){ if(BADGES[i].id===el.dataset.id){ b=BADGES[i]; break; } }
+      if(!b) return;
+      var has = state.badges.indexOf(b.id)>=0;
+      showToast((has?'\uD83C\uDFC5 ':'\uD83D\uDD12 ')+b.name+' \u2014 '+b.desc);
+    };
+  });
+}
+function renderStats(){
+  var L = levelFromXp(state.xp);
+  var acc = state.totalAnswered ? Math.round((state.totalCorrect/state.totalAnswered)*100) : 0;
+  document.getElementById('statLevel').textContent = L.level;
+  document.getElementById('statXp').textContent = state.xp;
+  document.getElementById('statStreak').textContent = state.streak;
+  document.getElementById('statAnswered').textContent = state.totalAnswered;
+  document.getElementById('statAccuracy').textContent = acc+'%';
+  document.getElementById('statBestCombo').textContent = state.bestCombo;
+  document.getElementById('statMastered').textContent = state.mastered.length+' / '+QUESTIONS.length;
+  document.getElementById('statMistakes').textContent = state.mistakes.length;
+  document.getElementById('statBadges').textContent = state.badges.length+' / '+BADGES.length;
+}
+
+/* ==========================================================================
+   12. BACKUP / RESET  (no window.confirm or alert - Brave suppresses them)
+   ========================================================================== */
+function openBackupModal(){
+  var code = '';
+  try{ code = btoa(unescape(encodeURIComponent(JSON.stringify(state)))); }catch(e){ code = ''; }
+  document.getElementById('backupCodeOut').value = code;
+  document.getElementById('backupModalBg').classList.remove('hidden');
+}
+function closeBackupModal(){ document.getElementById('backupModalBg').classList.add('hidden'); }
+function copyBackupCode(){
+  var ta = document.getElementById('backupCodeOut');
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(ta.value).then(
+      function(){ showToast('Code copied'); },
+      function(){ legacyCopy(ta); showToast('Code copied'); }
+    );
+  } else {
+    legacyCopy(ta);
+    showToast('Code copied');
+  }
+}
+function legacyCopy(ta){
+  try{
+    ta.removeAttribute('readonly');
+    ta.select();
+    if(ta.setSelectionRange) ta.setSelectionRange(0, 99999);
+    document.execCommand('copy');
+    ta.setAttribute('readonly','readonly');
+  }catch(e){}
+}
+function restoreFromCode(){
+  var code = document.getElementById('backupCodeIn').value.trim();
+  if(!code){ showToast('Paste a code first'); return; }
+  try{
+    var parsed = JSON.parse(decodeURIComponent(escape(atob(code))));
+    if(typeof parsed !== 'object' || parsed === null) throw new Error('bad');
+    Object.keys(DEFAULT_STATE).forEach(function(k){
+      if(parsed[k] !== undefined && parsed[k] !== null) state[k] = parsed[k];
+    });
+    ensureQuests();
+    checkStreakBreak();
+    saveState();
+    renderAll(); renderMistakes(); renderStats(); renderAwards();
+    closeBackupModal();
+    showToast('Progress restored');
+  }catch(e){
+    showToast("That code doesn't look right");
+  }
+}
+/* two-tap confirm replaces window.confirm */
+function handleReset(){
+  var btn = document.getElementById('resetBtn');
+  if(!resetArmed){
+    resetArmed = true;
+    btn.innerHTML = '\u26A0\uFE0F Tap again to erase everything';
+    clearTimeout(resetTimer);
+    resetTimer = setTimeout(function(){
+      resetArmed = false;
+      btn.innerHTML = '\u26A0\uFE0F Reset all progress';
+    }, 4000);
+    return;
+  }
+  clearTimeout(resetTimer);
+  resetArmed = false;
+  btn.innerHTML = '\u26A0\uFE0F Reset all progress';
+  state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+  ensureQuests();
+  saveState();
+  renderAll(); renderMistakes(); renderStats(); renderAwards();
+  showToast('Progress reset');
+  showScreen('home');
+}
+
+/* ==========================================================================
+   13. INIT
+   ========================================================================== */
+loadState();
+saveState();
+renderAll();
+renderMistakes();
+
+/* test hooks */
+window.__sst = {
+  QUESTIONS:QUESTIONS, LEARN_CARDS:LEARN_CARDS, BADGES:BADGES, QUEST_POOL:QUEST_POOL, RANKS:RANKS,
+  normalize:normalize, levenshtein:levenshtein, checkTyped:checkTyped,
+  levelFromXp:levelFromXp, xpNeededFor:xpNeededFor, rankName:rankName,
+  pickDailyQuests:pickDailyQuests, getQuestionById:getQuestionById,
+  masteredCount:masteredCount, totalCount:totalCount, checkBadges:checkBadges,
+  getState:function(){ return state; },
+  setState:function(s){ state = s; },
+  dayKey:dayKey
+};
+</script>
+</body>
+</html>
