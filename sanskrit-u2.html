@@ -1,0 +1,1466 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>शुक-लोक &middot; Sanskrit Unit 2</title>
+<style>
+:root{
+  --bg1:#2b1b5e; --bg2:#5b2a8c; --card:#ffffff; --ink:#22163f;
+  --mint:#25d0a4; --lemon:#ffd447; --candy:#ff5f9e; --sky:#4fc3f7; --grape:#8b5cf6;
+  --ok:#16a34a; --bad:#e11d48; --muted:#6b6688;
+  --shadow:0 6px 0 rgba(0,0,0,.16);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;height:100%}
+body{
+  font-family:'Noto Sans Devanagari','Nirmala UI','Mangal',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+  background:linear-gradient(160deg,var(--bg1),var(--bg2) 60%,#7c3aed);
+  color:var(--ink); overflow-x:hidden; touch-action:manipulation;
+}
+#app{max-width:760px;margin:0 auto;padding:12px 12px 90px}
+.hidden{display:none !important}
+.card{background:var(--card);border-radius:22px;padding:16px;box-shadow:var(--shadow);margin-bottom:14px}
+h1,h2,h3{margin:0 0 8px}
+h1{font-size:24px}
+h2{font-size:19px}
+.small{font-size:13px;color:var(--muted)}
+.center{text-align:center}
+button{font-family:inherit;font-size:16px;border:none;cursor:pointer}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:10px;color:#fff;padding:6px 4px 10px}
+.mascot{font-size:30px;line-height:1;filter:drop-shadow(0 3px 0 rgba(0,0,0,.25))}
+.topbar .grow{flex:1}
+.pill{background:rgba(255,255,255,.18);border-radius:999px;padding:5px 11px;font-size:13px;color:#fff;font-weight:700}
+.xpwrap{height:10px;background:rgba(255,255,255,.22);border-radius:99px;overflow:hidden;margin-top:6px}
+.xpbar{height:100%;background:linear-gradient(90deg,var(--lemon),var(--mint));width:0%;transition:width .4s}
+
+/* buttons */
+.btn{background:var(--grape);color:#fff;border-radius:16px;padding:13px 16px;font-weight:800;box-shadow:0 4px 0 rgba(0,0,0,.2);display:block;width:100%;margin:8px 0}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.btn.mint{background:var(--mint)} .btn.candy{background:var(--candy)}
+.btn.sky{background:var(--sky)} .btn.lemon{background:var(--lemon);color:#3b2c00}
+.btn.ghost{background:#efeaff;color:#4c2f8f}
+.btn.sm{padding:9px 12px;font-size:14px;width:auto;display:inline-block;margin:4px 4px 4px 0}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* option tiles */
+.opt{background:#f4f1ff;border:3px solid #e3dbff;border-radius:16px;padding:14px 12px;font-size:19px;font-weight:700;text-align:center;width:100%;color:var(--ink)}
+.opt:active{transform:scale(.98)}
+.opt.sel{border-color:var(--grape);background:#ece4ff}
+.opt.ok{border-color:var(--ok);background:#dcfce7}
+.opt.bad{border-color:var(--bad);background:#ffe4e9}
+.opt.dim{opacity:.45}
+.tile{display:inline-block;width:auto;padding:11px 14px;margin:4px;font-size:18px}
+.blank{display:inline-block;min-width:104px;border-bottom:3px dashed var(--grape);text-align:center;padding:4px 6px;font-size:19px;font-weight:700;color:var(--grape)}
+.blank.filled{border-bottom-style:solid;color:var(--ink)}
+.blank.ok{border-color:var(--ok);color:var(--ok)}
+.blank.bad{border-color:var(--bad);color:var(--bad)}
+
+table.conj{width:100%;border-collapse:collapse;margin:6px 0 10px}
+table.conj th,table.conj td{border:2px solid #e3dbff;padding:8px 4px;text-align:center;font-size:16px}
+table.conj th{background:#f4f1ff;font-size:14px;color:var(--muted)}
+
+.qtag{display:inline-block;background:#f0ebff;color:#6d28d9;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:800;margin-bottom:8px}
+.prompt{font-size:21px;font-weight:800;margin:6px 0 12px;line-height:1.5}
+.big{font-size:34px}
+.scene{font-size:40px;letter-spacing:6px;text-align:center;background:#f4f1ff;border-radius:16px;padding:14px 6px;margin-bottom:10px}
+.feedback{border-radius:14px;padding:11px 12px;font-weight:700;margin-top:10px;font-size:15px;line-height:1.5}
+.feedback.ok{background:#dcfce7;color:#14532d}
+.feedback.bad{background:#ffe4e9;color:#881337}
+.bucket{background:#f4f1ff;border:3px dashed #cfc2ff;border-radius:16px;padding:10px;min-height:78px}
+.bucket.active{border-color:var(--grape);background:#ece4ff}
+.bucket h4{margin:0 0 6px;font-size:14px;color:var(--muted);text-align:center}
+.chip{display:inline-block;background:#fff;border:2px solid #e3dbff;border-radius:12px;padding:6px 10px;margin:3px;font-size:16px;font-weight:700}
+.chip.ok{border-color:var(--ok);background:#dcfce7}
+.chip.bad{border-color:var(--bad);background:#ffe4e9}
+
+.badge{display:inline-block;width:74px;text-align:center;margin:6px;font-size:11px;color:var(--muted)}
+.badge .ic{font-size:30px;display:block;filter:grayscale(1);opacity:.35}
+.badge.on .ic{filter:none;opacity:1}
+.mist{display:flex;align-items:center;gap:8px;border-bottom:1px solid #eee;padding:8px 0}
+.mist .g{flex:1;font-size:15px}
+
+.navbar{position:fixed;left:0;right:0;bottom:0;background:#fff;box-shadow:0 -3px 12px rgba(0,0,0,.18);display:flex;padding:6px 4px;z-index:40}
+.navbar button{flex:1;background:none;padding:7px 2px;font-size:11px;color:var(--muted);font-weight:700}
+.navbar button .ic{display:block;font-size:20px}
+.navbar button.on{color:var(--grape)}
+
+.conf{position:fixed;top:-16px;width:10px;height:14px;z-index:60;pointer-events:none;border-radius:2px}
+@keyframes fall{to{transform:translateY(104vh) rotate(640deg);opacity:.9}}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;background:#22163f;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:70;font-weight:700;opacity:0;transition:opacity .25s}
+.toast.show{opacity:1}
+.timerbar{height:9px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:8px}
+.timerbar i{display:block;height:100%;background:var(--candy);width:100%}
+textarea{width:100%;height:110px;font-size:12px;border:2px solid #e3dbff;border-radius:12px;padding:8px;font-family:monospace}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="topbar">
+    <div class="mascot">🦜</div>
+    <div class="grow">
+      <div style="font-weight:800" id="greet">नमस्ते!</div>
+      <div class="xpwrap"><div class="xpbar" id="xpbar"></div></div>
+    </div>
+    <div class="pill" id="lvlPill">Lv 1</div>
+    <div class="pill" id="streakPill">🔥 0</div>
+  </div>
+
+  <!-- HOME -->
+  <section id="scr-home">
+    <div class="card">
+      <h2>शुकः स्वागतं करोति!</h2>
+      <p class="small" id="questLine">आज का लक्ष्य</p>
+      <button class="btn mint" data-go="mixed">▶ मिश्रित अभ्यास (Mixed Practice)</button>
+      <div class="grid2">
+        <button class="btn sky sm" style="width:100%" data-go="topics">📚 विषय चुनें</button>
+        <button class="btn candy sm" style="width:100%" data-go="clock">⏱ Beat the Clock</button>
+      </div>
+      <button class="btn lemon" data-go="fix">🛠 Fix My Mistakes (<span id="mistCount">0</span>)</button>
+      <button class="btn ghost" data-go="cards">🎴 फ़्लैशकार्ड</button>
+    </div>
+    <div class="card">
+      <h3>परीक्षा: सोमवार 24 अगस्त</h3>
+      <p class="small">इकाई–2 · खण्ड क (अनुप्रयुक्त व्याकरणम्) + खण्ड ख (लिंग-वचनानि)</p>
+      <p class="small"><b>याद रखो:</b> यह ऐप पहचान (recognition) के लिए है। लिखने का अभ्यास कॉपी पर ज़रूर करो ✍️</p>
+    </div>
+  </section>
+
+  <!-- TOPICS -->
+  <section id="scr-topics" class="hidden">
+    <div class="card">
+      <h2>विषय चुनें</h2>
+      <div id="topicList"></div>
+      <button class="btn ghost" data-go="home">← वापस</button>
+    </div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section id="scr-play" class="hidden">
+    <div class="card">
+      <div id="timerWrap" class="hidden"><div class="timerbar"><i id="timerFill"></i></div></div>
+      <div style="display:flex;align-items:center">
+        <span class="qtag" id="qtag">प्रश्न</span>
+        <span class="grow" style="flex:1"></span>
+        <span class="small" id="progress">1/10</span>
+        <span class="small" id="comboTag" style="margin-left:8px"></span>
+      </div>
+      <div id="qbody"></div>
+      <div id="feedback"></div>
+      <button class="btn mint hidden" id="checkBtn">जाँच करें</button>
+      <button class="btn sky hidden" id="nextBtn">आगे →</button>
+      <button class="btn ghost" id="quitBtn">✕ रोकें</button>
+    </div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="scr-result" class="hidden">
+    <div class="card center">
+      <div class="big" id="resEmoji">🎉</div>
+      <h2 id="resTitle">बहुत बढ़िया!</h2>
+      <p id="resLine" class="small"></p>
+      <div id="resBadges"></div>
+      <button class="btn mint" data-go="mixed">फिर से अभ्यास</button>
+      <button class="btn ghost" data-go="home">🏠 होम</button>
+    </div>
+  </section>
+
+  <!-- CARDS -->
+  <section id="scr-cards" class="hidden">
+    <div class="card center">
+      <h2>फ़्लैशकार्ड</h2>
+      <div id="cardDeckPick"></div>
+      <div id="cardArea" class="hidden">
+        <div class="scene" id="cardFront" style="font-size:26px;letter-spacing:0"></div>
+        <div class="feedback ok hidden" id="cardBack"></div>
+        <button class="btn lemon" id="flipBtn">पलटें 🔄</button>
+        <div class="row">
+          <button class="btn sm ghost" id="prevCard" style="flex:1">←</button>
+          <button class="btn sm ghost" id="nextCard" style="flex:1">→</button>
+        </div>
+        <p class="small" id="cardCount"></p>
+        <button class="btn ghost" id="cardBackBtn">← डेक बदलें</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- MISTAKES -->
+  <section id="scr-mist" class="hidden">
+    <div class="card">
+      <h2>🛠 गलतियों का बैंक</h2>
+      <p class="small">इन्हें दो बार सही करो तो ये अपने आप हट जाएँगे।</p>
+      <div id="mistList"></div>
+      <button class="btn mint hidden" id="drillBtn">इन्हीं का अभ्यास करें</button>
+      <button class="btn ghost" data-go="home">← वापस</button>
+    </div>
+  </section>
+
+  <!-- PROGRESS -->
+  <section id="scr-prog" class="hidden">
+    <div class="card">
+      <h2>प्रगति</h2>
+      <p class="small" id="progStats"></p>
+      <div id="masteryList"></div>
+    </div>
+    <div class="card">
+      <h3>पदक (Badges)</h3>
+      <div id="badgeWrap"></div>
+    </div>
+    <div class="card">
+      <h3>सेटिंग्स</h3>
+      <button class="btn sm ghost" id="soundBtn">🔊 आवाज़: चालू</button>
+      <button class="btn sm ghost" id="expBtn">⬇ बैकअप बनाएँ</button>
+      <button class="btn sm ghost" id="impBtn">⬆ बैकअप वापस लाएँ</button>
+      <button class="btn sm ghost" id="resetBtn">♻ सब मिटाएँ</button>
+      <div id="ioArea"></div>
+    </div>
+  </section>
+</div>
+
+<div class="navbar">
+  <button data-go="home" id="nav-home" class="on"><span class="ic">🏠</span>होम</button>
+  <button data-go="topics" id="nav-topics"><span class="ic">📚</span>विषय</button>
+  <button data-go="cards" id="nav-cards"><span class="ic">🎴</span>कार्ड</button>
+  <button data-go="fixview" id="nav-mist"><span class="ic">🛠</span>गलतियाँ</button>
+  <button data-go="prog" id="nav-prog"><span class="ic">⭐</span>प्रगति</button>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* =====================================================================
+   शुक-लोक — Sanskrit Unit 2 (Class IV, MDIS Greater Faridabad)
+   Single-file app. No external dependencies. Tap-only input.
+   Storage key is namespaced so it never collides with other hub apps.
+   ===================================================================== */
+var STORE_KEY = 'mdis_sanskrit_u2_v1';
+
+/* ---------------------------------------------------------------
+   DATA
+   Corrections applied vs. the handwritten notebook (deliberate):
+     वृक्षौ  -> पुल्लिङ्गम् (notebook said नपुंसकलिङ्गम्)
+     सूर्यः  -> पुल्लिङ्गम् (notebook said नपुंसकलिङ्गम्)
+     कुक्कुटः -> मुर्गा    (teacher's own red-pen correction)
+   Do not silently revert these.
+   --------------------------------------------------------------- */
+
+/* Noun stems. gender: m | f | n. hi = meaning of the singular. */
+var NOUN_STEMS = [
+  {s:'बाल',    g:'m', hi:'लड़का'},
+  {s:'वृक्ष',   g:'m', hi:'पेड़'},
+  {s:'सूर्य',   g:'m', hi:'सूरज'},
+  {s:'शुक',    g:'m', hi:'तोता'},
+  {s:'बक',     g:'m', hi:'बगुला'},
+  {s:'चटक',    g:'m', hi:'चिड़ा'},
+  {s:'काक',    g:'m', hi:'कौआ'},
+  {s:'कोकिल',  g:'m', hi:'कोयल'},
+  {s:'मयूर',   g:'m', hi:'मोर'},
+  {s:'कपोत',   g:'m', hi:'कबूतर'},
+  {s:'कुक्कुट', g:'m', hi:'मुर्गा'},
+  {s:'गज',     g:'m', hi:'हाथी'},
+  {s:'जनक',    g:'m', hi:'पिता'},
+  {s:'शिक्षक',  g:'m', hi:'अध्यापक'},
+  {s:'समीर',   g:'m', hi:'हवा'},
+  {s:'कृषक',   g:'m', hi:'किसान'},
+  {s:'हरिण',   g:'m', hi:'हिरण'},
+  {s:'अश्व',    g:'m', hi:'घोड़ा'},
+  {s:'बालिक',  g:'f', hi:'लड़की'},
+  {s:'कन्य',   g:'f', hi:'कन्या'},
+  {s:'महिल',   g:'f', hi:'महिला'},
+  {s:'नौक',    g:'f', hi:'नाव'},
+  {s:'घटिक',   g:'f', hi:'घड़ी'},
+  {s:'पताक',   g:'f', hi:'झंडा'},
+  {s:'नायिक',  g:'f', hi:'नायिका'},
+  {s:'लत',     g:'f', hi:'लता'},
+  {s:'कमल',    g:'n', hi:'कमल'},
+  {s:'पुस्तक',  g:'n', hi:'पुस्तक'},
+  {s:'चित्र',   g:'n', hi:'चित्र'},
+  {s:'गृह',     g:'n', hi:'घर'},
+  {s:'आम्र',    g:'n', hi:'आम'},
+  {s:'पत्र',    g:'n', hi:'पत्ता'},
+  {s:'फल',     g:'n', hi:'फल'},
+  {s:'वन',     g:'n', hi:'जंगल'},
+  {s:'नगर',    g:'n', hi:'नगर'},
+  {s:'मित्र',   g:'n', hi:'मित्र'}
+];
+
+var GEN_NAME = {m:'पुल्लिङ्गम्', f:'स्त्रीलिङ्गम्', n:'नपुंसकलिङ्गम्'};
+var NUM_NAME = ['एकवचनम्','द्विवचनम्','बहुवचनम्'];
+var PER_NAME = ['प्रथमः','मध्यमः','उत्तमः'];
+var HI_NUM   = ['एक','दो','अनेक'];
+
+/* णत्व: a stem containing र् / ऋ takes -आणि instead of -आनि (पत्राणि, आम्राणि). */
+function neuterPlural(stem){
+  return /[रृ]/.test(stem) ? stem + 'ाणि' : stem + 'ानि';
+}
+function nounForms(o){
+  if(o.g === 'm') return [o.s+'ः', o.s+'ौ', o.s+'ाः'];
+  if(o.g === 'f') return [o.s+'ा', o.s+'े', o.s+'ाः'];
+  return [o.s+'म्', o.s+'े', neuterPlural(o.s)];
+}
+/* Full expanded noun list: {w, g, n, hi, hiPhrase} */
+var NOUNS = [];
+(function(){
+  for(var i=0;i<NOUN_STEMS.length;i++){
+    var st = NOUN_STEMS[i], f = nounForms(st);
+    for(var n=0;n<3;n++){
+      NOUNS.push({
+        w:f[n], g:st.g, n:n, stem:st.s, hi:st.hi,
+        hiPhrase:(n===0 ? 'एक '+st.hi : HI_NUM[n]+' '+st.hi)
+      });
+    }
+  }
+})();
+
+/* Verbs. stem = लट् base. irregular verbs are excluded from conjugation drills. */
+var VERBS = [
+  {d:'चल्',  st:'चल',   hi:'चलना'},
+  {d:'खाद्', st:'खाद',  hi:'खाना'},
+  {d:'हस्',  st:'हस',   hi:'हँसना'},
+  {d:'नम्',  st:'नम',   hi:'नमन करना'},
+  {d:'पठ्',  st:'पठ',   hi:'पढ़ना'},
+  {d:'कूज्', st:'कूज',  hi:'कूजना (चहचहाना)'},
+  {d:'धाव्', st:'धाव',  hi:'दौड़ना'},
+  {d:'रक्ष्',st:'रक्ष', hi:'रक्षा करना'},
+  {d:'वद्',  st:'वद',   hi:'बोलना'},
+  {d:'लिख्', st:'लिख',  hi:'लिखना'},
+  {d:'गम्',  st:'गच्छ', hi:'जाना',   note:'गम् → गच्छ'},
+  {d:'पा',   st:'पिब',  hi:'पीना',   note:'पा → पिब'},
+  {d:'दा',   st:'यच्छ', hi:'देना',   note:'दा → यच्छ'},
+  {d:'दृश्', st:'पश्य', hi:'देखना',  note:'दृश् → पश्य'},
+  {d:'उद्+इ',st:'उदय',  hi:'उगना'},
+  {d:'अस्',  st:null,   hi:'होना', irregular:true,
+   forms:[['अस्ति','स्तः','सन्ति'],['असि','स्थः','स्थ'],['अस्मि','स्वः','स्मः']]}
+];
+/* उत्तमपुरुष lengthens the stem vowel: चल + मि -> चलामि (not चलमि). */
+var ENDINGS = [['ति','तः','न्ति'],['सि','थः','थ'],['ामि','ावः','ामः']];
+function verbForm(v,p,n){
+  if(v.irregular) return v.forms[p][n];
+  return v.st + ENDINGS[p][n];
+}
+var VERB_FORMS = [];
+(function(){
+  for(var i=0;i<VERBS.length;i++){
+    for(var p=0;p<3;p++){ for(var n=0;n<3;n++){
+      VERB_FORMS.push({w:verbForm(VERBS[i],p,n), p:p, n:n, v:VERBS[i]});
+    }}
+  }
+})();
+
+/* Birds — Sanskrit <-> Hindi (कुक्कुटः = मुर्गा, per teacher's correction) */
+var BIRDS = [
+  {sa:'शुकः', hi:'तोता'},   {sa:'बकः', hi:'बगुला'},
+  {sa:'चटकः', hi:'चिड़ा'},  {sa:'काकः', hi:'कौआ'},
+  {sa:'कोकिलः', hi:'कोयल'}, {sa:'मयूरः', hi:'मोर'},
+  {sa:'कपोतः', hi:'कबूतर'}, {sa:'कुक्कुटः', hi:'मुर्गा'}
+];
+
+/* Picture scenes: pick the right नाम / क्रिया (Q1-style) */
+var SCENES = [
+  {emoji:'🌄🌳🏠👦👧🚶', title:'ग्रामः (गाँव)',
+   nouns:['बालः','बालिका','वृक्षः','सूर्यः','गृहम्','कृषकः'],
+   verbs:['चलति','गच्छति','उदयति','धावति','हसति','पश्यति']},
+  {emoji:'🏞️👦👧🌳⚽🧓', title:'उद्यानम् (पार्क)',
+   nouns:['वृक्षाः','बालः','बालाः','पुष्पम्','मित्रम्','जनकः'],
+   verbs:['अस्ति','खेलति','हसन्ति','धावति','पठति','वदति']},
+  {emoji:'🏫📚👩‍🏫👦✏️🕐',title:'विद्यालयः (स्कूल)',
+   nouns:['शिक्षकः','पुस्तकम्','छात्रः','चित्रम्','घटिका','कन्या'],
+   verbs:['पठति','लिखति','वदति','नमति','अस्ति','गच्छति']}
+];
+/* Distractors for scene picking: words that are valid Sanskrit but not in the scene */
+var SCENE_DISTRACT_N = ['गजः','नौका','मयूरः','कमलम्','अश्वः','नगरम्','कपोतौ','फलम्'];
+var SCENE_DISTRACT_V = ['खादति','कूजति','पिबति','रक्षति','यच्छति','हसामि','चलामः','नमसि'];
+
+/* Picture-word items (Q6 style): emoji -> Sanskrit form + Hindi phrase */
+var PICWORDS = [
+  {e:'🕊️🕊️', sa:'कपोतौ',   hi:'दो कबूतर'},
+  {e:'📗📘',  sa:'पुस्तके',  hi:'दो पुस्तकें'},
+  {e:'🍃🍃🍃',sa:'पत्राणि',  hi:'अनेक पत्ते'},
+  {e:'👧',    sa:'बालिका',  hi:'एक लड़की'},
+  {e:'🐘',    sa:'गजः',     hi:'एक हाथी'},
+  {e:'🦚🦚🦚',sa:'मयूराः',  hi:'अनेक मोर'},
+  {e:'🌸🌸',  sa:'कमले',    hi:'दो कमल'},
+  {e:'🐴🐴',  sa:'अश्वौ',   hi:'दो घोड़े'},
+  {e:'🥭',    sa:'आम्रम्',  hi:'एक आम'},
+  {e:'⏰',    sa:'घटिका',   hi:'एक घड़ी'},
+  {e:'🚩',    sa:'पताका',   hi:'एक झंडा'},
+  {e:'🦜',    sa:'शुकः',    hi:'एक तोता'}
+];
+
+var TOPICS = [
+  {id:'dhatu', name:'धातुरूप (लट् लकार)', icon:'🔤'},
+  {id:'birds', name:'पक्षिणः नामानि',      icon:'🦜'},
+  {id:'ling',  name:'लिंग व वचन',          icon:'⚖️'},
+  {id:'purush',name:'पुरुष व वचन',         icon:'🗣️'},
+  {id:'artha', name:'अर्थ व चित्र',        icon:'🖼️'}
+];
+
+var BADGES = [
+  {id:'first',  ic:'🌱', name:'पहला कदम',   test:function(s){return s.totalCorrect>=1}},
+  {id:'ten',    ic:'⭐', name:'10 सही',      test:function(s){return s.totalCorrect>=10}},
+  {id:'fifty',  ic:'🌟', name:'50 सही',      test:function(s){return s.totalCorrect>=50}},
+  {id:'hundred',ic:'💯', name:'100 सही',     test:function(s){return s.totalCorrect>=100}},
+  {id:'combo5', ic:'🔥', name:'5 लगातार',    test:function(s){return s.bestCombo>=5}},
+  {id:'combo10',ic:'🚀', name:'10 लगातार',   test:function(s){return s.bestCombo>=10}},
+  {id:'perfect',ic:'🏆', name:'पूरा सही',    test:function(s){return s.perfectRounds>=1}},
+  {id:'streak3',ic:'📅', name:'3 दिन',       test:function(s){return s.bestStreak>=3}},
+  {id:'clock',  ic:'⏱️', name:'घड़ी विजेता', test:function(s){return s.clockBest>=10}},
+  {id:'fixer',  ic:'🛠️', name:'गलती सुधारी', test:function(s){return s.fixed>=5}},
+  {id:'birdy',  ic:'🐦', name:'पक्षी पंडित', test:function(s){return (s.topicCorrect.birds||0)>=20}},
+  {id:'dhatu20',ic:'📖', name:'धातु गुरु',   test:function(s){return (s.topicCorrect.dhatu||0)>=20}},
+  {id:'lv5',    ic:'🎖️', name:'स्तर 5',      test:function(s){return s.xp>=400}},
+  {id:'quest',  ic:'🎯', name:'लक्ष्य पूरा', test:function(s){return s.questsDone>=1}},
+  {id:'master', ic:'👑', name:'महापंडित',   test:function(s){return s.totalCorrect>=250}}
+];
+
+/* ---------------------------------------------------------------
+   STATE
+   --------------------------------------------------------------- */
+var DEFAULT_STATE = {
+  xp:0, totalCorrect:0, totalWrong:0, bestCombo:0, perfectRounds:0,
+  clockBest:0, fixed:0, questsDone:0,
+  streak:0, bestStreak:0, lastPractice:null,
+  quest:{date:null, done:0, goal:12},
+  topicCorrect:{}, mastery:{}, mistakes:[], badges:[], sound:true
+};
+var S = load();
+
+function load(){
+  try{
+    var raw = localStorage.getItem(STORE_KEY);
+    if(!raw) return clone(DEFAULT_STATE);
+    var o = JSON.parse(raw), d = clone(DEFAULT_STATE), k;
+    for(k in d){ if(!(k in o)) o[k] = d[k]; }
+    if(!o.topicCorrect) o.topicCorrect = {};
+    if(!o.mastery) o.mastery = {};
+    if(!Array.isArray(o.mistakes)) o.mistakes = [];
+    if(!Array.isArray(o.badges)) o.badges = [];
+    return o;
+  }catch(e){ return clone(DEFAULT_STATE); }
+}
+function save(){
+  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
+  catch(e){ toast('सेव नहीं हो पाया'); }
+}
+function clone(o){ return JSON.parse(JSON.stringify(o)); }
+function levelOf(xp){ return Math.floor(xp/100)+1; }
+function xpInLevel(xp){ return xp%100; }
+
+/* ---------------------------------------------------------------
+   QUESTION GENERATION
+   Every question carries a stable id so mastery + mistakes survive.
+   --------------------------------------------------------------- */
+function rnd(n){ return Math.floor(Math.random()*n); }
+function pick(a){ return a[rnd(a.length)]; }
+function shuffle(a){
+  var r = a.slice(), i, j, t;
+  for(i=r.length-1;i>0;i--){ j=rnd(i+1); t=r[i]; r[i]=r[j]; r[j]=t; }
+  return r;
+}
+function sample(a,k,exclude){
+  var pool = a.filter(function(x){ return !exclude || exclude.indexOf(x)<0; });
+  return shuffle(pool).slice(0,k);
+}
+
+/* -- Q: लिंग व वचन (dual MCQ) -- */
+function qLingaVachana(){
+  var it = pick(NOUNS);
+  return {
+    id:'lv:'+it.w, topic:'ling', type:'dual', tag:'लिंग व वचन',
+    prompt:'इस शब्द का लिंग व वचन बताओ:', focus:it.w,
+    rows:[
+      {label:'लिंगम्', options:['पुल्लिङ्गम्','स्त्रीलिङ्गम्','नपुंसकलिङ्गम्'], answer:GEN_NAME[it.g]},
+      {label:'वचनम्',  options:NUM_NAME.slice(), answer:NUM_NAME[it.n]}
+    ],
+    explain: it.w+' = '+it.hiPhrase+' → '+GEN_NAME[it.g]+', '+NUM_NAME[it.n]
+  };
+}
+
+/* -- Q: पुरुष व वचन (dual MCQ) -- */
+function qPurushaVachana(){
+  var it = pick(VERB_FORMS);
+  return {
+    id:'pv:'+it.w, topic:'purush', type:'dual', tag:'पुरुष व वचन',
+    prompt:'इस क्रिया का पुरुष व वचन बताओ:', focus:it.w,
+    rows:[
+      {label:'पुरुषः', options:PER_NAME.slice(), answer:PER_NAME[it.p]},
+      {label:'वचनम्',  options:NUM_NAME.slice(), answer:NUM_NAME[it.n]}
+    ],
+    explain: it.w+' ('+it.v.d+' = '+it.v.hi+') → '+PER_NAME[it.p]+', '+NUM_NAME[it.n]
+  };
+}
+
+/* -- Q: धातुरूप grid (fill 3 blanks by tapping tiles) -- */
+function qDhatuGrid(){
+  var v = pick(VERBS.filter(function(x){ return !x.irregular; }));
+  var cells = [], p, n;
+  for(p=0;p<3;p++){ for(n=0;n<3;n++){ cells.push({p:p,n:n,w:verbForm(v,p,n)}); } }
+  var blanks = shuffle(cells).slice(0,3);
+  var answers = blanks.map(function(b){ return b.w; });
+  var others = shuffle(cells.filter(function(c){
+    return answers.indexOf(c.w)<0;
+  })).slice(0,2).map(function(c){ return c.w; });
+  return {
+    id:'dg:'+v.d, topic:'dhatu', type:'grid', tag:'धातुरूप',
+    prompt:'खाली स्थान भरो — '+v.d+' ('+v.hi+') लट् लकार',
+    cells:cells, blankKeys:blanks.map(function(b){ return b.p+'-'+b.n; }),
+    answers:answers, tiles:shuffle(answers.concat(others)),
+    explain:(v.note ? v.note+'. ' : '')+'धातु '+v.d+' के रूप: '+
+      verbForm(v,0,0)+', '+verbForm(v,0,1)+', '+verbForm(v,0,2)
+  };
+}
+
+/* -- Q: single blank धातुरूप (आ-part of Q2) -- */
+function qDhatuBlank(){
+  var v = pick(VERBS.filter(function(x){ return !x.irregular; }));
+  var p = rnd(3), n = rnd(3);
+  var ans = verbForm(v,p,n);
+  var wrongs = [];
+  var alt = [[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[0,0],[1,1],[2,2]];
+  for(var i=0;i<alt.length && wrongs.length<3;i++){
+    var w = verbForm(v,alt[i][0],alt[i][1]);
+    if(w!==ans && wrongs.indexOf(w)<0) wrongs.push(w);
+  }
+  var shown = [];
+  for(var k=0;k<3;k++){ if(k!==n) shown.push(verbForm(v,p,k)); }
+  return {
+    id:'db:'+v.d+':'+p+n, topic:'dhatu', type:'mcq', tag:'धातुरूप — रिक्त स्थान',
+    prompt:PER_NAME[p]+' पुरुष: '+shown[0]+' , '+shown[1]+' , ____ ('+NUM_NAME[n]+')',
+    focus:v.d+' ('+v.hi+')',
+    options:shuffle([ans].concat(wrongs)), answer:ans,
+    explain:'सही रूप: '+ans+' — '+PER_NAME[p]+', '+NUM_NAME[n]
+  };
+}
+
+/* -- Q: birds both directions -- */
+function qBirdSaToHi(){
+  var b = pick(BIRDS);
+  var wrongs = sample(BIRDS.map(function(x){return x.hi;}),3,[b.hi]);
+  return {
+    id:'bh:'+b.sa, topic:'birds', type:'mcq', tag:'पक्षिणः नामानि',
+    prompt:'इसका हिंदी अर्थ क्या है?', focus:b.sa,
+    options:shuffle([b.hi].concat(wrongs)), answer:b.hi,
+    explain:b.sa+' = '+b.hi
+  };
+}
+function qBirdHiToSa(){
+  var b = pick(BIRDS);
+  var wrongs = sample(BIRDS.map(function(x){return x.sa;}),3,[b.sa]);
+  return {
+    id:'bs:'+b.hi, topic:'birds', type:'mcq', tag:'पक्षिणः नामानि',
+    prompt:'संस्कृत में क्या कहेंगे?', focus:b.hi,
+    options:shuffle([b.sa].concat(wrongs)), answer:b.sa,
+    explain:b.hi+' = '+b.sa
+  };
+}
+
+/* -- Q: matching (tap-to-pair) -- */
+function qMatch(){
+  var items = shuffle(PICWORDS).slice(0,4);
+  return {
+    id:'mt:'+items.map(function(x){return x.sa;}).join(','),
+    topic:'artha', type:'pair', tag:'मिलान',
+    prompt:'शब्द को सही अर्थ से मिलाओ (पहले शब्द, फिर अर्थ पर टैप करो)',
+    left:shuffle(items.map(function(x){return x.sa;})),
+    right:shuffle(items.map(function(x){return x.hi;})),
+    map:(function(){ var m={}; items.forEach(function(x){ m[x.sa]=x.hi; }); return m; })(),
+    explain:items.map(function(x){return x.sa+' = '+x.hi;}).join(' · ')
+  };
+}
+
+/* -- Q: sort by लिंग / वचन -- */
+function qSortLinga(){
+  var picks = [];
+  ['m','f','n'].forEach(function(g){
+    var p = shuffle(NOUNS.filter(function(x){ return x.g===g && x.n===0; })).slice(0,2);
+    picks = picks.concat(p);
+  });
+  var m = {}; picks.forEach(function(x){ m[x.w] = GEN_NAME[x.g]; });
+  return {
+    id:'sl:'+picks.map(function(x){return x.w;}).join(','),
+    topic:'ling', type:'sort', tag:'लिंग के अनुसार',
+    prompt:'शब्द चुनो, फिर सही डिब्बे पर टैप करो',
+    words:shuffle(picks.map(function(x){return x.w;})),
+    buckets:['पुल्लिङ्गम्','स्त्रीलिङ्गम्','नपुंसकलिङ्गम्'], map:m,
+    explain:picks.map(function(x){return x.w+' → '+GEN_NAME[x.g];}).join(' · ')
+  };
+}
+function qSortVachana(){
+  var picks = [], used = {};
+  for(var n=0;n<3;n++){
+    var p = shuffle(NOUNS.filter(function(x){ return x.n===n && !used[x.stem]; })).slice(0,2);
+    p.forEach(function(x){ used[x.stem] = 1; });
+    picks = picks.concat(p);
+  }
+  var m = {}; picks.forEach(function(x){ m[x.w] = NUM_NAME[x.n]; });
+  return {
+    id:'sv:'+picks.map(function(x){return x.w;}).join(','),
+    topic:'ling', type:'sort', tag:'वचन के अनुसार',
+    prompt:'शब्द चुनो, फिर सही डिब्बे पर टैप करो',
+    words:shuffle(picks.map(function(x){return x.w;})),
+    buckets:NUM_NAME.slice(), map:m,
+    explain:picks.map(function(x){return x.w+' → '+NUM_NAME[x.n];}).join(' · ')
+  };
+}
+
+/* -- Q: picture word (Q6) -- */
+function qPicWord(){
+  var it = pick(PICWORDS);
+  var wrongs = sample(PICWORDS.map(function(x){return x.sa;}),3,[it.sa]);
+  return {
+    id:'pw:'+it.sa, topic:'artha', type:'mcq', tag:'चित्र → संस्कृत',
+    prompt:'चित्र देखकर सही संस्कृत शब्द चुनो', scene:it.e,
+    options:shuffle([it.sa].concat(wrongs)), answer:it.sa,
+    explain:it.sa+' = '+it.hi
+  };
+}
+
+/* -- Q: Hindi meaning of a Sanskrit form (Q7) -- */
+function qMeaning(){
+  var it = pick(PICWORDS);
+  var wrongs = sample(PICWORDS.map(function(x){return x.hi;}),3,[it.hi]);
+  return {
+    id:'mn:'+it.sa, topic:'artha', type:'mcq', tag:'हिंदी अर्थ',
+    prompt:'इसका हिंदी अर्थ लिखो:', focus:it.sa,
+    options:shuffle([it.hi].concat(wrongs)), answer:it.hi,
+    explain:it.sa+' = '+it.hi
+  };
+}
+
+/* -- Q: scene → pick 2 संज्ञा or 2 क्रिया (Q1) -- */
+function qScene(){
+  var sc = pick(SCENES);
+  var wantNoun = Math.random() < 0.5;
+  var right = shuffle(wantNoun ? sc.nouns : sc.verbs).slice(0,2);
+  var wrong = shuffle(wantNoun ? SCENE_DISTRACT_N : SCENE_DISTRACT_V).slice(0,4);
+  return {
+    id:'sc:'+sc.title+':'+(wantNoun?'n':'v'), topic:'artha', type:'multi',
+    tag:'चित्र वर्णनम्', scene:sc.emoji,
+    prompt:sc.title+' — इस चित्र के लिए दो सही '+(wantNoun?'संज्ञाएँ':'क्रियाएँ')+' चुनो',
+    options:shuffle(right.concat(wrong)), answers:right, need:2,
+    explain:'इस चित्र में: '+(wantNoun?sc.nouns.join(', '):sc.verbs.join(', '))
+  };
+}
+
+var GENERATORS = {
+  ling:  [qLingaVachana, qSortLinga, qSortVachana],
+  purush:[qPurushaVachana],
+  dhatu: [qDhatuGrid, qDhatuBlank, qDhatuBlank],
+  birds: [qBirdSaToHi, qBirdHiToSa],
+  artha: [qPicWord, qMeaning, qMatch, qScene]
+};
+function genQuestion(topic){
+  var gens;
+  if(topic && GENERATORS[topic]) gens = GENERATORS[topic];
+  else {
+    gens = [];
+    for(var k in GENERATORS){ gens = gens.concat(GENERATORS[k]); }
+  }
+  return pick(gens)();
+}
+function buildRound(topic, count){
+  var out = [], seen = {}, guard = 0;
+  while(out.length < count && guard < count*40){
+    guard++;
+    var q = genQuestion(topic);
+    if(seen[q.id]) continue;
+    seen[q.id] = 1;
+    out.push(q);
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------
+   UI HELPERS
+   --------------------------------------------------------------- */
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, txt){
+  var e = document.createElement(tag);
+  if(cls) e.className = cls;
+  if(txt !== undefined && txt !== null) e.textContent = txt;
+  return e;
+}
+function clear(node){ while(node.firstChild) node.removeChild(node.firstChild); }
+
+var toastTimer = null;
+function toast(msg){
+  var t = $('toast');
+  t.textContent = msg; t.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ t.classList.remove('show'); }, 1600);
+}
+
+/* WebAudio blips — no files, no autoplay nags */
+var actx = null;
+function beep(freq, dur, type){
+  if(!S.sound) return;
+  try{
+    if(!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+    var o = actx.createOscillator(), g = actx.createGain();
+    o.type = type || 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.15, actx.currentTime+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, actx.currentTime+dur);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime+dur+0.02);
+  }catch(e){}
+}
+function soundOk(){ beep(660,0.10); setTimeout(function(){ beep(880,0.14); },90); }
+function soundBad(){ beep(200,0.18,'square'); }
+function soundLevel(){ [523,659,784,1047].forEach(function(f,i){ setTimeout(function(){ beep(f,0.14); }, i*110); }); }
+
+function confetti(){
+  var colors = ['#ff5f9e','#ffd447','#25d0a4','#4fc3f7','#8b5cf6'];
+  for(var i=0;i<26;i++){
+    (function(i){
+      var d = el('div','conf');
+      d.style.left = (Math.random()*100)+'vw';
+      d.style.background = colors[i%colors.length];
+      d.style.animation = 'fall '+(1.1+Math.random()*0.9)+'s linear forwards';
+      d.style.animationDelay = (Math.random()*0.3)+'s';
+      document.body.appendChild(d);
+      setTimeout(function(){ if(d.parentNode) d.parentNode.removeChild(d); }, 2600);
+    })(i);
+  }
+}
+
+function greeting(){
+  var h = new Date().getHours();
+  if(h < 12) return 'सुप्रभातम्!';
+  if(h < 17) return 'नमस्ते!';
+  if(h < 21) return 'शुभ संध्या!';
+  return 'शुभ रात्रि!';
+}
+
+function refreshTop(){
+  $('greet').textContent = greeting();
+  $('lvlPill').textContent = 'Lv ' + levelOf(S.xp);
+  $('streakPill').textContent = '🔥 ' + S.streak;
+  $('xpbar').style.width = xpInLevel(S.xp) + '%';
+  $('mistCount').textContent = S.mistakes.length;
+}
+
+var SCREENS = ['home','topics','play','result','cards','mist','prog'];
+function show(name){
+  SCREENS.forEach(function(s){
+    var n = $('scr-'+s);
+    if(n) n.classList.toggle('hidden', s !== name);
+  });
+  var navMap = {home:'nav-home', topics:'nav-topics', cards:'nav-cards', mist:'nav-mist', prog:'nav-prog'};
+  ['nav-home','nav-topics','nav-cards','nav-mist','nav-prog'].forEach(function(id){
+    $(id).classList.toggle('on', navMap[name] === id);
+  });
+  refreshTop();
+}
+
+/* ---------------------------------------------------------------
+   STREAK + QUEST
+   Streak advances only on a completed practice action (never on open).
+   --------------------------------------------------------------- */
+function todayKey(){
+  var d = new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+function daysBetween(a,b){
+  var pa = a.split('-').map(Number), pb = b.split('-').map(Number);
+  var da = new Date(pa[0],pa[1]-1,pa[2]), db = new Date(pb[0],pb[1]-1,pb[2]);
+  return Math.round((db-da)/86400000);
+}
+function markPractice(){
+  var t = todayKey();
+  if(S.lastPractice === t) return;
+  if(S.lastPractice && daysBetween(S.lastPractice,t) === 1) S.streak += 1;
+  else S.streak = 1;
+  S.lastPractice = t;
+  if(S.streak > S.bestStreak) S.bestStreak = S.streak;
+}
+function questCheck(){
+  var t = todayKey();
+  if(S.quest.date !== t){ S.quest = {date:t, done:0, goal:12}; }
+}
+function questTick(){
+  questCheck();
+  if(S.quest.done < S.quest.goal){
+    S.quest.done++;
+    if(S.quest.done === S.quest.goal){
+      S.questsDone++; S.xp += 25; confetti(); soundLevel();
+      toast('🎯 आज का लक्ष्य पूरा! +25 XP');
+    }
+  }
+}
+function renderQuest(){
+  questCheck();
+  $('questLine').textContent = '🎯 आज का लक्ष्य: ' + S.quest.done + '/' + S.quest.goal + ' सही उत्तर';
+}
+
+/* ---------------------------------------------------------------
+   MASTERY + MISTAKES
+   Mastery is mutable: a wrong answer pulls the count back down.
+   --------------------------------------------------------------- */
+function bumpMastery(id, ok){
+  var cur = S.mastery[id] || 0;
+  S.mastery[id] = ok ? Math.min(cur+1, 3) : Math.max(cur-1, 0);
+}
+function addMistake(q){
+  for(var i=0;i<S.mistakes.length;i++){
+    if(S.mistakes[i].id === q.id){ S.mistakes[i].hits = (S.mistakes[i].hits||1)+1; return; }
+  }
+  S.mistakes.push({id:q.id, topic:q.topic, label:mistakeLabel(q), hits:1, right:0});
+  if(S.mistakes.length > 60) S.mistakes.shift();
+}
+function mistakeLabel(q){
+  return (q.focus ? q.focus + ' — ' : '') + q.tag;
+}
+function creditMistake(q){
+  for(var i=0;i<S.mistakes.length;i++){
+    if(S.mistakes[i].id === q.id){
+      S.mistakes[i].right = (S.mistakes[i].right||0)+1;
+      if(S.mistakes[i].right >= 2){
+        S.mistakes.splice(i,1); S.fixed++;
+        toast('🛠 एक गलती सुधर गई!');
+      }
+      return;
+    }
+  }
+}
+function dropMistake(id){
+  S.mistakes = S.mistakes.filter(function(m){ return m.id !== id; });
+  save(); renderMistakes(); refreshTop();
+}
+
+/* ---------------------------------------------------------------
+   BADGES
+   --------------------------------------------------------------- */
+function checkBadges(){
+  var newly = [];
+  BADGES.forEach(function(b){
+    if(S.badges.indexOf(b.id) < 0 && b.test(S)){
+      S.badges.push(b.id); newly.push(b);
+    }
+  });
+  return newly;
+}
+function renderBadges(){
+  var w = $('badgeWrap'); clear(w);
+  BADGES.forEach(function(b){
+    var on = S.badges.indexOf(b.id) >= 0;
+    var d = el('div','badge'+(on?' on':''));
+    var i = el('span','ic', b.ic);
+    d.appendChild(i); d.appendChild(document.createTextNode(b.name));
+    w.appendChild(d);
+  });
+}
+
+/* ---------------------------------------------------------------
+   ROUND ENGINE
+   --------------------------------------------------------------- */
+var R = null;
+
+function startRound(opts){
+  questCheck();
+  R = {
+    queue: opts.queue,
+    i: 0, correct: 0, wrong: 0, combo: 0,
+    mode: opts.mode || 'practice',
+    newBadges: [],
+    timeLeft: opts.mode === 'clock' ? 90 : 0,
+    timerId: null
+  };
+  if(R.mode === 'clock'){
+    $('timerWrap').classList.remove('hidden');
+    R.timerId = setInterval(tickClock, 1000);
+  } else {
+    $('timerWrap').classList.add('hidden');
+  }
+  show('play');
+  renderQuestion();
+}
+function tickClock(){
+  R.timeLeft--;
+  $('timerFill').style.width = Math.max(0, (R.timeLeft/90)*100) + '%';
+  if(R.timeLeft <= 0) endRound();
+}
+function stopTimer(){ if(R && R.timerId){ clearInterval(R.timerId); R.timerId = null; } }
+
+function renderQuestion(){
+  if(R.mode === 'clock' && R.i >= R.queue.length){
+    R.queue = R.queue.concat(buildRound(null, 10));
+  }
+  if(R.i >= R.queue.length){ endRound(); return; }
+  var q = R.queue[R.i];
+  R.answered = false;
+  R.picked = null;
+
+  $('qtag').textContent = q.tag;
+  $('progress').textContent = (R.mode === 'clock')
+    ? ('✓ ' + R.correct)
+    : ((R.i+1) + '/' + R.queue.length);
+  $('comboTag').textContent = R.combo >= 3 ? ('🔥 x' + Math.min(R.combo,5)) : '';
+  clear($('feedback'));
+  $('nextBtn').classList.add('hidden');
+  $('checkBtn').classList.add('hidden');
+
+  var body = $('qbody'); clear(body);
+  if(q.scene){
+    var sc = el('div','scene', q.scene);
+    body.appendChild(sc);
+  }
+  body.appendChild(el('div','prompt', q.prompt));
+  if(q.focus){
+    var f = el('div','scene big', q.focus);
+    f.style.letterSpacing = '0';
+    body.appendChild(f);
+  }
+
+  if(q.type === 'mcq') renderMCQ(q, body);
+  else if(q.type === 'dual') renderDual(q, body);
+  else if(q.type === 'grid') renderGrid(q, body);
+  else if(q.type === 'pair') renderPair(q, body);
+  else if(q.type === 'sort') renderSort(q, body);
+  else if(q.type === 'multi') renderMulti(q, body);
+}
+
+/* ---- renderers ---- */
+function renderMCQ(q, body){
+  var wrap = el('div','grid2');
+  q.options.forEach(function(o){
+    var b = el('button','opt', o);
+    b.onclick = function(){
+      if(R.answered) return;
+      R.answered = true;
+      var ok = (o === q.answer);
+      Array.prototype.forEach.call(wrap.children, function(c){
+        if(c.textContent === q.answer) c.classList.add('ok');
+        else if(c === b) c.classList.add('bad');
+        else c.classList.add('dim');
+      });
+      resolve(q, ok);
+    };
+    wrap.appendChild(b);
+  });
+  body.appendChild(wrap);
+}
+
+function renderDual(q, body){
+  var picked = {};
+  q.rows.forEach(function(row, ri){
+    body.appendChild(el('div','small', row.label));
+    var wrap = el('div','row');
+    wrap.style.marginBottom = '10px';
+    row.options.forEach(function(o){
+      var b = el('button','opt tile', o);
+      b.onclick = function(){
+        if(R.answered) return;
+        Array.prototype.forEach.call(wrap.children, function(c){ c.classList.remove('sel'); });
+        b.classList.add('sel');
+        picked[ri] = o;
+        $('checkBtn').classList.toggle('hidden', Object.keys(picked).length < q.rows.length);
+      };
+      wrap.appendChild(b);
+    });
+    body.appendChild(wrap);
+    row._wrap = wrap;
+  });
+  $('checkBtn').onclick = function(){
+    if(R.answered) return;
+    R.answered = true;
+    $('checkBtn').classList.add('hidden');
+    var allOk = true;
+    q.rows.forEach(function(row, ri){
+      Array.prototype.forEach.call(row._wrap.children, function(c){
+        c.classList.remove('sel');
+        if(c.textContent === row.answer) c.classList.add('ok');
+        else if(c.textContent === picked[ri]) c.classList.add('bad');
+        else c.classList.add('dim');
+      });
+      if(picked[ri] !== row.answer) allOk = false;
+    });
+    resolve(q, allOk);
+  };
+}
+
+function renderGrid(q, body){
+  var filled = {}, order = [];
+  var tbl = el('table','conj');
+  var head = el('tr');
+  head.appendChild(el('th','','पुरुषः'));
+  NUM_NAME.forEach(function(n){ head.appendChild(el('th','',n)); });
+  tbl.appendChild(head);
+  var cellNodes = {};
+  for(var p=0;p<3;p++){
+    var tr = el('tr');
+    tr.appendChild(el('th','',PER_NAME[p]));
+    for(var n=0;n<3;n++){
+      var key = p+'-'+n;
+      var td = el('td');
+      if(q.blankKeys.indexOf(key) >= 0){
+        var sp = el('span','blank','____');
+        sp.dataset.key = key;
+        cellNodes[key] = sp;
+        td.appendChild(sp);
+      } else {
+        var cell = q.cells.filter(function(c){ return c.p+'-'+c.n === key; })[0];
+        td.textContent = cell.w;
+      }
+      tr.appendChild(td);
+    }
+    tbl.appendChild(tr);
+  }
+  body.appendChild(tbl);
+
+  var tileWrap = el('div','center');
+  q.tiles.forEach(function(t){
+    var b = el('button','opt tile', t);
+    b.onclick = function(){
+      if(R.answered || b.classList.contains('dim')) return;
+      var nextKey = q.blankKeys.filter(function(k){ return !filled[k]; })[0];
+      if(!nextKey) return;
+      filled[nextKey] = t; order.push({key:nextKey, node:b});
+      cellNodes[nextKey].textContent = t;
+      cellNodes[nextKey].classList.add('filled');
+      b.classList.add('dim');
+      $('checkBtn').classList.toggle('hidden', order.length < q.blankKeys.length);
+    };
+    tileWrap.appendChild(b);
+  });
+  body.appendChild(tileWrap);
+
+  var undo = el('button','btn sm ghost','↩ पिछला हटाओ');
+  undo.onclick = function(){
+    if(R.answered || !order.length) return;
+    var last = order.pop();
+    delete filled[last.key];
+    cellNodes[last.key].textContent = '____';
+    cellNodes[last.key].classList.remove('filled');
+    last.node.classList.remove('dim');
+    $('checkBtn').classList.add('hidden');
+  };
+  body.appendChild(el('div','center')).appendChild(undo);
+
+  $('checkBtn').onclick = function(){
+    if(R.answered) return;
+    R.answered = true;
+    $('checkBtn').classList.add('hidden');
+    var allOk = true;
+    q.blankKeys.forEach(function(k){
+      var want = q.cells.filter(function(c){ return c.p+'-'+c.n === k; })[0].w;
+      var got = filled[k];
+      cellNodes[k].classList.add(got === want ? 'ok' : 'bad');
+      if(got !== want){ allOk = false; cellNodes[k].textContent = want; }
+    });
+    resolve(q, allOk);
+  };
+}
+
+function renderPair(q, body){
+  var selLeft = null, done = {}, wrong = 0;
+  var wrap = el('div','grid2');
+  var lcol = el('div'), rcol = el('div');
+  q.left.forEach(function(w){
+    var b = el('button','opt', w);
+    b.style.marginBottom = '8px';
+    b.onclick = function(){
+      if(R.answered || done[w]) return;
+      Array.prototype.forEach.call(lcol.children, function(c){ c.classList.remove('sel'); });
+      b.classList.add('sel'); selLeft = {w:w, node:b};
+    };
+    lcol.appendChild(b);
+  });
+  q.right.forEach(function(h){
+    var b = el('button','opt', h);
+    b.style.marginBottom = '8px';
+    b.onclick = function(){
+      if(R.answered || !selLeft || b.classList.contains('ok')) return;
+      if(q.map[selLeft.w] === h){
+        selLeft.node.classList.remove('sel');
+        selLeft.node.classList.add('ok'); b.classList.add('ok');
+        done[selLeft.w] = 1; selLeft = null;
+        beep(760,0.08);
+        if(Object.keys(done).length === q.left.length){
+          R.answered = true;
+          resolve(q, wrong === 0);
+        }
+      } else {
+        wrong++;
+        b.classList.add('bad'); soundBad();
+        setTimeout(function(){ b.classList.remove('bad'); }, 400);
+      }
+    };
+    rcol.appendChild(b);
+  });
+  wrap.appendChild(lcol); wrap.appendChild(rcol);
+  body.appendChild(wrap);
+}
+
+function renderSort(q, body){
+  var placed = {}, selWord = null;
+  var wordWrap = el('div','center');
+  wordWrap.style.marginBottom = '10px';
+  var wordNodes = {};
+  q.words.forEach(function(w){
+    var b = el('button','opt tile', w);
+    b.onclick = function(){
+      if(R.answered || placed[w]) return;
+      Array.prototype.forEach.call(wordWrap.children, function(c){ c.classList.remove('sel'); });
+      b.classList.add('sel'); selWord = w;
+    };
+    wordNodes[w] = b;
+    wordWrap.appendChild(b);
+  });
+  body.appendChild(wordWrap);
+
+  var bWrap = el('div');
+  var bucketNodes = {};
+  q.buckets.forEach(function(bk){
+    var d = el('div','bucket');
+    d.style.marginBottom = '8px';
+    d.appendChild(el('h4','',bk));
+    var inner = el('div');
+    d.appendChild(inner);
+    bucketNodes[bk] = inner;
+    d.onclick = function(){
+      if(R.answered || !selWord) return;
+      placed[selWord] = bk;
+      var chip = el('span','chip', selWord);
+      chip.dataset.w = selWord;
+      inner.appendChild(chip);
+      wordNodes[selWord].classList.add('dim');
+      wordNodes[selWord].classList.remove('sel');
+      selWord = null;
+      $('checkBtn').classList.toggle('hidden', Object.keys(placed).length < q.words.length);
+    };
+    bWrap.appendChild(d);
+  });
+  body.appendChild(bWrap);
+
+  $('checkBtn').onclick = function(){
+    if(R.answered) return;
+    R.answered = true;
+    $('checkBtn').classList.add('hidden');
+    var allOk = true;
+    q.buckets.forEach(function(bk){
+      Array.prototype.forEach.call(bucketNodes[bk].children, function(chip){
+        var w = chip.dataset.w;
+        if(q.map[w] === bk) chip.classList.add('ok');
+        else { chip.classList.add('bad'); allOk = false; }
+      });
+    });
+    resolve(q, allOk);
+  };
+}
+
+function renderMulti(q, body){
+  var chosen = [];
+  var wrap = el('div','grid2');
+  q.options.forEach(function(o){
+    var b = el('button','opt', o);
+    b.onclick = function(){
+      if(R.answered) return;
+      var idx = chosen.indexOf(o);
+      if(idx >= 0){ chosen.splice(idx,1); b.classList.remove('sel'); }
+      else {
+        if(chosen.length >= q.need) return;
+        chosen.push(o); b.classList.add('sel');
+      }
+      $('checkBtn').classList.toggle('hidden', chosen.length !== q.need);
+    };
+    wrap.appendChild(b);
+  });
+  body.appendChild(wrap);
+  $('checkBtn').onclick = function(){
+    if(R.answered) return;
+    R.answered = true;
+    $('checkBtn').classList.add('hidden');
+    var allOk = true;
+    Array.prototype.forEach.call(wrap.children, function(c){
+      var t = c.textContent;
+      c.classList.remove('sel');
+      if(chosen.indexOf(t) >= 0){
+        if(q.answers.indexOf(t) >= 0) c.classList.add('ok');
+        else { c.classList.add('bad'); allOk = false; }
+      } else if(q.answers.indexOf(t) >= 0){
+        c.classList.add('ok');
+      } else c.classList.add('dim');
+    });
+    resolve(q, allOk);
+  };
+}
+
+/* ---- scoring ---- */
+function resolve(q, ok){
+  var fb = $('feedback'); clear(fb);
+  var box = el('div','feedback ' + (ok ? 'ok' : 'bad'));
+  if(ok){
+    R.correct++; R.combo++;
+    if(R.combo > S.bestCombo) S.bestCombo = R.combo;
+    var mult = Math.min(1 + Math.floor(R.combo/3), 3);
+    S.xp += 10 * mult;
+    S.totalCorrect++;
+    S.topicCorrect[q.topic] = (S.topicCorrect[q.topic] || 0) + 1;
+    bumpMastery(q.id, true);
+    creditMistake(q);
+    questTick();
+    box.textContent = '✅ शाबाश! ' + q.explain + (mult > 1 ? '  (x' + mult + ' XP)' : '');
+    soundOk();
+    if(R.combo === 5 || R.combo === 10) confetti();
+  } else {
+    R.wrong++; R.combo = 0;
+    S.totalWrong++;
+    bumpMastery(q.id, false);
+    addMistake(q);
+    box.textContent = '❌ फिर से देखो — ' + q.explain;
+    soundBad();
+  }
+  fb.appendChild(box);
+
+  var lvlBefore = levelOf(S.xp - (ok ? 10 : 0));
+  if(levelOf(S.xp) > lvlBefore){ confetti(); soundLevel(); toast('🎉 नया स्तर ' + levelOf(S.xp)); }
+
+  var newly = checkBadges();
+  newly.forEach(function(b){ R.newBadges.push(b); toast('🏅 ' + b.name); });
+
+  markPractice();
+  save();
+  refreshTop();
+  R.i++;
+  $('nextBtn').classList.remove('hidden');
+  $('comboTag').textContent = R.combo >= 3 ? ('🔥 x' + Math.min(R.combo,5)) : '';
+}
+
+function endRound(){
+  stopTimer();
+  var total = R.correct + R.wrong;
+  if(R.mode === 'clock' && R.correct > S.clockBest) S.clockBest = R.correct;
+  if(total > 0 && R.wrong === 0 && R.mode !== 'clock') S.perfectRounds++;
+  var newly = checkBadges();
+  save(); refreshTop();
+
+  var pct = total ? Math.round(R.correct/total*100) : 0;
+  $('resEmoji').textContent = pct >= 90 ? '🏆' : (pct >= 70 ? '🎉' : '💪');
+  $('resTitle').textContent = pct >= 90 ? 'शानदार!' : (pct >= 70 ? 'बहुत अच्छा!' : 'अभ्यास जारी रखो!');
+  $('resLine').textContent = R.correct + ' सही · ' + R.wrong + ' गलत · ' + pct + '%' +
+    (R.mode === 'clock' ? ('  (सर्वश्रेष्ठ: ' + S.clockBest + ')') : '');
+  var rb = $('resBadges'); clear(rb);
+  R.newBadges.concat(newly).forEach(function(b){
+    rb.appendChild(el('div','small','🏅 नया पदक: ' + b.name));
+  });
+  if(pct >= 70) confetti();
+  show('result');
+}
+
+/* ---------------------------------------------------------------
+   FLASHCARDS
+   --------------------------------------------------------------- */
+var DECKS = {
+  birds: {name:'पक्षिणः नामानि 🦜', cards: BIRDS.map(function(b){ return {f:b.sa, b:b.hi}; })},
+  dhatu: {name:'धातुरूप 🔤', cards: VERBS.filter(function(v){ return !v.irregular; }).map(function(v){
+    return {f:v.d + ' (' + v.hi + ')',
+            b:verbForm(v,0,0) + ' · ' + verbForm(v,0,1) + ' · ' + verbForm(v,0,2) +
+              '\n' + verbForm(v,1,0) + ' · ' + verbForm(v,1,1) + ' · ' + verbForm(v,1,2) +
+              '\n' + verbForm(v,2,0) + ' · ' + verbForm(v,2,1) + ' · ' + verbForm(v,2,2)};
+  })},
+  ling: {name:'लिंग व वचन ⚖️', cards: NOUN_STEMS.map(function(s){
+    var f = nounForms(s);
+    return {f:f[0] + ' / ' + f[1] + ' / ' + f[2],
+            b:GEN_NAME[s.g] + '\nएक: ' + f[0] + ' · द्वि: ' + f[1] + ' · बहु: ' + f[2] + '\nअर्थ: ' + s.hi};
+  })},
+  artha: {name:'चित्र व अर्थ 🖼️', cards: PICWORDS.map(function(p){ return {f:p.e + '  ' + p.sa, b:p.hi}; })}
+};
+var deckKey = null, cardIdx = 0;
+
+function renderDeckPick(){
+  var w = $('cardDeckPick'); clear(w);
+  $('cardArea').classList.add('hidden');
+  w.classList.remove('hidden');
+  Object.keys(DECKS).forEach(function(k){
+    var b = el('button','btn ghost', DECKS[k].name);
+    b.onclick = function(){ deckKey = k; cardIdx = 0; renderCard(); };
+    w.appendChild(b);
+  });
+}
+function renderCard(){
+  $('cardDeckPick').classList.add('hidden');
+  $('cardArea').classList.remove('hidden');
+  var deck = DECKS[deckKey];
+  var c = deck.cards[cardIdx];
+  $('cardFront').textContent = c.f;
+  $('cardBack').textContent = c.b;
+  $('cardBack').style.whiteSpace = 'pre-line';
+  $('cardBack').classList.add('hidden');
+  $('cardCount').textContent = (cardIdx+1) + ' / ' + deck.cards.length + ' — ' + deck.name;
+}
+
+/* ---------------------------------------------------------------
+   MISTAKES VIEW
+   --------------------------------------------------------------- */
+function renderMistakes(){
+  var w = $('mistList'); clear(w);
+  if(!S.mistakes.length){
+    w.appendChild(el('p','small','अभी कोई गलती नहीं — बढ़िया! 🎉'));
+    $('drillBtn').classList.add('hidden');
+    return;
+  }
+  $('drillBtn').classList.remove('hidden');
+  S.mistakes.slice().reverse().forEach(function(m){
+    var row = el('div','mist');
+    row.appendChild(el('div','g', m.label + '  (' + (m.right||0) + '/2 सही)'));
+    var b = el('button','btn sm ghost','हटाएँ');
+    b.onclick = function(){ dropMistake(m.id); };
+    row.appendChild(b);
+    w.appendChild(row);
+  });
+}
+/* Mistake drill: regenerate live questions weighted to the mistaken topics. */
+function drillMistakes(){
+  var topics = {}, list = [];
+  S.mistakes.forEach(function(m){ topics[m.topic] = 1; });
+  var keys = Object.keys(topics);
+  if(!keys.length){ toast('कोई गलती नहीं'); return; }
+  var wanted = {};
+  S.mistakes.forEach(function(m){ wanted[m.id] = 1; });
+  var guard = 0;
+  while(list.length < 10 && guard < 600){
+    guard++;
+    var q = genQuestion(pick(keys));
+    if(wanted[q.id] && !list.some(function(x){ return x.id === q.id; })){ list.push(q); continue; }
+    if(guard > 300 && !list.some(function(x){ return x.id === q.id; })) list.push(q);
+  }
+  startRound({queue:list, mode:'fix'});
+}
+
+/* ---------------------------------------------------------------
+   PROGRESS + BACKUP
+   --------------------------------------------------------------- */
+function renderProgress(){
+  var acc = (S.totalCorrect + S.totalWrong) > 0
+    ? Math.round(S.totalCorrect / (S.totalCorrect + S.totalWrong) * 100) : 0;
+  $('progStats').textContent =
+    'स्तर ' + levelOf(S.xp) + ' · ' + S.xp + ' XP · ' +
+    S.totalCorrect + ' सही / ' + (S.totalCorrect + S.totalWrong) + ' (' + acc + '%) · ' +
+    'सर्वश्रेष्ठ लगातार: ' + S.bestCombo + ' · streak ' + S.streak + ' (best ' + S.bestStreak + ')';
+  var w = $('masteryList'); clear(w);
+  TOPICS.forEach(function(t){
+    var n = S.topicCorrect[t.id] || 0;
+    var row = el('div','mist');
+    row.appendChild(el('div','g', t.icon + ' ' + t.name));
+    row.appendChild(el('div','small', n + ' सही'));
+    w.appendChild(row);
+  });
+  renderBadges();
+  $('soundBtn').textContent = S.sound ? '🔊 आवाज़: चालू' : '🔇 आवाज़: बंद';
+}
+
+/* Two-tap inline confirmation. Native modal dialogs are suppressed in Brave —
+   never use them anywhere in this file. */
+var pendingReset = false;
+function resetFlow(){
+  if(!pendingReset){
+    pendingReset = true;
+    $('resetBtn').textContent = '⚠ पक्का? फिर से दबाएँ';
+    setTimeout(function(){
+      pendingReset = false;
+      $('resetBtn').textContent = '♻ सब मिटाएँ';
+    }, 4000);
+    return;
+  }
+  pendingReset = false;
+  S = clone(DEFAULT_STATE);
+  save(); refreshTop(); renderProgress(); renderQuest();
+  $('resetBtn').textContent = '♻ सब मिटाएँ';
+  toast('सब कुछ मिटा दिया गया');
+}
+function showExport(){
+  var a = $('ioArea'); clear(a);
+  var ta = el('textarea'); ta.value = JSON.stringify(S);
+  ta.readOnly = true;
+  a.appendChild(el('p','small','यह पूरा टेक्स्ट कॉपी करके सुरक्षित रखें:'));
+  a.appendChild(ta);
+  ta.focus(); ta.select();
+}
+function showImport(){
+  var a = $('ioArea'); clear(a);
+  var ta = el('textarea'); ta.placeholder = 'यहाँ बैकअप टेक्स्ट चिपकाएँ';
+  var b = el('button','btn sm mint','वापस लाएँ');
+  b.onclick = function(){
+    try{
+      var o = JSON.parse(ta.value);
+      if(typeof o !== 'object' || o === null) throw new Error('bad');
+      var d = clone(DEFAULT_STATE), k;
+      for(k in d){ if(!(k in o)) o[k] = d[k]; }
+      S = o; save(); refreshTop(); renderProgress(); renderQuest();
+      clear(a); toast('बैकअप वापस आ गया ✅');
+    }catch(e){ toast('गलत बैकअप टेक्स्ट ❌'); }
+  };
+  a.appendChild(ta); a.appendChild(b);
+}
+
+/* ---------------------------------------------------------------
+   TOPIC LIST + ROUTING
+   --------------------------------------------------------------- */
+function renderTopics(){
+  var w = $('topicList'); clear(w);
+  TOPICS.forEach(function(t){
+    var b = el('button','btn sky', t.icon + '  ' + t.name);
+    b.onclick = function(){ startRound({queue:buildRound(t.id, 10), mode:'practice'}); };
+    w.appendChild(b);
+  });
+  var all = el('button','btn mint','🎲 सब मिलाकर');
+  all.onclick = function(){ startRound({queue:buildRound(null, 10), mode:'practice'}); };
+  w.appendChild(all);
+}
+
+function go(dest){
+  if(dest === 'home'){ renderQuest(); show('home'); }
+  else if(dest === 'topics'){ renderTopics(); show('topics'); }
+  else if(dest === 'cards'){ renderDeckPick(); show('cards'); }
+  else if(dest === 'prog'){ renderProgress(); show('prog'); }
+  else if(dest === 'fixview'){ renderMistakes(); show('mist'); }
+  else if(dest === 'mixed'){ startRound({queue:buildRound(null, 10), mode:'practice'}); }
+  else if(dest === 'clock'){ startRound({queue:buildRound(null, 12), mode:'clock'}); }
+  else if(dest === 'fix'){ renderMistakes(); show('mist'); }
+}
+
+document.addEventListener('click', function(ev){
+  var t = ev.target;
+  while(t && t !== document.body && !t.dataset.go) t = t.parentNode;
+  if(t && t.dataset && t.dataset.go){ go(t.dataset.go); }
+});
+
+$('nextBtn').onclick = function(){ renderQuestion(); };
+$('quitBtn').onclick = function(){ stopTimer(); endRound(); };
+$('flipBtn').onclick = function(){ $('cardBack').classList.toggle('hidden'); };
+$('nextCard').onclick = function(){
+  var d = DECKS[deckKey]; cardIdx = (cardIdx+1) % d.cards.length; renderCard();
+};
+$('prevCard').onclick = function(){
+  var d = DECKS[deckKey]; cardIdx = (cardIdx-1+d.cards.length) % d.cards.length; renderCard();
+};
+$('cardBackBtn').onclick = function(){ renderDeckPick(); };
+$('drillBtn').onclick = function(){ drillMistakes(); };
+$('soundBtn').onclick = function(){ S.sound = !S.sound; save(); renderProgress(); beep(600,0.1); };
+$('expBtn').onclick = function(){ showExport(); };
+$('impBtn').onclick = function(){ showImport(); };
+$('resetBtn').onclick = function(){ resetFlow(); };
+
+/* boot */
+questCheck();
+renderQuest();
+refreshTop();
+show('home');
+
+/* expose for QA harness only */
+if(typeof window !== 'undefined'){
+  window.__SU2 = {
+    NOUNS:NOUNS, NOUN_STEMS:NOUN_STEMS, VERBS:VERBS, VERB_FORMS:VERB_FORMS,
+    BIRDS:BIRDS, PICWORDS:PICWORDS, SCENES:SCENES,
+    nounForms:nounForms, verbForm:verbForm, neuterPlural:neuterPlural,
+    genQuestion:genQuestion, buildRound:buildRound, GENERATORS:GENERATORS,
+    GEN_NAME:GEN_NAME, NUM_NAME:NUM_NAME, PER_NAME:PER_NAME,
+    getState:function(){ return S; }, STORE_KEY:STORE_KEY
+  };
+}
+</script>
+</body>
+</html>
