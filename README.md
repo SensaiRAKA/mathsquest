@@ -11,6 +11,11 @@ static HTML file with no build step or dependencies.
 - **`sanskritquest.html`** — Sanskrit Quest: gender (लिंग), number (वचन),
   days of the week, domestic animals, and verbs, based on the Class 4,
   Unit-1 (2026-27) school worksheet
+- **`sanskrit-u2.html`** — शुक-लोक (Sanskrit Unit 2): picture composition
+  (संज्ञा/क्रिया), धातुरूप लट् लकार, पक्षिणः नामानि both directions, लिंग/वचन of
+  nouns, पुरुष/वचन of verb forms, and लिंग-वचनानि, based on the Class 4
+  Unit-2 weekly-test-2 syllabus. Tap-only input throughout — no free-text
+  Devanagari entry, no drag-and-drop, and no native dialogs
 - **`special-classes-maths.html`** — Maths Special Class (July): a short
   concept lesson followed by practice for each topic — big numbers &
   place value (Indian/International systems), factors & multiples

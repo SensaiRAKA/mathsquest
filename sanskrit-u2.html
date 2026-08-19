@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>शुक-लोक &middot; Sanskrit Unit 2</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
 <style>
 :root{
   --bg1:#2b1b5e; --bg2:#5b2a8c; --card:#ffffff; --ink:#22163f;
@@ -56,6 +60,7 @@ button{font-family:inherit;font-size:16px;border:none;cursor:pointer}
 .tile{display:inline-block;width:auto;padding:11px 14px;margin:4px;font-size:18px}
 .blank{display:inline-block;min-width:104px;border-bottom:3px dashed var(--grape);text-align:center;padding:4px 6px;font-size:19px;font-weight:700;color:var(--grape)}
 .blank.filled{border-bottom-style:solid;color:var(--ink)}
+.blank.next{background:#ece4ff;border-color:var(--candy);border-bottom-width:4px;border-radius:6px}
 .blank.ok{border-color:var(--ok);color:var(--ok)}
 .blank.bad{border-color:var(--bad);color:var(--bad)}
 
@@ -90,6 +95,9 @@ table.conj th{background:#f4f1ff;font-size:14px;color:var(--muted)}
 
 .conf{position:fixed;top:-16px;width:10px;height:14px;z-index:60;pointer-events:none;border-radius:2px}
 @keyframes fall{to{transform:translateY(104vh) rotate(640deg);opacity:.9}}
+.syncrow{display:none;align-items:center;gap:8px;flex-wrap:wrap;margin-top:8px}
+.syncrow .code{background:#ece4ff;color:var(--grape);font-weight:800;padding:6px 12px;border-radius:999px;font-size:13px}
+.hublink{display:block;text-align:center;margin:10px 0 0;color:#e9e2ff;font-size:13px;font-weight:700;text-decoration:none}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:78px;background:#22163f;color:#fff;padding:10px 16px;border-radius:999px;font-size:14px;z-index:70;font-weight:700;opacity:0;transition:opacity .25s}
 .toast.show{opacity:1}
 .timerbar{height:9px;background:#eee;border-radius:99px;overflow:hidden;margin-bottom:8px}
@@ -127,6 +135,7 @@ textarea{width:100%;height:110px;font-size:12px;border:2px solid #e3dbff;border-
       <p class="small">इकाई–2 · खण्ड क (अनुप्रयुक्त व्याकरणम्) + खण्ड ख (लिंग-वचनानि)</p>
       <p class="small"><b>याद रखो:</b> यह ऐप पहचान (recognition) के लिए है। लिखने का अभ्यास कॉपी पर ज़रूर करो ✍️</p>
     </div>
+    <a class="hublink" href="index.html">&larr; सभी विषय (All quests)</a>
   </section>
 
   <!-- TOPICS -->
@@ -216,6 +225,11 @@ textarea{width:100%;height:110px;font-size:12px;border:2px solid #e3dbff;border-
       <button class="btn sm ghost" id="impBtn">⬆ बैकअप वापस लाएँ</button>
       <button class="btn sm ghost" id="resetBtn">♻ सब मिटाएँ</button>
       <div id="ioArea"></div>
+      <div class="syncrow" id="syncRow">
+        <span class="code" id="syncCodeLabel"></span>
+        <button class="btn sm ghost" id="syncChangeBtn" style="width:auto">दूसरा कोड जोड़ें</button>
+      </div>
+      <div id="syncArea"></div>
     </div>
   </section>
 </div>
@@ -423,27 +437,62 @@ var DEFAULT_STATE = {
   clockBest:0, fixed:0, questsDone:0,
   streak:0, bestStreak:0, lastPractice:null,
   quest:{date:null, done:0, goal:12},
-  topicCorrect:{}, mastery:{}, mistakes:[], badges:[], sound:true
+  topicCorrect:{}, mastery:{}, mistakes:[], badges:[], sound:true,
+  updatedAt:0
 };
-var S = load();
+
+/* Repairs a state object of unknown provenance: localStorage, a pasted backup,
+   or a Firestore document. Missing keys are filled AND wrong types are coerced —
+   a backup that parses as JSON is not automatically a usable state. */
+function normalize(o){
+  var d = clone(DEFAULT_STATE), k;
+  if(!o || typeof o !== 'object' || Array.isArray(o)) return d;
+  for(k in d){ if(!(k in o)) o[k] = d[k]; }
+  ['xp','totalCorrect','totalWrong','bestCombo','perfectRounds','clockBest',
+   'fixed','questsDone','streak','bestStreak','updatedAt'].forEach(function(f){
+    var v = Number(o[f]);
+    o[f] = (isFinite(v) && v >= 0) ? v : 0;
+  });
+  if(typeof o.lastPractice !== 'string') o.lastPractice = null;
+  if(typeof o.sound !== 'boolean') o.sound = true;
+  if(!o.quest || typeof o.quest !== 'object' || Array.isArray(o.quest)) o.quest = clone(d.quest);
+  if(typeof o.quest.date !== 'string') o.quest.date = null;
+  o.quest.done = Math.max(0, Number(o.quest.done) || 0);
+  o.quest.goal = Math.max(1, Number(o.quest.goal) || 12);
+  if(!o.topicCorrect || typeof o.topicCorrect !== 'object' || Array.isArray(o.topicCorrect)) o.topicCorrect = {};
+  if(!o.mastery || typeof o.mastery !== 'object' || Array.isArray(o.mastery)) o.mastery = {};
+  if(!Array.isArray(o.mistakes)) o.mistakes = [];
+  if(!Array.isArray(o.badges)) o.badges = [];
+  o.mistakes = o.mistakes.filter(function(m){ return m && typeof m === 'object' && typeof m.id === 'string'; });
+  o.badges = o.badges.filter(function(b){ return typeof b === 'string'; });
+  return o;
+}
+
+/* localStorage can be unavailable (private mode, quota, blocked storage).
+   Fall back to memory so a session still works, and say so once, not once
+   per answer. */
+var memoryFallback = null, saveWarned = false, _initialBoot = true;
 
 function load(){
-  try{
-    var raw = localStorage.getItem(STORE_KEY);
-    if(!raw) return clone(DEFAULT_STATE);
-    var o = JSON.parse(raw), d = clone(DEFAULT_STATE), k;
-    for(k in d){ if(!(k in o)) o[k] = d[k]; }
-    if(!o.topicCorrect) o.topicCorrect = {};
-    if(!o.mastery) o.mastery = {};
-    if(!Array.isArray(o.mistakes)) o.mistakes = [];
-    if(!Array.isArray(o.badges)) o.badges = [];
-    return o;
-  }catch(e){ return clone(DEFAULT_STATE); }
+  var raw = null;
+  try{ raw = localStorage.getItem(STORE_KEY); }catch(e){ raw = memoryFallback; }
+  if(!raw) return clone(DEFAULT_STATE);
+  try{ return normalize(JSON.parse(raw)); }
+  catch(e){ return clone(DEFAULT_STATE); }
 }
 function save(){
-  try{ localStorage.setItem(STORE_KEY, JSON.stringify(S)); }
-  catch(e){ toast('सेव नहीं हो पाया'); }
+  /* Boot-time saves must not stamp a fresh updatedAt, or a just-opened device
+     would always look newer than the cloud and clobber real progress. */
+  if(!_initialBoot) S.updatedAt = Date.now();
+  var json = JSON.stringify(S);
+  memoryFallback = json;
+  try{ localStorage.setItem(STORE_KEY, json); }
+  catch(e){
+    if(!saveWarned){ saveWarned = true; toast('इस ब्राउज़र में सेव नहीं हो पा रहा — प्रगति सिर्फ़ इसी सत्र तक रहेगी'); }
+  }
+  if(typeof DikshaSync !== 'undefined') DikshaSync.push(STORE_KEY, S);
 }
+var S = load();
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
 function levelOf(xp){ return Math.floor(xp/100)+1; }
 function xpInLevel(xp){ return xp%100; }
@@ -497,7 +546,9 @@ function qDhatuGrid(){
   var v = pick(VERBS.filter(function(x){ return !x.irregular; }));
   var cells = [], p, n;
   for(p=0;p<3;p++){ for(n=0;n<3;n++){ cells.push({p:p,n:n,w:verbForm(v,p,n)}); } }
-  var blanks = shuffle(cells).slice(0,3);
+  /* Choose 3 blanks at random but keep them in reading order: tiles fill the
+     next blank top-to-bottom, so the order the child sees is the order used. */
+  var blanks = shuffle(cells).slice(0,3).sort(function(a,b){ return (a.p*3+a.n)-(b.p*3+b.n); });
   var answers = blanks.map(function(b){ return b.w; });
   var others = shuffle(cells.filter(function(c){
     return answers.indexOf(c.w)<0;
@@ -517,14 +568,22 @@ function qDhatuBlank(){
   var v = pick(VERBS.filter(function(x){ return !x.irregular; }));
   var p = rnd(3), n = rnd(3);
   var ans = verbForm(v,p,n);
+  var shown = [];
+  for(var k=0;k<3;k++){ if(k!==n) shown.push(verbForm(v,p,k)); }
+  /* Distractors must not be forms already visible in the prompt — those are
+     eliminated on sight and make the question free. */
   var wrongs = [];
   var alt = [[0,1],[0,2],[1,0],[1,2],[2,0],[2,1],[0,0],[1,1],[2,2]];
   for(var i=0;i<alt.length && wrongs.length<3;i++){
     var w = verbForm(v,alt[i][0],alt[i][1]);
-    if(w!==ans && wrongs.indexOf(w)<0) wrongs.push(w);
+    if(w!==ans && wrongs.indexOf(w)<0 && shown.indexOf(w)<0) wrongs.push(w);
   }
-  var shown = [];
-  for(var k=0;k<3;k++){ if(k!==n) shown.push(verbForm(v,p,k)); }
+  /* Fall back to other verbs if this one cannot supply 3 unseen forms. */
+  for(var j=0;j<VERBS.length && wrongs.length<3;j++){
+    if(VERBS[j].irregular || VERBS[j].d===v.d) continue;
+    var w2 = verbForm(VERBS[j],p,n);
+    if(w2!==ans && wrongs.indexOf(w2)<0 && shown.indexOf(w2)<0) wrongs.push(w2);
+  }
   return {
     id:'db:'+v.d+':'+p+n, topic:'dhatu', type:'mcq', tag:'धातुरूप — रिक्त स्थान',
     prompt:PER_NAME[p]+' पुरुष: '+shown[0]+' , '+shown[1]+' , ____ ('+NUM_NAME[n]+')',
@@ -801,7 +860,14 @@ function renderQuest(){
    --------------------------------------------------------------- */
 function bumpMastery(id, ok){
   var cur = S.mastery[id] || 0;
-  S.mastery[id] = ok ? Math.min(cur+1, 3) : Math.max(cur-1, 0);
+  var next = ok ? Math.min(cur+1, 3) : Math.max(cur-1, 0);
+  if(next === 0) delete S.mastery[id];   /* keeps the map from growing forever */
+  else S.mastery[id] = next;
+}
+function masteredCount(){
+  var n = 0, k;
+  for(k in S.mastery){ if(S.mastery[k] >= 3) n++; }
+  return n;
 }
 function addMistake(q){
   for(var i=0;i<S.mistakes.length;i++){
@@ -859,6 +925,7 @@ function renderBadges(){
 var R = null;
 
 function startRound(opts){
+  stopTimer();
   questCheck();
   R = {
     queue: opts.queue,
@@ -1010,17 +1077,38 @@ function renderGrid(q, body){
   }
   body.appendChild(tbl);
 
+  /* target = the blank the next tapped tile goes into. Highlighted so the
+     child can see where their tap will land, and tappable to change it. */
+  var target = null;
+  function markTarget(){
+    q.blankKeys.forEach(function(k){ cellNodes[k].classList.remove('next'); });
+    if(target && !filled[target]) cellNodes[target].classList.add('next');
+  }
+  function nextTarget(){
+    target = q.blankKeys.filter(function(k){ return !filled[k]; })[0] || null;
+    markTarget();
+  }
+  q.blankKeys.forEach(function(k){
+    cellNodes[k].onclick = function(){
+      if(R.answered || filled[k]) return;
+      target = k; markTarget();
+    };
+  });
+  nextTarget();
+
   var tileWrap = el('div','center');
   q.tiles.forEach(function(t){
     var b = el('button','opt tile', t);
     b.onclick = function(){
       if(R.answered || b.classList.contains('dim')) return;
-      var nextKey = q.blankKeys.filter(function(k){ return !filled[k]; })[0];
-      if(!nextKey) return;
-      filled[nextKey] = t; order.push({key:nextKey, node:b});
-      cellNodes[nextKey].textContent = t;
-      cellNodes[nextKey].classList.add('filled');
+      if(!target || filled[target]) nextTarget();
+      if(!target) return;
+      var key = target;
+      filled[key] = t; order.push({key:key, node:b});
+      cellNodes[key].textContent = t;
+      cellNodes[key].classList.add('filled');
       b.classList.add('dim');
+      nextTarget();
       $('checkBtn').classList.toggle('hidden', order.length < q.blankKeys.length);
     };
     tileWrap.appendChild(b);
@@ -1035,6 +1123,7 @@ function renderGrid(q, body){
     cellNodes[last.key].textContent = '____';
     cellNodes[last.key].classList.remove('filled');
     last.node.classList.remove('dim');
+    target = last.key; markTarget();
     $('checkBtn').classList.add('hidden');
   };
   body.appendChild(el('div','center')).appendChild(undo);
@@ -1048,6 +1137,7 @@ function renderGrid(q, body){
       var want = q.cells.filter(function(c){ return c.p+'-'+c.n === k; })[0].w;
       var got = filled[k];
       cellNodes[k].classList.add(got === want ? 'ok' : 'bad');
+      cellNodes[k].classList.remove('next');
       if(got !== want){ allOk = false; cellNodes[k].textContent = want; }
     });
     resolve(q, allOk);
@@ -1190,6 +1280,7 @@ function renderMulti(q, body){
 
 /* ---- scoring ---- */
 function resolve(q, ok){
+  var xpBefore = S.xp;
   var fb = $('feedback'); clear(fb);
   var box = el('div','feedback ' + (ok ? 'ok' : 'bad'));
   if(ok){
@@ -1215,8 +1306,9 @@ function resolve(q, ok){
   }
   fb.appendChild(box);
 
-  var lvlBefore = levelOf(S.xp - (ok ? 10 : 0));
-  if(levelOf(S.xp) > lvlBefore){ confetti(); soundLevel(); toast('🎉 नया स्तर ' + levelOf(S.xp)); }
+  /* Compare against the XP this answer actually started from — a x3 combo or
+     the +25 quest bonus can cross a level boundary by more than 10. */
+  if(levelOf(S.xp) > levelOf(xpBefore)){ confetti(); soundLevel(); toast('🎉 नया स्तर ' + levelOf(S.xp)); }
 
   var newly = checkBadges();
   newly.forEach(function(b){ R.newBadges.push(b); toast('🏅 ' + b.name); });
@@ -1229,11 +1321,14 @@ function resolve(q, ok){
   $('comboTag').textContent = R.combo >= 3 ? ('🔥 x' + Math.min(R.combo,5)) : '';
 }
 
-function endRound(){
+function endRound(opts){
   stopTimer();
+  var quit = !!(opts && opts.quit);
   var total = R.correct + R.wrong;
-  if(R.mode === 'clock' && R.correct > S.clockBest) S.clockBest = R.correct;
-  if(total > 0 && R.wrong === 0 && R.mode !== 'clock') S.perfectRounds++;
+  var finished = R.i >= R.queue.length;
+  if(R.mode === 'clock' && !quit && R.correct > S.clockBest) S.clockBest = R.correct;
+  /* A round abandoned part-way is not "पूरा सही", however clean it was so far. */
+  if(total > 0 && R.wrong === 0 && R.mode !== 'clock' && finished && !quit) S.perfectRounds++;
   var newly = checkBadges();
   save(); refreshTop();
 
@@ -1339,7 +1434,8 @@ function renderProgress(){
   $('progStats').textContent =
     'स्तर ' + levelOf(S.xp) + ' · ' + S.xp + ' XP · ' +
     S.totalCorrect + ' सही / ' + (S.totalCorrect + S.totalWrong) + ' (' + acc + '%) · ' +
-    'सर्वश्रेष्ठ लगातार: ' + S.bestCombo + ' · streak ' + S.streak + ' (best ' + S.bestStreak + ')';
+    'सर्वश्रेष्ठ लगातार: ' + S.bestCombo + ' · streak ' + S.streak + ' (best ' + S.bestStreak + ')' +
+    ' · पक्के प्रश्न: ' + masteredCount();
   var w = $('masteryList'); clear(w);
   TOPICS.forEach(function(t){
     var n = S.topicCorrect[t.id] || 0;
@@ -1349,6 +1445,7 @@ function renderProgress(){
     w.appendChild(row);
   });
   renderBadges();
+  renderSync();
   $('soundBtn').textContent = S.sound ? '🔊 आवाज़: चालू' : '🔇 आवाज़: बंद';
 }
 
@@ -1367,6 +1464,7 @@ function resetFlow(){
   }
   pendingReset = false;
   S = clone(DEFAULT_STATE);
+  S.updatedAt = Date.now();
   save(); refreshTop(); renderProgress(); renderQuest();
   $('resetBtn').textContent = '♻ सब मिटाएँ';
   toast('सब कुछ मिटा दिया गया');
@@ -1386,14 +1484,51 @@ function showImport(){
   b.onclick = function(){
     try{
       var o = JSON.parse(ta.value);
-      if(typeof o !== 'object' || o === null) throw new Error('bad');
-      var d = clone(DEFAULT_STATE), k;
-      for(k in d){ if(!(k in o)) o[k] = d[k]; }
-      S = o; save(); refreshTop(); renderProgress(); renderQuest();
+      if(typeof o !== 'object' || o === null || Array.isArray(o)) throw new Error('bad');
+      S = normalize(o);
+      S.updatedAt = Date.now();     /* a restore is newer than whatever is in the cloud */
+      save(); refreshTop(); renderProgress(); renderQuest();
       clear(a); toast('बैकअप वापस आ गया ✅');
     }catch(e){ toast('गलत बैकअप टेक्स्ट ❌'); }
   };
   a.appendChild(ta); a.appendChild(b);
+}
+
+/* ---------------------------------------------------------------
+   CROSS-DEVICE SYNC (inline UI — never window.prompt/alert)
+   --------------------------------------------------------------- */
+function renderSync(){
+  var row = $('syncRow');
+  if(typeof DikshaSync === 'undefined' || !DikshaSync.isReady()){ row.style.display = 'none'; return; }
+  row.style.display = 'flex';
+  $('syncCodeLabel').textContent = 'कोड: ' + DikshaSync.getCode();
+}
+function syncCopyCode(){
+  var code = DikshaSync.getCode();
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(code);
+      toast('कोड कॉपी हो गया: ' + code);
+      return;
+    }
+  }catch(e){}
+  toast('कोड: ' + code);
+}
+function syncChangeCode(){
+  var a = $('syncArea'); clear(a);
+  a.appendChild(el('p','small','दूसरे डिवाइस का कोड यहाँ लिखें (जैसे TIGER-4271):'));
+  var inp = el('input');
+  inp.type = 'text';
+  inp.placeholder = 'TIGER-4271';
+  inp.style.cssText = 'width:100%;padding:10px;border-radius:12px;border:2px solid #e3dbff;font-size:16px;font-family:inherit';
+  var ok = el('button','btn sm mint','जोड़ें');
+  ok.onclick = function(){
+    if(!DikshaSync.setCode(inp.value)){ toast('कोड सही नहीं है ❌'); return; }
+    clear(a);
+    toast('जुड़ गया! प्रगति लाई जा रही है…');
+    setTimeout(function(){ window.location.reload(); }, 900);
+  };
+  a.appendChild(inp); a.appendChild(ok);
 }
 
 /* ---------------------------------------------------------------
@@ -1412,6 +1547,8 @@ function renderTopics(){
 }
 
 function go(dest){
+  /* Any navigation away from a live round ends that round's timer. */
+  if(R && R.timerId && dest !== 'play'){ stopTimer(); R = null; }
   if(dest === 'home'){ renderQuest(); show('home'); }
   else if(dest === 'topics'){ renderTopics(); show('topics'); }
   else if(dest === 'cards'){ renderDeckPick(); show('cards'); }
@@ -1429,7 +1566,7 @@ document.addEventListener('click', function(ev){
 });
 
 $('nextBtn').onclick = function(){ renderQuestion(); };
-$('quitBtn').onclick = function(){ stopTimer(); endRound(); };
+$('quitBtn').onclick = function(){ stopTimer(); endRound({quit:true}); };
 $('flipBtn').onclick = function(){ $('cardBack').classList.toggle('hidden'); };
 $('nextCard').onclick = function(){
   var d = DECKS[deckKey]; cardIdx = (cardIdx+1) % d.cards.length; renderCard();
@@ -1443,12 +1580,32 @@ $('soundBtn').onclick = function(){ S.sound = !S.sound; save(); renderProgress()
 $('expBtn').onclick = function(){ showExport(); };
 $('impBtn').onclick = function(){ showImport(); };
 $('resetBtn').onclick = function(){ resetFlow(); };
+$('syncCodeLabel').onclick = function(){ syncCopyCode(); };
+$('syncChangeBtn').onclick = function(){ syncChangeCode(); };
 
 /* boot */
 questCheck();
 renderQuest();
 refreshTop();
 show('home');
+_initialBoot = false;
+
+/* ---------- cross-device sync (no-op if Firebase is unreachable or unconfigured) ---------- */
+if(typeof DikshaSync !== 'undefined' && DikshaSync.init()){
+  DikshaSync.pull(STORE_KEY).then(function(remote){
+    if(remote && (remote.updatedAt || 0) > (S.updatedAt || 0)){
+      S = normalize(remote);
+      questCheck();
+      renderQuest();
+      refreshTop();
+      if(!$('scr-prog').classList.contains('hidden')) renderProgress();
+      toast('दूसरे डिवाइस की प्रगति आ गई ☁️');
+    }
+    DikshaSync.arm();
+    DikshaSync.push(STORE_KEY, S);
+    renderSync();
+  });
+}
 
 /* expose for QA harness only */
 if(typeof window !== 'undefined'){
