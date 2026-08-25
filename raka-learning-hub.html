@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Raka's Learning Hub — ID Models Drill</title>
+<style>
+  :root{
+    --ink:#16233F;
+    --ink-soft:#2B3B5E;
+    --manila:#EFE6CC;
+    --paper:#FBF8F0;
+    --stamp:#A6383A;
+    --amber:#D9932E;
+    --green:#3F6B4A;
+    --line:#D8CBA0;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--manila);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.5;
+    padding-bottom:60px;
+  }
+  header{
+    background:var(--ink);
+    color:var(--paper);
+    padding:28px 20px 22px;
+    position:relative;
+    overflow:hidden;
+  }
+  header::after{
+    content:"";
+    position:absolute;
+    right:-40px; top:-40px;
+    width:160px; height:160px;
+    border:3px solid rgba(251,248,240,0.08);
+    border-radius:50%;
+  }
+  .eyebrow{
+    font-family:Georgia,'Times New Roman',serif;
+    font-size:12px;
+    letter-spacing:3px;
+    text-transform:uppercase;
+    color:var(--amber);
+    margin:0 0 6px;
+  }
+  h1{
+    font-family:Georgia,'Times New Roman',serif;
+    font-weight:700;
+    font-size:26px;
+    margin:0 0 4px;
+    letter-spacing:0.3px;
+  }
+  .sub{
+    font-size:13px;
+    color:#C9D0DE;
+    max-width:520px;
+  }
+  .progress-wrap{
+    max-width:720px;
+    margin:18px auto 0;
+    padding:0 20px;
+  }
+  .progress-bar{
+    background:#3a4a6e;
+    border-radius:20px;
+    height:8px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    background:var(--amber);
+    height:100%;
+    width:0%;
+    transition:width .4s ease;
+  }
+  .progress-label{
+    font-size:11px;
+    color:#C9D0DE;
+    margin-top:6px;
+    display:flex;
+    justify-content:space-between;
+  }
+  main{
+    max-width:720px;
+    margin:24px auto;
+    padding:0 20px;
+  }
+  .toolbar{
+    display:flex;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .btn{
+    font-family:inherit;
+    font-size:13px;
+    font-weight:600;
+    border:1px solid var(--ink);
+    background:var(--paper);
+    color:var(--ink);
+    padding:9px 14px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .btn.primary{
+    background:var(--ink);
+    color:var(--paper);
+  }
+  .btn:active{transform:translateY(1px);}
+  .module{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:10px;
+    margin-bottom:14px;
+    overflow:hidden;
+  }
+  .module-head{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    padding:16px 16px;
+    cursor:pointer;
+  }
+  .mod-num{
+    font-family:'Courier New',monospace;
+    font-weight:700;
+    font-size:12px;
+    color:var(--paper);
+    background:var(--ink-soft);
+    border-radius:5px;
+    padding:5px 8px;
+    letter-spacing:1px;
+    flex-shrink:0;
+  }
+  .mod-num.done{background:var(--green);}
+  .mod-title-wrap{flex:1;}
+  .mod-title{
+    font-family:Georgia,'Times New Roman',serif;
+    font-weight:700;
+    font-size:16px;
+    margin:0;
+  }
+  .mod-tagline{
+    font-size:12.5px;
+    color:#5a5142;
+    margin-top:2px;
+  }
+  .mod-status{
+    font-size:18px;
+    flex-shrink:0;
+  }
+  .module-body{
+    display:none;
+    padding:0 16px 18px;
+    border-top:1px dashed var(--line);
+  }
+  .module.open .module-body{display:block;}
+  .explain{
+    font-size:14px;
+    margin:14px 0;
+  }
+  .explain b{color:var(--ink);}
+  .qa-example{
+    background:var(--manila);
+    border-left:3px solid var(--amber);
+    padding:10px 12px;
+    font-size:13px;
+    border-radius:0 6px 6px 0;
+    margin:12px 0;
+  }
+  .qa-example .lab{
+    font-size:10px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    color:var(--stamp);
+    font-weight:700;
+    display:block;
+    margin-bottom:4px;
+  }
+  .quiz-block{margin-top:18px;}
+  .q-count{
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:#8a8060;
+    font-weight:700;
+    margin-bottom:6px;
+  }
+  .q-text{
+    font-size:14.5px;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  .opt{
+    display:block;
+    width:100%;
+    text-align:left;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:7px;
+    padding:10px 12px;
+    font-size:13.5px;
+    margin-bottom:8px;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .opt:hover{border-color:var(--ink-soft);}
+  .opt.correct{
+    background:#e5f0e7;
+    border-color:var(--green);
+    font-weight:600;
+  }
+  .opt.wrong{
+    background:#f5e2e1;
+    border-color:var(--stamp);
+  }
+  .opt.disabled{cursor:default;}
+  .feedback{
+    font-size:13px;
+    padding:10px 12px;
+    border-radius:7px;
+    margin-top:6px;
+    display:none;
+  }
+  .feedback.show{display:block;}
+  .feedback.right{background:#e5f0e7;color:#274d31;}
+  .feedback.miss{background:#f5e2e1;color:#6b2323;}
+  .next-q{
+    margin-top:10px;
+    display:none;
+  }
+  .next-q.show{display:inline-block;}
+  .stamp{
+    position:fixed;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%) scale(2.4) rotate(-18deg);
+    opacity:0;
+    pointer-events:none;
+    font-family:Georgia,serif;
+    font-weight:900;
+    font-size:34px;
+    color:var(--stamp);
+    border:5px solid var(--stamp);
+    border-radius:10px;
+    padding:10px 22px;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    z-index:50;
+    transition:none;
+  }
+  .stamp.fire{
+    transition:transform .35s cubic-bezier(.2,1.4,.4,1), opacity .35s ease;
+    transform:translate(-50%,-50%) scale(1) rotate(-10deg);
+    opacity:0.92;
+  }
+  .drill-screen{
+    display:none;
+  }
+  .drill-screen.active{display:block;}
+  #moduleList.hidden-when-drill{display:none;}
+  .drill-card{
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:22px 18px;
+    min-height:220px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
+  .drill-source{
+    font-size:11px;
+    letter-spacing:1px;
+    text-transform:uppercase;
+    color:var(--stamp);
+    font-weight:700;
+    margin-bottom:8px;
+  }
+  .drill-close{
+    background:none;
+    border:none;
+    color:var(--ink-soft);
+    font-size:13px;
+    text-decoration:underline;
+    cursor:pointer;
+    margin-bottom:14px;
+    padding:0;
+  }
+  .drill-tally{
+    font-size:12px;
+    color:#5a5142;
+    margin-top:14px;
+  }
+  footer{
+    max-width:720px;
+    margin:30px auto 0;
+    padding:0 20px;
+    font-size:11.5px;
+    color:#8a8060;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <p class="eyebrow">Raka's Learning Hub</p>
+  <h1>Instructional Design &amp; Learning Models</h1>
+  <p class="sub">Ten models, drilled with QA-and-training scenarios instead of dictionary definitions. Answer, get corrected, move on — no cheat sheet needed by the end.</p>
+  <div class="progress-wrap">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label"><span id="progressText">0 / 10 modules certified</span><span id="streakText"></span></div>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <button class="btn primary" id="drillBtn">Quick Drill (random, all modules)</button>
+    <button class="btn" id="resetBtn">Reset progress</button>
+  </div>
+
+  <div id="moduleList"></div>
+
+  <div class="drill-screen" id="drillScreen">
+    <button class="drill-close" id="drillClose">&larr; back to modules</button>
+    <div class="drill-card" id="drillCard"></div>
+    <div class="drill-tally" id="drillTally"></div>
+  </div>
+</main>
+
+<div class="stamp" id="stamp">Certified</div>
+
+<footer>Progress is saved in this browser only (localStorage). Clearing site data resets it.</footer>
+
+<script>
+const MODULES = [
+  {
+    id:"bloom",
+    num:"MOD-01",
+    title:"Bloom's Taxonomy",
+    tagline:"Six levels of cognitive complexity — not an ID model, applies everywhere.",
+    explain:"Remember &rarr; Understand &rarr; Apply &rarr; Analyze &rarr; Evaluate &rarr; Create. It classifies the <b>kind of thinking</b> a learning objective demands. It isn't a design process like ADDIE — it's a lens you apply to objectives and assessment items, for kids and adults alike.",
+    example:{label:"QA angle", text:"\u201cList the three components of the escalation SOP\u201d sits at Remember. \u201cGiven this call transcript, judge whether the agent handled the disclosure correctly and justify your score\u201d sits at Evaluate — same topic, very different cognitive demand."},
+    questions:[
+      {
+        q:"An entire QA certification test is made up of questions like \u201cName the four phases of ADDIE.\u201d What's the problem, in Bloom's terms?",
+        options:[
+          "Nothing — recall questions are the gold standard for QA certification",
+          "It only tests the Remember level, so it can't tell you if the analyst can actually apply the framework on a real call",
+          "It's testing Create, which is too advanced for a certification test",
+          "Bloom's doesn't apply to adult professional testing"
+        ],
+        correct:1,
+        why:"A test built entirely from Remember-level items proves someone can recite terms, not that they can use them. You'd want at least a few Apply/Analyze/Evaluate items to certify real competence."
+      },
+      {
+        q:"Which pair is ordered correctly from lower to higher on Bloom's scale?",
+        options:[
+          "Create \u2192 Remember",
+          "Understand \u2192 Analyze",
+          "Evaluate \u2192 Apply",
+          "Analyze \u2192 Understand"
+        ],
+        correct:1,
+        why:"The full order is Remember, Understand, Apply, Analyze, Evaluate, Create. Understand comes before Analyze."
+      }
+    ]
+  },
+  {
+    id:"dok",
+    num:"MOD-02",
+    title:"DOK — Depth of Knowledge",
+    tagline:"Webb's framework: complexity of the TASK, not difficulty of the verb.",
+    explain:"DOK has 4 levels: Recall &rarr; Skill/Concept &rarr; Strategic Thinking &rarr; Extended Thinking. The trap: people confuse it with Bloom's. Bloom's classifies the <b>verb</b> in the objective. DOK classifies how much reasoning the <b>task itself</b> demands, regardless of the verb — \u201cdescribe\u201d can be DOK 1 (describe a term) or DOK 3 (describe why two conflicting SOPs would each be defensible).",
+    example:{label:"QA angle", text:"\u201cIdentify the error in this call\u201d is DOK 2. \u201cDesign a coaching intervention for a repeat-offender agent and defend it against two other approaches a manager might propose\u201d is DOK 4 — extended, multi-step, no single right answer."},
+    questions:[
+      {
+        q:"What actually distinguishes DOK from Bloom's Taxonomy?",
+        options:[
+          "DOK is only for children, Bloom's is only for adults",
+          "They're the same thing with different names",
+          "Bloom's classifies the objective's verb; DOK classifies how complex the task is to actually complete, independent of the verb used",
+          "DOK has six levels like Bloom's"
+        ],
+        correct:2,
+        why:"A verb like \u2018describe\u2019 or \u2018list\u2019 can sit at any DOK level depending on what the task actually demands — that's the whole point of the framework existing alongside Bloom's."
+      },
+      {
+        q:"A QA task says: \u201cExplain, using data from three months of call audits, why the current escalation SOP is failing for high-value complaints, and propose a revised SOP.\u201d What DOK level is this?",
+        options:[
+          "DOK 1 — Recall",
+          "DOK 2 — Skill/Concept",
+          "DOK 4 — Extended Thinking",
+          "This isn't a DOK-relevant task"
+        ],
+        correct:2,
+        why:"Multiple data sources, sustained reasoning, and an original proposal with no single correct answer — that's the signature of DOK 4."
+      }
+    ]
+  },
+  {
+    id:"5e",
+    num:"MOD-03",
+    title:"5E Model",
+    tagline:"Engage \u2192 Explore \u2192 Explain \u2192 Elaborate \u2192 Evaluate.",
+    explain:"Born in constructivist science education but portable to any training. The core idea: don't explain the concept first. Let learners <b>explore</b> and hit the problem themselves before you name it — retention goes up because they built the mental model instead of receiving it.",
+    example:{label:"QA angle", text:"Engage: play a borderline call and ask \u2018pass or fail?\u2019 Explore: small groups debate it with no rubric yet. Explain: now introduce the actual scoring rubric. Elaborate: apply it to a harder call. Evaluate: score independently and compare to calibrated scores."},
+    questions:[
+      {
+        q:"A trainer opens a calibration session by lecturing the scoring rubric for 20 minutes before showing any call. Which 5E phase did they skip, and what's the cost?",
+        options:[
+          "They skipped Evaluate — no cost, it comes last anyway",
+          "They skipped Explore — learners never got to form and test their own judgment before being handed the answer, so it doesn't stick as well",
+          "They skipped Engage — the cost is just lower energy in the room",
+          "Nothing was skipped, this is a valid Explain-first version of 5E"
+        ],
+        correct:1,
+        why:"5E's whole bet is that Explore-before-Explain beats Explain-first for retention. Jumping straight to the rubric turns an active session into a passive lecture."
+      },
+      {
+        q:"Which phase comes right after Explore in the 5E model?",
+        options:["Evaluate","Engage","Explain","Elaborate"],
+        correct:2,
+        why:"Order is Engage, Explore, Explain, Elaborate, Evaluate. You let them wrestle with it (Explore), then you name and formalize what they found (Explain)."
+      }
+    ]
+  },
+  {
+    id:"udl",
+    num:"MOD-04",
+    title:"UDL — Universal Design for Learning",
+    tagline:"Multiple means of Engagement, Representation, and Action/Expression — built in for everyone.",
+    explain:"UDL isn't about accommodating one learner after the fact. It's about designing the material from the start so it already works for a range of learners: options for how content is presented (video, text, audio), options for how learners engage (choice, relevance), and options for how they show what they know (write, present, build).",
+    example:{label:"QA angle", text:"A compliance module that only offers a 40-slide PDF is not UDL. One that offers the same content as a short video, a one-page job aid, and a scenario walkthrough — learner's choice — is."},
+    questions:[
+      {
+        q:"Which of these is the clearest example of the UDL principle of Representation?",
+        options:[
+          "Letting an agent choose to demonstrate mastery via a role-play instead of a written test",
+          "Giving learners the same compliance content as a video, an infographic, and a written summary, and letting them pick",
+          "Adding a badge system to make the module more fun",
+          "Grading harder for senior staff than new hires"
+        ],
+        correct:1,
+        why:"Representation is about how the content is presented. Offering the same information in multiple formats is textbook Representation. (The role-play example is Action/Expression, not Representation.)"
+      },
+      {
+        q:"True or false: UDL means you redesign the training individually for each learner after you notice they're struggling.",
+        options:[
+          "True — that's exactly what UDL is",
+          "False — UDL builds flexibility into the material for everyone up front, rather than retrofitting fixes for individuals afterward",
+        ],
+        correct:1,
+        why:"Retrofitting for individuals is closer to differentiation. UDL's bet is proactive: build the flexibility in before anyone struggles, so fewer people need a special fix later."
+      }
+    ]
+  },
+  {
+    id:"grr",
+    num:"MOD-05",
+    title:"GRR — Gradual Release of Responsibility",
+    tagline:"\u201cI do \u2192 We do \u2192 You do.\u201d",
+    explain:"A teaching sequence, not a full design model. Trainer models the skill fully, then does it together with the learner, then hands full responsibility to the learner. Skipping the middle step is the classic failure — it's the difference between training and just demonstrating.",
+    example:{label:"QA angle", text:"I do: senior QA scores a call live, narrating their reasoning. We do: new QA co-scores the next call with the senior, comparing notes in real time. You do: new QA scores solo, then it's reviewed."},
+    questions:[
+      {
+        q:"A new QA analyst watches one demo call review, then is immediately handed a full caseload to score solo. What GRR phase got skipped, and what's the likely result?",
+        options:[
+          "'I do' was skipped — the result is the analyst never saw a demo",
+          "'We do' was skipped — no scaffolded co-practice, so expect inconsistent scoring and low confidence early on",
+          "'You do' was skipped — the analyst never actually worked independently",
+          "Nothing was skipped, this is standard GRR"
+        ],
+        correct:1,
+        why:"Going straight from watching a demo to full independence removes the scaffolded practice stage where errors get caught cheaply. That's the stage most likely to be cut under time pressure — and it's the one that matters most for consistency."
+      },
+      {
+        q:"GRR is most naturally paired with which idea from earlier modules?",
+        options:[
+          "Bloom's Create level, because GRR always ends in original creative work",
+          "The 5E model's Explore phase, because both are about letting the learner try before being told the answer",
+          "DOK level 1, because GRR is only ever about recall tasks",
+          "None of the above — GRR is unrelated to the others"
+        ],
+        correct:1,
+        why:"Both GRR and 5E resist the instinct to just tell the learner the answer up front — they build in a stage where the learner has to actively work with the material before full mastery is expected."
+      }
+    ]
+  },
+  {
+    id:"gagne",
+    num:"MOD-06",
+    title:"Gagn\u00e9's 9 Events of Instruction",
+    tagline:"A sequence: attention \u2192 objectives \u2192 recall \u2192 content \u2192 guidance \u2192 practice \u2192 feedback \u2192 assessment \u2192 retention/transfer.",
+    explain:"Full sequence: 1) Gain attention 2) Inform learner of objectives 3) Stimulate recall of prior learning 4) Present the content 5) Provide learning guidance 6) Elicit performance (practice) 7) Provide feedback 8) Assess performance 9) Enhance retention and transfer. It's the most granular of the process models — think of it as ADDIE's Design/Develop phase zoomed in to session level.",
+    example:{label:"QA angle", text:"A training module that teaches the escalation SOP, gives one quiz, and ends has content, practice, and assessment — but skips event 9. Three weeks later nobody remembers it because there's no job aid, spaced follow-up, or on-the-job transfer check."},
+    questions:[
+      {
+        q:"A QA onboarding module has: an intro video, learning objectives slide, the SOP content, a practice quiz, and a final test. What event is most obviously missing?",
+        options:[
+          "Event 3 — Stimulate recall of prior learning",
+          "Event 9 — Enhance retention and transfer (no job aid, spaced practice, or real-call follow-up)",
+          "Event 1 — Gain attention",
+          "Nothing is missing, this covers all 9 events"
+        ],
+        correct:1,
+        why:"Content, guidance, practice, and assessment are all there — but nothing designed to make it stick after the test, or transfer to real calls. That's event 9, and it's the one most training design skips under a deadline."
+      },
+      {
+        q:"Which event comes before 'Present the content' in Gagn\u00e9's sequence?",
+        options:[
+          "Provide feedback",
+          "Assess performance",
+          "Stimulate recall of prior learning",
+          "Enhance retention and transfer"
+        ],
+        correct:2,
+        why:"Order: gain attention, state objectives, stimulate recall of prior learning, THEN present content. Anchoring to what they already know comes right before the new material."
+      }
+    ]
+  },
+  {
+    id:"arcs",
+    num:"MOD-07",
+    title:"ARCS Model",
+    tagline:"Attention \u2192 Relevance \u2192 Confidence \u2192 Satisfaction. Motivation, not content design.",
+    explain:"Keller's model isn't about what to teach — it's about why anyone would bother staying engaged. Attention (novelty, curiosity), Relevance (\u2018why does this matter to my job\u2019), Confidence (\u2018I believe I can do this\u2019), Satisfaction (a sense of payoff/reward for the effort).",
+    example:{label:"QA angle", text:"Agents zoning out during a compliance refresher usually isn't a content problem — it's a Relevance problem (they don't see how it connects to their actual calls) or a Satisfaction problem (nothing changes for them after they finish it)."},
+    questions:[
+      {
+        q:"Trainees can clearly repeat the material back, but on the post-training survey they say 'I don't think I'll actually use this on real calls.' Which ARCS component is weak?",
+        options:[
+          "Attention",
+          "Relevance",
+          "Confidence",
+          "Satisfaction"
+        ],
+        correct:1,
+        why:"They understood it fine — the gap is that they don't see the connection to their actual job. That's a Relevance failure, not a comprehension one."
+      },
+      {
+        q:"Which of these is a Confidence-building move, specifically (not Attention, Relevance, or Satisfaction)?",
+        options:[
+          "Opening with a surprising real call clip",
+          "Explaining how the skill maps to their KPI",
+          "Breaking practice into small wins with visible progress, so learners believe they can succeed before the high-stakes test",
+          "Giving a certificate at the end"
+        ],
+        correct:2,
+        why:"Confidence is about the learner believing success is achievable. Small, visible wins before the real test build that belief. A certificate at the end is Satisfaction, not Confidence."
+      }
+    ]
+  },
+  {
+    id:"miller",
+    num:"MOD-08",
+    title:"Miller's Pyramid",
+    tagline:"Knows \u2192 Knows How \u2192 Shows How \u2192 Does. Built for assessing real competence.",
+    explain:"Four levels, bottom to top: Knows (facts), Knows How (can explain application), Shows How (can demonstrate in a controlled setting), Does (actually performs correctly in real, unobserved practice). This is the one most directly built for QA-style competence questions, because it's literally about the gap between knowing something and doing it on the job.",
+    example:{label:"QA angle", text:"A written test on the escalation SOP = Knows. Explaining when to use it = Knows How. Role-playing it in training = Shows How. Actually applying it correctly on live calls when no one's watching = Does. Most certification programs stop at Shows How."},
+    questions:[
+      {
+        q:"An analyst passes the written SOP test and does well in the role-play, but their live-call audit scores are inconsistent. What does Miller's Pyramid say about this gap?",
+        options:[
+          "It means the written test was wrong and should be retaken",
+          "It's expected — passing at Knows and Shows How doesn't guarantee performance at Does; that's exactly the gap the pyramid exists to name",
+          "It means the role-play should be scrapped entirely",
+          "Miller's Pyramid doesn't apply to call center QA"
+        ],
+        correct:1,
+        why:"The whole point of the pyramid is that the top three levels are progressively harder to fake and progressively more predictive of real job performance. A gap between Shows How and Does is common, not a sign something's broken."
+      },
+      {
+        q:"Which QA method sits highest on Miller's Pyramid?",
+        options:[
+          "A multiple-choice knowledge test",
+          "Asking the analyst to explain the SOP verbally",
+          "A supervised role-play in training",
+          "Auditing real, unannounced live calls"
+        ],
+        correct:3,
+        why:"Unannounced live-call audits are the closest thing to 'Does' — real performance, unobserved and unstaged. Everything else is a proxy for it."
+      }
+    ]
+  },
+  {
+    id:"merrill",
+    num:"MOD-09",
+    title:"Merrill's Principles of Instruction",
+    tagline:"Real problems. Prior knowledge. Demonstration. Application. Integration.",
+    explain:"Learning is strongest when it's problem-centered and the learner: 1) activates relevant prior knowledge, 2) is shown the skill demonstrated (not just told about it), 3) applies it themselves, and 4) integrates it into real work. Strong andragogy alignment — this is built for how adults actually learn, not how children are taught in school.",
+    example:{label:"QA angle", text:"A training that only lectures the coaching framework, with no real transcript to practice on and no follow-up on how it changed their actual coaching conversations, violates almost every one of Merrill's principles at once."},
+    questions:[
+      {
+        q:"A new-manager training on giving feedback is 90 minutes of slides on feedback theory, no practice, no real scenarios. Which Merrill principle is most obviously missing?",
+        options:[
+          "Activation of prior knowledge only",
+          "Demonstration and Application — they're told about giving feedback but never shown it done or given a chance to try it on a real-feeling scenario",
+          "Integration only, everything else is fine",
+          "Nothing is missing, theory-first is how Merrill's model works"
+        ],
+        correct:1,
+        why:"Merrill's model is explicitly anti theory-only. Demonstration (show it being done) and Application (let them try it) are core, not optional add-ons."
+      },
+      {
+        q:"What's the key difference in spirit between Merrill's Principles and the 5E Model?",
+        options:[
+          "They're identical, just different names",
+          "5E is rooted in K-12 science/constructivist learning; Merrill's is explicitly built around adult, problem-centered, real-work learning — but both reject 'explain first, hope it sticks'",
+          "Merrill's has no place for demonstration",
+          "5E is only for online learning, Merrill's is only for in-person"
+        ],
+        correct:1,
+        why:"Different origins (school science vs. adult/corporate training) but a shared instinct: don't lecture first, root it in a real problem the learner has to work through."
+      }
+    ]
+  },
+  {
+    id:"kemp",
+    num:"MOD-10",
+    title:"Kemp Instructional Design Model",
+    tagline:"Flexible, learner-centered, non-linear — nine elements you can enter from any point.",
+    explain:"Where ADDIE is a straight line (Analyze &rarr; Design &rarr; Develop &rarr; Implement &rarr; Evaluate), Kemp is drawn as an oval: learners, objectives, content, strategies, resources, and evaluation all sit around the wheel and you can start or revisit any of them at any time. It's built for messy, real-world projects where requirements shift mid-build.",
+    example:{label:"QA angle", text:"You're three weeks into building a QA training module when the LOB scope changes and you get a new learner population (experienced hires instead of new hires). ADDIE, run strictly, wants you back at Analyze. Kemp treats that as normal — you just re-enter at 'learner characteristics' without restarting the whole process."},
+    questions:[
+      {
+        q:"Halfway through building a training module, your learner population changes unexpectedly. Which model handles that more naturally, and why?",
+        options:[
+          "ADDIE, because it's the industry standard regardless of the situation",
+          "Kemp, because it's explicitly non-linear — you can revisit the learner-characteristics element without treating the whole project as restarted",
+          "Neither model deals with changing requirements",
+          "SAM, because Kemp doesn't allow any revision"
+        ],
+        correct:1,
+        why:"This is Kemp's whole reason for existing next to ADDIE: real projects don't move in a straight line, and Kemp's oval shape is a deliberate rejection of ADDIE's strict sequence."
+      },
+      {
+        q:"What does the sheet's classification of Kemp as 'Pedagogy & Andragogy' actually tell you?",
+        options:[
+          "Kemp is exclusively for corporate training",
+          "Kemp is exclusively for school-age learners",
+          "Kemp makes no built-in assumption about learner age or context — like ADDIE, it's a flexible skeleton you apply to either",
+          "Kemp cannot be used for QA or corporate training"
+        ],
+        correct:2,
+        why:"Same pattern as ADDIE, Dick & Carey, and Gagn\u00e9's 9 Events: process models tend to be age-agnostic. It's models like Merrill's (adult-leaning) or 5E (child-leaning in origin) that have a stronger pedagogy/andragogy pull."
+      }
+    ]
+  }
+];
+
+const STORAGE_KEY = "rakaLearningHub_v1";
+let state = loadState();
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw) return JSON.parse(raw);
+  }catch(e){}
+  return { done:{}, missedPool:[] };
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+
+const moduleListEl = document.getElementById("moduleList");
+const progressFill = document.getElementById("progressFill");
+const progressText = document.getElementById("progressText");
+
+function renderModules(){
+  moduleListEl.innerHTML = "";
+  MODULES.forEach(mod=>{
+    const isDone = !!state.done[mod.id];
+    const wrap = document.createElement("div");
+    wrap.className = "module";
+    wrap.id = "mod-"+mod.id;
+
+    const head = document.createElement("div");
+    head.className = "module-head";
+    head.innerHTML = `
+      <div class="mod-num ${isDone?'done':''}">${mod.num}</div>
+      <div class="mod-title-wrap">
+        <p class="mod-title">${mod.title}</p>
+        <p class="mod-tagline">${mod.tagline}</p>
+      </div>
+      <div class="mod-status">${isDone?'\u2713':'\u203a'}</div>
+    `;
+    head.addEventListener("click", ()=>{
+      wrap.classList.toggle("open");
+    });
+
+    const body = document.createElement("div");
+    body.className = "module-body";
+    body.innerHTML = `
+      <p class="explain">${mod.explain}</p>
+      <div class="qa-example"><span class="lab">${mod.example.label}</span>${mod.example.text}</div>
+      <div class="quiz-block" id="quiz-${mod.id}"></div>
+    `;
+
+    wrap.appendChild(head);
+    wrap.appendChild(body);
+    moduleListEl.appendChild(wrap);
+
+    renderQuiz(mod, document.getElementById("quiz-"+mod.id));
+  });
+  updateProgress();
+}
+
+function renderQuiz(mod, container){
+  let idx = 0;
+  let correctCount = 0;
+
+  function renderQ(){
+    if(idx >= mod.questions.length){
+      container.innerHTML = `<p class="feedback show right">Module drilled: ${correctCount}/${mod.questions.length} on first try. ${correctCount===mod.questions.length ? "Certified." : "Re-open anytime to try again."}</p>`;
+      if(correctCount === mod.questions.length){
+        markDone(mod.id);
+      }
+      return;
+    }
+    const q = mod.questions[idx];
+    container.innerHTML = `
+      <p class="q-count">Question ${idx+1} of ${mod.questions.length}</p>
+      <p class="q-text">${q.q}</p>
+      <div id="opts-${mod.id}-${idx}"></div>
+      <div class="feedback" id="fb-${mod.id}-${idx}"></div>
+      <button class="btn next-q" id="next-${mod.id}-${idx}">Next \u2192</button>
+    `;
+    const optsWrap = document.getElementById(`opts-${mod.id}-${idx}`);
+    q.options.forEach((opt, oi)=>{
+      const b = document.createElement("button");
+      b.className = "opt";
+      b.textContent = opt;
+      b.addEventListener("click", ()=>{
+        if(b.classList.contains("answered-block")) return;
+        Array.from(optsWrap.children).forEach(c=>{
+          c.classList.add("disabled");
+          c.classList.add("answered-block");
+        });
+        const fb = document.getElementById(`fb-${mod.id}-${idx}`);
+        if(oi === q.correct){
+          b.classList.add("correct");
+          fb.className = "feedback show right";
+          fb.textContent = q.why;
+          correctCount++;
+        } else {
+          b.classList.add("wrong");
+          Array.from(optsWrap.children)[q.correct].classList.add("correct");
+          fb.className = "feedback show miss";
+          fb.textContent = q.why;
+        }
+        document.getElementById(`next-${mod.id}-${idx}`).classList.add("show");
+      });
+      optsWrap.appendChild(b);
+    });
+    document.getElementById(`next-${mod.id}-${idx}`).addEventListener("click", ()=>{
+      idx++;
+      renderQ();
+    });
+  }
+  renderQ();
+}
+
+function markDone(id){
+  if(!state.done[id]){
+    state.done[id] = true;
+    saveState();
+    updateProgress();
+    fireStamp();
+  }
+}
+
+function updateProgress(){
+  const total = MODULES.length;
+  const done = Object.keys(state.done).length;
+  progressFill.style.width = (done/total*100)+"%";
+  progressText.textContent = `${done} / ${total} modules certified`;
+  document.querySelectorAll(".mod-num").forEach(el=>{});
+}
+
+function fireStamp(){
+  const s = document.getElementById("stamp");
+  s.classList.remove("fire");
+  void s.offsetWidth;
+  s.classList.add("fire");
+  setTimeout(()=>{ s.classList.remove("fire"); }, 900);
+}
+
+document.getElementById("resetBtn").addEventListener("click", ()=>{
+  if(confirm("Reset all progress on this device?")){
+    state = { done:{}, missedPool:[] };
+    saveState();
+    renderModules();
+  }
+});
+
+// ---- Quick Drill mode: random questions across all modules, missed ones resurface sooner ----
+const drillScreen = document.getElementById("drillScreen");
+const drillCard = document.getElementById("drillCard");
+const drillTally = document.getElementById("drillTally");
+let drillPool = [];
+let drillSeen = 0, drillCorrect = 0;
+
+function buildDrillPool(){
+  let pool = [];
+  MODULES.forEach(mod=>{
+    mod.questions.forEach((q,qi)=>{
+      pool.push({modId:mod.id, modTitle:mod.title, q, qi});
+    });
+  });
+  // weight missed questions in
+  (state.missedPool||[]).forEach(key=>{
+    const found = pool.find(p=>p.modId+":"+p.qi === key);
+    if(found) pool.push(found);
+  });
+  // shuffle
+  for(let i=pool.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [pool[i],pool[j]]=[pool[j],pool[i]];
+  }
+  return pool;
+}
+
+document.getElementById("drillBtn").addEventListener("click", ()=>{
+  drillPool = buildDrillPool();
+  drillSeen = 0; drillCorrect = 0;
+  document.getElementById("moduleList").classList.add("hidden-when-drill");
+  drillScreen.classList.add("active");
+  nextDrillQ();
+});
+document.getElementById("drillClose").addEventListener("click", ()=>{
+  document.getElementById("moduleList").classList.remove("hidden-when-drill");
+  drillScreen.classList.remove("active");
+});
+
+function nextDrillQ(){
+  if(drillPool.length===0){
+    drillCard.innerHTML = `<p>Drill complete: ${drillCorrect}/${drillSeen} correct.</p><p style="font-size:13px;color:#5a5142;">Run it again — missed questions come back weighted next round.</p>`;
+    drillTally.textContent = "";
+    return;
+  }
+  const item = drillPool.shift();
+  drillSeen++;
+  const key = item.modId+":"+item.qi;
+  drillCard.innerHTML = `
+    <p class="drill-source">${item.modTitle}</p>
+    <p class="q-text">${item.q.q}</p>
+    <div id="drillOpts"></div>
+    <div class="feedback" id="drillFb"></div>
+    <button class="btn next-q" id="drillNext">Next \u2192</button>
+  `;
+  const optsWrap = document.getElementById("drillOpts");
+  item.q.options.forEach((opt, oi)=>{
+    const b = document.createElement("button");
+    b.className = "opt";
+    b.textContent = opt;
+    b.addEventListener("click", ()=>{
+      Array.from(optsWrap.children).forEach(c=>c.classList.add("disabled"));
+      const fb = document.getElementById("drillFb");
+      if(oi === item.q.correct){
+        b.classList.add("correct");
+        fb.className = "feedback show right";
+        fb.textContent = item.q.why;
+        drillCorrect++;
+        state.missedPool = (state.missedPool||[]).filter(k=>k!==key);
+      } else {
+        b.classList.add("wrong");
+        Array.from(optsWrap.children)[item.q.correct].classList.add("correct");
+        fb.className = "feedback show miss";
+        fb.textContent = item.q.why;
+        if(!(state.missedPool||[]).includes(key)){
+          state.missedPool = (state.missedPool||[]).concat([key]);
+        }
+      }
+      saveState();
+      document.getElementById("drillNext").classList.add("show");
+    });
+    optsWrap.appendChild(b);
+  });
+  document.getElementById("drillNext").addEventListener("click", nextDrillQ);
+  drillTally.textContent = `Question ${drillSeen} \u00b7 ${drillCorrect} correct so far \u00b7 ${drillPool.length} left in this round`;
+}
+
+renderModules();
+</script>
+</body>
+</html>
