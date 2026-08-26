@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="Rakesh Kumar">
+<title>Computers - Class IV - W.T. II</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@400;600;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Scratch block palette - taken from the block categories in the chapter */
+  --motion:#4c97ff;
+  --looks:#9966ff;
+  --sound:#cf63cf;
+  --events:#ffbf00;
+  --control:#ffab19;
+  --sensing:#5cb1d6;
+  --operators:#59c059;
+  --variables:#ff8c1a;
+  --myblocks:#ff6680;
+
+  --ink:#10203a;
+  --ink-soft:#41536e;
+  --paper:#f2f5fb;
+  --card:#ffffff;
+  --line:#d9e2f1;
+  --good:#2fa84f;
+  --bad:#e04b4b;
+
+  /* driven by JS - the sky is the progress meter */
+  --sky-top:#141a3a;
+  --sky-mid:#2c2f63;
+  --sky-low:#4a3d72;
+  --sun-x:6%;
+  --sun-y:86%;
+  --sun-glow:0;
+  --star-op:1;
+
+  --display:'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --body:'Nunito', 'Segoe UI', system-ui, sans-serif;
+  --mono:'Space Mono', 'Courier New', monospace;
+
+  --r:14px;
+}
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--body);
+  color:var(--ink);
+  background:var(--paper);
+  -webkit-text-size-adjust:100%;
+}
+button{font-family:inherit}
+
+/* ---------- THE SKY : signature element ---------- */
+.sky{
+  position:relative;
+  min-height:210px;
+  overflow:hidden;
+  background:linear-gradient(180deg,var(--sky-top) 0%,var(--sky-mid) 52%,var(--sky-low) 100%);
+  transition:background 1.1s ease;
+  border-bottom:4px solid rgba(0,0,0,.18);
+}
+.stars{position:absolute;inset:0;opacity:var(--star-op);transition:opacity 1.1s ease;pointer-events:none}
+.star{position:absolute;background:#fff;border-radius:50%;animation:tw 3.6s ease-in-out infinite}
+@keyframes tw{0%,100%{opacity:.25}50%{opacity:.95}}
+.sun{
+  position:absolute;
+  left:var(--sun-x);
+  top:var(--sun-y);
+  width:74px;height:74px;
+  margin:-37px 0 0 -37px;
+  border-radius:50%;
+  background:radial-gradient(circle at 38% 34%,#fff6c9,#ffd54a 46%,#ff9c2e 100%);
+  box-shadow:0 0 calc(30px + var(--sun-glow) * 70px) rgba(255,190,60,calc(.25 + var(--sun-glow)*.6));
+  transition:left 1.1s cubic-bezier(.3,.7,.3,1), top 1.1s cubic-bezier(.3,.7,.3,1), box-shadow 1.1s ease, opacity .8s ease;
+}
+.moon{
+  position:absolute;right:12%;top:22%;
+  width:52px;height:52px;border-radius:50%;
+  background:radial-gradient(circle at 66% 34%,#fdfdff,#c9cfe6);
+  box-shadow:inset -13px -4px 0 0 rgba(20,26,58,.92);
+  opacity:var(--star-op);
+  transition:opacity 1.1s ease;
+}
+.cloud{position:absolute;background:rgba(255,255,255,.72);border-radius:100px;filter:blur(.4px);animation:drift linear infinite}
+.cloud:after,.cloud:before{content:"";position:absolute;background:inherit;border-radius:100px}
+@keyframes drift{from{transform:translateX(-24vw)}to{transform:translateX(114vw)}}
+.hills{position:absolute;left:0;right:0;bottom:0;height:74px}
+.hill{position:absolute;bottom:0;border-radius:50% 50% 0 0/100% 100% 0 0;background:#1b2b45;opacity:.9}
+
+.sky-head{position:relative;z-index:3;padding:16px 18px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.crest{font-family:var(--display);font-weight:800;font-size:1.42rem;line-height:1.1;color:#fff;text-shadow:0 2px 12px rgba(0,0,0,.45);margin:0}
+.crest small{display:block;font-family:var(--body);font-weight:600;font-size:.74rem;letter-spacing:.09em;text-transform:uppercase;opacity:.82;margin-top:3px}
+.weather{
+  background:rgba(10,16,36,.42);
+  backdrop-filter:blur(6px);
+  border:1px solid rgba(255,255,255,.24);
+  border-radius:12px;padding:8px 12px;color:#fff;text-align:right;min-width:140px
+}
+.weather b{font-family:var(--display);font-size:1.5rem;display:block;line-height:1}
+.weather span{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;opacity:.85}
+
+/* the bot on the ground reacts to how she is doing */
+.bot{position:absolute;z-index:4;left:50%;bottom:6px;transform:translateX(-50%);width:80px;text-align:center}
+.bot-body{width:62px;height:56px;margin:0 auto;border-radius:16px;background:linear-gradient(180deg,#eef3ff,#c2cfe8);border:3px solid #16233d;position:relative;transition:transform .35s ease}
+.bot-body.hop{animation:hop .5s ease}
+@keyframes hop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px)}}
+.bot-body.shake{animation:shk .4s ease}
+@keyframes shk{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.eye{position:absolute;top:17px;width:11px;height:11px;border-radius:50%;background:#16233d;transition:height .2s}
+.eye.l{left:11px}.eye.r{right:11px}
+.mouth{position:absolute;bottom:11px;left:50%;transform:translateX(-50%);width:24px;height:11px;border:3px solid #16233d;border-top:0;border-radius:0 0 24px 24px;transition:all .3s}
+.mouth.flat{height:0;border-bottom-width:3px;border-radius:0}
+.mouth.sad{border:3px solid #16233d;border-bottom:0;border-radius:24px 24px 0 0;bottom:8px}
+.antenna{position:absolute;top:-16px;left:50%;transform:translateX(-50%);width:3px;height:14px;background:#16233d}
+.antenna:after{content:"";position:absolute;top:-8px;left:-4px;width:11px;height:11px;border-radius:50%;background:var(--events);box-shadow:0 0 12px var(--events)}
+.bot-say{
+  font-family:var(--display);font-size:.72rem;font-weight:700;color:var(--ink);
+  background:#fff;border:2px solid #16233d;border-radius:12px;padding:3px 8px;margin-bottom:6px;
+  display:inline-block;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis
+}
+
+/* ---------- SHELL ---------- */
+.wrap{max-width:860px;margin:0 auto;padding:0 14px 90px}
+
+/* Scratch-style tab blocks with a notch and a bump */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:-22px 0 18px;position:relative;z-index:5}
+.tab{
+  position:relative;border:0;cursor:pointer;color:#fff;
+  font-family:var(--display);font-weight:700;font-size:.95rem;
+  padding:11px 16px 13px;border-radius:8px;
+  box-shadow:0 3px 0 rgba(0,0,0,.22);
+  opacity:.82;transition:transform .14s ease,opacity .14s ease
+}
+.tab:after{content:"";position:absolute;left:15px;bottom:-5px;width:17px;height:6px;border-radius:0 0 7px 7px;background:inherit}
+.tab:hover{transform:translateY(-2px);opacity:1}
+.tab[aria-selected="true"]{opacity:1;transform:translateY(-3px);box-shadow:0 6px 0 rgba(0,0,0,.24)}
+.tab.t-learn{background:var(--motion)}
+.tab.t-drill{background:var(--looks)}
+.tab.t-test{background:var(--operators)}
+.tab.t-prog{background:var(--variables)}
+
+.panel[hidden]{display:none}
+
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 16px 18px;margin-bottom:14px;box-shadow:0 1px 2px rgba(16,32,58,.05)
+}
+h2.sec{font-family:var(--display);font-size:1.3rem;margin:22px 0 10px;display:flex;align-items:center;gap:9px}
+h2.sec .chip{font-family:var(--mono);font-size:.68rem;background:var(--ink);color:#fff;padding:3px 7px;border-radius:5px;letter-spacing:.04em}
+h3.tt{font-family:var(--display);font-size:1.08rem;margin:0 0 8px}
+p{line-height:1.62;margin:0 0 10px}
+.muted{color:var(--ink-soft);font-size:.9rem}
+.hl{background:linear-gradient(180deg,transparent 58%,#ffe9a8 58%);font-weight:700}
+ul.tight{margin:6px 0 10px;padding-left:20px}
+ul.tight li{margin-bottom:5px;line-height:1.55}
+
+/* pill that looks like a scratch block, used inline in the lessons */
+.blk{
+  display:inline-block;font-family:var(--body);font-weight:700;font-size:.82rem;color:#fff;
+  padding:3px 10px;border-radius:7px;box-shadow:0 2px 0 rgba(0,0,0,.18);white-space:nowrap;margin:1px 0
+}
+.blk.motion{background:var(--motion)}.blk.looks{background:var(--looks)}
+.blk.sound{background:var(--sound)}.blk.events{background:var(--events);color:#3c2b00}
+.blk.control{background:var(--control);color:#3c2b00}.blk.sensing{background:var(--sensing)}
+.blk.operators{background:var(--operators)}.blk.variables{background:var(--variables)}
+
+/* On a narrow phone the wider tables (block categories, Motion blocks) are
+   too wide to fit. .lesson has overflow:hidden, so without this they lose
+   their last column off the right edge. Turning the table into a block box
+   lets it scroll sideways on its own instead of being clipped. */
+table.t{width:100%;border-collapse:collapse;font-size:.9rem;margin:8px 0 12px;
+  display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
+table.t>tbody{display:table;width:100%;border-collapse:collapse}
+table.t th{background:var(--ink);color:#fff;text-align:left;padding:8px 10px;font-family:var(--display);font-weight:700}
+table.t td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:middle}
+table.t tr:nth-child(even) td{background:#f7faff}
+
+.lesson{border:1px solid var(--line);border-radius:var(--r);margin-bottom:10px;overflow:hidden;background:#fff}
+.lesson>summary{
+  cursor:pointer;list-style:none;padding:13px 15px;font-family:var(--display);font-weight:700;font-size:1rem;
+  display:flex;align-items:center;gap:10px;background:#fff
+}
+.lesson>summary::-webkit-details-marker{display:none}
+.lesson>summary:before{content:"+";font-size:1.25rem;width:24px;height:24px;flex:0 0 24px;border-radius:7px;background:var(--motion);color:#fff;display:grid;place-items:center;line-height:1}
+.lesson[open]>summary:before{content:"\2013"}
+.lesson .body{padding:2px 15px 16px;border-top:1px dashed var(--line)}
+.done-dot{margin-left:auto;font-size:.68rem;font-family:var(--mono);color:var(--good)}
+
+/* interactive toys inside the lessons */
+.toy{background:#0f1830;border-radius:12px;padding:14px;color:#e8eefc;margin:10px 0}
+.toy h4{font-family:var(--display);margin:0 0 8px;font-size:.95rem;color:#ffd76a}
+.toy label{font-size:.8rem;display:block;margin-bottom:4px;color:#a9bbdc}
+.toy input,.toy select{
+  font-family:var(--mono);font-size:.95rem;padding:7px 9px;border-radius:8px;border:1px solid #33456e;
+  background:#182444;color:#fff;width:100%
+}
+.toy .out{font-family:var(--mono);font-size:1.02rem;margin-top:10px;color:#8fe3a4;word-break:break-word}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+.stagebox{position:relative;width:100%;max-width:480px;aspect-ratio:4/3;background:#fff;border:3px solid var(--ink);border-radius:10px;margin:8px auto;cursor:crosshair;overflow:hidden}
+.axis{position:absolute;background:#c8d4ea}
+.axis.h{left:0;right:0;top:50%;height:2px}
+.axis.v{top:0;bottom:0;left:50%;width:2px}
+.pin{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;background:var(--looks);border:3px solid #fff;box-shadow:0 0 0 2px var(--looks);transition:left .18s,top .18s}
+.coordout{text-align:center;font-family:var(--mono);font-weight:700;margin-top:6px}
+
+/* ---------- QUESTIONS ---------- */
+.qhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.qmeta{font-family:var(--mono);font-size:.74rem;color:var(--ink-soft);letter-spacing:.05em;text-transform:uppercase}
+.bar{height:9px;background:var(--line);border-radius:99px;overflow:hidden;flex:1 1 140px;min-width:110px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--operators),var(--events));transition:width .45s ease}
+
+.qtext{font-family:var(--display);font-weight:700;font-size:1.14rem;line-height:1.42;margin:4px 0 14px}
+.opts{display:grid;gap:9px}
+.opt{
+  text-align:left;border:2px solid var(--line);background:#fff;border-radius:11px;
+  padding:12px 14px;font-size:1rem;cursor:pointer;line-height:1.4;
+  display:flex;gap:11px;align-items:center;transition:border-color .14s,background .14s,transform .1s
+}
+.opt:hover:not(:disabled){border-color:var(--motion);transform:translateX(2px)}
+.opt .key{
+  flex:0 0 26px;height:26px;border-radius:7px;background:var(--paper);border:1px solid var(--line);
+  display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:.82rem
+}
+.opt.right{border-color:var(--good);background:#eefaf0}
+.opt.right .key{background:var(--good);color:#fff;border-color:var(--good)}
+.opt.wrong{border-color:var(--bad);background:#fdeeee}
+.opt.wrong .key{background:var(--bad);color:#fff;border-color:var(--bad)}
+.opt:disabled{cursor:default}
+
+.typebox{display:flex;gap:8px;flex-wrap:wrap}
+.typebox input{
+  flex:1 1 200px;font-family:var(--body);font-size:1.05rem;padding:12px 14px;
+  border:2px solid var(--line);border-radius:11px
+}
+.typebox input:focus{outline:none;border-color:var(--motion)}
+.typebox input.right{border-color:var(--good);background:#eefaf0}
+.typebox input.wrong{border-color:var(--bad);background:#fdeeee}
+
+.btn{
+  border:0;border-radius:11px;padding:12px 18px;font-family:var(--display);font-weight:700;font-size:1rem;
+  cursor:pointer;color:#fff;background:var(--motion);box-shadow:0 3px 0 rgba(0,0,0,.2)
+}
+.btn:hover{filter:brightness(1.06)}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--line);box-shadow:none}
+.btn.go{background:var(--operators)}
+.btn.warn{background:var(--variables)}
+.btn.sm{padding:8px 13px;font-size:.86rem}
+
+.verdict{margin-top:13px;border-radius:11px;padding:12px 14px;font-size:.95rem;line-height:1.55;border-left:5px solid}
+.verdict.ok{background:#eefaf0;border-color:var(--good)}
+.verdict.no{background:#fdeeee;border-color:var(--bad)}
+.verdict b{font-family:var(--display)}
+
+.matchgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mitem{border:2px solid var(--line);background:#fff;border-radius:10px;padding:11px;cursor:pointer;font-size:.94rem;text-align:left}
+.mitem.sel{border-color:var(--looks);background:#f5efff}
+.mitem.done{border-color:var(--good);background:#eefaf0;color:var(--ink-soft);cursor:default}
+.mitem.miss{border-color:var(--bad);animation:shk .35s ease}
+
+.setpick{display:grid;gap:9px;margin-top:10px}
+.setbtn{
+  display:flex;justify-content:space-between;align-items:center;gap:10px;
+  border:2px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;cursor:pointer;text-align:left
+}
+.setbtn:hover{border-color:var(--motion)}
+.setbtn b{font-family:var(--display);font-size:1rem;display:block}
+.setbtn span{font-size:.8rem;color:var(--ink-soft)}
+.score-pill{font-family:var(--mono);font-size:.74rem;background:var(--paper);border:1px solid var(--line);padding:4px 8px;border-radius:99px;white-space:nowrap}
+.score-pill.gold{background:#fff3cd;border-color:#ffd76a}
+
+.flip{border:1px solid var(--line);border-radius:12px;padding:13px 15px;margin-bottom:10px;background:#fff}
+.flip .q{font-family:var(--display);font-weight:700;margin-bottom:8px}
+.flip .a{display:none;border-top:1px dashed var(--line);padding-top:9px;margin-top:4px;font-size:.95rem;line-height:1.6}
+.flip.open .a{display:block}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:13px}
+.stat b{font-family:var(--display);font-size:1.75rem;display:block;line-height:1.1}
+.stat span{font-size:.74rem;text-transform:uppercase;letter-spacing:.07em;color:var(--ink-soft)}
+
+.mastery{margin-bottom:9px}
+.mastery .lab{display:flex;justify-content:space-between;font-size:.86rem;margin-bottom:4px}
+.mastery .track{height:11px;background:var(--line);border-radius:99px;overflow:hidden}
+.mastery .track i{display:block;height:100%;border-radius:99px;transition:width .5s ease}
+
+.timer{font-family:var(--mono);font-weight:700;font-size:1rem;background:var(--ink);color:#fff;padding:6px 11px;border-radius:9px}
+.timer.low{background:var(--bad);animation:tw 1s infinite}
+
+.foot{text-align:center;font-size:.76rem;color:var(--ink-soft);padding:22px 10px;line-height:1.6}
+
+@media (max-width:560px){
+  .crest{font-size:1.18rem}
+  .matchgrid{grid-template-columns:1fr}
+  .row2{grid-template-columns:1fr}
+  .tab{font-size:.86rem;padding:10px 12px 12px}
+  .sky{min-height:186px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*:before,*:after{animation:none!important;transition:none!important}
+}
+</style>
+</head>
+<body>
+<header class="sky" id="sky">
+  <div class="stars" id="stars"></div>
+  <div class="moon" id="moon"></div>
+  <div class="sun" id="sun"></div>
+  <div class="hills">
+    <div class="hill" style="left:-8%;width:46%;height:56px"></div>
+    <div class="hill" style="left:28%;width:52%;height:74px;background:#12203a"></div>
+    <div class="hill" style="left:66%;width:48%;height:50px"></div>
+  </div>
+  <div class="sky-head">
+    <h1 class="crest">Computers &mdash; Weekly Test II
+      <small>Class IV &middot; Memory &amp; Storage &middot; Coding with Scratch</small>
+    </h1>
+    <div class="weather">
+      <b id="wNum">0%</b>
+      <span id="wLabel">Before sunrise</span>
+    </div>
+  </div>
+  <div class="bot">
+    <div class="bot-say" id="botSay">Let's get the sun up</div>
+    <div class="bot-body" id="botBody">
+      <div class="antenna"></div>
+      <div class="eye l"></div><div class="eye r"></div>
+      <div class="mouth flat" id="botMouth"></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="tabs" role="tablist">
+    <button class="tab t-learn" role="tab" aria-selected="true" data-panel="pLearn">Learn</button>
+    <button class="tab t-drill" role="tab" aria-selected="false" data-panel="pDrill">Practice</button>
+    <button class="tab t-test"  role="tab" aria-selected="false" data-panel="pTest">Mock test</button>
+    <button class="tab t-prog"  role="tab" aria-selected="false" data-panel="pProg">Progress</button>
+  </div>
+
+  <!-- ============ LEARN ============ -->
+  <section class="panel" id="pLearn">
+    <div class="card">
+      <h3 class="tt">What the test covers</h3>
+      <p class="muted">Syllabus for W.T.-II, Unit II (2026-27): <b>Chapter 2 &mdash; Computer Memory and Data Storage</b> and
+      <b>Chapter 7 &mdash; Coding with Scratch</b>. Subject Enrichment is a practical on Scratch, so the last lesson here is a
+      hands-on checklist you do inside real Scratch.</p>
+      <p class="muted">Open a lesson, read it, then hit its quick check. Every correct answer lifts the sun.</p>
+    </div>
+
+    <h2 class="sec"><span class="chip">CH 2</span> Computer Memory and Data Storage</h2>
+    <div id="lessonsA"></div>
+
+    <h2 class="sec"><span class="chip">CH 7</span> Coding with Scratch</h2>
+    <div id="lessonsB"></div>
+  </section>
+
+  <!-- ============ PRACTICE ============ -->
+  <section class="panel" id="pDrill" hidden>
+    <div class="card">
+      <h3 class="tt">Pick a drill</h3>
+      <p class="muted">Same question shapes as the real paper. Wrong answers come back later in the same round, so nothing
+      slips through.</p>
+      <div class="setpick" id="setPick"></div>
+    </div>
+    <div class="card" id="drillCard" hidden>
+      <div class="qhead">
+        <span class="qmeta" id="drillMeta">&nbsp;</span>
+        <div class="bar"><i id="drillBar" style="width:0%"></i></div>
+        <button class="btn ghost sm" id="drillQuit">Leave</button>
+      </div>
+      <div id="drillBody"></div>
+    </div>
+  </section>
+
+  <!-- ============ MOCK TEST ============ -->
+  <section class="panel" id="pTest" hidden>
+    <div class="card" id="testIntro">
+      <h3 class="tt">Full mock paper</h3>
+      <p>Built to the same shape as the Unit II assignment: five sections per topic, 40 questions, 40 marks.
+      You get 30 minutes. No answers shown until you finish &mdash; same as the real thing.</p>
+      <ul class="tight muted">
+        <li>Q.1 Multiple choice &mdash; 10</li>
+        <li>Q.2 Fill in the blanks &mdash; 10</li>
+        <li>Q.3 True or False &mdash; 10</li>
+        <li>Q.4 One word answers &mdash; 10</li>
+      </ul>
+      <p class="muted">Long answers are handled separately, in the Practice tab under <b>Written answers</b>, because those
+      need a grown-up to read them.</p>
+      <button class="btn go" id="testStart">Start the paper</button>
+    </div>
+
+    <div class="card" id="testCard" hidden>
+      <div class="qhead">
+        <span class="qmeta" id="testMeta">&nbsp;</span>
+        <span class="timer" id="testTimer">30:00</span>
+        <div class="bar"><i id="testBar" style="width:0%"></i></div>
+      </div>
+      <div id="testBody"></div>
+      <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn" id="testNext">Next</button>
+        <button class="btn ghost sm" id="testEnd">Finish now</button>
+      </div>
+    </div>
+
+    <div class="card" id="testResult" hidden></div>
+  </section>
+
+  <!-- ============ PROGRESS ============ -->
+  <section class="panel" id="pProg" hidden>
+    <div class="card">
+      <h3 class="tt">Where you stand</h3>
+      <div class="grid2" id="statGrid"></div>
+    </div>
+    <div class="card">
+      <h3 class="tt">Topic by topic</h3>
+      <div id="masteryList"></div>
+      <p class="muted" style="margin-top:12px">The sun sits at whatever your overall mastery is. Get every topic green and
+      it will be high noon.</p>
+    </div>
+    <div class="card">
+      <h3 class="tt">Test history</h3>
+      <div id="histList"><p class="muted">No mock papers attempted yet.</p></div>
+      <button class="btn ghost sm" id="resetAll" style="margin-top:12px">Clear all progress</button>
+    </div>
+  </section>
+
+  <p class="foot">
+    Modern Delhi International School, Greater Faridabad &middot; Unit II (2026-27)<br>
+    Test on 31 August 2026. Content follows the Class IV Computer Science textbook, chapters 2 and 7.
+  </p>
+</div>
+<script>
+/* ============================================================
+   CONTENT
+   Everything below is taken from the Class IV Computer Science
+   textbook, Ch 2 (pp. 15-23) and Ch 7 (pp. 81-95), plus the
+   Unit II assignment paper for W.T.-II.
+   ============================================================ */
+
+var LESSONS_A = [
+{
+  id:"a1", topic:"binary", title:"How a computer stores anything at all",
+  html:
+    "<p>A computer is an <b>electronic device</b>. It runs on electricity, so the only two things it can really tell apart are "+
+    "<b>current on</b> and <b>current off</b>.</p>"+
+    "<ul class='tight'>"+
+    "<li>Current present &rarr; <b>ON</b> &rarr; also called <b>High</b> &rarr; written as <span class='hl'>1</span></li>"+
+    "<li>Current absent &rarr; <b>OFF</b> &rarr; also called <b>Low</b> &rarr; written as <span class='hl'>0</span></li>"+
+    "</ul>"+
+    "<p>Those two digits, 0 and 1, are called <b>binary digits</b>, or <b>bits</b> for short. A language built only out of "+
+    "0 and 1 is called <b>binary language</b>, and it is the only language the computer understands directly.</p>"+
+    "<p class='muted'>Careful in the exam: the question is often <i>which language does the computer understand directly</i>. "+
+    "The answer is binary language, not English and not 'code language'.</p>",
+  check:["b1","b2"]
+},
+{
+  id:"a2", topic:"units", title:"Bits, bytes and the ladder up to Yottabyte",
+  html:
+    "<p>One bit on its own cannot say much. So the computer groups bits in <b>eights</b>. A group of "+
+    "<span class='hl'>8 bits = 1 byte</span>, and one byte holds a <b>single character</b> of your data &mdash; one letter, one digit, one comma.</p>"+
+    "<p>For bigger data we climb a ladder, and every step up is <b>1024</b> of the step below:</p>"+
+    "<table class='t'><tr><th>Unit</th><th>Equals</th></tr>"+
+    "<tr><td>1 Kilobyte (KB)</td><td>1024 Bytes</td></tr>"+
+    "<tr><td>1 Megabyte (MB)</td><td>1024 Kilobytes</td></tr>"+
+    "<tr><td>1 Gigabyte (GB)</td><td>1024 Megabytes</td></tr>"+
+    "<tr><td>1 Terabyte (TB)</td><td>1024 Gigabytes</td></tr>"+
+    "<tr><td>1 Petabyte (PB)</td><td>1024 Terabytes</td></tr>"+
+    "<tr><td>1 Exabyte (EB)</td><td>1024 Petabytes</td></tr>"+
+    "<tr><td>1 Zettabyte (ZB)</td><td>1024 Exabytes</td></tr>"+
+    "<tr><td>1 Yottabyte (YB)</td><td>1024 Zettabytes</td></tr></table>"+
+    "<p>So <b>Yottabyte is the biggest unit on this list</b> &mdash; that is the one the paper asks about.</p>"+
+    "<div class='toy'><h4>Ladder machine</h4>"+
+    "<div class='row2'>"+
+    "<div><label>Amount</label><input id='cvVal' type='number' value='1' min='0' step='any'></div>"+
+    "<div><label>Unit</label><select id='cvUnit'></select></div>"+
+    "</div><div class='out' id='cvOut'>&nbsp;</div></div>",
+  check:["b3","b4","b5"]
+},
+{
+  id:"a3", topic:"memtypes", title:"The two types of memory",
+  html:
+    "<p>A computer has <b>two</b> kinds of memory, and every long answer about memory starts by naming them:</p>"+
+    "<ul class='tight'>"+
+    "<li><b>Primary memory</b> (also called main, internal or electronic memory) &mdash; part of the CPU, helps in "+
+    "<i>processing</i> data. Its two types are <b>RAM</b> and <b>ROM</b>.</li>"+
+    "<li><b>Secondary memory</b> (also called external memory) &mdash; used for <i>permanent</i> storage. Hard disc, CD, DVD, "+
+    "pendrive, Blu-ray disc, memory card.</li></ul>"+
+    "<p>Why do we need secondary memory at all? Because primary memory is volatile, it is small, and it is expensive. "+
+    "Secondary storage is large, cheap, and keeps the data until you erase it.</p>",
+  check:["b6","b7"]
+},
+{
+  id:"a4", topic:"ramrom", title:"RAM against ROM",
+  html:
+    "<table class='t'><tr><th>RAM</th><th>ROM</th></tr>"+
+    "<tr><td>Random Access Memory</td><td>Read Only Memory</td></tr>"+
+    "<tr><td><b>Volatile</b> &mdash; erased when power goes off</td><td><b>Non-volatile</b> &mdash; keeps its contents when power goes off</td></tr>"+
+    "<tr><td>Stores the user's data and instructions <b>temporarily</b></td><td>Stores the computer's <b>startup instructions permanently</b></td></tr>"+
+    "<tr><td>Directly accessed by the CPU</td><td>Directly accessed by the CPU</td></tr></table>"+
+    "<p>Both are electronic memory, so if a question asks <i>which of these is an electronic memory</i> and the choices are "+
+    "RAM, ROM, both &mdash; the answer is <b>both</b>.</p>"+
+    "<p class='muted'>Word to spell right in the exam: <b>volatile</b>. It means the contents vanish.</p>",
+  check:["b8","b9","b10"]
+},
+{
+  id:"a5", topic:"devices", title:"Secondary storage devices, one by one",
+  html:
+    "<ul class='tight'>"+
+    "<li><b>Hard disc</b> &mdash; the main storage device fixed inside the CPU box. Holds all the application software and "+
+    "the operating system. Capacity <b>1 TB to 8 TB</b>. A <b>portable hard disc</b> is the same thing but fixed externally, "+
+    "so it is good for storing large amounts of data safely <i>and</i> for carrying files between computers.</li>"+
+    "<li><b>CD</b> (Compact Disc) and <b>DVD</b> (Digital Versatile Disc) &mdash; <b>optical</b> storage devices, round in shape, "+
+    "used mainly for audio-visual data. Optical means they use <b>laser light</b> to store and read data. CD holds up to "+
+    "<b>700 MB</b>; DVD holds <b>4.7 GB to 17.08 GB</b>.</li>"+
+    "<li><b>Pendrive</b> &mdash; also called flash drive or USB drive. <b>2 GB to 4 TB</b>. Connects through the "+
+    "<b>USB</b> port, which stands for <b>Universal Serial Bus</b>. It is <b>rewritable</b>, so data can be changed or removed. "+
+    "It needs no internet.</li>"+
+    "<li><b>Blu-ray Disc (BD)</b> &mdash; optical, looks like a CD or DVD but larger capacity: <b>25 GB to 50 GB</b>. "+
+    "Single layer = <b>25 GB</b>, double layer = <b>50 GB</b>. Used for high-definition video.</li>"+
+    "<li><b>Memory card</b> &mdash; also called flash card or memory stick. <b>2 GB to 2 TB</b>. Goes into phones and tablets to "+
+    "<b>extend their storage capacity</b>.</li></ul>"+
+    "<p><b>Fact Frenzy:</b> the first hard drive was made by <b>IBM in 1956</b>. It was the size of two refrigerators and weighed about a ton.</p>",
+  check:["b11","b12","b13"]
+},
+{
+  id:"a6", topic:"devices", title:"The numbers she will be asked for",
+  html:
+    "<p>These exact figures appear in the fill-in-the-blanks and one-word sections. Learn them as pairs.</p>"+
+    "<table class='t'><tr><th>Thing</th><th>Number</th></tr>"+
+    "<tr><td>Bits in a byte</td><td>8</td></tr>"+
+    "<tr><td>Step between every storage unit</td><td>1024</td></tr>"+
+    "<tr><td>CD</td><td>up to 700 MB</td></tr>"+
+    "<tr><td>DVD</td><td>4.7 GB to 17.08 GB</td></tr>"+
+    "<tr><td>Blu-ray, single layer</td><td>25 GB</td></tr>"+
+    "<tr><td>Blu-ray, double layer</td><td>50 GB</td></tr>"+
+    "<tr><td>Pendrive</td><td>2 GB to 4 TB</td></tr>"+
+    "<tr><td>Memory card</td><td>2 GB to 2 TB</td></tr>"+
+    "<tr><td>Hard disc</td><td>1 TB to 8 TB</td></tr>"+
+    "<tr><td>First hard drive</td><td>IBM, 1956</td></tr></table>"+
+    "<p><b>Full forms to write out:</b> BITS = Binary Digits &middot; CD = Compact Disc &middot; DVD = Digital Versatile Disc &middot; "+
+    "BD = Blu-ray Disc &middot; TB = Terabyte &middot; YB = Yottabyte &middot; USB = Universal Serial Bus &middot; "+
+    "RAM = Random Access Memory &middot; ROM = Read Only Memory.</p>",
+  check:["b14","b15"]
+}
+];
+
+var LESSONS_B = [
+{
+  id:"c1", topic:"env", title:"What Scratch is, and what is on the screen",
+  html:
+    "<p><b>Scratch</b> is a coding environment made for children aged <b>8 to 16</b>. You do not type commands &mdash; you "+
+    "<b>drag and drop</b> coloured blocks and snap them together in order. That is why the fill-in-the-blank answer is "+
+    "<span class='hl'>drag and drop</span>.</p>"+
+    "<p>Parts of the Scratch window, which she may have to label:</p>"+
+    "<ul class='tight'>"+
+    "<li><b>Sprite</b> &mdash; the object that is animated. The cat is the default sprite.</li>"+
+    "<li><b>Stage</b> &mdash; the area where the sprite moves and performs the action.</li>"+
+    "<li><b>Blocks category</b> &mdash; the list of coloured categories down the left.</li>"+
+    "<li><b>Blocks palette</b> &mdash; the blocks belonging to the category you picked.</li>"+
+    "<li><b>Coding area</b> &mdash; where you snap blocks together to build a script.</li>"+
+    "<li><b>Sprite info pane</b> &mdash; just below the stage, shows all sprites and backdrops.</li>"+
+    "<li><b>Go button</b> (green flag) starts the script, <b>Stop button</b> (red) stops it.</li>"+
+    "</ul>"+
+    "<p class='muted'>Trap: the green flag <b>starts</b> the program. If a true/false statement says it stops execution, that is <b>False</b>.</p>",
+  check:["d1","d2"]
+},
+{
+  id:"c2", topic:"coords", title:"The stage is a grid",
+  html:
+    "<p>The stage is <b>480 units wide</b> and <b>360 units tall</b>. The centre is <b>(0,0)</b>.</p>"+
+    "<ul class='tight'>"+
+    "<li>x runs from <b>-240</b> on the left to <b>240</b> on the right</li>"+
+    "<li>y runs from <b>-180</b> at the bottom to <b>180</b> at the top</li>"+
+    "</ul>"+
+    "<p><b>Coordinates</b> are the values of x and y that tell you a position on a 2-D plane. A 2-D plane has only width and "+
+    "height, no thickness.</p>"+
+    "<p>To send a sprite straight to a spot, use <span class='blk motion'>go to x: 0 y: 0</span>. To send it there "+
+    "<i>smoothly</i>, use <span class='blk motion'>glide 1 secs to x: 0 y: 0</span>.</p>"+
+    "<div class='toy'><h4>Tap the stage to read the coordinates</h4>"+
+    "<div class='stagebox' id='stageBox'><div class='axis h'></div><div class='axis v'></div>"+
+    "<div class='pin' id='stagePin' style='left:50%;top:50%'></div></div>"+
+    "<div class='coordout' id='stageOut'>x: 0&nbsp;&nbsp;&nbsp;y: 0</div>"+
+    "<p class='muted' style='color:#a9bbdc;font-size:.8rem;margin:6px 0 0'>Centre is 0,0. Top right is 240,180. Bottom left is -240,-180.</p></div>",
+  check:["d3","d4","d5"]
+},
+{
+  id:"c3", topic:"blocks", title:"Blocks, scripts and the three block shapes",
+  html:
+    "<p>A <b>block</b> is one single coding instruction that tells the sprite what to do. A set of blocks stacked together is "+
+    "called a <b>script</b>, also called <b>code</b> or a <b>program</b>. Arranging blocks in the correct order to perform a "+
+    "task is called <b>sequencing</b>.</p>"+
+    "<p>There are three shapes of block:</p>"+
+    "<ul class='tight'>"+
+    "<li><b>Hat block</b> &mdash; rounded top with a bump at the bottom. <b>Every script starts with a hat block</b>, for example "+
+    "<span class='blk events'>when green flag clicked</span>.</li>"+
+    "<li><b>Stack block</b> &mdash; a notch on top and a bump below, so it can be fitted <b>above and below</b> other blocks to form "+
+    "a sequence. This is the answer to the multiple-choice question about forming a sequence of commands.</li>"+
+    "<li><b>Reporter block</b> &mdash; fits wherever a <b>value</b> is needed. Two shapes, each fitting a hole of the same shape.</li>"+
+    "</ul>",
+  check:["d6","d7","d8"]
+},
+{
+  id:"c4", topic:"cats", title:"Block categories: colour and count",
+  html:
+    "<p>Each category has its own colour. The counts are printed in the book, so they are fair game in a fill-in-the-blank.</p>"+
+    "<table class='t'><tr><th>Category</th><th>Colour</th><th>How many</th><th>What it does</th></tr>"+
+    "<tr><td><span class='blk motion'>Motion</span></td><td>medium blue</td><td>18</td><td>moves the sprite</td></tr>"+
+    "<tr><td><span class='blk looks'>Looks</span></td><td>purple</td><td>20</td><td>appearance, speech and thought bubbles</td></tr>"+
+    "<tr><td><span class='blk sound'>Sound</span></td><td>pink / magenta</td><td>9</td><td>controls sound in the script</td></tr>"+
+    "<tr><td><span class='blk events'>Events</span></td><td>light yellow</td><td>8</td><td>senses mouse click, key press &mdash; tells sprites when to start</td></tr>"+
+    "<tr><td><span class='blk control'>Control</span></td><td>golden</td><td>11</td><td>controls execution: wait, and loops like <b>forever</b></td></tr>"+
+    "<tr><td><span class='blk sensing'>Sensing</span></td><td>cyan</td><td>18</td><td>detects mouse down, touching colour</td></tr>"+
+    "<tr><td><span class='blk operators'>Operators</span></td><td>light green</td><td>&mdash;</td><td>adding, subtracting, comparing values</td></tr>"+
+    "<tr><td><span class='blk variables'>Variables</span></td><td>orange</td><td>&mdash;</td><td>stores data values</td></tr>"+
+    "<tr><td>My Blocks</td><td>pink</td><td>&mdash;</td><td>holds procedures for the sprite</td></tr></table>"+
+    "<p><b>Two the paper actually asked:</b> the <b>Sound</b> category holds all audio-related blocks, and the "+
+    "<b>forever loop</b> (a Control block) is what makes a bird keep flapping its wings again and again.</p>"+
+    "<p class='muted'>Trap: <i>Script</i> is <b>not</b> a block category. Wait belongs to <b>Control</b>, not Events.</p>",
+  check:["d9","d10","d11"]
+},
+{
+  id:"c5", topic:"motion", title:"Motion blocks",
+  html:
+    "<table class='t'><tr><th>Block</th><th>What it does</th></tr>"+
+    "<tr><td><span class='blk motion'>move 10 steps</span></td><td>moves the sprite forward. A <b>minus</b> value like "+
+    "<span class='blk motion'>move -10 steps</span> moves it <b>backward</b>.</td></tr>"+
+    "<tr><td><span class='blk motion'>turn right 15 degrees</span></td><td>turns clockwise</td></tr>"+
+    "<tr><td><span class='blk motion'>turn left 15 degrees</span></td><td>turns anti-clockwise</td></tr>"+
+    "<tr><td><span class='blk motion'>go to x: 0 y: 0</span></td><td>jumps the sprite to a fixed position. With 0 and 0 it lands at the centre.</td></tr>"+
+    "<tr><td><span class='blk motion'>point in direction 90</span></td><td>points the sprite in a direction</td></tr>"+
+    "<tr><td><span class='blk motion'>glide 1 secs to x: 0 y: 0</span></td><td>moves smoothly to a position</td></tr>"+
+    "<tr><td><span class='blk motion'>point towards mouse-pointer</span></td><td>points at the mouse pointer</td></tr>"+
+    "<tr><td><span class='blk motion'>change x by 10</span> / <span class='blk motion'>change y by 10</span></td><td>changes the x or y position</td></tr>"+
+    "<tr><td><span class='blk motion'>set x to 0</span> / <span class='blk motion'>set y to 0</span></td><td>sets x or y to an exact value</td></tr>"+
+    "<tr><td><span class='blk motion'>if on edge, bounce</span></td><td>sends the sprite the opposite way when it touches the edge of the stage</td></tr></table>"+
+    "<p><b>Bouncing ball project:</b> remove the cat, add the Soccer Ball sprite, start with "+
+    "<span class='blk events'>when green flag clicked</span>, then <span class='blk motion'>go to x: -180 y: -100</span>, then a "+
+    "chain of glide blocks alternating y between 100 and -100 so the ball arcs across the stage.</p>",
+  check:["d12","d13"]
+},
+{
+  id:"c6", topic:"looks", title:"Looks blocks, costumes and animation",
+  html:
+    "<table class='t'><tr><th>Block</th><th>What it does</th></tr>"+
+    "<tr><td><span class='blk looks'>say Hello! for 2 seconds</span></td><td>speech bubble for a set time</td></tr>"+
+    "<tr><td><span class='blk looks'>say Hello!</span></td><td>speech bubble that stays</td></tr>"+
+    "<tr><td><span class='blk looks'>think Hmm...</span></td><td>thought bubble</td></tr>"+
+    "<tr><td><span class='blk looks'>change color effect by 25</span></td><td>changes the sprite's colour</td></tr>"+
+    "<tr><td><span class='blk looks'>change size by 10</span></td><td>changes the sprite's size</td></tr>"+
+    "<tr><td><span class='blk looks'>next costume</span></td><td>switches to the sprite's next costume</td></tr>"+
+    "<tr><td><span class='blk looks'>hide</span> / <span class='blk looks'>show</span></td><td>hides or shows the sprite on the stage</td></tr></table>"+
+    "<p>A <b>costume</b> is one of the many possible appearances of a sprite. Every sprite must have <b>at least one</b> costume. "+
+    "Switching costumes quickly with <span class='blk looks'>next costume</span> is how you make an <b>animation</b> &mdash; that is "+
+    "why a sprite is given multiple costumes.</p>"+
+    "<p><b>Animation in Scratch</b> is the process of making sprites move or change appearance using costumes and coding blocks. "+
+    "That is the wording for the long answer.</p>"+
+    "<p class='muted'>A sprite that was hidden at the start is brought back with <span class='blk looks'>show</span>, not "+
+    "<span class='blk looks'>go to</span>.</p>",
+  check:["d14","d15","d16"]
+},
+{
+  id:"c7", topic:"practical", title:"Subject enrichment: the practical",
+  html:
+    "<p>The enrichment assessment is a <b>practical on Scratch</b>, so this one is done at the computer, not on paper. "+
+    "Work through it once and she will have touched every block the paper asks about.</p>"+
+    "<ul class='tight'>"+
+    "<li>Open Scratch and start a new project. Delete the cat sprite using the bin icon on its thumbnail.</li>"+
+    "<li>Choose a backdrop from the Stage info pane, bottom right.</li>"+
+    "<li>Add a sprite that has more than one costume &mdash; Parrot or a dancer works well. Check the Costumes tab to see them.</li>"+
+    "<li>Build: <span class='blk events'>when green flag clicked</span> &rarr; <span class='blk looks'>next costume</span> &rarr; "+
+    "<span class='blk motion'>move 50 steps</span> &rarr; <span class='blk control'>wait 1 seconds</span> &rarr; "+
+    "<span class='blk looks'>change color effect by 25</span>. Right-click a block and choose <b>Duplicate</b> to repeat the set.</li>"+
+    "<li>Add <span class='blk motion'>if on edge, bounce</span> and watch the sprite turn around at the edge.</li>"+
+    "<li>Add a second sprite and give it its own separate script, so both run at once from the same green flag.</li>"+
+    "<li>Save: <b>File &rarr; Save to your computer</b>. Reopen with <b>File &rarr; Load from your computer</b>.</li>"+
+    "</ul>"+
+    "<p class='muted'>Say the names out loud while dragging &mdash; hat block, stack block, Motion, Looks. The vocabulary is what the written paper tests.</p>",
+  check:["d17","d18"]
+}
+];
+
+/* ============================================================
+   QUESTION BANK
+   type: mcq | tf | fill | word | match
+   ============================================================ */
+
+var Q = {};
+function q(o){ Q[o.id] = o; return o; }
+
+/* ---------- CH 2 : quick checks + drills ---------- */
+q({id:"b1",topic:"mem",sub:"binary",type:"mcq",
+  q:"Which language can a computer understand directly?",
+  opts:["English language","Binary language","Code language","Hindi language"],ans:1,
+  why:"A computer only tells apart current ON and current OFF, so it reads 1 and 0 only. That is binary language."});
+q({id:"b2",topic:"mem",sub:"binary",type:"fill",
+  q:"The presence of electric current is called ON or ______.",
+  accept:["high"],why:"Present current = ON = High = 1. Absent current = OFF = Low = 0."});
+q({id:"b3",topic:"mem",sub:"units",type:"mcq",
+  q:"One byte is a combination of ______.",
+  opts:["2 bits","6 bits","8 bits","1024 bits"],ans:2,
+  why:"8 bits make 1 byte, and one byte holds a single character."});
+q({id:"b4",topic:"mem",sub:"units",type:"mcq",
+  q:"1 Megabyte is equal to ______.",
+  opts:["1024 Bytes","1024 Kilobytes","1024 Gigabytes","1024 Terabytes"],ans:1,
+  why:"Every step on the ladder is 1024 of the step below. MB sits just above KB."});
+q({id:"b5",topic:"mem",sub:"units",type:"word",
+  q:"Which memory unit is bigger than a Zettabyte?",
+  accept:["yottabyte","yotta byte","yb"],why:"1 Yottabyte = 1024 Zettabytes. It is the biggest unit in the chapter."});
+q({id:"b6",topic:"mem",sub:"memtypes",type:"mcq",
+  q:"Which of these is an electronic memory?",
+  opts:["RAM","ROM","Both of these","Hard disc"],ans:2,
+  why:"RAM and ROM are both primary, and primary memory is electronic memory."});
+q({id:"b7",topic:"mem",sub:"memtypes",type:"tf",
+  q:"Secondary storage devices usually have larger storage capacity than primary memory.",ans:true,
+  why:"True. Primary memory is small and costly, secondary storage is large and cheaper."});
+q({id:"b8",topic:"mem",sub:"ramrom",type:"mcq",
+  q:"What happens to the data stored in RAM when the computer is powered off?",
+  opts:["The data is permanently stored.","The data is erased from memory.","The data is transferred to the hard disk.","The data becomes slower to access."],ans:1,
+  why:"RAM is volatile. Cut the power and everything in it is gone."});
+q({id:"b9",topic:"mem",sub:"ramrom",type:"word",
+  q:"Which type of memory retains data even after the power is switched off?",
+  accept:["rom","read only memory","read-only memory"],why:"ROM is non-volatile and holds the startup instructions permanently."});
+q({id:"b10",topic:"mem",sub:"ramrom",type:"fill",
+  q:"Startup instructions for the computer are stored in ______.",
+  accept:["rom","read only memory"],why:"ROM keeps the startup instructions permanently."});
+q({id:"b11",topic:"mem",sub:"devices",type:"mcq",
+  q:"What are optical storage devices?",
+  opts:["Devices that use laser light to store and read data","Devices that print information on paper","Devices used for typing on a computer","Devices used for drawing pictures on the computer"],ans:0,
+  why:"Optical means laser light. CD, DVD and Blu-ray are the optical devices in this chapter."});
+q({id:"b12",topic:"mem",sub:"devices",type:"fill",
+  q:"Single layer Blu-ray disc stores ______ GB of data while double layer disc stores ______ GB. (write both numbers)",
+  accept:["25 50","25,50","25 and 50","2550"],why:"Single layer 25 GB, double layer 50 GB. The whole BD range is 25 to 50 GB."});
+q({id:"b13",topic:"mem",sub:"devices",type:"word",
+  q:"Which optical disc is commonly used for high-definition video storage?",
+  accept:["blu-ray disc","blu ray disc","bluray disc","blu-ray","blu ray","bluray","bd"],
+  why:"Blu-ray Disc. It holds 25 to 50 GB, far more than a CD or DVD."});
+q({id:"b14",topic:"mem",sub:"devices",type:"fill",
+  q:"______ introduced the first hard drive, in the year 1956.",
+  accept:["ibm"],why:"IBM, 1956. It was the size of two refrigerators and weighed about a ton."});
+q({id:"b15",topic:"mem",sub:"devices",type:"word",
+  q:"Expand USB.",
+  accept:["universal serial bus"],why:"Universal Serial Bus. A pendrive is also called a USB drive because it plugs into this port."});
+
+q({id:"b16",topic:"mem",sub:"devices",type:"mcq",
+  q:"Which of the following is the best use of a portable hard disk?",
+  opts:["Storing large amounts of data and files safely","Transferring files from one computer to another easily","Saving photos, videos and games safely","All of these"],ans:3,
+  why:"A portable hard disc does all three, so the answer is all of these."});
+q({id:"b17",topic:"mem",sub:"devices",type:"mcq",
+  q:"Which of these devices is commonly connected through a USB port?",
+  opts:["Pen drive","CD","Motherboard","RAM stick"],ans:0,
+  why:"The pen drive plugs into the USB port, which is why it is also called a USB drive."});
+q({id:"b18",topic:"mem",sub:"devices",type:"fill",
+  q:"Memory cards are used to extend the ______ of digital devices.",
+  accept:["storage capacity","storage","capacity"],why:"A memory card extends the storage capacity of phones and tablets."});
+q({id:"b19",topic:"mem",sub:"devices",type:"fill",
+  q:"Storage devices that can be used again after erasing data are called ______ devices.",
+  accept:["rewritable","re-writable","re writable"],why:"Rewritable. A pendrive is the example given in the book."});
+q({id:"b20",topic:"mem",sub:"units",type:"word",
+  q:"What is the full form of YB?",
+  accept:["yottabyte","yotta byte"],why:"Yottabyte, the largest unit on the storage ladder."});
+q({id:"b21",topic:"mem",sub:"devices",type:"tf",
+  q:"A pen drive needs an internet connection to store files.",ans:false,
+  why:"False. A pendrive stores data on its own, no internet involved. Cloud storage is the one that needs internet."});
+q({id:"b22",topic:"mem",sub:"units",type:"tf",
+  q:"The smallest unit of memory is called a byte.",ans:false,
+  why:"False. The smallest unit is a bit. Eight of them make a byte."});
+q({id:"b23",topic:"mem",sub:"devices",type:"tf",
+  q:"Portable storage devices like CDs and DVDs are easy to carry from one place to another.",ans:true,
+  why:"True. They are light, flat and shift easily between computers."});
+q({id:"b24",topic:"mem",sub:"units",type:"tf",
+  q:"Yottabyte is one of the biggest memory units used in computing.",ans:true,
+  why:"True. It is the top of the ladder in this chapter."});
+q({id:"b25",topic:"mem",sub:"devices",type:"word",
+  q:"Which USB storage device can be easily plugged into a computer for data transfer?",
+  accept:["pen drive","pendrive","flash drive","usb drive"],why:"Pen drive, also called flash drive or USB drive."});
+q({id:"b26",topic:"mem",sub:"devices",type:"word",
+  q:"A smartphone user wants more space for apps, photos and videos. Which storage device should be inserted into the phone?",
+  accept:["memory card","flash card","memory stick"],why:"A memory card, also called a flash card or memory stick."});
+q({id:"b27",topic:"mem",sub:"devices",type:"word",
+  q:"What is the type of storage where files are saved online and can be opened from any device using the internet?",
+  accept:["cloud storage","cloud"],why:"Cloud storage. It is the one kind of storage that does need the internet."});
+q({id:"b28",topic:"mem",sub:"devices",type:"mcq",
+  q:"Which storage device is fixed inside the CPU box and holds the operating system?",
+  opts:["Pendrive","Hard disc","Memory card","CD"],ans:1,
+  why:"The hard disc. Capacity 1 TB to 8 TB."});
+q({id:"b29",topic:"mem",sub:"devices",type:"mcq",
+  q:"A DVD can store data in the range of ______.",
+  opts:["up to 700 MB","4.7 GB to 17.08 GB","25 GB to 50 GB","2 GB to 4 TB"],ans:1,
+  why:"CD is up to 700 MB, DVD is 4.7 to 17.08 GB, Blu-ray is 25 to 50 GB."});
+q({id:"b30",topic:"mem",sub:"memtypes",type:"fill",
+  q:"Secondary memory is also known as ______ memory.",
+  accept:["external"],why:"Secondary = external memory. Primary = internal or electronic memory."});
+q({id:"b31",topic:"mem",sub:"ramrom",type:"fill",
+  q:"______ is a volatile memory.",
+  accept:["ram","random access memory"],why:"RAM is volatile, ROM is non-volatile."});
+q({id:"b32",topic:"mem",sub:"units",type:"fill",
+  q:"1 kilobyte is equal to ______ bytes.",
+  accept:["1024","1,024"],why:"Every step of the ladder is 1024."});
+q({id:"b33",topic:"mem",sub:"binary",type:"fill",
+  q:"Data in the computer is represented using the digits ______ and ______. (write both)",
+  accept:["0 1","0,1","0 and 1","01"],why:"0 and 1, the two binary digits."});
+q({id:"b34",topic:"mem",sub:"ramrom",type:"tf",
+  q:"ROM loses all its contents when the power supply is switched off.",ans:false,
+  why:"False. ROM is non-volatile, so it keeps its contents. RAM is the one that loses them."});
+q({id:"b35",topic:"mem",sub:"devices",type:"tf",
+  q:"A CD can store more data than a Blu-ray disc.",ans:false,
+  why:"False. CD holds up to 700 MB. Blu-ray holds 25 to 50 GB, which is far more."});
+q({id:"b36",topic:"mem",sub:"units",type:"match",
+  q:"Match each unit with what it equals.",
+  pairs:[["1 GB","1024 MB"],["1024 KB","1 MB"],["1 TB","1024 GB"],["1 KB","1024 Bytes"],["8 Bits","1 Byte"],["1 EB","1024 PB"]],
+  why:"Every step up the ladder is 1024 of the step below."});
+q({id:"b37",topic:"mem",sub:"devices",type:"match",
+  q:"Match each short form with its full form.",
+  pairs:[["BITS","Binary Digits"],["DVD","Digital Versatile Disc"],["CD","Compact Disc"],["BD","Blu-ray Disc"],["USB","Universal Serial Bus"],["RAM","Random Access Memory"]],
+  why:"These full forms come up in the 'Expand the following' section."});
+q({id:"b38",topic:"mem",sub:"devices",type:"match",
+  q:"Match each device with its storage capacity.",
+  pairs:[["CD","up to 700 MB"],["DVD","4.7 GB to 17.08 GB"],["Blu-ray disc","25 GB to 50 GB"],["Pendrive","2 GB to 4 TB"],["Memory card","2 GB to 2 TB"],["Hard disc","1 TB to 8 TB"]],
+  why:"These exact ranges are printed in the chapter and get asked as fill-in-the-blanks."});
+
+/* ---------- CH 7 : quick checks + drills ---------- */
+q({id:"d1",topic:"scr",sub:"env",type:"mcq",
+  q:"The Scratch object on which any action is performed is known as the ______.",
+  opts:["Script","Sprite","Stage","Backdrop"],ans:1,
+  why:"Sprite. The cat is the default sprite."});
+q({id:"d2",topic:"scr",sub:"env",type:"fill",
+  q:"Scratch coding becomes easier because commands are arranged using a ______ method instead of typing long codes.",
+  accept:["drag and drop","drag-and-drop","dragging and dropping"],why:"Drag and drop is the exact phrase the paper wants."});
+q({id:"d3",topic:"scr",sub:"coords",type:"mcq",
+  q:"The dimensions of the Scratch stage are ______.",
+  opts:["240 x 180","480 x 360","360 x 480","-240 x -180"],ans:1,
+  why:"480 units wide, 360 units tall."});
+q({id:"d4",topic:"scr",sub:"coords",type:"fill",
+  q:"The centre position where a sprite appears on the Scratch stage is represented by ______. (write it as x and y)",
+  accept:["x:0 y:0","x 0 y 0","x:0,y:0","0,0","(0,0)","x=0 y=0","x:0 , y:0","x: 0 y: 0"],
+  why:"The centre of the stage is x: 0, y: 0."});
+q({id:"d5",topic:"scr",sub:"coords",type:"fill",
+  q:"______ are the values of X and Y units which tell the position in a 2D plane.",
+  accept:["coordinates","co-ordinates","co ordinates"],why:"Coordinates. Watch the spelling."});
+q({id:"d6",topic:"scr",sub:"blocks",type:"mcq",
+  q:"Which type of Scratch block can be fitted above and below other blocks to form a sequence of commands?",
+  opts:["Hat Block","Reporter Block","Stack Block","Sensing block"],ans:2,
+  why:"A stack block has a notch on top and a bump below, so it snaps in the middle of a stack."});
+q({id:"d7",topic:"scr",sub:"blocks",type:"fill",
+  q:"The 'when green flag clicked' block is an example of a ______ block.",
+  accept:["hat"],why:"Hat block. Every script starts with one."});
+q({id:"d8",topic:"scr",sub:"blocks",type:"fill",
+  q:"The process of arranging coding blocks in the correct order to perform a task is called ______.",
+  accept:["sequencing"],why:"Sequencing."});
+q({id:"d9",topic:"scr",sub:"cats",type:"word",
+  q:"What is the category name for all audio-related blocks in Scratch?",
+  accept:["sound"],why:"Sound. It is pink or magenta and has 9 blocks."});
+q({id:"d10",topic:"scr",sub:"cats",type:"word",
+  q:"A bird keeps flapping its wings again and again while flying across the stage. Which loop makes this repetition happen?",
+  accept:["forever loop","forever"],why:"The forever loop, from the Control category."});
+q({id:"d11",topic:"scr",sub:"cats",type:"mcq",
+  q:"Which category of blocks is displayed in purple colour?",
+  opts:["Looks","Motion","Sound","Control"],ans:0,
+  why:"Looks is purple. Motion is blue, Sound is pink, Control is golden."});
+q({id:"d12",topic:"scr",sub:"motion",type:"mcq",
+  q:"Which block helps a sprite jump to a fixed position on the Stage?",
+  opts:["say Hello! for 2 seconds","go to x: 23 y: 8","if on edge, bounce","turn 15 degrees"],ans:1,
+  why:"The 'go to x y' block sends the sprite straight to a fixed position."});
+q({id:"d13",topic:"scr",sub:"motion",type:"word",
+  q:"Which block makes a sprite change its direction when it touches the boundary of the stage?",
+  accept:["if on edge bounce","if on edge, bounce","if on edge","on edge bounce"],
+  why:"'if on edge, bounce' from the Motion category."});
+q({id:"d14",topic:"scr",sub:"looks",type:"mcq",
+  q:"A sprite was hidden at the beginning of a project. Which command makes it visible on the Stage again?",
+  opts:["Go to","Show","Hide","Glide"],ans:1,
+  why:"The 'show' block from the Looks category."});
+q({id:"d15",topic:"scr",sub:"looks",type:"mcq",
+  q:"Why do Scratch programmers use multiple costumes for the same sprite?",
+  opts:["To create animation effects","To save projects faster","To change stage size","To add sound to the project"],ans:0,
+  why:"Switching costumes quickly is what makes an animation."});
+q({id:"d16",topic:"scr",sub:"looks",type:"word",
+  q:"In a Scratch project the scene shifts from a classroom to a playground. What has been changed?",
+  accept:["backdrop","back drop"],why:"The backdrop. The stage background is called the backdrop."});
+q({id:"d17",topic:"scr",sub:"env",type:"tf",
+  q:"Scratch allows users to share their projects online with others.",ans:true,
+  why:"True."});
+q({id:"d18",topic:"scr",sub:"blocks",type:"tf",
+  q:"A set of code blocks stacked together is known as code or script.",ans:true,
+  why:"True. Code, script and program all mean the same thing here."});
+
+q({id:"d19",topic:"scr",sub:"env",type:"mcq",
+  q:"What can two sprites do together in Scratch?",
+  opts:["They cannot interact with each other.","They can interact and perform actions together.","Only one sprite can move.","Nothing at all."],ans:1,
+  why:"You can put two or more sprites on the stage and give each its own script, and they run together."});
+q({id:"d20",topic:"scr",sub:"cats",type:"word",
+  q:"Which blocks are used for adding, subtracting and comparing values?",
+  accept:["operators","operator blocks","operators block","operators blocks","operator"],
+  why:"Operators blocks, which are light green."});
+q({id:"d21",topic:"scr",sub:"env",type:"tf",
+  q:"Scratch projects cannot have more than one backdrop.",ans:false,
+  why:"False. You can add several backdrops and switch between them."});
+q({id:"d22",topic:"scr",sub:"cats",type:"tf",
+  q:"Events blocks help sprites know when to start actions.",ans:true,
+  why:"True. Events blocks sense things like a green flag click or a key press."});
+q({id:"d23",topic:"scr",sub:"cats",type:"tf",
+  q:"Events blocks are used to control the sound in the script.",ans:false,
+  why:"False. Sound blocks control sound. Events blocks decide when a script starts."});
+q({id:"d24",topic:"scr",sub:"cats",type:"mcq",
+  q:"Which of these is NOT a block category?",
+  opts:["Looks","Events","Script","Sensing"],ans:2,
+  why:"Script is not a category. A script is what you build by joining blocks."});
+q({id:"d25",topic:"scr",sub:"blocks",type:"mcq",
+  q:"The first block of every script is a ______.",
+  opts:["stack block","hat block","reporter block","motion block"],ans:1,
+  why:"A hat block, with its rounded top."});
+q({id:"d26",topic:"scr",sub:"looks",type:"mcq",
+  q:"Which of these is used to change the appearance of a sprite?",
+  opts:["Looks","Costume","Appearance","Motion"],ans:0,
+  why:"The Looks category holds the blocks that change how a sprite appears."});
+q({id:"d27",topic:"scr",sub:"env",type:"tf",
+  q:"We can use only one sprite at a time on the stage.",ans:false,
+  why:"False. Two or more sprites can be on the stage, each with its own script."});
+q({id:"d28",topic:"scr",sub:"blocks",type:"tf",
+  q:"A script is a collection of code blocks from different categories.",ans:true,
+  why:"True. A script usually mixes Events, Motion, Looks and Control blocks."});
+q({id:"d29",topic:"scr",sub:"cats",type:"tf",
+  q:"Motion blocks are displayed in blue colour.",ans:true,
+  why:"True, medium blue. There are 18 of them."});
+q({id:"d30",topic:"scr",sub:"env",type:"tf",
+  q:"The green flag button is used to stop the program execution.",ans:false,
+  why:"False. The green flag is the Go button. The red one stops it."});
+q({id:"d31",topic:"scr",sub:"cats",type:"tf",
+  q:"The wait block belongs to the Events category.",ans:false,
+  why:"False. Wait is a Control block. Control has 11 blocks and handles waiting and looping."});
+q({id:"d32",topic:"scr",sub:"cats",type:"fill",
+  q:"______ blocks are displayed in light yellow colour.",
+  accept:["events","event"],why:"Events, light yellow, 8 blocks."});
+q({id:"d33",topic:"scr",sub:"cats",type:"fill",
+  q:"______ blocks are used to detect situations like mouse down and touching colours.",
+  accept:["sensing"],why:"Sensing blocks, cyan, 18 of them."});
+q({id:"d34",topic:"scr",sub:"coords",type:"fill",
+  q:"The height of the Scratch stage is ______ units while the width is ______ units. (write both numbers)",
+  accept:["360 480","360,480","360 and 480"],why:"Height 360, width 480. Easy to swap by mistake."});
+q({id:"d35",topic:"scr",sub:"env",type:"fill",
+  q:"______ is the area on which a sprite moves or completes the action.",
+  accept:["stage","the stage"],why:"The stage."});
+q({id:"d36",topic:"scr",sub:"env",type:"fill",
+  q:"Sprite command blocks are snapped together in the ______ area.",
+  accept:["coding","code","coding area"],why:"The coding area."});
+q({id:"d37",topic:"scr",sub:"motion",type:"mcq",
+  q:"Which block moves the sprite in the backward direction?",
+  opts:["move 10 steps","move -10 steps","move 100 steps","go to x: 0 y: 0"],ans:1,
+  why:"A minus value in the Move block sends the sprite backward."});
+q({id:"d38",topic:"scr",sub:"motion",type:"mcq",
+  q:"Which block places the sprite at the centre of the stage?",
+  opts:["go to x: 0 y: 0","go to x: 40 y: 180","go to x: 180 y: 460","point in direction 90"],ans:0,
+  why:"The centre is 0,0."});
+q({id:"d39",topic:"scr",sub:"motion",type:"mcq",
+  q:"Which block rotates the sprite in the anti-clockwise direction?",
+  opts:["turn right 15 degrees","turn left 15 degrees","point in direction 90","change x by 10"],ans:1,
+  why:"The left-turning arrow is anti-clockwise."});
+q({id:"d40",topic:"scr",sub:"looks",type:"mcq",
+  q:"Which block changes the sprite's costume?",
+  opts:["next costume","change costume","change size by 10","switch backdrop"],ans:0,
+  why:"'next costume' is the block name in the Looks category."});
+q({id:"d41",topic:"scr",sub:"looks",type:"word",
+  q:"What is the name for one of the many possible appearances of a sprite?",
+  accept:["costume"],why:"A costume. Every sprite must have at least one."});
+q({id:"d42",topic:"scr",sub:"blocks",type:"match",
+  q:"Match each block with what it does.",
+  pairs:[["move 10 steps","Moves the sprite forward or backward"],["when green flag clicked","Hat block that starts the script"],["say Hello!","Shows a speech balloon"],["change color effect by 25","Changes the colour of the sprite"],["change size by 50","Changes the size of the sprite"],["if on edge, bounce","Turns the sprite around at the stage edge"]],
+  why:"These pairings come straight from the block tables in the chapter."});
+q({id:"d43",topic:"scr",sub:"cats",type:"match",
+  q:"Match each block category with its colour.",
+  pairs:[["Motion","Blue"],["Looks","Purple"],["Sound","Pink"],["Events","Light yellow"],["Control","Golden"],["Operators","Light green"]],
+  why:"Colour is the quickest way to find a block, which is why the book lists them."});
+q({id:"d44",topic:"scr",sub:"cats",type:"match",
+  q:"Match each category with how many blocks it has.",
+  pairs:[["Motion","18"],["Looks","20"],["Sound","9"],["Events","8"],["Control","11"],["Sensing","18"]],
+  why:"The counts are printed in the block category table."});
+
+/* ---------- written answers ---------- */
+var WRITTEN = [
+{t:"mem",q:"What do you understand by binary language?",
+ a:"It is the machine language made up of the binary digits 0 and 1, which can be directly processed by the computer."},
+{t:"mem",q:"What are the two types of computer memory?",
+ a:"Primary memory and secondary memory."},
+{t:"mem",q:"What is the difference between RAM and ROM?",
+ a:"RAM is a volatile memory and it stores the user's data temporarily, so everything is lost when the power goes off. ROM is a non-volatile memory and it stores the startup instructions permanently, so the contents stay even when the power is switched off."},
+{t:"mem",q:"Name the devices which are used to store data permanently in the computer.",
+ a:"Hard disc, CD, DVD, pendrive, memory card and Blu-ray disc are examples of secondary storage devices used to store data permanently."},
+{t:"mem",q:"How is a DVD different from a BD?",
+ a:"The storage capacity of a BD is greater than that of a DVD. A DVD can store 4.7 GB to 17.08 GB of data, while a BD can store 25 GB to 50 GB."},
+{t:"mem",q:"What makes a hard disk an essential part of a computer system?",
+ a:"A hard disc is essential because it stores the computer's data and programs, including all the application software and the operating system. It saves them even when the computer is turned off."},
+{t:"mem",q:"Explain the two types of memory.",
+ a:"Primary memory is the main memory of the computer that stores data and instructions temporarily. Its types are RAM and ROM. Secondary memory stores data permanently, and its types are hard disc, CD, DVD, pendrive and memory card."},
+{t:"scr",q:"What is the use of Scratch?",
+ a:"Scratch is an easy-to-use programming environment where children can connect code blocks in the correct order to create games, animations, stories and other interactive projects."},
+{t:"scr",q:"What is a stage? Describe the dimensions of the Scratch stage.",
+ a:"The stage is the area on which the sprite moves and performs actions. It is 480 units wide and 360 units tall, divided into a grid of (x, y). The centre of the stage is at the (0,0) coordinates."},
+{t:"scr",q:"What is the difference between a script and a block?",
+ a:"Blocks are the individual coding instructions that tell a sprite what to do. A script is a set of those blocks stacked together in a logical order to complete a task."},
+{t:"scr",q:"What is the use of Motion blocks? Name some of the commonly used blocks of this category.",
+ a:"Motion blocks are used to control the movement of the sprite in a specific direction. Commonly used ones are move 10 steps, turn 15 degrees, go to x y, glide 1 secs to x y, point in direction, change x by, set x to, and if on edge bounce."},
+{t:"scr",q:"What is animation in Scratch?",
+ a:"It is the process of making sprites move or change appearance by using costumes and coding blocks."},
+{t:"scr",q:"What is the use of the 'go to x: 0 y: 0' block?",
+ a:"It moves a sprite to a given x and y position on the stage."},
+{t:"scr",q:"What do you understand by costumes? Explain.",
+ a:"A costume is one of the many possible appearances of a sprite. A sprite must have at least one costume, and changing costumes quickly is used to create animation."}
+];
+</script>
+<script>
+(function(){
+"use strict";
+
+/* ---------- storage that survives being opened from a file or a preview ---------- */
+var store = (function(){
+  var mem = {}, ok = true;
+  try{ window.localStorage.setItem("__probe","1"); window.localStorage.removeItem("__probe"); }
+  catch(e){ ok = false; }
+  return {
+    get:function(k){ try{ return ok ? window.localStorage.getItem(k) : (mem[k]||null); }catch(e){ return mem[k]||null; } },
+    set:function(k,v){ try{ if(ok){ window.localStorage.setItem(k,v); } else { mem[k]=v; } }catch(e){ mem[k]=v; } },
+    wipe:function(){ try{ if(ok){ window.localStorage.removeItem(KEY); } }catch(e){} mem={}; }
+  };
+})();
+
+var KEY = "mq.computers.wt2.v1";
+var TARGET_COVERAGE = 45;
+
+var S = {
+  answered:0, correct:0, seen:{}, sub:{}, lessons:{}, history:[], best:0, days:{}
+};
+
+function load(){
+  var raw = store.get(KEY);
+  if(!raw){ return; }
+  try{
+    var o = JSON.parse(raw);
+    if(o && typeof o === "object"){
+      S.answered = o.answered||0; S.correct = o.correct||0;
+      S.seen = o.seen||{}; S.sub = o.sub||{}; S.lessons = o.lessons||{};
+      S.history = o.history||[]; S.best = o.best||0; S.days = o.days||{};
+    }
+  }catch(e){}
+}
+function save(){ store.set(KEY, JSON.stringify(S)); }
+
+/* ---------- helpers ---------- */
+function $(id){ return document.getElementById(id); }
+function el(tag, cls, html){
+  var n = document.createElement(tag);
+  if(cls){ n.className = cls; }
+  if(html !== undefined){ n.innerHTML = html; }
+  return n;
+}
+function shuffle(a){
+  var r = a.slice(), i, j, t;
+  for(i=r.length-1;i>0;i--){ j=Math.floor(Math.random()*(i+1)); t=r[i]; r[i]=r[j]; r[j]=t; }
+  return r;
+}
+function norm(s){
+  return String(s).toLowerCase()
+    .replace(/\b(and|the|a|an)\b/g," ")
+    .replace(/[^a-z0-9]/g,"");
+}
+function pool(filter){
+  var out=[], k;
+  for(k in Q){ if(Q.hasOwnProperty(k) && filter(Q[k])){ out.push(Q[k]); } }
+  return out;
+}
+function todayKey(){
+  var d = new Date();
+  return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
+}
+
+/* ---------- THE SKY ---------- */
+var SKIES = [
+  {top:"#0d1230", mid:"#1b1f4a", low:"#3a2f5e"},   /* night      */
+  {top:"#1b2352", mid:"#4a3a72", low:"#8c5a72"},   /* first light*/
+  {top:"#3a4f96", mid:"#a5628a", low:"#f2955e"},   /* sunrise    */
+  {top:"#4f86d6", mid:"#84b3e6", low:"#dfc9a4"},   /* morning    */
+  {top:"#3f8fe0", mid:"#78bdf2", low:"#c8e7fb"},   /* bright day */
+  {top:"#2f86e4", mid:"#63b9f7", low:"#eaf7ff"}    /* high noon  */
+];
+var LABELS = ["Before sunrise","First light","Sunrise","Morning","Bright day","High noon"];
+
+function hex2rgb(h){
+  return [parseInt(h.substr(1,2),16), parseInt(h.substr(3,2),16), parseInt(h.substr(5,2),16)];
+}
+function mix(a,b,t){
+  var x=hex2rgb(a), y=hex2rgb(b), i, o="rgb(";
+  for(i=0;i<3;i++){ o += Math.round(x[i]+(y[i]-x[i])*t) + (i<2?",":""); }
+  return o+")";
+}
+
+function overallPct(){
+  if(S.answered === 0){ return 0; }
+  var acc = S.correct / S.answered;
+  var distinct = 0, k;
+  for(k in S.seen){ if(S.seen.hasOwnProperty(k)){ distinct++; } }
+  var cover = Math.min(1, distinct / TARGET_COVERAGE);
+  return Math.round(acc * cover * 100);
+}
+
+function paintSky(){
+  var p = overallPct() / 100;
+  var idx = p * (SKIES.length - 1);
+  var lo = Math.floor(idx), hi = Math.min(SKIES.length-1, lo+1), t = idx - lo;
+  var r = document.documentElement.style;
+  r.setProperty("--sky-top", mix(SKIES[lo].top, SKIES[hi].top, t));
+  r.setProperty("--sky-mid", mix(SKIES[lo].mid, SKIES[hi].mid, t));
+  r.setProperty("--sky-low", mix(SKIES[lo].low, SKIES[hi].low, t));
+  r.setProperty("--sun-x", (6 + p*44) + "%");
+  r.setProperty("--sun-y", (88 - Math.sin(p*Math.PI/2)*68) + "%");
+  r.setProperty("--sun-glow", String(p));
+  r.setProperty("--star-op", String(Math.max(0, 1 - p*3.2)));
+  $("sun").style.opacity = p < 0.04 ? "0.25" : "1";
+  var band = Math.min(LABELS.length-1, Math.round(p*(LABELS.length-1)));
+  $("wNum").textContent = overallPct() + "%";
+  $("wLabel").textContent = LABELS[band];
+}
+
+function makeStars(){
+  var box = $("stars"), i, s;
+  for(i=0;i<38;i++){
+    s = el("div","star");
+    s.style.left = (Math.random()*100).toFixed(2) + "%";
+    s.style.top = (Math.random()*62).toFixed(2) + "%";
+    var sz = (1 + Math.random()*2).toFixed(1);
+    s.style.width = sz + "px"; s.style.height = sz + "px";
+    s.style.animationDelay = (Math.random()*3.6).toFixed(2) + "s";
+    box.appendChild(s);
+  }
+}
+function makeClouds(){
+  var sky = $("sky"), i, c;
+  for(i=0;i<3;i++){
+    c = el("div","cloud");
+    var w = 70 + i*26;
+    c.style.width = w+"px"; c.style.height = (w*0.32)+"px";
+    c.style.top = (18 + i*17) + "%";
+    c.style.animationDuration = (46 + i*22) + "s";
+    c.style.animationDelay = (-i*15) + "s";
+    c.style.opacity = String(0.28 + i*0.12);
+    sky.appendChild(c);
+  }
+}
+
+/* ---------- the bot ---------- */
+var CHEER = ["Nice one","Got it","Yes!","Spot on","Sun's climbing","Correct"];
+var NUDGE = ["Not quite","Read it again","Close","Try the next one","Hmm, no"];
+function botReact(ok, line){
+  var body = $("botBody"), mouth = $("botMouth"), say = $("botSay");
+  body.className = "bot-body " + (ok ? "hop" : "shake");
+  mouth.className = "mouth " + (ok ? "" : "sad");
+  say.textContent = line || (ok ? CHEER[Math.floor(Math.random()*CHEER.length)]
+                                : NUDGE[Math.floor(Math.random()*NUDGE.length)]);
+  setTimeout(function(){ body.className = "bot-body"; }, 600);
+}
+
+/* ---------- scoring ---------- */
+function record(qo, ok, silent){
+  S.answered++;
+  if(ok){ S.correct++; }
+  S.seen[qo.id] = 1;
+  var k = qo.sub;
+  if(!S.sub[k]){ S.sub[k] = {c:0,t:0}; }
+  S.sub[k].t++;
+  if(ok){ S.sub[k].c++; }
+  S.days[todayKey()] = 1;
+  save();
+  paintSky();
+  if(!silent){ botReact(ok); }
+}
+
+/* ============================================================
+   QUESTION RENDERER
+   onDone(ok) fires once the learner has settled the question.
+   ============================================================ */
+function renderQ(qo, host, onDone, opts){
+  opts = opts || {};
+  var quiet = !!opts.quiet;          /* mock test: no feedback until the end */
+  host.innerHTML = "";
+  var wrap = el("div");
+  var prompt = qo.q;
+  if(qo.type === "tf"){ prompt = "True or False: " + prompt; }
+  wrap.appendChild(el("div","qtext", prompt));
+
+  var settled = false;
+  function finish(ok, chosen){
+    if(settled){ return; }
+    settled = true;
+    if(!quiet){
+      var v = el("div","verdict " + (ok ? "ok" : "no"));
+      v.innerHTML = "<b>" + (ok ? "Correct." : "Not this time.") + "</b> " + (qo.why||"");
+      wrap.appendChild(v);
+    }
+    onDone(ok, chosen);
+  }
+
+  /* ---- multiple choice ---- */
+  if(qo.type === "mcq"){
+    var box = el("div","opts");
+    var order = shuffle(qo.opts.map(function(txt,i){ return {txt:txt,i:i}; }));
+    order.forEach(function(o, n){
+      var b = el("button","opt");
+      b.innerHTML = "<span class='key'>" + "abcd".charAt(n) + "</span><span>" + o.txt + "</span>";
+      b.onclick = function(){
+        var ok = (o.i === qo.ans);
+        Array.prototype.forEach.call(box.children, function(c){ c.disabled = true; });
+        if(quiet){ b.classList.add("right"); }
+        else {
+          b.classList.add(ok ? "right" : "wrong");
+          if(!ok){
+            Array.prototype.forEach.call(box.children, function(c, ci){
+              if(order[ci].i === qo.ans){ c.classList.add("right"); }
+            });
+          }
+        }
+        finish(ok, o.txt);
+      };
+      box.appendChild(b);
+    });
+    wrap.appendChild(box);
+  }
+
+  /* ---- true / false ---- */
+  else if(qo.type === "tf"){
+    var tb = el("div","opts");
+    [["True",true],["False",false]].forEach(function(pair, n){
+      var b = el("button","opt");
+      b.innerHTML = "<span class='key'>" + (n===0?"T":"F") + "</span><span>" + pair[0] + "</span>";
+      b.onclick = function(){
+        var ok = (pair[1] === qo.ans);
+        Array.prototype.forEach.call(tb.children, function(c){ c.disabled = true; });
+        if(quiet){ b.classList.add("right"); }
+        else{
+          b.classList.add(ok ? "right" : "wrong");
+          if(!ok){
+            Array.prototype.forEach.call(tb.children, function(c, ci){
+              if((ci===0) === qo.ans){ c.classList.add("right"); }
+            });
+          }
+        }
+        finish(ok, pair[0]);
+      };
+      tb.appendChild(b);
+    });
+    wrap.appendChild(tb);
+  }
+
+  /* ---- fill in the blank / one word ---- */
+  else if(qo.type === "fill" || qo.type === "word"){
+    var row = el("div","typebox");
+    var inp = el("input");
+    inp.type = "text";
+    inp.setAttribute("autocomplete","off");
+    inp.setAttribute("autocapitalize","off");
+    inp.placeholder = qo.type === "word" ? "One word answer" : "Type the missing words";
+    var go = el("button","btn"); go.textContent = "Check";
+    row.appendChild(inp); row.appendChild(go);
+    wrap.appendChild(row);
+    function submit(){
+      if(settled){ return; }
+      var v = norm(inp.value);
+      if(!v){ inp.focus(); return; }
+      var ok = qo.accept.some(function(a){ return norm(a) === v; });
+      inp.disabled = true; go.disabled = true;
+      if(!quiet){
+        inp.classList.add(ok ? "right" : "wrong");
+        if(!ok){
+          var hint = el("p","muted");
+          hint.style.marginTop = "8px";
+          hint.innerHTML = "Answer: <b>" + qo.accept[0] + "</b>";
+          wrap.appendChild(hint);
+        }
+      }
+      finish(ok, inp.value);
+    }
+    go.onclick = submit;
+    inp.onkeydown = function(e){ if(e.key === "Enter"){ submit(); } };
+    setTimeout(function(){ inp.focus(); }, 60);
+  }
+
+  /* ---- match the following ---- */
+  else if(qo.type === "match"){
+    var note = el("p","muted","Tap one on the left, then its partner on the right.");
+    wrap.appendChild(note);
+    var grid = el("div","matchgrid");
+    var lefts = qo.pairs.map(function(p,i){ return {t:p[0], i:i}; });
+    var rights = shuffle(qo.pairs.map(function(p,i){ return {t:p[1], i:i}; }));
+    var colL = el("div"), colR = el("div");
+    colL.style.display = colR.style.display = "grid";
+    colL.style.gap = colR.style.gap = "9px";
+    var sel = null, solved = 0, slips = 0;
+
+    lefts.forEach(function(o){
+      var b = el("button","mitem", o.t);
+      b.onclick = function(){
+        if(b.classList.contains("done")){ return; }
+        if(sel){ sel.node.classList.remove("sel"); }
+        sel = {node:b, i:o.i}; b.classList.add("sel");
+      };
+      colL.appendChild(b);
+    });
+    rights.forEach(function(o){
+      var b = el("button","mitem", o.t);
+      b.onclick = function(){
+        if(!sel || b.classList.contains("done")){ return; }
+        if(sel.i === o.i){
+          sel.node.classList.remove("sel");
+          sel.node.classList.add("done"); b.classList.add("done");
+          sel = null; solved++;
+          if(solved === qo.pairs.length){ finish(slips === 0); }
+        } else {
+          slips++;
+          b.classList.add("miss");
+          setTimeout(function(){ b.classList.remove("miss"); }, 400);
+        }
+      };
+      colR.appendChild(b);
+    });
+    grid.appendChild(colL); grid.appendChild(colR);
+    wrap.appendChild(grid);
+  }
+
+  host.appendChild(wrap);
+}
+
+/* ============================================================
+   LESSONS
+   ============================================================ */
+function renderLessons(list, host){
+  list.forEach(function(L){
+    var d = el("details","lesson");
+    var sm = el("summary");
+    sm.innerHTML = "<span>" + L.title + "</span>";
+    var dot = el("span","done-dot", S.lessons[L.id] ? "done" : "");
+    sm.appendChild(dot);
+    d.appendChild(sm);
+    var body = el("div","body", L.html);
+
+    var checkWrap = el("div");
+    checkWrap.style.marginTop = "12px";
+    var start = el("button","btn go sm","Quick check (" + L.check.length + ")");
+    start.onclick = function(){
+      start.remove();
+      runQueue(L.check.map(function(id){ return Q[id]; }), checkWrap, function(sc, tot){
+        S.lessons[L.id] = 1; save();
+        dot.textContent = "done";
+        checkWrap.innerHTML = "";
+        var v = el("div","verdict " + (sc === tot ? "ok" : "no"));
+        v.innerHTML = "<b>" + sc + " out of " + tot + ".</b> " +
+          (sc === tot ? "This lesson is solid." : "Worth reading the lesson once more, then drill it in Practice.");
+        checkWrap.appendChild(v);
+        var again = el("button","btn ghost sm","Try the check again");
+        again.style.marginTop = "10px";
+        again.onclick = function(){ checkWrap.innerHTML = ""; start.textContent = "Quick check (" + L.check.length + ")"; body.appendChild(start); };
+        checkWrap.appendChild(again);
+      });
+    };
+    checkWrap.appendChild(start);
+    body.appendChild(checkWrap);
+    d.appendChild(body);
+    host.appendChild(d);
+  });
+}
+
+/* a queue that re-inserts anything answered wrong */
+function runQueue(items, host, onEnd, opts){
+  var queue = items.slice();
+  var total = items.length, score = 0, done = 0;
+  var qbox = el("div"); host.appendChild(qbox);
+
+  function step(){
+    if(queue.length === 0){ onEnd(score, total); return; }
+    var qo = queue.shift();
+    renderQ(qo, qbox, function(ok){
+      record(qo, ok);
+      if(ok){
+        if(!qo.__missed){ score++; }
+        done++;
+      } else {
+        qo.__missed = true;
+        queue.splice(Math.min(queue.length, 2), 0, qo);
+      }
+      if(opts && typeof opts.onProgress === "function"){
+        opts.onProgress(done, total);
+      }
+      var nx = el("button","btn sm", queue.length ? "Next" : "Finish");
+      nx.style.marginTop = "12px";
+      nx.onclick = function(){ qbox.innerHTML = ""; step(); };
+      qbox.appendChild(nx);
+      nx.focus();
+    }, opts);
+  }
+  step();
+}
+
+/* ============================================================
+   PRACTICE SETS
+   ============================================================ */
+var SETS = [
+  {id:"m-mcq",  name:"Memory: multiple choice",     f:function(x){ return x.topic==="mem" && x.type==="mcq"; }},
+  {id:"m-fill", name:"Memory: fill in the blanks",  f:function(x){ return x.topic==="mem" && x.type==="fill"; }},
+  {id:"m-tf",   name:"Memory: true or false",       f:function(x){ return x.topic==="mem" && x.type==="tf"; }},
+  {id:"m-word", name:"Memory: one word answers",    f:function(x){ return x.topic==="mem" && x.type==="word"; }},
+  {id:"m-mat",  name:"Memory: match and expand",    f:function(x){ return x.topic==="mem" && x.type==="match"; }},
+  {id:"s-mcq",  name:"Scratch: multiple choice",    f:function(x){ return x.topic==="scr" && x.type==="mcq"; }},
+  {id:"s-fill", name:"Scratch: fill in the blanks", f:function(x){ return x.topic==="scr" && x.type==="fill"; }},
+  {id:"s-tf",   name:"Scratch: true or false",      f:function(x){ return x.topic==="scr" && x.type==="tf"; }},
+  {id:"s-word", name:"Scratch: one word answers",   f:function(x){ return x.topic==="scr" && x.type==="word"; }},
+  {id:"s-mat",  name:"Scratch: match the blocks",   f:function(x){ return x.topic==="scr" && x.type==="match"; }},
+  {id:"mix",    name:"Mixed rapid round",           f:function(){ return true; }, cap:20},
+  {id:"writ",   name:"Written answers",             written:true}
+];
+
+function buildSetPicker(){
+  var host = $("setPick");
+  host.innerHTML = "";
+  SETS.forEach(function(st){
+    var b = el("button","setbtn");
+    var n;
+    if(st.written){ n = WRITTEN.length; }
+    else { n = pool(st.f).length; if(st.cap){ n = Math.min(n, st.cap); } }
+    var seenPct = st.written ? null : setProgress(st);
+    b.innerHTML = "<span><b>" + st.name + "</b><span>" + n + (st.written ? " model answers" : " questions") + "</span></span>";
+    var pill = el("span","score-pill" + (seenPct === 100 ? " gold" : ""),
+      st.written ? "read" : (seenPct + "% seen"));
+    b.appendChild(pill);
+    b.onclick = function(){ openSet(st); };
+    host.appendChild(b);
+  });
+}
+function setProgress(st){
+  var p = pool(st.f), hit = 0;
+  if(!p.length){ return 0; }
+  p.forEach(function(x){ if(S.seen[x.id]){ hit++; } });
+  return Math.round(hit/p.length*100);
+}
+
+function openSet(st){
+  var card = $("drillCard");
+  card.hidden = false;
+  $("drillBody").innerHTML = "";
+  $("drillMeta").textContent = st.name;
+  $("drillBar").style.width = "0%";
+  try{ card.scrollIntoView({behavior:"smooth", block:"start"}); }catch(e){}
+
+  if(st.written){
+    var host = $("drillBody");
+    host.appendChild(el("p","muted","Read the question, say your answer out loud, then tap to open the model answer and compare."));
+    WRITTEN.forEach(function(w){
+      var f = el("div","flip");
+      f.innerHTML = "<div class='q'>" + w.q + "</div><div class='a'>" + w.a + "</div>";
+      f.onclick = function(){ f.classList.toggle("open"); };
+      host.appendChild(f);
+    });
+    $("drillBar").style.width = "100%";
+    return;
+  }
+
+  var items = shuffle(pool(st.f));
+  if(st.cap){ items = items.slice(0, st.cap); }
+  items.forEach(function(x){ delete x.__missed; });
+  var host2 = $("drillBody");
+
+  runQueue(items, host2, function(sc, tot){
+    host2.innerHTML = "";
+    $("drillBar").style.width = "100%";
+    var v = el("div","verdict " + (sc/tot >= 0.8 ? "ok" : "no"));
+    v.innerHTML = "<b>" + sc + " out of " + tot + " first time.</b> " +
+      (sc === tot ? "Clean sweep. Try the mock paper." :
+       sc/tot >= 0.8 ? "Nearly there. Reread the lesson for the ones you missed." :
+       "Go back to the Learn tab for this topic, then run this drill again.");
+    host2.appendChild(v);
+    var again = el("button","btn sm","Run it again");
+    again.style.marginTop = "12px";
+    again.onclick = function(){ openSet(st); };
+    host2.appendChild(again);
+    buildSetPicker();
+  }, {
+    onProgress: function(done, total){
+      $("drillBar").style.width = Math.round(done/total*100) + "%";
+    }
+  });
+}
+
+$("drillQuit").onclick = function(){
+  $("drillCard").hidden = true;
+  $("drillBody").innerHTML = "";
+  buildSetPicker();
+};
+
+/* ============================================================
+   MOCK TEST
+   ============================================================ */
+var T = null;
+
+function pickPaper(){
+  var out = [];
+  ["mcq","fill","tf","word"].forEach(function(ty){
+    var m = shuffle(pool(function(x){ return x.type===ty && x.topic==="mem"; }));
+    var s = shuffle(pool(function(x){ return x.type===ty && x.topic==="scr"; }));
+    var take = m.slice(0,5).concat(s.slice(0,5));
+    while(take.length < 10){
+      var rest = m.slice(5).concat(s.slice(5));
+      if(!rest.length){ break; }
+      take.push(rest[take.length % rest.length]);
+    }
+    out = out.concat(shuffle(take));
+  });
+  return out;
+}
+
+$("testStart").onclick = function(){
+  T = { items: pickPaper(), i:0, answers:[], left: 30*60 };
+  $("testIntro").hidden = true;
+  $("testResult").hidden = true;
+  $("testCard").hidden = false;
+  tick();
+  T.timer = setInterval(tick, 1000);
+  showTestQ();
+};
+
+function tick(){
+  if(!T){ return; }
+  var m = Math.floor(T.left/60), s = T.left % 60;
+  var node = $("testTimer");
+  node.textContent = m + ":" + (s<10?"0":"") + s;
+  node.className = "timer" + (T.left <= 120 ? " low" : "");
+  if(T.left <= 0){ endTest(true); return; }
+  T.left--;
+}
+
+function showTestQ(){
+  var qo = T.items[T.i];
+  $("testMeta").textContent = "Question " + (T.i+1) + " of " + T.items.length + " \u00b7 " + qo.type.toUpperCase();
+  $("testBar").style.width = Math.round(T.i/T.items.length*100) + "%";
+  $("testNext").disabled = true;
+  renderQ(qo, $("testBody"), function(ok, chosen){
+    T.answers.push({id:qo.id, ok:ok, given:chosen});
+    $("testNext").disabled = false;
+    $("testNext").textContent = (T.i === T.items.length-1) ? "See the result" : "Next";
+    $("testNext").focus();
+  }, {quiet:true});
+}
+
+$("testNext").onclick = function(){
+  if(T.i === T.items.length-1){ endTest(false); return; }
+  T.i++;
+  showTestQ();
+};
+$("testEnd").onclick = function(){ endTest(false); };
+
+function endTest(auto){
+  if(!T){ return; }
+  clearInterval(T.timer);
+  var score = 0;
+  T.answers.forEach(function(a){
+    var qo = Q[a.id];
+    record(qo, a.ok, true);
+    if(a.ok){ score++; }
+  });
+  var attempted = T.answers.length, total = T.items.length;
+  S.history.unshift({ d: new Date().toISOString().slice(0,10), s: score, a: attempted, t: total });
+  S.history = S.history.slice(0,10);
+  if(score > S.best){ S.best = score; }
+  save(); paintSky();
+  botReact(score/total >= 0.7, score + " out of " + total);
+
+  $("testCard").hidden = true;
+  var r = $("testResult");
+  r.hidden = false;
+  r.innerHTML = "";
+  r.appendChild(el("h3","tt", auto ? "Time is up" : "Paper finished"));
+  var pct = Math.round(score/total*100);
+  var head = el("p");
+  head.innerHTML = "<b style='font-size:1.6rem;font-family:var(--display)'>" + score + " / " + total + "</b> &nbsp; (" +
+    pct + "%). Attempted " + attempted + ".";
+  r.appendChild(head);
+  r.appendChild(el("p","muted",
+    pct >= 90 ? "Ready for 31 August." :
+    pct >= 75 ? "Good. Fix the misses below and run it once more." :
+    pct >= 50 ? "Half the paper is safe. The list below is the revision list." :
+                "Go back to Learn. Do not run another paper until the lessons are done."));
+
+  var wrong = T.answers.filter(function(a){ return !a.ok; });
+  if(wrong.length){
+    r.appendChild(el("h3","tt","What to fix (" + wrong.length + ")"));
+    wrong.forEach(function(a){
+      var qo = Q[a.id];
+      var f = el("div","flip open");
+      var right = qo.type === "mcq" ? qo.opts[qo.ans]
+               : qo.type === "tf"  ? (qo.ans ? "True" : "False")
+               : qo.accept ? qo.accept[0] : "see the lesson";
+      f.innerHTML = "<div class='q'>" + qo.q + "</div><div class='a'><b>Answer:</b> " + right +
+                    "<br><span class='muted'>" + (qo.why||"") + "</span></div>";
+      r.appendChild(f);
+    });
+  }
+  var again = el("button","btn go","Take another paper");
+  again.style.marginTop = "14px";
+  again.onclick = function(){ $("testIntro").hidden = false; r.hidden = true; window.scrollTo(0,0); };
+  r.appendChild(again);
+  T = null;
+  renderProgress();
+}
+
+/* ============================================================
+   PROGRESS
+   ============================================================ */
+var SUBNAMES = {
+  binary:"Binary and bits", units:"Storage units", memtypes:"Types of memory",
+  ramrom:"RAM and ROM", devices:"Storage devices",
+  env:"Scratch window", coords:"Stage and coordinates", blocks:"Blocks and scripts",
+  cats:"Block categories", motion:"Motion blocks", looks:"Looks and costumes"
+};
+
+function renderProgress(){
+  var g = $("statGrid");
+  g.innerHTML = "";
+  var acc = S.answered ? Math.round(S.correct/S.answered*100) : 0;
+  var distinct = 0, k;
+  for(k in S.seen){ if(S.seen.hasOwnProperty(k)){ distinct++; } }
+  var days = 0;
+  for(k in S.days){ if(S.days.hasOwnProperty(k)){ days++; } }
+  [["Sun height", overallPct()+"%"],["Accuracy", acc+"%"],["Questions seen", distinct],
+   ["Answered", S.answered],["Best paper", S.best+"/40"],["Days practised", days]].forEach(function(p){
+    var s = el("div","stat");
+    s.innerHTML = "<b>" + p[1] + "</b><span>" + p[0] + "</span>";
+    g.appendChild(s);
+  });
+
+  var ml = $("masteryList");
+  ml.innerHTML = "";
+  var keys = Object.keys(SUBNAMES);
+  keys.forEach(function(sub){
+    var d = S.sub[sub];
+    var pc = d && d.t ? Math.round(d.c/d.t*100) : 0;
+    var row = el("div","mastery");
+    var col = pc >= 80 ? "var(--operators)" : pc >= 50 ? "var(--events)" : pc > 0 ? "var(--variables)" : "var(--line)";
+    row.innerHTML = "<div class='lab'><span>" + SUBNAMES[sub] + "</span><span class='muted'>" +
+      (d && d.t ? pc + "% of " + d.t : "not started") + "</span></div>" +
+      "<div class='track'><i style='width:" + pc + "%;background:" + col + "'></i></div>";
+    ml.appendChild(row);
+  });
+
+  var h = $("histList");
+  if(!S.history.length){ h.innerHTML = "<p class='muted'>No mock papers attempted yet.</p>"; }
+  else{
+    h.innerHTML = "";
+    /* Build the whole table in one string. Appending rows with appendChild
+       puts them outside the tbody the parser makes for the header row, which
+       splits the table into two row groups with columns that do not line up. */
+    var rows = "<tr><th>Date</th><th>Score</th><th>Attempted</th></tr>";
+    S.history.forEach(function(x){
+      rows += "<tr><td>" + x.d + "</td><td><b>" + x.s + " / " + x.t + "</b></td><td>" + x.a + "</td></tr>";
+    });
+    var tb = el("table","t");
+    tb.innerHTML = rows;
+    h.appendChild(tb);
+  }
+}
+
+$("resetAll").onclick = function(){
+  if(!window.confirm("Clear every score and start from before sunrise?")){ return; }
+  S = { answered:0, correct:0, seen:{}, sub:{}, lessons:{}, history:[], best:0, days:{} };
+  store.wipe(); save();
+  paintSky(); renderProgress(); buildSetPicker();
+  $("lessonsA").innerHTML = ""; $("lessonsB").innerHTML = "";
+  renderLessons(LESSONS_A, $("lessonsA"));
+  renderLessons(LESSONS_B, $("lessonsB"));
+  wireToys();
+  botReact(true, "Fresh start");
+};
+
+/* ============================================================
+   TABS
+   ============================================================ */
+Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(t){
+  t.onclick = function(){
+    Array.prototype.forEach.call(document.querySelectorAll(".tab"), function(o){
+      o.setAttribute("aria-selected", o === t ? "true" : "false");
+    });
+    ["pLearn","pDrill","pTest","pProg"].forEach(function(id){ $(id).hidden = true; });
+    $(t.dataset.panel).hidden = false;
+    if(t.dataset.panel === "pProg"){ renderProgress(); }
+    if(t.dataset.panel === "pDrill"){ buildSetPicker(); }
+    try{ window.scrollTo({top:0, behavior:"smooth"}); }catch(e){ window.scrollTo(0,0); }
+  };
+});
+
+/* ============================================================
+   THE TWO TOYS INSIDE THE LESSONS
+   ============================================================ */
+var UNITS = [
+  {n:"Bytes", p:0},{n:"Kilobytes (KB)",p:1},{n:"Megabytes (MB)",p:2},{n:"Gigabytes (GB)",p:3},
+  {n:"Terabytes (TB)",p:4},{n:"Petabytes (PB)",p:5},{n:"Exabytes (EB)",p:6},
+  {n:"Zettabytes (ZB)",p:7},{n:"Yottabytes (YB)",p:8}
+];
+
+function wireToys(){
+  var sel = $("cvUnit"), val = $("cvVal"), out = $("cvOut");
+  if(sel && val && out){
+    sel.innerHTML = "";
+    UNITS.forEach(function(u, i){
+      var o = document.createElement("option");
+      o.value = String(i); o.textContent = u.n;
+      sel.appendChild(o);
+    });
+    sel.value = "3";
+    function conv(){
+      var v = parseFloat(val.value);
+      if(isNaN(v)){ out.textContent = "Type a number"; return; }
+      var p = UNITS[parseInt(sel.value,10)].p;
+      var lines = [];
+      UNITS.forEach(function(u){
+        var r = v * Math.pow(1024, p - u.p);
+        if(r >= 0.001 && r < 1e15){
+          lines.push(fmt(r) + " " + u.n.replace(/ \(.*\)/,""));
+        }
+      });
+      out.innerHTML = lines.join("<br>");
+    }
+    function fmt(x){
+      if(x >= 1000){ return Math.round(x).toLocaleString("en-IN"); }
+      return (Math.round(x*1000)/1000).toString();
+    }
+    val.oninput = conv; sel.onchange = conv; conv();
+  }
+
+  var box = $("stageBox"), pin = $("stagePin"), sout = $("stageOut");
+  if(box && pin && sout){
+    box.onclick = function(e){
+      var r = box.getBoundingClientRect();
+      var fx = (e.clientX - r.left) / r.width;
+      var fy = (e.clientY - r.top) / r.height;
+      pin.style.left = (fx*100) + "%";
+      pin.style.top = (fy*100) + "%";
+      var x = Math.round((fx - 0.5) * 480);
+      var y = Math.round((0.5 - fy) * 360);
+      sout.textContent = "x: " + x + "   y: " + y;
+    };
+  }
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+load();
+makeStars();
+makeClouds();
+renderLessons(LESSONS_A, $("lessonsA"));
+renderLessons(LESSONS_B, $("lessonsB"));
+wireToys();
+paintSky();
+renderProgress();
+buildSetPicker();
+
+(function greet(){
+  var p = overallPct();
+  $("botSay").textContent = p === 0 ? "Let's get the sun up"
+    : p >= 88 ? "High noon. You're ready."
+    : p >= 50 ? "Sun's up. Keep going."
+    : "Still early. Open a lesson.";
+})();
+
+})();
+</script>
+</body>
+</html>
