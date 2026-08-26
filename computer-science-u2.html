@@ -983,6 +983,259 @@ q({id:"d44",topic:"scr",sub:"cats",type:"match",
   why:"The counts are printed in the block category table."});
 
 /* ---------- written answers ---------- */
+/* ---------- CH 2 : second bank, same syllabus ----------
+   Added because the first bank was thin enough that a mock paper had to
+   re-ask most of it. Every fact here is taught in the lessons above. */
+q({id:"b40",topic:"mem",sub:"units",type:"mcq",
+  q:"1 Terabyte is equal to ______.",
+  opts:["1024 Kilobytes","1024 Gigabytes","1024 Megabytes","1024 Petabytes"],ans:1,
+  why:"TB sits one step above GB, and every step up the ladder is 1024 of the step below."});
+q({id:"b41",topic:"mem",sub:"binary",type:"mcq",
+  q:"The absence of electric current is written as ______.",
+  opts:["1","0","High","ON"],ans:1,
+  why:"Current absent = OFF = Low = 0. Current present = ON = High = 1."});
+q({id:"b42",topic:"mem",sub:"units",type:"mcq",
+  q:"How many characters can be stored in one byte?",
+  opts:["One","Eight","1024","Two"],ans:0,
+  why:"8 bits make 1 byte, and one byte holds a single character - one letter, one digit or one comma."});
+q({id:"b43",topic:"mem",sub:"memtypes",type:"mcq",
+  q:"Which of these is a secondary storage device?",
+  opts:["RAM","ROM","Pendrive","CPU"],ans:2,
+  why:"RAM and ROM are primary memory. A pendrive is external, so it is secondary storage."});
+q({id:"b44",topic:"mem",sub:"ramrom",type:"mcq",
+  q:"Which memory is directly accessed by the CPU?",
+  opts:["RAM only","ROM only","Both RAM and ROM","Neither of them"],ans:2,
+  why:"Both RAM and ROM are primary memory, and both are directly accessed by the CPU."});
+q({id:"b45",topic:"mem",sub:"devices",type:"mcq",
+  q:"A double layer Blu-ray disc can store ______.",
+  opts:["25 GB","50 GB","700 MB","4.7 GB"],ans:1,
+  why:"Single layer holds 25 GB, double layer holds 50 GB."});
+q({id:"b46",topic:"mem",sub:"devices",type:"mcq",
+  q:"What is the storage capacity range of a hard disc?",
+  opts:["2 GB to 4 TB","1 TB to 8 TB","up to 700 MB","25 GB to 50 GB"],ans:1,
+  why:"A hard disc holds 1 TB to 8 TB. 2 GB to 4 TB is the pendrive."});
+q({id:"b47",topic:"mem",sub:"devices",type:"mcq",
+  q:"Which device is also called a flash card or a memory stick?",
+  opts:["Pendrive","Memory card","Hard disc","CD"],ans:1,
+  why:"A memory card goes by flash card or memory stick, and holds 2 GB to 2 TB."});
+q({id:"b48",topic:"mem",sub:"units",type:"mcq",
+  q:"Which of these is the smallest unit of memory?",
+  opts:["Kilobyte","Byte","Bit","Megabyte"],ans:2,
+  why:"A bit is a single 0 or 1. Eight of them make one byte, so the bit is the smallest."});
+q({id:"b49",topic:"mem",sub:"devices",type:"mcq",
+  q:"IBM introduced the first hard drive in which year?",
+  opts:["1946","1956","1966","1976"],ans:1,
+  why:"1956. It was the size of two refrigerators and weighed about a ton."});
+
+q({id:"b50",topic:"mem",sub:"binary",type:"fill",
+  q:"The digits 0 and 1 are called binary digits, or ______ for short.",
+  accept:["bits","bit"],why:"Binary digit shortens to bit."});
+q({id:"b51",topic:"mem",sub:"units",type:"fill",
+  q:"1024 Megabytes make 1 ______.",
+  accept:["gigabyte","giga byte","gb"],why:"Every step up the ladder is 1024 of the step below, and MB steps up to GB."});
+q({id:"b52",topic:"mem",sub:"memtypes",type:"fill",
+  q:"______ memory is also known as main or internal memory.",
+  accept:["primary"],why:"Primary memory is also called main, internal or electronic memory."});
+q({id:"b53",topic:"mem",sub:"devices",type:"fill",
+  q:"CD stands for ______.",
+  accept:["compact disc","compact disk"],why:"Compact Disc. It holds up to 700 MB."});
+q({id:"b54",topic:"mem",sub:"devices",type:"fill",
+  q:"Optical storage devices use ______ light to store and read data.",
+  accept:["laser"],why:"That is what optical means here - CDs, DVDs and Blu-ray discs all use laser light."});
+q({id:"b55",topic:"mem",sub:"ramrom",type:"fill",
+  q:"RAM stands for ______.",
+  accept:["random access memory"],why:"Random Access Memory. It is the volatile one."});
+q({id:"b56",topic:"mem",sub:"units",type:"fill",
+  q:"One byte can store one ______ of data.",
+  accept:["character"],why:"One byte holds a single character - one letter, one digit, one comma."});
+q({id:"b57",topic:"mem",sub:"devices",type:"fill",
+  q:"A CD can store up to ______ MB of data.",
+  accept:["700"],why:"Up to 700 MB. A DVD holds far more, 4.7 GB to 17.08 GB."});
+q({id:"b58",topic:"mem",sub:"memtypes",type:"fill",
+  q:"Hard disc, CD, DVD and pendrive are all examples of ______ memory.",
+  accept:["secondary","external"],why:"They are all outside the CPU, so they are secondary or external memory."});
+q({id:"b59",topic:"mem",sub:"units",type:"fill",
+  q:"1 Petabyte is equal to 1024 ______.",
+  accept:["terabytes","terabyte","tb"],why:"PB sits one step above TB on the ladder."});
+
+q({id:"b60",topic:"mem",sub:"memtypes",type:"tf",
+  q:"RAM is an example of primary memory.",ans:true,
+  why:"True. Primary memory has two types, RAM and ROM."});
+q({id:"b61",topic:"mem",sub:"devices",type:"tf",
+  q:"A DVD can store more data than a CD.",ans:true,
+  why:"True. A CD holds up to 700 MB, a DVD holds 4.7 GB to 17.08 GB."});
+q({id:"b62",topic:"mem",sub:"units",type:"tf",
+  q:"1 Kilobyte is equal to 1000 bytes.",ans:false,
+  why:"False. Every step on the ladder is 1024, so 1 KB = 1024 bytes."});
+q({id:"b63",topic:"mem",sub:"devices",type:"tf",
+  q:"Data stored on a pendrive can be erased and written again.",ans:true,
+  why:"True. A pendrive is rewritable."});
+q({id:"b64",topic:"mem",sub:"devices",type:"tf",
+  q:"The hard disc is fixed inside the CPU box.",ans:true,
+  why:"True. It holds the operating system and the application software."});
+q({id:"b65",topic:"mem",sub:"memtypes",type:"tf",
+  q:"Primary memory is cheaper and larger than secondary memory.",ans:false,
+  why:"False, it is the other way round. Primary memory is small and expensive; secondary storage is large and cheap."});
+q({id:"b66",topic:"mem",sub:"binary",type:"tf",
+  q:"A computer understands the English language directly.",ans:false,
+  why:"False. It understands binary language only - just 0 and 1."});
+q({id:"b67",topic:"mem",sub:"devices",type:"tf",
+  q:"CDs and DVDs are round in shape.",ans:true,
+  why:"True. Optical discs are round and are used mainly for audio-visual data."});
+q({id:"b68",topic:"mem",sub:"devices",type:"tf",
+  q:"A memory card is used in phones and tablets to increase storage.",ans:true,
+  why:"True. It extends the storage capacity of a digital device."});
+
+q({id:"b70",topic:"mem",sub:"devices",type:"word",
+  q:"Expand CD.",
+  accept:["compact disc","compact disk"],why:"Compact Disc."});
+q({id:"b71",topic:"mem",sub:"devices",type:"word",
+  q:"Expand DVD.",
+  accept:["digital versatile disc","digital versatile disk","digital video disc"],why:"Digital Versatile Disc."});
+q({id:"b72",topic:"mem",sub:"units",type:"word",
+  q:"How many bits make one byte?",
+  accept:["8","eight"],why:"8 bits = 1 byte = one character."});
+q({id:"b73",topic:"mem",sub:"ramrom",type:"word",
+  q:"Name the memory that is volatile.",
+  accept:["ram","random access memory"],why:"RAM is volatile - switch the power off and its contents vanish."});
+q({id:"b74",topic:"mem",sub:"devices",type:"word",
+  q:"Which optical disc can store only up to 700 MB?",
+  accept:["cd","compact disc","compact disk"],why:"A CD holds up to 700 MB - the smallest of the optical discs."});
+q({id:"b75",topic:"mem",sub:"memtypes",type:"word",
+  q:"Which type of memory is also called external memory?",
+  accept:["secondary","secondary memory","external memory"],why:"Secondary memory is the external one, used for permanent storage."});
+q({id:"b76",topic:"mem",sub:"ramrom",type:"word",
+  q:"Expand ROM.",
+  accept:["read only memory","read-only memory"],why:"Read Only Memory. It is non-volatile."});
+q({id:"b77",topic:"mem",sub:"units",type:"word",
+  q:"Name the unit that is equal to 1024 Gigabytes.",
+  accept:["terabyte","tera byte","tb"],why:"1 Terabyte = 1024 Gigabytes."});
+
+/* ---------- CH 7 : second bank, same syllabus ---------- */
+q({id:"d50",topic:"scr",sub:"env",type:"mcq",
+  q:"Scratch is designed for children of which age group?",
+  opts:["3 to 7 years","8 to 16 years","15 to 20 years","Above 20 years"],ans:1,
+  why:"Scratch is made for ages 8 to 16."});
+q({id:"d51",topic:"scr",sub:"cats",type:"mcq",
+  q:"Which category of blocks is displayed in blue colour?",
+  opts:["Motion","Looks","Sound","Sensing"],ans:0,
+  why:"Motion blocks are blue. Looks are purple, Sound is pink, Sensing is cyan."});
+q({id:"d52",topic:"scr",sub:"coords",type:"mcq",
+  q:"What is the range of the x coordinate on the Scratch stage?",
+  opts:["0 to 480","-240 to 240","-180 to 180","-360 to 360"],ans:1,
+  why:"The stage is 480 wide, so x runs from -240 on the left to 240 on the right."});
+q({id:"d53",topic:"scr",sub:"motion",type:"mcq",
+  q:"Which block moves a sprite smoothly to a position over time?",
+  opts:["move 10 steps","glide 1 secs to x: 0 y: 0","go to x: 0 y: 0","change x by 10"],ans:1,
+  why:"glide moves smoothly. go to jumps there instantly."});
+q({id:"d54",topic:"scr",sub:"looks",type:"mcq",
+  q:"Which block shows a speech bubble that disappears after a set time?",
+  opts:["say Hello!","say Hello! for 2 seconds","think Hmm...","change size by 10"],ans:1,
+  why:"say Hello! for 2 seconds disappears after the time. Plain say Hello! stays on screen."});
+q({id:"d55",topic:"scr",sub:"cats",type:"mcq",
+  q:"How many blocks does the Motion category have?",
+  opts:["9","11","18","20"],ans:2,
+  why:"Motion has 18 blocks. Looks has 20, Control 11, Sound 9."});
+q({id:"d56",topic:"scr",sub:"env",type:"mcq",
+  q:"Which button is used to start a script in Scratch?",
+  opts:["The red stop button","The green flag button","The space bar","The sprite thumbnail"],ans:1,
+  why:"The green flag starts the script. The red button stops it."});
+
+q({id:"d57",topic:"scr",sub:"cats",type:"fill",
+  q:"Motion blocks are shown in ______ colour.",
+  accept:["blue"],why:"Motion is blue."});
+q({id:"d58",topic:"scr",sub:"cats",type:"fill",
+  q:"Looks blocks are shown in ______ colour.",
+  accept:["purple"],why:"Looks is purple."});
+q({id:"d59",topic:"scr",sub:"looks",type:"fill",
+  q:"Every sprite must have at least ______ costume.",
+  accept:["one","1"],why:"At least one. Extra costumes are what let you animate it."});
+q({id:"d60",topic:"scr",sub:"coords",type:"fill",
+  q:"Counting from the centre, the top edge of the stage is at y = ______.",
+  accept:["180"],why:"The stage is 360 tall, so it runs 180 up from the centre and 180 down."});
+q({id:"d61",topic:"scr",sub:"env",type:"fill",
+  q:"The default sprite in Scratch is the ______.",
+  accept:["cat"],why:"Scratch opens with the cat sprite. You delete it with the bin icon on its thumbnail."});
+q({id:"d62",topic:"scr",sub:"blocks",type:"fill",
+  q:"Blocks that report a value back, rather than performing an action, are called ______ blocks.",
+  accept:["reporter"],why:"The three shapes are hat, stack and reporter."});
+q({id:"d63",topic:"scr",sub:"motion",type:"fill",
+  q:"The ______ block sends the sprite the opposite way when it touches the edge of the stage.",
+  accept:["if on edge bounce","if on edge, bounce","if on edge","on edge bounce"],
+  why:"if on edge, bounce - a Motion block."});
+q({id:"d64",topic:"scr",sub:"looks",type:"fill",
+  q:"Switching costumes quickly is how you create an ______ in Scratch.",
+  accept:["animation"],why:"That is why a sprite is given more than one costume."});
+q({id:"d65",topic:"scr",sub:"cats",type:"fill",
+  q:"Control blocks are displayed in ______ colour.",
+  accept:["golden","gold"],why:"Control is golden. The wait block lives here, not in Events."});
+q({id:"d66",topic:"scr",sub:"env",type:"fill",
+  q:"The pane just below the stage that shows all sprites and backdrops is called the sprite ______ pane.",
+  accept:["info","information"],why:"The sprite info pane sits just below the stage."});
+
+q({id:"d67",topic:"scr",sub:"env",type:"tf",
+  q:"In Scratch you build a program by typing commands.",ans:false,
+  why:"False. You drag and drop coloured blocks and snap them together."});
+q({id:"d68",topic:"scr",sub:"coords",type:"tf",
+  q:"The centre of the Scratch stage is at x: 0 y: 0.",ans:true,
+  why:"True. The centre is (0,0)."});
+q({id:"d69",topic:"scr",sub:"looks",type:"tf",
+  q:"A sprite must have at least one costume.",ans:true,
+  why:"True. A costume is one of its possible appearances, and it needs at least one."});
+q({id:"d70",topic:"scr",sub:"cats",type:"tf",
+  q:"Sound blocks are displayed in golden colour.",ans:false,
+  why:"False. Sound blocks are pink. Golden is the Control category."});
+q({id:"d71",topic:"scr",sub:"looks",type:"tf",
+  q:"The 'next costume' block is used to create animation.",ans:true,
+  why:"True. Switching costumes quickly is what makes the sprite look animated."});
+q({id:"d72",topic:"scr",sub:"motion",type:"tf",
+  q:"The 'move -10 steps' block moves the sprite backward.",ans:true,
+  why:"True. A minus value moves it the other way."});
+q({id:"d73",topic:"scr",sub:"blocks",type:"tf",
+  q:"Reporter blocks and hat blocks are the same shape.",ans:false,
+  why:"False. Hat, stack and reporter blocks each have their own shape."});
+q({id:"d74",topic:"scr",sub:"coords",type:"tf",
+  q:"The Scratch stage is 480 units wide and 360 units tall.",ans:true,
+  why:"True. Width 480, height 360."});
+q({id:"d75",topic:"scr",sub:"cats",type:"tf",
+  q:"Looks blocks are used to change how a sprite appears.",ans:true,
+  why:"True. Looks handles costumes, size, colour effect, hide and show."});
+q({id:"d76",topic:"scr",sub:"motion",type:"tf",
+  q:"The 'turn right 15 degrees' block turns the sprite anti-clockwise.",ans:false,
+  why:"False. Turn right is clockwise. Turn left is anti-clockwise."});
+
+q({id:"d77",topic:"scr",sub:"env",type:"word",
+  q:"What is the name of the object that is animated in Scratch?",
+  accept:["sprite"],why:"The sprite. The cat is the default one."});
+q({id:"d78",topic:"scr",sub:"coords",type:"word",
+  q:"What is the area called where a sprite moves and performs its actions?",
+  accept:["stage","the stage"],why:"The stage, 480 by 360 units."});
+q({id:"d79",topic:"scr",sub:"blocks",type:"word",
+  q:"What is the name for a set of code blocks stacked together?",
+  accept:["script","code","code or script"],why:"A script, also called code."});
+q({id:"d80",topic:"scr",sub:"cats",type:"word",
+  q:"Which block category is shown in orange colour?",
+  accept:["variables","variable"],why:"Variables is orange."});
+q({id:"d81",topic:"scr",sub:"blocks",type:"word",
+  q:"What is the name of the block shape that must start every script?",
+  accept:["hat block","hat","hat blocks"],why:"A hat block, such as when green flag clicked."});
+q({id:"d82",topic:"scr",sub:"motion",type:"word",
+  q:"Which block points a sprite in a given direction?",
+  accept:["point in direction","point in direction 90","point in direction block"],
+  why:"point in direction 90 - a Motion block."});
+q({id:"d83",topic:"scr",sub:"looks",type:"word",
+  q:"Which block removes a sprite from view on the stage?",
+  accept:["hide"],why:"hide. show brings it back."});
+q({id:"d84",topic:"scr",sub:"cats",type:"word",
+  q:"Which block category has 20 blocks?",
+  accept:["looks"],why:"Looks has 20 blocks - the most of any category in the chapter."});
+q({id:"d85",topic:"scr",sub:"looks",type:"word",
+  q:"Which block makes a thought bubble appear above a sprite?",
+  accept:["think","think block","think hmm"],why:"The think Hmm... block."});
+q({id:"d86",topic:"scr",sub:"cats",type:"word",
+  q:"Which category does the 'when green flag clicked' block belong to?",
+  accept:["events","event"],why:"Events, shown in light yellow."});
+
 var WRITTEN = [
 {t:"mem",q:"What do you understand by binary language?",
  a:"It is the machine language made up of the binary digits 0 and 1, which can be directly processed by the computer."},
@@ -1073,6 +1326,16 @@ function pool(filter){
   var out=[], k;
   for(k in Q){ if(Q.hasOwnProperty(k) && filter(Q[k])){ out.push(Q[k]); } }
   return out;
+}
+/* Draw the n questions she has been asked least often, breaking ties at
+   random. Without this, every mock paper resampled the same small pools
+   and roughly half the paper came back identical each time. Shuffling
+   first and then sorting by count keeps the order random inside a tie,
+   because Array.sort is stable. */
+function leastSeen(list, n){
+  var r = shuffle(list);
+  r.sort(function(a,b){ return (S.seen[a.id]||0) - (S.seen[b.id]||0); });
+  return n ? r.slice(0, n) : r;
 }
 function todayKey(){
   var d = new Date();
@@ -1168,7 +1431,7 @@ function botReact(ok, line){
 function record(qo, ok, silent){
   S.answered++;
   if(ok){ S.correct++; }
-  S.seen[qo.id] = 1;
+  S.seen[qo.id] = (S.seen[qo.id] || 0) + 1;
   var k = qo.sub;
   if(!S.sub[k]){ S.sub[k] = {c:0,t:0}; }
   S.sub[k].t++;
@@ -1313,7 +1576,11 @@ function renderQ(qo, host, onDone, opts){
       var b = el("button","mitem", o.t);
       b.onclick = function(){
         if(!sel || b.classList.contains("done")){ return; }
-        if(sel.i === o.i){
+        /* Match on the text as well as the index. Two categories can share a
+           right-hand value - Motion and Sensing both have 18 blocks - and the
+           two tiles are identical on screen, so pairing Motion with the other
+           18 is correct even though the indexes differ. */
+        if(sel.i === o.i || qo.pairs[sel.i][1] === o.t){
           sel.node.classList.remove("sel");
           sel.node.classList.add("done"); b.classList.add("done");
           sel = null; solved++;
@@ -1466,8 +1733,11 @@ function openSet(st){
     return;
   }
 
-  var items = shuffle(pool(st.f));
-  if(st.cap){ items = items.slice(0, st.cap); }
+  var items = pool(st.f);
+  /* A capped set showed a fresh random slice each time with no memory, so
+     it kept re-asking favourites. Uncapped sets serve the whole pool
+     anyway, so they only need shuffling. */
+  items = st.cap ? shuffle(leastSeen(items, st.cap)) : shuffle(items);
   items.forEach(function(x){ delete x.__missed; });
   var host2 = $("drillBody");
 
@@ -1506,13 +1776,17 @@ var T = null;
 function pickPaper(){
   var out = [];
   ["mcq","fill","tf","word"].forEach(function(ty){
-    var m = shuffle(pool(function(x){ return x.type===ty && x.topic==="mem"; }));
-    var s = shuffle(pool(function(x){ return x.type===ty && x.topic==="scr"; }));
-    var take = m.slice(0,5).concat(s.slice(0,5));
-    while(take.length < 10){
-      var rest = m.slice(5).concat(s.slice(5));
-      if(!rest.length){ break; }
-      take.push(rest[take.length % rest.length]);
+    var take = leastSeen(pool(function(x){ return x.type===ty && x.topic==="mem"; }), 5)
+       .concat(leastSeen(pool(function(x){ return x.type===ty && x.topic==="scr"; }), 5));
+    if(take.length < 10){
+      /* One side was short of 5. Top up from whatever is left of this type,
+         skipping what the section already holds so a paper can never ask
+         the same question twice. */
+      var used = {};
+      take.forEach(function(x){ used[x.id] = 1; });
+      take = take.concat(leastSeen(pool(function(x){
+        return x.type===ty && !used[x.id];
+      }), 10 - take.length));
     }
     out = out.concat(shuffle(take));
   });
