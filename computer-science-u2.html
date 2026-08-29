@@ -1109,7 +1109,7 @@ q({id:"b76",topic:"mem",sub:"ramrom",type:"word",
   accept:["read only memory","read-only memory"],why:"Read Only Memory. It is non-volatile."});
 q({id:"b77",topic:"mem",sub:"units",type:"word",
   q:"Name the unit that is equal to 1024 Gigabytes.",
-  accept:["terabyte","tera byte","tb"],why:"1 Terabyte = 1024 Gigabytes."});
+  accept:["terabyte","terabytes","tera byte","tb"],why:"1 Terabyte = 1024 Gigabytes."});
 
 /* ---------- CH 7 : second bank, same syllabus ---------- */
 q({id:"d50",topic:"scr",sub:"env",type:"mcq",
@@ -1322,6 +1322,50 @@ function norm(s){
     .replace(/\b(and|the|a|an)\b/g," ")
     .replace(/[^a-z0-9]/g,"");
 }
+/* She typed "blue-ray disc" and was marked wrong. The question asks which
+   disc, not how to spell it, so a one-letter slip should not cost the mark -
+   but it must still be pointed out, because the paper will want it spelled
+   right.
+
+   Tolerance has to be earned, not blanket. Several correct answers in this
+   bank are one character apart: RAM/ROM, CD/BD, GB/TB/YB, hat/cat, 8/1.
+   Accepting a near miss on any of those would hand her the mark for the
+   wrong concept. So a near miss only counts when the answer is long enough
+   that a typo is far likelier than a mix-up, and never when digits are
+   involved. */
+function editDistance(a, b){
+  var prev = [], prev2 = [], cur = [], i, j;
+  for(j = 0; j <= b.length; j++){ prev[j] = j; }
+  for(i = 1; i <= a.length; i++){
+    cur = [i];
+    for(j = 1; j <= b.length; j++){
+      cur[j] = Math.min(prev[j] + 1, cur[j-1] + 1,
+                        prev[j-1] + (a.charAt(i-1) === b.charAt(j-1) ? 0 : 1));
+      /* Count a swapped pair of letters as one slip, not two. "animatoin"
+         for "animation" is the commonest way a child mistypes a word she
+         knows, and plain edit distance scores it the same as two unrelated
+         wrong letters. */
+      if(i > 1 && j > 1 &&
+         a.charAt(i-1) === b.charAt(j-2) && a.charAt(i-2) === b.charAt(j-1)){
+        cur[j] = Math.min(cur[j], prev2[j-2] + 1);
+      }
+    }
+    prev2 = prev;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function nearMiss(typed, accept){
+  var hit = null;
+  accept.forEach(function(a){
+    if(hit){ return; }
+    var t = norm(a);
+    if(t.length < 6 || /[0-9]/.test(t)){ return; }
+    var allow = t.length >= 10 ? 2 : 1;
+    if(editDistance(typed, t) <= allow){ hit = a; }
+  });
+  return hit;
+}
 function pool(filter){
   var out=[], k;
   for(k in Q){ if(Q.hasOwnProperty(k) && filter(Q[k])){ out.push(Q[k]); } }
@@ -1533,11 +1577,18 @@ function renderQ(qo, host, onDone, opts){
       if(settled){ return; }
       var v = norm(inp.value);
       if(!v){ inp.focus(); return; }
-      var ok = qo.accept.some(function(a){ return norm(a) === v; });
+      var exact = qo.accept.some(function(a){ return norm(a) === v; });
+      var close = exact ? null : nearMiss(v, qo.accept);
+      var ok = exact || !!close;
       inp.disabled = true; go.disabled = true;
       if(!quiet){
         inp.classList.add(ok ? "right" : "wrong");
-        if(!ok){
+        if(close){
+          var sp = el("p","muted");
+          sp.style.marginTop = "8px";
+          sp.innerHTML = "Correct \u2014 but check the spelling: <b>" + close + "</b>";
+          wrap.appendChild(sp);
+        } else if(!ok){
           var hint = el("p","muted");
           hint.style.marginTop = "8px";
           hint.innerHTML = "Answer: <b>" + qo.accept[0] + "</b>";
