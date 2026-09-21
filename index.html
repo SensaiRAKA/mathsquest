@@ -31,6 +31,29 @@ a.subject.special{border-left-color:var(--berry)}
 a.subject.udai{border-left-color:#151238}
 a.subject.eng{border-left-color:#6C4FD6}
 a.subject.soon{border-left-color:#C9C2DB;opacity:.6;pointer-events:none}
+
+/* ---- Class 4 Learning Hub: collapsible sub-sections ---- */
+details.grp{background:#fff;border-radius:18px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;
+ border-left:8px solid var(--teal)}
+details.grp[data-g="wt1"]{border-left-color:var(--lilac)}
+details.grp[data-g="wt2"]{border-left-color:var(--teal)}
+details.grp[data-g="mid"]{border-left-color:var(--orange)}
+details.grp[data-g="sp"]{border-left-color:var(--berry)}
+details.grp>summary{display:flex;align-items:center;gap:12px;padding:14px 16px;min-height:56px;
+ cursor:pointer;list-style:none;font-weight:800}
+details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary:active{background:#FAF7F1}
+summary .gico{font-size:26px;flex-shrink:0}
+summary .gname{font-family:'Baloo 2';font-size:17px;line-height:1.2}
+summary .gnote{display:block;font-family:'Nunito';font-size:11.5px;font-weight:700;color:#8A8496}
+summary .gcount{margin-left:auto;background:#F1EEF8;color:#6F6785;font-size:11px;font-weight:800;
+ border-radius:99px;padding:4px 9px;white-space:nowrap;flex-shrink:0}
+summary .chev{flex-shrink:0;font-size:13px;color:#A79FB8;transition:transform .15s}
+details.grp[open]>summary .chev{transform:rotate(90deg)}
+details.grp[open]>summary{border-bottom:1px solid #F0ECE3}
+.grp-body{padding:12px 12px 4px}
+.grp-body a.subject{border-radius:14px;box-shadow:0 2px 0 rgba(46,42,59,.10);border-left-width:5px}
+details.grp[open]>summary .gcount{background:#FFF3E6;color:#E56E22}
 .test{display:flex;align-items:center;gap:12px;background:#fff;border-radius:14px;box-shadow:var(--shadow);padding:12px 14px;margin-bottom:10px}
 .test .date{background:var(--lilac);color:#fff;border-radius:12px;padding:8px 10px;text-align:center;min-width:64px;flex-shrink:0}
 .test .date .d{font-family:'Baloo 2';font-size:20px;font-weight:800;line-height:1}
@@ -52,11 +75,8 @@ footer{text-align:center;font-size:11px;font-weight:700;color:#A79FB8;margin-top
   <p>Class 4 · Practice · Play · Learn</p>
 </header>
 
-<h2>📚 My Subjects</h2>
-<div id="subjects"></div>
-
-<h2>🏫 Special Classes</h2>
-<div id="special"></div>
+<h2>🎓 Class 4 Learning Hub</h2>
+<div id="hub"></div>
 
 <h2>🗓️ Upcoming Tests</h2>
 <div id="tests"></div>
@@ -68,39 +88,49 @@ footer{text-align:center;font-size:11px;font-weight:700;color:#A79FB8;margin-top
 "use strict";
 /* =====================================================================
    EDIT HERE — Rakesh: this is the only part you need to change.
-   1) SUBJECTS: set href to the app file name in this repo (or full URL).
-      Set href to "" to show a greyed-out "coming soon" card.
-   2) TESTS: add rows as {date:"YYYY-MM-DD", subject:"...", topic:"..."}.
-      Past tests fade out automatically; the next test gets highlighted.
+   1) GROUPS: the Class 4 Learning Hub's sub-sections. Add a module as one
+      entry in the right group's `items` list; set href to the app file name
+      in this repo (or full URL). Set href to "" for a greyed-out
+      "coming soon" card. To start a new sub-section (Weekly Test 3, say),
+      copy a whole {id, icon, name, note, items} block.
+   2) TESTS: add rows as {date:"YYYY-MM-DD", subject:"...", topic:"...",
+      group:"wt2"}. Past tests fade out automatically; the next test gets
+      highlighted, and its `group` is the sub-section that opens on load.
 ===================================================================== */
-const SUBJECTS = [
-  { icon:"💻", name:"Computer Science", desc:"Unit 1: Computer System + Scratch", href:"computer-science.html", cls:"" },
-  { icon:"💾", name:"Computers · Unit II", desc:"Ch 2 Memory & Storage + Ch 7 Coding with Scratch — W.T.-II · 31 Aug", href:"computer-science-u2.html", cls:"" },
-  { icon:"🚀", name:"Computers · Mid-term Mission", desc:"Ch 1, 2, 6, 7 — 2-day plan, recall cards, drills, long answers & full model-paper mock — Mid-term · Fri 18 Sep", href:"computer-science-midterm.html", cls:"" },
-  { icon:"🔢", name:"Mathematics", desc:"Addition, subtraction, multiplication, division, place value & word problems", href:"mathsquest.html", cls:"maths" },
-  { icon:"🧮", name:"Maths · Unit II", desc:"Class IV · Multiplication, Factors, Fractions", href:"maths.html", cls:"maths" },
-  { icon:"📜", name:"Sanskrit", desc:"लिंग, वचन, दिन, पशु और क्रियाएँ — Class 4, Unit 1", href:"sanskritquest.html", cls:"" },
-  { icon:"🦜", name:"संस्कृतम् — इकाई 2", desc:"लिंग-वचन, धातुरूप, पक्षिणः नामानि", href:"sanskrit-u2.html", cls:"" },
-  { icon:"🔬", name:"Science", desc:"Unit 2: Reproduction in Animals — life cycles, eggs, mammals & more", href:"sciencequest.html", cls:"" },
-  { icon:"✍️", name:"English", desc:"Unit 2: Comprehension, Adjectives, Degrees, Negative Sentences, L-4 Zoo + Paragraph Builder", href:"englishquest.html", cls:"eng" },
-  { icon:"🗺️", name:"Social Studies", desc:"Ch.4 The Great Indian Desert & Ch.5 The Peninsular Plateau — Bharat Explorer", href:"social-studies.html", cls:"" },
-  { icon:"🌏", name:"SST · Mid-term Quest", desc:"Class IV — Coastal Plains, Islands, Mountains, Desert & Plateau. 8 quests over 2 days.", href:"sst-midterm.html", cls:"" }
-];
-const SPECIAL_CLASSES = [
-  { icon:"🏫", name:"Maths", desc:"July special class: big numbers, factors & multiples, Roman numerals, BODMAS", href:"special-classes-maths.html", cls:"special" },
-  { icon:"🌅", name:"UDAI Test Series", desc:"Special Classes — Reasoning, Maths, Science, ICSO", href:"special-classes-udai.html", cls:"udai" }
+const GROUPS = [
+  { id:"wt1", icon:"1️⃣", name:"Weekly Test 1", note:"Unit 1 modules", items:[
+    { icon:"💻", name:"Computer Science", desc:"Unit 1: Computer System + Scratch", href:"computer-science.html", cls:"" },
+    { icon:"🔢", name:"Mathematics", desc:"Addition, subtraction, multiplication, division, place value & word problems", href:"mathsquest.html", cls:"maths" },
+    { icon:"📜", name:"Sanskrit", desc:"लिंग, वचन, दिन, पशु और क्रियाएँ — Class 4, Unit 1", href:"sanskritquest.html", cls:"" }
+  ]},
+  { id:"wt2", icon:"2️⃣", name:"Weekly Test 2", note:"Unit II modules", items:[
+    { icon:"💾", name:"Computers · Unit II", desc:"Ch 2 Memory & Storage + Ch 7 Coding with Scratch — W.T.-II · 31 Aug", href:"computer-science-u2.html", cls:"" },
+    { icon:"🧮", name:"Maths · Unit II", desc:"Class IV · Multiplication, Factors, Fractions", href:"maths.html", cls:"maths" },
+    { icon:"🦜", name:"संस्कृतम् — इकाई 2", desc:"लिंग-वचन, धातुरूप, पक्षिणः नामानि", href:"sanskrit-u2.html", cls:"" },
+    { icon:"🔬", name:"Science", desc:"Unit 2: Reproduction in Animals — life cycles, eggs, mammals & more", href:"sciencequest.html", cls:"" },
+    { icon:"✍️", name:"English", desc:"Unit 2: Comprehension, Adjectives, Degrees, Negative Sentences, L-4 Zoo + Paragraph Builder", href:"englishquest.html", cls:"eng" },
+    { icon:"🗺️", name:"Social Studies", desc:"Ch.4 The Great Indian Desert & Ch.5 The Peninsular Plateau — Bharat Explorer", href:"social-studies.html", cls:"" }
+  ]},
+  { id:"mid", icon:"🎯", name:"Mid-Term Preparation", note:"2-day plans, drills & full model-paper mocks", items:[
+    { icon:"🚀", name:"Computers · Mid-term Mission", desc:"Ch 1, 2, 6, 7 — 2-day plan, recall cards, drills, long answers & full model-paper mock · Fri 18 Sep", href:"computer-science-midterm.html", cls:"" },
+    { icon:"🌏", name:"SST · Mid-term Quest", desc:"Class IV — Coastal Plains, Islands, Mountains, Desert & Plateau. 8 quests over 2 days.", href:"sst-midterm.html", cls:"" }
+  ]},
+  { id:"sp", icon:"🏫", name:"Special Classes", note:"Extra coaching outside the school syllabus", items:[
+    { icon:"🏫", name:"Maths", desc:"July special class: big numbers, factors & multiples, Roman numerals, BODMAS", href:"special-classes-maths.html", cls:"special" },
+    { icon:"🌅", name:"UDAI Test Series", desc:"Special Classes — Reasoning, Maths, Science, ICSO", href:"special-classes-udai.html", cls:"udai" }
+  ]}
 ];
 const TESTS = [
-  { date:"2026-07-13", subject:"Computer Science", topic:"Unit 1: Computer System & Scratch Coding" },
+  { date:"2026-07-13", subject:"Computer Science", topic:"Unit 1: Computer System & Scratch Coding", group:"wt1" },
   /* Science Weekly Test 2 (Unit-II). Papa: please confirm/adjust the exact date below. */
-  { date:"2026-07-20", subject:"Science", topic:"W.T.-II · Chapter 3: Reproduction in Animals" },
-  { date:"2026-08-03", subject:"English", topic:"W.T.-II · Unit II: Comprehension, Paragraph, Adjectives, Zoo" },
-  { date:"2026-08-17", subject:"Social Studies", topic:"W.T. · Ch.4 The Great Indian Desert & Ch.5 The Peninsular Plateau" },
-  { date:"2026-08-31", subject:"Computer Science", topic:"W.T.-II · Ch 2 Memory & Storage, Ch 7 Coding with Scratch" },
-  { date:"2026-09-18", subject:"Computer Science", topic:"Mid-term · Ch 1, 2, 6, 7 — Computer System, Memory & Storage, Scratch" },
-  { date:"2026-09-21", subject:"Social Studies", topic:"Mid-term · Coastal Plains, Islands, Mountains, The Great Indian Desert & The Peninsular Plateau" }
+  { date:"2026-07-20", subject:"Science", topic:"W.T.-II · Chapter 3: Reproduction in Animals", group:"wt2" },
+  { date:"2026-08-03", subject:"English", topic:"W.T.-II · Unit II: Comprehension, Paragraph, Adjectives, Zoo", group:"wt2" },
+  { date:"2026-08-17", subject:"Social Studies", topic:"W.T. · Ch.4 The Great Indian Desert & Ch.5 The Peninsular Plateau", group:"wt2" },
+  { date:"2026-08-31", subject:"Computer Science", topic:"W.T.-II · Ch 2 Memory & Storage, Ch 7 Coding with Scratch", group:"wt2" },
+  { date:"2026-09-18", subject:"Computer Science", topic:"Mid-term · Ch 1, 2, 6, 7 — Computer System, Memory & Storage, Scratch", group:"mid" },
+  { date:"2026-09-21", subject:"Social Studies", topic:"Mid-term · Coastal Plains, Islands, Mountains, The Great Indian Desert & The Peninsular Plateau", group:"mid" }
   /* add more like:
-  { date:"2026-07-20", subject:"Mathematics", topic:"Unit 1: Large Numbers" },
+  { date:"2026-07-20", subject:"Mathematics", topic:"Unit 1: Large Numbers", group:"wt2" },
   */
 ];
 /* ============================ end of edit zone ====================== */
@@ -108,23 +138,38 @@ const TESTS = [
 const MONTHS=["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
 const DATE_FMT_OPTS={weekday:"long"};
 
-const subEl=document.getElementById("subjects");
-subEl.innerHTML=SUBJECTS.map(s=>{
-  const cls="subject "+s.cls+(s.href?"":" soon");
-  return '<a class="'+cls+'" href="'+(s.href||"#")+'"><span class="ico">'+s.icon+'</span><span><b>'+s.name+'</b><span class="d">'+s.desc+'</span></span></a>';
-}).join("");
+const esc = t => String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 
-const specEl=document.getElementById("special");
-specEl.innerHTML=SPECIAL_CLASSES.map(s=>{
-  const cls="subject "+s.cls+(s.href?"":" soon");
-  return '<a class="'+cls+'" href="'+(s.href||"#")+'"><span class="ico">'+s.icon+'</span><span><b>'+s.name+'</b><span class="d">'+s.desc+'</span></span></a>';
-}).join("");
-
+/* Sort the tests once; both the hub and the test list read the result. */
 const now=new Date(); now.setHours(0,0,0,0);
 const rows=TESTS.map(t=>{
   const d=new Date(t.date+"T00:00:00");
   return {t:t, d:d, days:Math.round((d-now)/86400000)};
 }).sort((a,b)=>a.d-b.d);
+
+/* The sub-section that opens on load is the one holding the next test still to
+   come, so the hub always lands on what she is revising for. Once every test
+   has passed, fall back to the most recent one - the day after an exam she is
+   still most likely to want that same material, not whatever sits last in the
+   list. Only an empty TESTS list falls back to the last group. */
+const anchorTest = rows.find(r=>r.days>=0) || rows[rows.length-1];
+const openGroup = (anchorTest && anchorTest.t.group) || (GROUPS.length ? GROUPS[GROUPS.length-1].id : "");
+
+const cardHTML = s => {
+  const cls="subject "+s.cls+(s.href?"":" soon");
+  return '<a class="'+cls+'" href="'+esc(s.href||"#")+'"><span class="ico">'+s.icon+'</span>'+
+         '<span><b>'+esc(s.name)+'</b><span class="d">'+esc(s.desc)+'</span></span></a>';
+};
+
+document.getElementById("hub").innerHTML = GROUPS.map(g=>{
+  const n=g.items.length;
+  return '<details class="grp" data-g="'+esc(g.id)+'"'+(g.id===openGroup?" open":"")+'>'+
+    '<summary><span class="chev">&#9654;</span><span class="gico">'+g.icon+'</span>'+
+    '<span class="gname">'+esc(g.name)+'<span class="gnote">'+esc(g.note)+'</span></span>'+
+    '<span class="gcount">'+n+(n===1?" module":" modules")+'</span></summary>'+
+    '<div class="grp-body">'+g.items.map(cardHTML).join("")+'</div></details>';
+}).join("");
+
 let nextFound=false;
 document.getElementById("tests").innerHTML = rows.length ? rows.map(r=>{
   const past=r.days<0;
@@ -134,9 +179,9 @@ document.getElementById("tests").innerHTML = rows.length ? rows.map(r=>{
     badge=r.days===0?"TODAY!":r.days===1?"Tomorrow!":"In "+r.days+" days";}
   const weekday=r.d.toLocaleDateString("en-IN",DATE_FMT_OPTS);
   return '<div class="'+cls+'"><div class="date"><div class="d">'+r.d.getDate()+'</div><div class="m">'+MONTHS[r.d.getMonth()]+'</div></div>'+
-    '<div class="info"><b>'+r.t.subject+'</b><span class="t">'+r.t.topic+' · '+weekday+'</span></div>'+
+    '<div class="info"><b>'+esc(r.t.subject)+'</b><span class="t">'+esc(r.t.topic)+' \u00b7 '+weekday+'</span></div>'+
     (badge?'<span class="badge">'+badge+'</span>':'')+'</div>';
-}).join("") : '<div class="test"><div class="info"><b>No tests scheduled</b><span class="t">Enjoy the break! 🎈</span></div></div>';
+}).join("") : '<div class="test"><div class="info"><b>No tests scheduled</b><span class="t">Enjoy the break! \ud83c\udf88</span></div></div>';
 </script>
 </body>
 </html>

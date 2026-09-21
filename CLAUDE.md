@@ -19,8 +19,16 @@ This is zero-impact work on a personal study site. Always take it all the way li
 
 ## Conventions
 
-- `index.html` is the root page. A new module is one `SUBJECTS` card plus one
-  `TESTS` row; never restructure the page.
+- `index.html` is the root page. Its subject cards live in `GROUPS`, the
+  sub-sections of the Class 4 Learning Hub (`wt1` Weekly Test 1, `wt2` Weekly
+  Test 2, `mid` Mid-Term Preparation, `sp` Special Classes), each rendered as a
+  collapsible `<details>`. A new module is one entry in the right group's
+  `items` plus one `TESTS` row carrying that group's `id` in its `group` key.
+  The sub-section holding the next upcoming test is the one that opens on load,
+  so the `group` key is what makes the hub land on the right place - do not
+  leave it off. Add a sub-section only when a new exam cycle needs one
+  (copy a whole `{id, icon, name, note, items}` block and give it a
+  `border-left-color` rule); otherwise do not restructure the page.
 - Every quest that should sync across devices loads, in `<head>`, in this order:
   the two Firebase compat SDK scripts, `firebase-config.js`, then `sync.js`.
   A quest with only `sync.js` silently runs local-only - add the missing tags.
