@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>English Mid-Term Quest - Class IV</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<style>
+:root{
+  --bg:#0f1b2d; --bg2:#16263f; --card:#1d3251; --card2:#24406a;
+  --ink:#eaf2ff; --dim:#9fb6d6; --line:#2e4870;
+  --teal:#2fd4c4; --coral:#ff7a6b; --sun:#ffc861; --grape:#a98cff; --leaf:#7ee081;
+  --ok:#3ddc97; --bad:#ff6b6b;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 600px at 50% -10%, #23406b 0%, #0f1b2d 60%);
+  color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+  min-height:100vh; padding-bottom:40px;
+}
+.wrap{max-width:820px;margin:0 auto;padding:12px}
+button{font-family:inherit;cursor:pointer;border:none}
+
+/* ---------- top bar ---------- */
+.hud{position:sticky;top:0;z-index:40;background:rgba(15,27,45,.93);backdrop-filter:blur(8px);
+  border-bottom:1px solid #2e4870;padding:8px 12px}
+.hud-in{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.avatar{width:42px;height:42px;border-radius:14px;background:linear-gradient(140deg,var(--teal),var(--grape));
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.hud-mid{flex:1;min-width:0}
+.hud-top{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--dim)}
+.hud-top b{color:var(--ink);font-size:14px}
+.xpbar{height:9px;border-radius:9px;background:#24374f;overflow:hidden;margin-top:5px}
+.xpfill{height:100%;background:linear-gradient(90deg,var(--teal),var(--leaf));width:0%;transition:width .5s}
+.streak{flex:0 0 auto;background:#2a2036;border:1px solid #4a3a5e;border-radius:12px;padding:5px 9px;
+  font-size:13px;font-weight:700;color:var(--sun)}
+
+/* ---------- generic ---------- */
+h1{font-size:23px;margin:14px 0 2px;letter-spacing:.2px}
+h2{font-size:18px;margin:18px 0 8px}
+.sub{color:var(--dim);font-size:13.5px;margin:0 0 12px;line-height:1.5}
+.card{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid #33527f;
+  border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.btn{background:linear-gradient(140deg,#2fd4c4,#1f9bd6);color:#05202b;font-weight:800;
+  border-radius:14px;padding:13px 16px;font-size:16px;width:100%;box-shadow:0 4px 0 #14647f}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #14647f}
+.btn.ghost{background:transparent;border:1.5px solid #46688f;color:var(--ink);box-shadow:none;font-weight:700}
+.btn.warm{background:linear-gradient(140deg,#ffc861,#ff9a4d);color:#3a2200;box-shadow:0 4px 0 #b06a1d}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.pill{display:inline-block;background:#24406a;border:1px solid #3a5d91;border-radius:999px;
+  padding:3px 10px;font-size:12px;color:var(--dim);margin-right:6px}
+.center{text-align:center}
+.hide{display:none!important}
+
+/* ---------- day / session cards ---------- */
+.daytag{display:flex;align-items:center;gap:8px;margin:20px 0 4px}
+.daytag .dot{width:10px;height:10px;border-radius:50%;background:var(--sun)}
+.daytag h2{margin:0}
+.slist{display:grid;gap:10px}
+.scard{display:flex;gap:12px;align-items:center;background:linear-gradient(150deg,var(--card),var(--card2));
+  border:1px solid #33527f;border-radius:18px;padding:12px;width:100%;text-align:left;color:var(--ink)}
+.scard.done{border-color:#3ddc97}
+.scard .em{width:46px;height:46px;border-radius:14px;background:#12253c;display:flex;align-items:center;
+  justify-content:center;font-size:24px;flex:0 0 auto}
+.scard .t{font-weight:800;font-size:15.5px}
+.scard .d{font-size:12.5px;color:var(--dim);margin-top:2px}
+.scard .r{flex:0 0 auto;font-size:12px;color:var(--dim);text-align:right}
+.ring{font-weight:800;font-size:13px;color:var(--teal)}
+.boss{border-color:#ff7a6b;background:linear-gradient(150deg,#3a2333,#4a2a3a)}
+.boss .em{background:#5a2b34}
+
+/* ---------- question ---------- */
+.qtop{display:flex;align-items:center;gap:8px;margin:6px 0 10px}
+.qtop .back{background:#24406a;border-radius:12px;padding:8px 12px;color:var(--ink);font-weight:700;font-size:14px}
+.dots{flex:1;display:flex;gap:4px;flex-wrap:wrap}
+.dt{width:9px;height:9px;border-radius:50%;background:#33507a}
+.dt.ok{background:var(--ok)} .dt.no{background:var(--bad)} .dt.cur{background:var(--sun);transform:scale(1.35)}
+.timer{font-weight:800;color:var(--sun);font-size:15px;font-variant-numeric:tabular-nums}
+.qtype{font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--teal);font-weight:800}
+.qtext{font-size:18.5px;line-height:1.45;margin:8px 0 14px;font-weight:600}
+.opts{display:grid;gap:9px}
+.opt{background:#12253c;border:1.5px solid #3a5d91;border-radius:14px;padding:13px 14px;
+  font-size:16px;color:var(--ink);text-align:left;width:100%;line-height:1.35}
+.opt:active{background:#1a3355}
+.opt.sel{border-color:var(--sun)}
+.opt.good{background:#134b39;border-color:var(--ok)}
+.opt.bad{background:#4b1d22;border-color:var(--bad)}
+.opt .k{display:inline-block;width:24px;font-weight:800;color:var(--dim)}
+.fb{margin-top:12px;border-radius:14px;padding:12px;font-size:14.5px;line-height:1.5}
+.fb.good{background:#123f31;border:1px solid #2f7d61}
+.fb.bad{background:#42181d;border:1px solid #8a3a42}
+.fb b{display:block;margin-bottom:3px;font-size:15px}
+
+/* match */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mcol{display:grid;gap:9px}
+.mi{background:#12253c;border:1.5px solid #3a5d91;border-radius:13px;padding:11px;font-size:14.5px;
+  color:var(--ink);text-align:left;line-height:1.3}
+.mi.active{border-color:var(--sun);background:#2a2f1f}
+.mi.paired{opacity:.55}
+.mi.good{background:#134b39;border-color:var(--ok);opacity:1}
+.mi.bad{background:#4b1d22;border-color:var(--bad);opacity:1}
+.mi .tag{display:inline-block;background:#35558a;border-radius:6px;padding:1px 6px;font-size:11px;margin-left:6px}
+
+/* order */
+.slots{display:grid;gap:8px;margin-bottom:12px}
+.slot{border:1.5px dashed #46688f;border-radius:13px;padding:11px;min-height:44px;font-size:15px;color:var(--dim)}
+.slot.filled{border-style:solid;background:#12253c;color:var(--ink)}
+.slot.good{border-color:var(--ok);background:#134b39;color:#fff}
+.slot.bad{border-color:var(--bad);background:#4b1d22;color:#fff}
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#24406a;border:1.5px solid #3a5d91;border-radius:999px;padding:9px 14px;font-size:14.5px;color:var(--ink)}
+.chip.used{opacity:.3}
+
+/* word bank */
+.bank{display:flex;flex-wrap:wrap;gap:8px}
+.ans-slot{background:#12253c;border:1.5px solid #3a5d91;border-radius:13px;padding:13px;
+  font-size:17px;min-height:50px;margin-bottom:12px;font-weight:700}
+.ans-slot.empty{color:#5d7ba6;font-weight:400}
+
+/* write */
+textarea{width:100%;min-height:110px;background:#12253c;border:1.5px solid #3a5d91;border-radius:14px;
+  color:var(--ink);font-size:16px;padding:12px;font-family:inherit;line-height:1.45;resize:vertical}
+.model{background:#12303c;border:1px solid #2f7d8a;border-radius:14px;padding:12px;margin-top:10px;
+  font-size:15px;line-height:1.55}
+.model ul{margin:6px 0 0 18px;padding:0}
+.model li{margin:4px 0}
+.rate{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.rate button{border-radius:13px;padding:11px 6px;font-size:13.5px;font-weight:800;color:#06202b}
+.r1{background:#3ddc97}.r2{background:#ffc861}.r3{background:#ff9a8f}
+
+/* map */
+.mapbox{background:#0c1a2b;border:1px solid #33527f;border-radius:16px;padding:6px}
+svg .rg{fill:#26456f;stroke:#4d7ab0;stroke-width:1.2;cursor:pointer}
+svg .rg:active{fill:#35608f}
+svg .rg.good{fill:#1f6b4f;stroke:#3ddc97}
+svg .rg.bad{fill:#6b2730;stroke:#ff6b6b}
+svg .lbl{fill:#cfe2ff;font-size:9px;font-weight:700;pointer-events:none}
+
+/* results */
+.big{font-size:44px;font-weight:900;letter-spacing:-1px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:#24406a;border:1px solid #4d7ab0;
+  border-radius:999px;padding:7px 12px;font-size:13px;margin:4px 4px 0 0}
+.badge.new{background:#3b2f14;border-color:var(--sun);color:var(--sun)}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+.smallnote{font-size:12px;color:var(--dim);line-height:1.5;margin-top:14px}
+.warnbox{background:#3b2f14;border:1px solid #7a6127;border-radius:14px;padding:12px;font-size:13.5px;line-height:1.55}
+/* ---------- English additions: tasks, sort, passage ---------- */
+.task{background:linear-gradient(160deg,#2a2440,#33295a);border-color:#6a55b8}
+.steps{display:grid;gap:8px;margin-top:4px}
+.step{display:flex;gap:10px;align-items:flex-start;background:#12253c;border:1.5px solid #3a5d91;border-radius:13px;
+  padding:11px;font-size:15px;color:var(--ink);text-align:left;width:100%;line-height:1.4}
+.step .bx{flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:2px solid #6f8fbf;display:flex;
+  align-items:center;justify-content:center;font-weight:900;font-size:15px}
+.step.on{border-color:var(--ok);background:#133b31}
+.step.on .bx{background:var(--ok);border-color:var(--ok);color:#06202b}
+.hints{background:#1b2d45;border:1px dashed #5d7ba6;border-radius:12px;padding:10px;font-size:14px;line-height:1.55;margin:10px 0}
+.btn[disabled]{opacity:.4}
+.srow{background:#12253c;border:1.5px solid #3a5d91;border-radius:13px;padding:10px;margin-bottom:8px}
+.srow.good{border-color:var(--ok);background:#133b31}
+.srow.bad{border-color:var(--bad);background:#3f1a20}
+.srow .w{font-weight:800;font-size:15.5px;margin-bottom:7px}
+.bks{display:flex;flex-wrap:wrap;gap:6px}
+.bk{background:#24406a;border:1.5px solid #3a5d91;border-radius:999px;padding:7px 11px;font-size:13.5px;color:var(--ink)}
+.bk.sel{background:var(--sun);border-color:var(--sun);color:#3a2200;font-weight:800}
+details.pass{background:#1a2a40;border:1px solid #3a5d91;border-radius:16px;padding:10px 12px;margin:8px 0}
+details.pass summary{font-weight:800;color:var(--sun);cursor:pointer;font-size:14.5px}
+details.pass p{font-size:15.5px;line-height:1.6;margin:8px 0}
+.tag2{display:inline-block;background:#6a55b8;color:#fff;border-radius:8px;padding:2px 8px;font-size:11px;font-weight:800;margin-left:6px;vertical-align:middle}
+.howto{background:#13304a;border:1px solid #2f6ea8;border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.6}
+.howto ol{margin:6px 0 0 18px;padding:0}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+
+<div class="hud">
+  <div class="hud-in">
+    <div class="avatar" id="mascot">&#127793;</div>
+    <div class="hud-mid">
+      <div class="hud-top"><b id="lvlName">Level 1</b><span id="xpTxt">0 XP</span></div>
+      <div class="xpbar"><div class="xpfill" id="xpFill"></div></div>
+    </div>
+    <div class="streak" id="streak">&#128293; 0</div>
+  </div>
+</div>
+
+<div class="wrap" id="app"></div>
+
+<script>
+"use strict";
+/* ==========================================================================
+   ENGLISH MID-TERM QUEST - Class IV, Modern Delhi International School
+   Mid-term on Thursday 24 Sept 2026. 3-day plan: Mon evening, Tue, Wed.
+   Sources: Revision Assignment-I booklet, Model Test Paper, L-6 notebook,
+   textbook pages (Ali Baba p36-41, Zoo p54-57, Avoidable Talk p85-88).
+   Single file. Tap-only. localStorage isolated. No alert/confirm.
+   ========================================================================== */
+
+var KEY = "diksha_eng_midterm_v1";
+
+/* ---------- helpers to build questions ---------- */
+function M(q, opts, ai, why){ return {t:"mcq", q:q, o:opts, a:ai, why:why||""}; }
+function TF(q, ans, why){ return {t:"tf", q:q, a:ans?0:1, o:["True","False"], why:why||""}; }
+function W(q, ans, bank, why){ return {t:"word", q:q, a:ans, bank:bank, why:why||""}; }
+function MA(q, pairs, why){ return {t:"match", q:q, pairs:pairs, why:why||""}; }
+function OR(q, items, why){ return {t:"order", q:q, items:items, why:why||""}; }
+function SO(q, buckets, items, why){ return {t:"sort", q:q, buckets:buckets, items:items, why:why||""}; }
+function WR(q, marks, model){ return {t:"write", q:q, marks:marks, model:model}; }
+/* TK = a book / notebook task. Not scored. steps are ticked one by one.
+   x.model = model answer shown after she finishes, x.check = self-check list,
+   x.hints = hint words, x.id = persistent id (so the plan remembers it). */
+function TK(id, q, steps, x){ x = x||{}; return {t:"task", id:id, q:q, steps:steps, model:x.model||"", check:x.check||[], hints:x.hints||""}; }
+function P(pid, item){ item.p = pid; return item; }
+
+/* ---------- reading passages (original, written for this app) ---------- */
+var PASSAGES = {
+ puppy:{title:"The Lost Puppy", text:[
+  "It was a rainy Sunday morning. Meera was looking out of her window when she saw a tiny brown puppy shivering under a car. Its fur was wet and it was crying softly. Meera ran to her mother and told her about it. Her mother gave her an old towel and a bowl of warm milk. Meera went out with her umbrella and gently picked up the puppy. She wiped it dry with the towel and let it drink the milk. The puppy wagged its little tail happily.",
+  "In the evening, a boy named Kabir came down the street with his father. He looked very sad and was calling out, 'Bruno! Bruno!' The puppy jumped up at once and ran to him. Kabir hugged the puppy tightly and thanked Meera again and again. His father said that Bruno had run away when loud thunder scared him in the night. Kabir invited Meera to play with Bruno every Sunday. Meera was delighted. She learnt that a small act of kindness can bring a big smile to someone's face."]},
+ kite:{title:"The Kite Festival", text:[
+  "Every year in January, the sky above Ahmedabad fills with thousands of colourful kites. This is the Kite Festival, also called Uttarayan. Arjun and his grandfather climbed up to the roof early in the morning. Grandfather had made a big red kite with a long tail. 'A good kite needs a light frame and a strong string,' he said. Arjun held the spool while Grandfather let the kite rise into the wind. Soon it was flying high above the houses. All around them, people shouted with joy whenever a kite was cut.",
+  "In the afternoon, Arjun's kite got tangled in a tree. He wanted to pull it hard, but Grandfather stopped him. 'Be patient,' he said. 'Pulling will only tear it.' Slowly and carefully, they freed the kite without any damage. Arjun smiled. At night, people lit paper lanterns and the dark sky glowed with tiny lights. Arjun felt that patience had saved his kite, and that it was the best day of his life."]}
+};
+
+/* ---------- model paragraphs (present tense, describe the thing) ---------- */
+var CHECK_PARA = [
+ "I wrote the title and underlined it.",
+ "Every sentence is in PRESENT tense (is, are, has, have, grows, runs) - no 'was', 'had', 'came'.",
+ "I DESCRIBED the thing - how it looks, what it has, how it is used. Not a diary of my day.",
+ "I used at least 6 of the hint words.",
+ "I wrote 8 to 12 sentences.",
+ "Every sentence starts with a capital letter and ends with a full stop."
+];
+var MODEL_PARK = "<p><b>A Nearby Park</b></p><p>There is a beautiful park near my house. It covers a huge area and has two big iron gates. Soft and lush green grass spreads all over it like a carpet. Beautiful flowers like roses, marigolds and sunflowers bloom in the flower beds. Tall trees give cool shade and plenty of fresh air. In one corner, there are swings, slides and see-saws for children. Wooden seats are placed along the walking track for people to rest. A gardener waters the plants every day and keeps the park well maintained. Dustbins are kept at many places, so the park stays neat and clean. Every morning and evening, people come here to walk, jog and exercise. I feel very happy whenever I visit this park.</p>";
+var MODEL_AUTO = "<p><b>An Auto Rickshaw</b></p><p>An auto rickshaw is a three-wheeler. It is a popular means of transportation in our country. It has a small body, three wheels and a roof that protects passengers from the sun and the rain. The driver sits in the front and steers it with a handle. Two or three passengers can sit comfortably on the back seat. Most auto rickshaws run on fuel like CNG or petrol, but an e-rickshaw runs on a battery. The e-rickshaw is an advanced technology because it does not pollute the air. An auto rickshaw is economical, as it costs less than a taxi. It moves easily through narrow lanes and busy roads. A careful driver makes every ride safe. Truly, the auto rickshaw makes travelling easy for everyone.</p>";
+var MODEL_PHONE = "<p><b>A Mobile Phone</b></p><p>A mobile phone is a wonderful electronic device. It is small, thin and rectangular, so it fits easily in a pocket. It has a touch screen, a camera, a speaker and a microphone. It runs on a battery, which we charge with a charger. With a mobile phone, we can make calls and send messages to anyone, anywhere. We can also click pictures, listen to music and use the internet. Many useful apps help us learn, shop and pay bills. Mobile phones are made by different companies and come in different price ranges. They are available in electronic shops, malls and online. We must not use a phone for too long, as it can harm our eyes. Truly, a mobile phone is a blessing of modern technology.</p>";
+var MODEL_BUS = "<p><b>A School Bus</b></p><p>A school bus is a big yellow vehicle that takes children to school and back home. It has four big wheels, many windows and two doors. Inside, there are rows of comfortable seats for the students. The driver sits in the front and drives the bus carefully. A helper makes sure that every child gets on and off safely. The bus runs on diesel or CNG, and some new buses run on electricity. It carries a first-aid box and a fire extinguisher for safety. Every morning, it stops at fixed places to pick up the children. The children chat and sing happily during the ride. A school bus is safe and economical, and it saves time for parents. I love travelling in my school bus with my friends.</p>";
+
+/* =======================================================================
+   SESSIONS  (day 1 = Mon 21 Sept evening, day 2 = Tue 22, day 3 = Wed 23)
+   fixed:true keeps the printed order (tasks first, paper order in the mock)
+   ======================================================================= */
+var SESSIONS = [
+/* ---------------- DAY 1 : MONDAY EVENING ---------------- */
+{
+ id:"s1", day:1, mins:50, fixed:true, emoji:"&#9997;&#65039;", title:"Writing Workshop",
+ blurb:"Notebook + pencil. Learn the paragraph rules, then write 2 paragraphs on paper.",
+ items:[
+  TK("t_rules","Read the 6 paragraph rules aloud. Tick each one after you read it.",[
+   "A descriptive paragraph DESCRIBES one thing: a park, a microwave, an auto rickshaw.",
+   "Write in PRESENT tense: is, are, has, have, grows, runs, looks.",
+   "Do NOT write a diary. No 'I went... then I saw... then I came home'.",
+   "Order: what it is &#8594; how it looks &#8594; what it has / how it works &#8594; why it is useful or how you feel.",
+   "Use the hint words. Write 8 to 12 sentences.",
+   "Capital letter at the start. Full stop at the end."]),
+  M("Which sentence is in the PRESENT tense?",["The park had many swings.","The park has many swings.","The park will have many swings."],1,"'has' is present tense. Use present tense in the paragraph."),
+  M("Choose the right word for a paragraph: 'Tall trees ______ cool shade.'",["gave","give","given"],1,"Trees (many) give. Present tense."),
+  M("Choose the right word: 'A gardener ______ care of the plants.'",["takes","took","taken"],0,"One gardener takes. Present tense adds -s for he/she/it."),
+  M("Choose the right word: 'The auto rickshaw ______ on three wheels.'",["ran","runs","run"],1,"The auto rickshaw (one thing) runs."),
+  M("Choose the right word: 'Children ______ happily on the swings.'",["play","played","plays"],0,"Children (many) play - no -s."),
+  M("Which sentence DESCRIBES the park (good for the paragraph)?",["I had came to the park on 17th September.","The park has soft and lush green grass.","After clicking pictures I went home."],1,"Describe the park itself. 'I had came' is wrong grammar too - it should be 'I came'."),
+  M("Which sentence does NOT belong in a paragraph on 'An Auto Rickshaw'?",["It is a three-wheeler.","It runs on CNG, petrol or a battery.","Yesterday I ate an ice cream at the mall."],2,"Stay on the topic. Every sentence should be about the auto rickshaw."),
+  M("Find the mistake: 'I am feeling very happy and tired after going to the park.' The better sentence for a descriptive paragraph is:",["I feel happy whenever I visit this park.","I was feeling happy.","I had felt happy."],0,"Short, present tense, and it ends the paragraph nicely."),
+  TK("t_park","Paragraph 1: rewrite 'A Nearby Park' in your notebook.",[
+   "Open your English notebook to a fresh page.",
+   "Write the title 'A Nearby Park' and underline it.",
+   "Look at the hint words in the box below. Plan: what it is, how it looks, what it has, why you like it.",
+   "Write 8 to 12 sentences. Present tense only. Describe the park, not your day.",
+   "Read it aloud to Papa or Mummy. Then tap Done to see a model."],
+   {hints:"huge area, swings, greenery, fresh air, seats, gates, beautiful flowers, well maintained, gardener, dustbins, soft and lush green grass, happy, exercise",
+    model:MODEL_PARK, check:CHECK_PARA}),
+  TK("t_auto","Paragraph 2: write 'An Auto Rickshaw' in your notebook.",[
+   "Turn to a fresh page. Write the title 'An Auto Rickshaw' and underline it.",
+   "Look at the hint words below.",
+   "Write 8 to 12 sentences in present tense.",
+   "Read it aloud. Then tap Done to compare with the model."],
+   {hints:"three wheeler, means of transportation, economical, advanced technology, e-rickshaw, fuel or battery, safe, driver",
+    model:MODEL_AUTO, check:CHECK_PARA})
+ ]
+},
+{
+ id:"s2", day:1, mins:50, fixed:true, emoji:"&#128214;", title:"Story Time",
+ blurb:"English book open. Read all 3 lessons aloud, then quick checks.",
+ items:[
+  TK("t_read_ali","Read 'The Story of Ali Baba' from your English book.",[
+   "Open your English book to page 36.",
+   "Read pages 36 to 39 aloud, slowly.",
+   "At every pink word, stop and read its meaning in the Glossary (pages 39-40).",
+   "Close the book. Tell the story to Papa or Mummy in 5 sentences."]),
+  M("Where did Ali Baba and Kasim live?",["In Persia","In Delhi","In Chittor"],0,"'In the land of Persia...'"),
+  M("What were the magic words?",["Open Door!","Open Sesame!","Rocks, part!"],1,"Open Sesame!"),
+  M("Who poured boiling oil into the jars?",["Ali Baba","Mustafa","Morjina"],2,"Morjina, Ali Baba's smart helper."),
+  TK("t_read_zoo","Read 'Zoo' from your English book.",[
+   "Open your English book to page 54.",
+   "Read pages 54 to 56 aloud.",
+   "Read the Glossary on page 57.",
+   "Tell Papa or Mummy three facts about Amrita the tigress."]),
+  M("What was the name of the tigress?",["Rani","Amrita","Sundari"],1,"Amrita, a Royal Bengal tigress."),
+  M("What is the tiger's way of silently following its prey called?",["Pouncing","Stalking","Grasping"],1,"Stalking."),
+  TK("t_read_at","Read 'Avoidable Talk' from your English book.",[
+   "Open your English book to page 85.",
+   "Read pages 85 to 88 aloud.",
+   "Read the Glossary on page 88.",
+   "Read your notebook pages for L-6 (word meanings, RTC and question-answers) once aloud."]),
+  M("Where did Shastri work?",["In a big jeweller's shop","In a bank","In a school"],0,"He added up numbers all day in a big jeweller's shop."),
+  M("Who wrote 'Avoidable Talk'?",["Ruskin Bond","R K Narayan","Rabindranath Tagore"],1,"R K Narayan.")
+ ]
+},
+/* ---------------- DAY 2 : TUESDAY ---------------- */
+{
+ id:"s3", day:2, mins:15, emoji:"&#129658;", title:"Slip Doctor",
+ blurb:"The exact mistakes from your booklet. Fix them once and for all.",
+ items:[
+  M("The mice ______ running through the corridor.",["was","were"],1,"Mice = many, so WERE. (You wrote 'The mice was'.)"),
+  M("The ties of the gentlemen are hanging there. Rewrite:",["The gentleman's ties are hanging there.","The gentlemen's ties are hanging there.","The gentlemens' ties are hanging there."],1,"GentleMEN (many) + 's = gentlemen's."),
+  M("The books of the teachers look new. Rewrite:",["The teacher's books look new.","The teachers' books look new.","The teachers's books look new."],1,"Teachers (many, ends in s) - just add ' after the s: teachers'."),
+  M("The books for the children should be colourful. Rewrite:",["The children's book should be colourful.","The children's books should be colourful.","The childrens' books should be colourful."],1,"Keep 'books' plural. Children + 's = children's."),
+  M("Too many coins were there in the wallet of James. Rewrite:",["Too many coins were there in the James's wallet.","Too many coins were there in James's wallet.","Too many coins were there in James wallet."],1,"No 'the' before a name. James's (or James') wallet."),
+  M("The children are collecting marbles. Make it negative:",["The children are not collecting the marbles.","The children are not collecting marbles.","The children not are collecting marbles."],1,"Only add 'not'. Do not add new words like 'the'."),
+  M("Which bucket does 'ox' go into as a plural?",["oxes","oxen","oxs"],1,"One ox, two oxen."),
+  M("The duke gifted the milkmaid ______ golden necklace.",["her","his"],1,"The duke is a man, so HIS necklace. (Teacher corrected this one.)"),
+  M("Which mark ends: 'Always respect your elders'",["!","?","."],2,"It is an order/advice (imperative). Imperatives end with a full stop."),
+  M("Correct spelling:",["bookay","boquet","bouquet"],2,"b-o-u-q-u-e-t. A bouquet of flowers."),
+  TF("The robbers hid their treasure in a cave in the forest.",true,"TRUE. The cave was in the forest where Ali Baba chopped wood. (You wrote False.)"),
+  M("'Perhaps he wanted to fling IT at me.' What is 'it'?",["The paper","The leaden paperweight","The pen"],1,"The master gripped a leaden PAPERWEIGHT. (You wrote 'the paper'.)"),
+  M("All the children ______ present but the coach ______ not there.",["are ... was","were ... was","were ... is"],1,"Pick ONE time and stick to it: are/is (now) or were/was (past). Never write both."),
+  M("Choose the correct sentence:",["I had came to the park.","I came to the park.","I had come to the park yesterday and I am sit."],1,"'had came' is wrong. Say 'came' or 'had come'.")
+ ]
+},
+{
+ id:"s4", day:2, mins:45, emoji:"&#127947;&#65039;", title:"Grammar Gym 1",
+ blurb:"Sentences, kinds, subject &amp; predicate, negatives, all noun topics.",
+ items:[
+  OR("Rearrange to make a sentence.",["The","little","bird","sings","sweetly."],"The little bird sings sweetly."),
+  OR("Rearrange to make a sentence.",["Where","are","you","going?"],"A question ends with ?"),
+  OR("Rearrange to make a sentence.",["What","a","lovely","day!"],"Exclamatory - ends with !"),
+  OR("Rearrange to make a sentence.",["Please","close","the","door."],"An order/request - ends with ."),
+  OR("Rearrange: with / friends / the / hide and seek / prince / wanted / play / to / his",["The","prince","wanted","to","play","hide and seek","with","his","friends."],"From your model paper."),
+  M("Kind of sentence: 'How beautiful the rainbow looks'",["Declarative","Interrogative","Imperative","Exclamatory"],3,"It starts with 'How' but shows strong feeling, so it is exclamatory (!)."),
+  M("Kind of sentence: 'Please pass me the salt'",["Declarative","Interrogative","Imperative","Exclamatory"],2,"A request = imperative. Ends with ."),
+  M("Kind of sentence: 'The sun rises in the east'",["Declarative","Interrogative","Imperative","Exclamatory"],0,"It tells a fact = declarative."),
+  M("Kind of sentence: 'Which bag is yours'",["Declarative","Interrogative","Imperative","Exclamatory"],1,"It asks = interrogative. Ends with ?"),
+  M("Kind of sentence: 'We should be kind to animals'",["Declarative","Interrogative","Imperative","Exclamatory"],0,"It tells us something = declarative."),
+  M("Subject of: 'The strong wind and the rain caused damage to the crops.'",["The strong wind","The strong wind and the rain","caused damage to the crops"],1,"The subject is who/what the sentence is about: the strong wind AND the rain."),
+  M("Subject of: 'Clean the dining table.'",["the dining table","Clean","You (hidden)"],2,"In an order, the subject 'You' is hidden."),
+  M("Predicate of: 'The bakery warmed the muffins and then packed them.'",["The bakery","warmed the muffins and then packed them","packed them"],1,"Predicate = everything said about the subject."),
+  M("Subject of: 'My friend's white and brown dog loves to chase rabbits.'",["My friend's white and brown dog","dog","loves to chase rabbits"],0,"Take all the words that describe the dog too."),
+  M("Negative of: 'She plays the piano.'",["She not plays the piano.","She does not plays the piano.","She does not play the piano."],2,"does not + play (no -s)."),
+  M("Negative of: 'Measure the length of this cloth.'",["Do not measure the length of this cloth.","Measure not the length of this cloth.","Not measure the length of this cloth."],0,"Orders become negative with Do not / Don't."),
+  M("Negative of: 'There was a car on the road.'",["There was no car on the road.","There not was a car on the road.","There were no cars on the road."],0,"was + no (or was not a car)."),
+  M("Negative of: 'The sheet has been washed before use.'",["The sheet has not been washed before use.","The sheet not has been washed before use.","The sheet has been not washed before use."],0,"not goes after 'has'."),
+  M("Which is a COMMON noun in: 'Amrita read a book last Saturday.'",["Amrita","book","Saturday"],1,"Amrita and Saturday are proper nouns (special names, capital letters)."),
+  M("Which group has ONLY proper nouns?",["Goa, India, Becky","dove, pet, Goa","waterfall, Karnataka, homework"],0,"Names of particular places, people and pets are proper nouns."),
+  W("______ is our mother tongue. (proper noun)","Hindi",["Hindi","language","tongue"],"A language name is a proper noun."),
+  MA("Match the collective nouns.",[["a pride of","lions"],["a gaggle of","geese"],["a school of","fish"],["a clutch of","eggs"],["a chest of","drawers"],["a choir of","singers"]],""),
+  MA("Match the collective nouns.",[["a troop of","monkeys"],["a herd of","cows"],["a flight of","stairs"],["a bouquet of","flowers"],["a crew of","sailors"],["a colony of","ants"]],""),
+  M("The suitcase rolled down the ______ of stairs.",["herd","flight","crew"],1,"A flight of stairs."),
+  MA("Match the singular to the plural.",[["chief","chiefs"],["half","halves"],["mouse","mice"],["mosquito","mosquitoes"],["brother-in-law","brothers-in-law"],["woman","women"]],""),
+  M("Change the number: 'The farmer is going to the market with an ox.'",["The farmers is going to the market with oxen.","The farmers are going to the market with oxen.","The farmers are going to the market with oxes."],1,"farmers are + oxen."),
+  M("Change the number: 'I don't remember where your photograph is.'",["I don't remember where your photographs are.","I don't remember where your photographs is.","I don't remember where your photograph are."],0,"photographs ARE."),
+  MA("Match masculine to feminine.",[["duke","duchess"],["fox","vixen"],["gander","goose"],["ram","ewe"],["wizard","witch"],["nephew","niece"]],""),
+  SO("Sort the nouns by gender.",["Masculine","Feminine","Common","Neuter"],[["stallion",0],["heroine",1],["cousin",2],["pencil",3],["drake",0],["mare",1],["doctor",2],["lamp",3]],"Common = can be a boy or a girl. Neuter = a thing."),
+  M("Change the gender: 'The wizard cast a spell on the tiger.'",["The witch cast a spell on the tigress.","The witch cast a spell on the tiger.","The wizardess cast a spell on the tigress."],0,"wizard - witch, tiger - tigress."),
+  M("The hostel of the boys:",["the boy's hostel","the boys' hostel","the boys's hostel"],1,"Many boys: boys'."),
+  M("The mess of the navy officers:",["the navy officer's mess","the navy officers' mess","the mess of navy officers's"],1,"Many officers: officers'."),
+  M("The spectacles of my granny:",["my grannys's spectacles","my granny's spectacles","my grannies' spectacles"],1,"One granny: granny's.")
+ ]
+},
+{
+ id:"s5", day:2, mins:45, emoji:"&#128176;", title:"Ali Baba &amp; Zoo",
+ blurb:"Literature: story facts, extracts, word meanings, long answers.",
+ items:[
+  M("Ali Baba was a ______.",["rich merchant","poor woodcutter","cobbler"],1,"Poor woodcutter."),
+  M("Why was Kasim rich?",["He found gold","He married a rich lady","He was a merchant"],1,"'Kasim was a rich man because he married a rich lady.'"),
+  M("The two brothers were not very ______ any more.",["cordial","curious","suspicious"],0,"cordial = warm and friendly."),
+  M("What got stuck at the bottom of the weighing scales?",["A gold coin","A silver coin","A piece of rock"],0,"A gold coin - that is how Kasim found out."),
+  M("Kasim could not come out of the cave because he ______.",["forgot his keys","fell asleep","forgot the magic words"],2,"He forgot 'Open Sesame!'"),
+  M("The cobbler who sewed Kasim's body was ______.",["Morjina","Mustafa","the robbers' chief"],1,"Mustafa the cobbler."),
+  M("How did the robbers find Ali Baba's house?",["Morjina told them","They blindfolded Mustafa and made him lead them","They followed Kasim"],1,"They heard Mustafa had sewn a dead body, blindfolded him and made him lead them. Then they marked the house."),
+  M("The robbers' leader came pretending to be ______.",["an oil merchant","a cobbler","a woodcutter"],0,"He carried forty jars of oil."),
+  M("How did Morjina kill the leader?",["With boiling oil","She stabbed him during a dagger dance","With a paperweight"],1,"Boiling oil for the gang in the jars; the dagger dance for the leader."),
+  M("Ali Baba was kind hearted, so he ______.",["shared his treasures with his brother's family","gave everything to Mustafa","did not take a single coin"],0,"Both families lived happily together."),
+  TF("Morjina was Kasim's helper.",false,"FALSE. Morjina was Ali Baba's helper."),
+  TF("Mustafa was the leader of the forty thieves.",false,"FALSE. Mustafa was a cobbler."),
+  TF("The robbers were killed by Mustafa.",false,"FALSE. Morjina killed them."),
+  TF("Kasim cried himself to sleep inside the cave.",true,"TRUE."),
+  TF("Ali Baba borrowed the weighing scales from Kasim.",true,"TRUE. He wanted to weigh the gold coins."),
+  MA("Match the word to its meaning.",[["cordial","warm and friendly"],["boulder","very large rock"],["brutally","cruelly"],["suspicious","doubtful"],["supper","evening meal"],["dagger","a small knife"]],""),
+  M("'He heard the sound of horses coming in his direction.' Who is 'he'?",["Kasim","Ali Baba","Mustafa"],1,"Ali Baba, in the forest."),
+  M("Where was 'he' at that time?",["In the forest, chopping wood","In his house","Inside the cave"],0,"It had grown dark in the forest."),
+  M("Name the chapter these lines are from: 'They must be the robbers, he thought and hid behind a tree to watch.'",["Zoo","The Story of Ali Baba","Avoidable Talk"],1,""),
+  M("Why did Rima and Rohit want to go to the zoo?",["To see the new tiger cubs with their mother","To see the elephants","To have a picnic"],0,"A pair of tiger cubs were born recently. It was the Independence Day holiday."),
+  M("What did the mother tiger look like?",["Reddish-orange fur with black stripes","White fur with black stripes","Light brown with no stripes"],0,"Her cubs were light brown."),
+  M("How much did Amrita weigh?",["About 15 kg","About 150 kg","About 500 kg"],1,"About 150 kilograms."),
+  M("What did the tigress do at the pool?",["Caught a fish and fed her young ones","Slept in the water","Chased the zookeeper"],0,"It was a hot day, so they went to the pool."),
+  M("The zookeeper told that Amrita ______.",["was a beautiful tigress","liked to be by itself","did not allow any other tiger into its enclosure","both (b) and (c)"],3,"Both: liked to be by itself AND did not allow other tigers in."),
+  M("According to the book, a tiger's most favourite food is ______.",["deer and wild pigs","fish and frogs","grass and leaves"],0,"Deer and wild pigs. Book also says favourite deer = gaur."),
+  TF("In the wild, tigers hunt at night and relax during the day.",true,"TRUE."),
+  M("How are tigers protected now?",["In special forests called sanctuaries","In circuses","In farms"],0,"No one is allowed to hunt in a sanctuary."),
+  M("Next day, Rima and Rohit shared their zoo experience with their ______.",["teacher","friends","grandparents"],1,"They were elated to share it with their friends."),
+  MA("Match the word to its meaning.",[["enclosure","area with a fence or wall"],["prey","target of attack"],["stalk","to follow secretly"],["pounce","attack"],["grasp","hold firmly"],["elated","overjoyed"]],""),
+  WR("How did Ali Baba find out the thieves' hideout? (1.5 marks)",1.5,"<p>One evening, Ali Baba was chopping wood in the forest. He heard horses coming and hid behind a tree to watch. The robbers stopped in front of a cave and said 'Open Sesame!'. The rocks parted and they went in. After they left, Ali Baba said the same words and found piles of gold coins inside.</p>"),
+  WR("What was the result of Kasim's greed?",1.5,"<p>Kasim filled his sack with loads of gold coins and forgot the magic words 'Open Sesame!'. He could not get out of the cave. The next day the robbers found him and killed him brutally.</p>"),
+  WR("How did Morjina save Ali Baba?",1.5,"<p>Morjina found robbers hiding in the oil jars. She poured boiling oil into all the jars and killed them. When the leader tried to kill Ali Baba, she performed a dagger dance and stabbed him.</p>"),
+  WR("Describe the appearance of the tigress and its cubs at the zoo.",1.5,"<p>The mother tiger, Amrita, was a Royal Bengal tigress. She had a reddish-orange coat of fur with black stripes and weighed about 150 kilograms. Her cubs were light brown in colour.</p>"),
+  WR("What did the zookeeper tell the children about a tiger's diet?",1.5,"<p>The zookeeper said that a tiger's most favourite food is deer and wild pigs, and their favourite kind of deer is gaur. Sometimes they also kill small animals like monkeys. After killing an animal, they eat it over a week in a hidden spot or cave.</p>"),
+  WR("Make sentences: curious, boulder, recently.",1.5,"<ul><li>The curious child asked many questions about the stars.</li><li>A huge boulder blocked the mountain road.</li><li>We recently moved to a new house.</li></ul><p>Your own sentences are fine if the word is used correctly.</p>")
+ ]
+},
+/* ---------------- DAY 3 : WEDNESDAY ---------------- */
+{
+ id:"s6", day:3, mins:40, emoji:"&#129351;", title:"Grammar Gym 2",
+ blurb:"Adjectives, degrees of comparison, articles, verbs, pronouns.",
+ items:[
+  M("Kind of adjective: '<b>This</b> printer has run out of ink.'",["Quality","Demonstrative","Number"],1,"This / that / these / those = demonstrative (pointing)."),
+  M("Kind of adjective: 'coloured ink' - the word <b>coloured</b>",["Quality","Quantity","Interrogative"],0,"It tells what kind = quality."),
+  M("Kind of adjective: '<b>Which</b> film did you watch?'",["Demonstrative","Interrogative","Number"],1,"Which / what / whose before a noun = interrogative."),
+  M("Kind of adjective: 'There are <b>ten</b> vacant seats.'",["Number","Quantity","Quality"],0,"Can be counted = number."),
+  M("Kind of adjective: 'Jalan had <b>enough</b> money.'",["Number","Quantity","Demonstrative"],1,"How much (not counted one by one) = quantity."),
+  M("Kind of adjective: 'My father has <b>many</b> pictures.'",["Number","Quantity","Quality"],0,"many = number (things you can count). much/little = quantity."),
+  M("Kind of adjective: '<b>Those</b> women are waiting.'",["Demonstrative","Interrogative","Quality"],0,"Those = demonstrative."),
+  W("There is ______ soup in the bowl. (quantity)","little",["little","many","three"],"little / much / some / enough = quantity."),
+  W("______ toys are kept on the shelf? (interrogative)","Whose",["Whose","These","Many"],"Whose / Which / What."),
+  M("I have five cousins and all of them are ______ than I am.",["old","older","the oldest"],1,"'than' means comparing two - comparative."),
+  M("Mr. Sinha is the ______ teacher at school.",["good","better","best"],2,"the ... best (superlative)."),
+  M("Tanmay is ______ student in the class.",["cleverest","cleverer","the cleverest"],2,"the + superlative."),
+  M("The weather has become ______ than it was yesterday. (bad)",["badder","worse","worst"],1,"bad - worse - worst."),
+  M("This is the ______ question out of the ten given. (easy)",["easier","easiest","most easy"],1,"easy - easier - easiest."),
+  M("Swimming underwater is the ______ thing I have done. (difficult)",["difficultest","more difficult","most difficult"],2,"Long words use more / most."),
+  M("Your smile looks as ______ as the sun today. (bright)",["bright","brighter","brightest"],0,"as ... as uses the positive degree."),
+  OR("Put the degrees in order: positive, comparative, superlative.",["good","better","best"],""),
+  OR("Put the degrees in order: positive, comparative, superlative.",["little","less","least"],""),
+  M("Keeping the classroom clean needs a ______ effort. (little)",["little","less","least"],0,"a little effort - positive."),
+  M("Choose the article: 'Mayank has ______ hour to complete the task.'",["a","an","the"],1,"hour sounds like 'our' - vowel sound - an."),
+  M("Choose the article: 'I saw a picture of ______ unicorn.'",["a","an","the"],0,"unicorn sounds like 'you-nicorn' - consonant sound - a."),
+  M("Choose the article: 'Have you ever seen ______ umbrella made of bamboo?'",["a","an","the"],1,"umbrella starts with a vowel sound - an."),
+  M("Choose the article: '______ Rian is my brother's friend.'",["A","The","no article (x)"],2,"No article before a person's name."),
+  M("Choose the article: 'Mayank has to read about ______ Narmada River.'",["a","an","the"],2,"Rivers take 'the'."),
+  SO("Sort each word into the right pot.",["a","an","the","no article"],[["honest boy",1],["owl",1],["uniform",0],["one-rupee coin",0],["Taj Mahal",2],["Ganga",2],["kindness",3],["Rohan",3]],"Listen to the first SOUND: 'honest' starts with 'o' sound (an), 'uniform' with 'you' (a), 'one' with 'w' (a)."),
+  W("Dr. Rajendra Prasad ______ the first President of India.","was",["was","is","were"],"Past - was."),
+  M("January ______ 31 days but April and June ______ 30 days.",["have ... has","has ... have","had ... has"],1,"one month has, two months have."),
+  W("I ______ a student of Class IV.","am",["am","is","are"],"I am."),
+  M("Which is the verb? 'The sun is shining brightly today.'",["sun","is shining","brightly"],1,"is shining."),
+  M("Which is the verb? 'Tarun has completed school.'",["Tarun","has completed","school"],1,"has completed."),
+  M("Which is the verb? 'Throw the ball to me.'",["Throw","ball","me"],0,"Throw."),
+  M("The boys are going to the market. I will meet ______ there.",["they","them","their"],1,"meet them."),
+  M("My sister and I made this boat. It is ______.",["our","ours","us"],1,"It is ours."),
+  M("My granny and I have similar spectacles. ______ is lying on the sofa but ______ is with me.",["Her ... my","Hers ... mine","She ... me"],1,"Hers / mine stand alone (no noun after)."),
+  M("The captain and the team posed with the trophy. ______ had won ______ again after five years.",["They ... it","Them ... its","Their ... it"],0,"They won it."),
+  M("______ brought ripe bananas and also offered them to his brother.",["She","He","They"],1,"'his brother' - so HE."),
+  M("This is ______ bag. The bag is ______.",["her ... hers","hers ... her","her ... her"],0,"her + noun; hers alone.")
+ ]
+},
+{
+ id:"s7", day:3, mins:35, emoji:"&#128173;", title:"Avoidable Talk + Reading",
+ blurb:"Lesson 6 questions, who said to whom, spellings, and an unseen passage.",
+ items:[
+  M("What was mentioned in Shastri's horoscope?",["He would win a prize","The stars were out to trouble him; even his mildest remarks could offend and lead to a quarrel","He would become rich"],1,"That is why he was told to avoid all quarrels."),
+  M("What advice did Shastri's friend give him?",["Start praying daily","Your worst period is coming to an end, but avoid all avoidable talks","Gift everyone a silver coin"],1,""),
+  M("Every morning Shastri decided that ______.",["he would not talk to anyone today","he would have a nice time at the shop","he has to follow his horoscope","he would see where people are going"],0,"'I must not talk to anyone today.'"),
+  M("How did Shastri answer his wife at dinner?",["With long stories","With a curt 'Yes' or 'No'","By shouting"],1,"curt = rudely short in speech."),
+  M("What happened in the tram?",["Somebody stood on his toe and the conductor pushed him aside with rude remarks","He lost his wallet","He met his friend"],0,"He bore it patiently and kept quiet."),
+  M("How late was Shastri for work?",["Two hours","Two minutes","Ten minutes"],1,"Only two minutes - but his employer behaved as if it were two hours."),
+  M("The customer held up a ______.",["trinket","paperweight","ledger"],0,"trinket = a small ornament or jewellery."),
+  M("What did the customer want?",["To buy gold","To take out the diamond and reset it in platinum","To sell a ring"],1,""),
+  M("When Shastri did not answer the customer, he went to the ______.",["proprietor","landlord","tram owner"],0,"proprietor = the owner of the shop."),
+  M("Why did Shastri not go when the proprietor called?",["He was angry","He had three more lines to add; if interrupted he would have to start the gigantic folio again","He did not hear"],1,""),
+  M("Why did Shastri feel desperate?",["He lost his job","He thought his master wanted to fling the paperweight at him","He was hungry"],1,""),
+  M("Why was the master holding the paperweight?",["To throw it at Shastri","Because the customer sitting before him was a madman","To weigh jewellery"],1,"'That was a madman. You saw me with a paperweight in my hand, while he sat before me.' It was never meant for Shastri."),
+  M("The master thought that Shastri had come to his bungalow to ______.",["feel sorry for his conduct","comfort him","fight with him","have dinner with him"],0,"'You have enough sense to feel sorry for your conduct.'"),
+  M("For how many years had Shastri worked for his master?",["Two","Ten","Twenty"],2,"Twenty years."),
+  TF("Shastri strictly followed his friend's advice.",true,"He stayed silent all day and never talked back, even at the bungalow. (If your teacher's key says otherwise, go with the teacher.)"),
+  MA("Who said to whom?",[["'Then get out of a shop like this.'","The customer to Shastri"],["'Drop the pen and come here when I call, will you?'","The master to Shastri"],["'You must ask over there. I know nothing.'","Shastri to the customer"],["'Your worst period is coming to an end.'","The friend to Shastri"]],""),
+  MA("Match the word to its meaning.",[["quarrel","a small argument"],["offend","to hurt someone's feelings"],["curt","rudely short in speech"],["slunk","moved away quietly"],["trinket","small ornament"],["repent","feel sorry for a wrong"]],""),
+  M("Correct spelling:",["reeflected","reflucted","reflected"],2,""),
+  M("Correct spelling:",["enclosure","encloscure","anclosure"],0,""),
+  M("Correct spelling:",["dellighted","delited","delighted"],2,""),
+  M("Correct spelling:",["forgotten","forgoten","forgotteen"],0,""),
+  M("Correct spelling:",["propreitor","proprietor","propietor"],1,""),
+  WR("What lesson do we learn from 'Avoidable Talk'?",1.5,"<p>We should not get angry over small things and should not act in haste when we are angry. We must stay calm and answer everyone politely, because rude or careless words lead to quarrels.</p>"),
+  WR("Why was the speaker holding a paperweight? ('That was a madman...')",1,"<p>The master was holding the paperweight because the customer sitting before him was a madman. He held it to protect himself - it was not meant for Shastri.</p>"),
+  WR("Make sentences: interrupted, glimpse, gigantic.",1.5,"<ul><li>The movie was interrupted by a power cut.</li><li>I caught a glimpse of a rabbit in the garden.</li><li>We saw a gigantic tree in the forest.</li></ul>"),
+  P("puppy", M("Where did Meera see the puppy?",["Under a car","On the roof","In a shop"],0,"")),
+  P("puppy", M("What did Meera's mother give her?",["An umbrella and a ball","An old towel and a bowl of warm milk","A basket"],1,"")),
+  P("puppy", TF("The puppy was black.",false,"It was a tiny BROWN puppy.")),
+  P("puppy", TF("Bruno ran away because loud thunder scared him.",true,"")),
+  P("puppy", W("Find a word in the passage that means 'shaking with cold'.","shivering",["shivering","crying","wagged"],"")),
+  P("puppy", W("Find a word in the passage that means 'very happy'.","delighted",["delighted","sad","gently"],"")),
+  P("puppy", W("Find the opposite of 'loosely' in the passage.","tightly",["tightly","softly","gently"],"Kabir hugged the puppy tightly.")),
+  P("puppy", WR("What did Meera learn?",1,"<p>Meera learnt that a small act of kindness can bring a big smile to someone's face.</p>"))
+ ]
+},
+/* ---------------- DAY 3 : BOSS - FULL MODEL PAPER ---------------- */
+{
+ id:"s8", day:3, mins:75, fixed:true, boss:true, timed:4500, emoji:"&#128081;", title:"BOSS: Full Model Paper",
+ blurb:"Same order as the real paper. 75 minutes. Paragraph on paper.",
+ items:[
+  P("kite", M("A1. When is the Kite Festival held?",["In January","In July","In October"],0,"")),
+  P("kite", M("A1. What had Grandfather made?",["A small blue kite","A big red kite with a long tail","A paper lantern"],1,"")),
+  P("kite", TF("A1. Arjun pulled the kite hard to get it out of the tree.",false,"Grandfather stopped him - they freed it slowly and carefully.")),
+  P("kite", TF("A1. People lit paper lanterns at night.",true,"")),
+  P("kite", W("A1. Find a word in the passage that means 'stuck and twisted'.","tangled",["tangled","freed","smiled"],"")),
+  P("kite", W("A1. Find a word in the passage that means 'harm'.","damage",["damage","spool","frame"],"")),
+  P("kite", WR("A1. Why did Grandfather stop Arjun from pulling the kite?",1,"<p>Grandfather stopped him because pulling hard would only tear the kite. He told Arjun to be patient.</p>")),
+  TK("t_boss_para","B1. Write a descriptive paragraph on ONE topic in your notebook (10 minutes).",[
+   "Choose ONE: 'A Mobile Phone' OR 'A School Bus'.",
+   "Write the title and underline it.",
+   "Write 8 to 12 sentences in present tense, using the hints below.",
+   "Tap Done to compare with the model."],
+   {hints:"A Mobile Phone: electronic device, rectangular, touch screen, camera, battery and charger, calls and messages, internet and apps, different companies and prices, careful use.<br><br>A School Bus: vehicle, wheels, seats, windows, driver, helper, fuel, safety, first-aid box, friends.",
+    model:MODEL_PHONE+MODEL_BUS, check:CHECK_PARA}),
+  OR("C1. Rearrange: my / every / grandmother / morning / walks",["My","grandmother","walks","every","morning."],"My grandmother walks every morning."),
+  M("C2. Kind of sentence: 'Fill your water bottle.'",["Declarative","Interrogative","Imperative","Exclamatory"],2,""),
+  M("C2. Kind of sentence: 'What a wonderful view this is'",["Declarative","Interrogative","Imperative","Exclamatory"],3,""),
+  M("C3. Subject of: 'The brave army men fought in the battle.'",["The brave army men","fought in the battle","the battle"],0,""),
+  M("C3. Subject of: 'Write the paragraph.'",["the paragraph","Write","You (hidden)"],2,""),
+  W("C4. I love to eat ______ during summers. (common noun)","ice cream",["ice cream","Amul","Delhi"],""),
+  M("C5. Change the number: 'The baby played with the puppy.'",["The babys played with the puppies.","The babies played with the puppies.","The babies plays with the puppy."],1,"baby - babies, puppy - puppies."),
+  M("C6. Change the gender: 'The duke did not like being in his office.'",["The duchess did not like being in her office.","The duchess did not like being in his office.","The dukess did not like being in her office."],0,""),
+  M("C7. Negative of: 'She is chopping fresh vegetables for the soup.'",["She is not chopping fresh vegetables for the soup.","She not is chopping fresh vegetables for the soup.","She is chopping not fresh vegetables."],0,""),
+  M("C8. The (students' scales / student's scales) were kept in THEIR lockers.",["students' scales","student's scales"],0,"'their lockers' - many students."),
+  M("C8. The (tiger's stripes / tigers' stripes) differ in width, length and circles.",["tiger's stripes","tigers' stripes"],1,"All tigers - tigers'."),
+  W("C9. My cook had bought ______ apples from Nainital. (number)","fifteen",["fifteen","much","those"],""),
+  M("C10. These utensils are ______ than those of silver. (cheap)",["cheap","cheaper","cheapest"],1,""),
+  M("C10. This basket has the ______ peaches. (juicy)",["juicier","juiciest","most juicy"],1,""),
+  M("C11. Harshit added ______ spoonful of sugar to his tea.",["a","an","the"],0,""),
+  M("C11. ______ juice served to us was too sour to drink.",["A","An","The"],2,"A particular juice - the."),
+  M("C12. That blue scarf on the table is ______ (it belongs to me).",["my","mine","me"],1,""),
+  M("C13. Which is the verb? 'Whole grains are an important part of a balanced diet.'",["grains","are","part"],1,""),
+  WR("D1. How did Ali Baba find out the thieves' hideout?",1.5,"<p>While chopping wood in the forest, Ali Baba heard horses and hid behind a tree. He saw the robbers say 'Open Sesame!' in front of a cave, the rocks parted and they went in. After they left, he said the same words and went inside.</p>"),
+  WR("D1. Describe the appearance of the tigress and its cubs at the zoo.",1.5,"<p>Amrita was a Royal Bengal tigress with a reddish-orange coat of fur and black stripes. She weighed about 150 kilograms. Her cubs were light brown in colour.</p>"),
+  WR("D1. What did the zookeeper tell the children about a tiger's diet?",1.5,"<p>Their most favourite food is deer and wild pigs; their favourite deer is gaur. They sometimes kill small animals like monkeys, and eat a kill over a week in a hidden spot or cave.</p>"),
+  WR("D1. What advice did Shastri's friend give him?",1.5,"<p>His friend told him, 'Your worst period is coming to an end, but make sure to avoid all avoidable talks.' He meant that careless words start quarrels, so Shastri should speak only when needed.</p>"),
+  WR("D2. Make sentences: recently, gigantic, curious.",3,"<ul><li>Our school recently built a new library.</li><li>The elephant looked gigantic next to the puppy.</li><li>The students were curious to know their results.</li></ul>"),
+  M("D3. 'He heard the sound of horses coming in his direction.' Who is 'he'?",["Ali Baba","Kasim","Mustafa"],0,""),
+  M("D3. Where is 'he' at present?",["In the forest","In the town","In the cave"],0,"He was chopping wood in the forest."),
+  M("D3. Why are 'they' coming in his direction?",["They were robbers coming to their secret cave","They were looking for Ali Baba","They were going to the market"],0,"The robbers came to their cave full of treasure."),
+  M("D3. Name the chapter.",["Zoo","Avoidable Talk","The Story of Ali Baba"],2,""),
+  M("D4. Who said to whom: 'Then get out of a shop like this.'",["The master to Shastri","The customer to Shastri","Shastri to the customer"],1,"The customer, after Shastri said 'I know nothing'."),
+  M("D5. Circle the correct spelling.",["reeflected","reflucted","reflected"],2,""),
+  M("D5. Circle the correct spelling.",["enclosure","encloscure","anclosure"],0,""),
+  M("D5. Circle the correct spelling.",["dellighted","delited","delighted"],2,""),
+  M("D5. Circle the correct spelling.",["forgotten","forgoten","forgotteen"],0,""),
+  TF("D6. Ali Baba was a poor woodcutter.",true,""),
+  TF("D6. Shastri strictly followed his friend's advice.",true,"He kept silent all day and never talked back."),
+  TF("D6. The zookeeper gave a lot of information to the children.",true,""),
+  TF("D6. The robbers were killed by Mustafa.",false,"Morjina killed them."),
+  W("D7. The Royal Bengal tigress in the zoo: ______","Amrita",["Amrita","Rani","Chiku"],""),
+  W("D7. The customer held a ______","trinket",["trinket","ledger","paperweight"],""),
+  W("D7. Ali Baba's greedy brother: ______","Kasim",["Kasim","Mustafa","Morjina"],""),
+  W("D7. The tigress weighed ______","150 kg",["150 kg","15 kg","500 kg"],""),
+  M("D8. The zookeeper told that Amrita ______.",["was a beautiful tigress","liked to be by itself","did not allow any other tiger into its enclosure","both (b) and (c)"],3,""),
+  M("D8. Ali Baba was kind hearted, so he ______.",["shared his wealth with Mustafa","helped Morjina in becoming rich","shared his treasures with his brother's family","did not take a single rupee"],2,""),
+  M("D8. The master thought that Shastri had come to his bungalow to ______.",["feel sorry for his conduct","comfort him","fight with him","have dinner with him"],0,""),
+  M("D8. Shastri decided every morning that ______.",["he would not talk to anyone today","he would have a nice time at the shop","he has to follow his horoscope","he would see where people are going"],0,"")
+ ]
+}
+];
+
+/* =======================================================================
+   STATE
+   ======================================================================= */
+var S = load();
+function load(){
+  var d = {xp:0, done:{}, best:{}, badges:[], lastDay:"", streak:0, tasks:{}, updatedAt:0};
+  try{
+    var raw = localStorage.getItem(KEY);
+    if(raw){ var p = JSON.parse(raw); for(var k in d){ if(p[k]!==undefined) d[k]=p[k]; } }
+  }catch(e){}
+  return d;
+}
+function save(){
+  S.updatedAt = Date.now();
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+  if(typeof DikshaSync!=="undefined"){ DikshaSync.push(KEY, S); }
+}
+function dayKey(d){ return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate(); }
+function todayStr(){ return dayKey(new Date()); }
+/* streak only moves when she actually starts a quest */
+function touchStreak(){
+  var t = todayStr();
+  if(S.lastDay === t) return;
+  var y = new Date(); y.setDate(y.getDate()-1);
+  S.streak = (S.lastDay === dayKey(y)) ? S.streak+1 : 1;
+  S.lastDay = t; save();
+}
+
+var LEVELS = [
+  [0,"Word Sprout","&#127793;"],[120,"Sentence Seeker","&#128269;"],[300,"Noun Ninja","&#129399;"],
+  [550,"Adjective Ace","&#127912;"],[850,"Grammar Guardian","&#128737;&#65039;"],[1200,"Story Sleuth","&#128373;&#65039;"],
+  [1650,"Paragraph Pro","&#9997;&#65039;"],[2200,"Literature Legend","&#128218;"],[2900,"English Champion","&#128081;"]
+];
+function levelInfo(){
+  var i=0; for(var j=0;j<LEVELS.length;j++){ if(S.xp>=LEVELS[j][0]) i=j; }
+  var next = LEVELS[i+1] ? LEVELS[i+1][0] : LEVELS[i][0]+600;
+  var base = LEVELS[i][0];
+  return {i:i, name:LEVELS[i][1], em:LEVELS[i][2], base:base, next:next,
+          pct: Math.max(4, Math.min(100, Math.round((S.xp-base)/(next-base)*100)))};
+}
+function addXP(n){ S.xp += n; save(); paintHud(); }
+
+var BADGES = {
+  writer:  ["&#9997;&#65039;","Paragraph Maker","Finished the Writing Workshop"],
+  reader:  ["&#128214;","Bookworm","Read all 3 lessons"],
+  doctor:  ["&#129658;","Slip Fixer","Cured the Slip Doctor list"],
+  gym1:    ["&#127947;&#65039;","Noun Ninja","Finished Grammar Gym 1"],
+  treasure:["&#128176;","Treasure Hunter","Finished Ali Baba &amp; Zoo"],
+  gym2:    ["&#129351;","Adjective Ace","Finished Grammar Gym 2"],
+  calm:    ["&#128173;","Calm Mind","Finished Avoidable Talk + Reading"],
+  boss:    ["&#128081;","Mid-Term Champion","Beat the Full Model Paper"],
+  perfect: ["&#11088;","Bullseye","Scored 100% in any quest"],
+  allday1: ["&#127769;","Monday Done","Cleared every Monday quest"],
+  allday2: ["&#127774;","Tuesday Done","Cleared every Tuesday quest"],
+  allday3: ["&#127942;","Wednesday Done","Cleared every Wednesday quest"]
+};
+var SBADGE = {s1:"writer", s2:"reader", s3:"doctor", s4:"gym1", s5:"treasure", s6:"gym2", s7:"calm", s8:"boss"};
+function grant(id){ if(BADGES[id] && S.badges.indexOf(id)<0){ S.badges.push(id); save(); return true; } return false; }
+
+var DAYS = {1:"Day 1 - Monday 21 Sept (evening)", 2:"Day 2 - Tuesday 22 Sept", 3:"Day 3 - Wednesday 23 Sept"};
+var DAYNOTE = {
+  1:"About 100 minutes. Quest 1, then a 10-minute break, then Quest 2. Keep your English book, notebook and pencil ready.",
+  2:"About 105 minutes. Slip Doctor first. Break for 10 minutes after Grammar Gym 1.",
+  3:"About 2 hours. Break after Grammar Gym 2. Do the Boss last, sitting at a table like the real exam. Nothing new after dinner - sleep well!"
+};
+
+/* =======================================================================
+   HUD
+   ======================================================================= */
+function paintHud(){
+  var L = levelInfo();
+  document.getElementById("mascot").innerHTML = L.em;
+  document.getElementById("lvlName").textContent = "Level "+(L.i+1)+" - "+L.name;
+  document.getElementById("xpTxt").textContent = S.xp+" XP";
+  document.getElementById("xpFill").style.width = L.pct+"%";
+  document.getElementById("streak").innerHTML = "&#128293; "+S.streak;
+}
+
+/* =======================================================================
+   CONFETTI
+   ======================================================================= */
+var cvs = document.getElementById("confetti"), ctx = cvs.getContext ? cvs.getContext("2d") : null, parts = [], raf = null;
+function sizeCanvas(){ cvs.width = innerWidth; cvs.height = innerHeight; }
+sizeCanvas(); addEventListener("resize", sizeCanvas);
+function confetti(n){
+  if(!ctx) return;
+  n = n || 70;
+  var cols = ["#2fd4c4","#ffc861","#ff7a6b","#a98cff","#7ee081"];
+  for(var i=0;i<n;i++){
+    parts.push({x:Math.random()*cvs.width, y:-20-Math.random()*cvs.height*0.4,
+      vx:(Math.random()-0.5)*3, vy:2+Math.random()*4, s:5+Math.random()*7,
+      c:cols[(Math.random()*cols.length)|0], r:Math.random()*6, vr:(Math.random()-0.5)*0.3});
+  }
+  if(!raf) raf = requestAnimationFrame(tick);
+}
+function tick(){
+  if(!ctx){ parts=[]; raf=null; return; }
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  for(var i=parts.length-1;i>=0;i--){
+    var p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.r+=p.vr;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c;
+    ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+    if(p.y>cvs.height+30) parts.splice(i,1);
+  }
+  if(parts.length) raf = requestAnimationFrame(tick);
+  else { raf=null; ctx.clearRect(0,0,cvs.width,cvs.height); }
+}
+
+/* =======================================================================
+   HOME
+   ======================================================================= */
+var app = document.getElementById("app");
+function esc(s){ return String(s).replace(/&(?!#?\w+;)/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function sessionById(id){ return SESSIONS.filter(function(x){ return x.id===id; })[0]; }
+function taskCount(s){ return s.items.filter(function(it){ return it.t==="task"; }).length; }
+function tasksDone(s){ return s.items.filter(function(it){ return it.t==="task" && S.tasks[it.id]; }).length; }
+
+function home(){
+  clearTimer();
+  var L = levelInfo();
+  var h = '<h1>English Mid-Term Quest &#127775;</h1>'+
+    '<p class="sub">Class IV English - Modern Delhi International School.<br>'+
+    'Exam on <b>Thursday 24 September</b>. 8 quests over 3 days.</p>';
+
+  h += '<div class="howto"><b>How to use this, Diksha:</b><ol>'+
+    '<li>Do the quests in order, from top to bottom.</li>'+
+    '<li>Purple <span class="tag2">BOOK / NOTEBOOK</span> cards are real work on paper. Read or write for real, then tick each step.</li>'+
+    '<li>For written answers, say or write your answer FIRST, then peek at the model and mark yourself honestly.</li>'+
+    '<li>Take a 10-minute break between quests. Water, stretch, then come back.</li></ol></div>';
+
+  [1,2,3].forEach(function(day){
+    h += '<div class="daytag"><span class="dot"></span><h2>'+DAYS[day]+'</h2></div>'+
+         '<p class="sub" style="margin:0 0 8px">'+DAYNOTE[day]+'</p><div class="slist">';
+    SESSIONS.filter(function(s){ return s.day===day; }).forEach(function(s){
+      var b = S.best[s.id];
+      var tc = taskCount(s), td = tasksDone(s);
+      var right = b ? '<div class="ring">'+b.pct+'%</div><div>'+b.score+'/'+b.max+'</div>'
+                    : '<div>'+s.mins+' min</div>';
+      if(tc) right += '<div>&#128221; '+td+'/'+tc+'</div>';
+      h += '<button class="scard '+(s.boss?"boss ":"")+(b?"done ":"")+'" onclick="startSession(\''+s.id+'\')">'+
+           '<div class="em">'+s.emoji+'</div>'+
+           '<div style="flex:1;min-width:0"><div class="t">'+s.title+(b?' &#9989;':'')+(tc?'<span class="tag2">BOOK / NOTEBOOK</span>':'')+'</div>'+
+           '<div class="d">'+s.blurb+'</div></div>'+
+           '<div class="r">'+right+'</div></button>';
+    });
+    h += '</div>';
+  });
+
+  h += '<div class="card warnbox" style="margin-top:18px"><b>Remember these fixes (from your own booklet):</b>'+
+       '<ul style="margin:8px 0 0 18px;padding:0;line-height:1.7">'+
+       '<li>The mice <b>were</b> (not was). The <b>gentlemen\'s</b> ties. The <b>teachers\'</b> books.</li>'+
+       '<li>No extra <b>the</b>: in <b>James\'s</b> wallet; collecting marbles.</li>'+
+       '<li>The robbers\' cave was <b>in the forest</b> - True.</li>'+
+       '<li>\'fling <b>it</b>\' = the <b>leaden paperweight</b>.</li>'+
+       '<li>Orders end with a full stop: Always respect your elders<b>.</b></li>'+
+       '<li>Paragraphs: <b>present tense</b>, describe the thing, 8 to 12 sentences.</li>'+
+       '<li>Spell it: <b>bouquet</b>.</li></ul></div>';
+
+  h += '<div class="card"><b>Note for Papa / Mummy</b><p class="sub" style="margin:6px 0 0">'+
+       'The textbook (Zoo, p56) says a tiger\'s favourite deer is the <b>gaur</b>. In real life a gaur is the Indian bison, not a deer. '+
+       'For the exam, write what the book says. Also: the book (p41) teaches <b>hair</b> as uncountable, so check with the teacher what she wants for '+
+       '\'Shalini\'s hair was long\' - it is not tested in this app.</p></div>';
+
+  h += '<h2>Badges ('+S.badges.length+'/'+Object.keys(BADGES).length+')</h2><div>';
+  Object.keys(BADGES).forEach(function(k){
+    var b=BADGES[k], got=S.badges.indexOf(k)>=0;
+    h += '<span class="badge" style="'+(got?"":"opacity:.35")+'">'+b[0]+' '+b[1]+'</span>';
+  });
+  h += '</div>';
+
+  h += '<div class="card"><div class="row"><button class="btn ghost" onclick="resetAsk()">Reset all progress</button></div>'+
+       '<div id="resetZone"></div></div>';
+  h += '<p class="smallnote">XP '+S.xp+' - '+L.name+'. Progress saves on this device (and syncs if sync is on).</p>';
+
+  app.innerHTML = h;
+  paintHud();
+  window.scrollTo(0,0);
+}
+
+function resetAsk(){
+  document.getElementById("resetZone").innerHTML =
+    '<p class="sub" style="margin-top:12px">Sure? This clears XP, badges, ticks and all scores.</p>'+
+    '<div class="row"><button class="btn warm" onclick="doReset()">Yes, reset</button>'+
+    '<button class="btn ghost" onclick="home()">Cancel</button></div>';
+}
+function doReset(){ try{ localStorage.removeItem(KEY); }catch(e){} S = load(); save(); home(); }
+
+/* =======================================================================
+   SESSION RUNNER
+   ======================================================================= */
+var R = null;
+var timerId = null;
+function clearTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
+
+function startSession(id){
+  touchStreak();
+  var s = sessionById(id);
+  var list;
+  if(s.fixed){ list = s.items.slice(); }
+  else {
+    var autos = s.items.filter(function(i){ return i.t!=="write" && !i.p; });
+    var pass  = s.items.filter(function(i){ return i.t!=="write" && i.p; });
+    var writes = s.items.filter(function(i){ return i.t==="write" && !i.p; });
+    var pwr = s.items.filter(function(i){ return i.t==="write" && i.p; });
+    shuffle(autos);
+    list = autos.concat(writes, pass, pwr);
+  }
+  R = {s:s, items:list, i:0, score:0, max:0, results:[], left:s.timed||0, ended:false, lock:false};
+  clearTimer();
+  if(s.timed){
+    timerId = setInterval(function(){
+      R.left--;
+      var el = document.getElementById("timer");
+      if(el) el.textContent = fmt(R.left);
+      if(R.left<=0){ clearTimer(); finish(true); }
+    },1000);
+  }
+  renderQ();
+}
+function fmt(t){ if(t<0)t=0; var m=Math.floor(t/60), s=t%60; return m+":"+(s<10?"0":"")+s; }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0; var t=a[i];a[i]=a[j];a[j]=t; } return a; }
+
+function qHeader(){
+  var dots = R.items.map(function(it,k){
+    var c = k<R.i ? (it.t==="task" ? "ok" : (R.results[k] ? "ok":"no")) : (k===R.i ? "cur":"");
+    return '<span class="dt '+c+'"></span>';
+  }).join("");
+  return '<div class="qtop"><button class="back" onclick="confirmQuit()">&#8592;</button>'+
+    '<div class="dots">'+dots+'</div>'+
+    (R.s.timed ? '<div class="timer" id="timer">'+fmt(R.left)+'</div>' : '<div class="timer">'+(R.i+1)+'/'+R.items.length+'</div>')+
+    '</div>';
+}
+function confirmQuit(){
+  var el = document.getElementById("quitZone");
+  if(!el) return;
+  el.innerHTML = '<div class="card"><p class="sub" style="margin:0 0 10px">Leave this quest? Ticked book tasks stay saved, but the score will not.</p>'+
+    '<div class="row"><button class="btn warm" onclick="clearTimer();home()">Leave</button>'+
+    '<button class="btn ghost" onclick="document.getElementById(\'quitZone\').innerHTML=\'\'">Stay</button></div></div>';
+}
+
+var TYPELABEL = {mcq:"Choose one", tf:"True or False", word:"Pick the right word", match:"Match the columns",
+  order:"Put the words in order", sort:"Sort them", write:"Say or write the answer", task:"Book / notebook task"};
+
+function passageHtml(pid){
+  var P0 = PASSAGES[pid];
+  return '<details class="pass" open><summary>&#128196; Read the passage: '+P0.title+'</summary>'+
+    P0.text.map(function(t){ return '<p>'+t+'</p>'; }).join("")+'</details>';
+}
+
+function renderQ(){
+  if(R.i >= R.items.length){ finish(false); return; }
+  R.lock = false;
+  var it = R.items[R.i];
+  var h = qHeader()+'<div id="quitZone"></div>'+(it.p ? passageHtml(it.p) : '')+
+    '<div class="card'+(it.t==="task"?" task":"")+'">'+
+    '<div class="qtype">'+TYPELABEL[it.t]+'</div>'+
+    '<div class="qtext">'+it.q+'</div><div id="body"></div></div><div id="fb"></div><div id="nextZone"></div>';
+  app.innerHTML = h;
+  window.scrollTo(0,0);
+  ({mcq:rMcq, tf:rMcq, word:rWord, match:rMatch, order:rOrder, sort:rSort, write:rWrite, task:rTask})[it.t](it);
+}
+
+function nextBtn(label){
+  document.getElementById("nextZone").innerHTML =
+    '<button class="btn" id="nextBtn" onclick="goNext()">'+(label||"Next")+' &#8594;</button>';
+}
+function goNext(){ if(!R || R.ended) return; R.i++; renderQ(); }
+function lastLabel(){ return R.i===R.items.length-1 ? "See results" : "Next"; }
+
+function feedback(ok, it, extra){
+  if(R.lock) return;
+  R.lock = true;
+  R.results[R.i] = ok;
+  R.max += 1;
+  if(ok){ R.score += 1; addXP(R.s.boss?14:10); }
+  else { addXP(2); }
+  var why = it.why || "";
+  if(extra) why = extra + (why? " " + why : "");
+  document.getElementById("fb").innerHTML =
+    '<div class="fb '+(ok?"good":"bad")+'"><b>'+(ok?"&#9989; Correct!":"&#10060; Not quite")+'</b>'+why+'</div>';
+  nextBtn(lastLabel());
+}
+
+/* MCQ / TF */
+function rMcq(it){
+  var keys="ABCD";
+  document.getElementById("body").innerHTML = '<div class="opts">'+it.o.map(function(o,k){
+    return '<button class="opt" id="o'+k+'" onclick="pickMcq('+k+')"><span class="k">'+keys[k]+'</span>'+o+'</button>';
+  }).join("")+'</div>';
+}
+function pickMcq(k){
+  var it = R.items[R.i];
+  if(R.lock) return;
+  for(var j=0;j<it.o.length;j++){
+    var el=document.getElementById("o"+j); el.disabled=true;
+    if(j===it.a) el.className="opt good";
+    else if(j===k) el.className="opt bad";
+  }
+  feedback(k===it.a, it, k===it.a?"":("The answer is: "+it.o[it.a]+"."));
+}
+
+/* WORD BANK */
+function rWord(it){
+  R.bank = shuffle(it.bank.slice());
+  document.getElementById("body").innerHTML =
+    '<div class="ans-slot empty" id="slot">tap a word below</div><div class="bank" id="bank">'+
+    R.bank.map(function(w,k){ return '<button class="chip" id="w'+k+'" onclick="pickWord('+k+')">'+w+'</button>'; }).join("")+
+    '</div>';
+}
+function pickWord(k){
+  var it=R.items[R.i];
+  if(R.lock) return;
+  var w = R.bank[k];
+  var slot=document.getElementById("slot");
+  slot.className="ans-slot"; slot.textContent=w;
+  var ok = w.toLowerCase()===String(it.a).toLowerCase();
+  var kids=document.getElementById("bank").children;
+  for(var j=0;j<kids.length;j++){ kids[j].disabled=true; if(R.bank[j].toLowerCase()!==String(it.a).toLowerCase()) kids[j].classList.add("used"); }
+  feedback(ok, it, ok?"":("The answer is: "+it.a+"."));
+}
+
+/* MATCH */
+var MST = null;
+function rMatch(it){
+  var left = it.pairs.map(function(p,k){ return {t:p[0], k:k}; });
+  var right = shuffle(it.pairs.map(function(p,k){ return {t:p[1], k:k}; }));
+  MST = {left:left, right:right, sel:null, made:{}, n:it.pairs.length, done:0};
+  document.getElementById("body").innerHTML =
+    '<div class="mgrid"><div class="mcol">'+left.map(function(l,i){
+      return '<button class="mi" id="L'+i+'" onclick="mTapL('+i+')">'+l.t+'<span class="tag hide" id="LT'+i+'"></span></button>'; }).join("")+
+    '</div><div class="mcol">'+right.map(function(r,i){
+      return '<button class="mi" id="R'+i+'" onclick="mTapR('+i+')">'+r.t+'<span class="tag hide" id="RT'+i+'"></span></button>'; }).join("")+
+    '</div></div><p class="smallnote">Tap a box on the left, then its partner on the right.</p>';
+}
+function mTapL(i){
+  if(R.lock || MST.made["L"+i]!==undefined) return;
+  if(MST.sel!==null) document.getElementById("L"+MST.sel).classList.remove("active");
+  MST.sel = i; document.getElementById("L"+i).classList.add("active");
+}
+function mTapR(j){
+  if(R.lock || MST.sel===null || MST.made["R"+j]!==undefined) return;
+  var i=MST.sel;
+  MST.made["L"+i]=j; MST.made["R"+j]=i; MST.sel=null; MST.done++;
+  var num=MST.done;
+  var Le=document.getElementById("L"+i), Re=document.getElementById("R"+j);
+  Le.classList.remove("active"); Le.classList.add("paired"); Re.classList.add("paired");
+  var lt=document.getElementById("LT"+i), rt=document.getElementById("RT"+j);
+  lt.classList.remove("hide"); rt.classList.remove("hide"); lt.textContent=num; rt.textContent=num;
+  if(MST.done===MST.n) gradeMatch();
+}
+function gradeMatch(){
+  var it=R.items[R.i], right=0;
+  for(var i=0;i<MST.n;i++){
+    var j = MST.made["L"+i];
+    var good = MST.left[i].k === MST.right[j].k;
+    if(good) right++;
+    document.getElementById("L"+i).className = "mi "+(good?"good":"bad");
+    document.getElementById("R"+j).className = "mi "+(good?"good":"bad");
+  }
+  var ok = right===MST.n;
+  var correctList = it.pairs.map(function(p){ return p[0]+" = "+p[1]; }).join("<br>");
+  feedback(ok, it, ok? ("All "+right+" correct!") : ("You got "+right+" of "+MST.n+".<br>"+correctList+"<br>"));
+}
+
+/* ORDER (index-based so repeated words would still be safe) */
+var OST=null;
+function rOrder(it){
+  var idx = it.items.map(function(_,k){ return k; });
+  OST={picked:[], pool:shuffle(idx)};
+  drawOrder(it);
+}
+function drawOrder(it){
+  var slots = it.items.map(function(_,k){
+    var v = OST.picked[k];
+    return '<div class="slot '+(v!==undefined?"filled":"")+'" id="S'+k+'" onclick="undoOrder('+k+')">'+(v!==undefined ? (k+1)+". "+it.items[v] : (k+1)+". ...")+'</div>';
+  }).join("");
+  var pool = OST.pool.map(function(p){
+    var used = OST.picked.indexOf(p)>=0;
+    return '<button class="chip '+(used?"used":"")+'" onclick="pickOrder('+p+')">'+it.items[p]+'</button>';
+  }).join("");
+  document.getElementById("body").innerHTML='<div class="slots">'+slots+'</div><div class="pool">'+pool+'</div>'+
+    '<p class="smallnote">Tap a chip to place it. Tap a filled slot to take it back.</p>';
+}
+function pickOrder(p){
+  var it=R.items[R.i];
+  if(R.lock || OST.locked) return;
+  if(OST.picked.indexOf(p)>=0) return;
+  if(OST.picked.length>=it.items.length) return;
+  OST.picked.push(p); drawOrder(it);
+  if(OST.picked.length===it.items.length) gradeOrder(it);
+}
+function undoOrder(k){
+  var it=R.items[R.i];
+  if(R.lock || OST.locked) return;
+  if(OST.picked[k]===undefined) return;
+  OST.picked.splice(k,1); drawOrder(it);
+}
+function gradeOrder(it){
+  OST.locked=true;
+  var right=0;
+  for(var k=0;k<it.items.length;k++){
+    var good = it.items[OST.picked[k]]===it.items[k];
+    if(good) right++;
+    document.getElementById("S"+k).className="slot filled "+(good?"good":"bad");
+  }
+  var ok = right===it.items.length;
+  feedback(ok, it, ok?"":("Correct order: "+it.items.join(" ")+"<br>"));
+}
+
+/* SORT - each word gets a bucket */
+var SST0=null;
+function rSort(it){
+  SST0 = {pick:{}, n:it.items.length};
+  var h = it.items.map(function(w,i){
+    return '<div class="srow" id="SR'+i+'"><div class="w">'+w[0]+'</div><div class="bks">'+
+      it.buckets.map(function(b,j){ return '<button class="bk" id="B'+i+'_'+j+'" onclick="pickSort('+i+','+j+')">'+b+'</button>'; }).join("")+
+      '</div></div>';
+  }).join("");
+  document.getElementById("body").innerHTML = h +
+    '<button class="btn" id="sortCheck" disabled onclick="gradeSort()">Check</button>';
+}
+function pickSort(i,j){
+  var it=R.items[R.i];
+  if(R.lock) return;
+  SST0.pick[i]=j;
+  for(var k=0;k<it.buckets.length;k++){
+    document.getElementById("B"+i+"_"+k).className = "bk"+(k===j?" sel":"");
+  }
+  document.getElementById("sortCheck").disabled = Object.keys(SST0.pick).length < SST0.n;
+}
+function gradeSort(){
+  var it=R.items[R.i];
+  if(R.lock || Object.keys(SST0.pick).length < SST0.n) return;
+  var right=0, fix=[];
+  it.items.forEach(function(w,i){
+    var good = SST0.pick[i]===w[1];
+    if(good) right++; else fix.push(w[0]+" &#8594; "+it.buckets[w[1]]);
+    document.getElementById("SR"+i).className = "srow "+(good?"good":"bad");
+  });
+  var b=document.getElementById("sortCheck"); if(b) b.classList.add("hide");
+  var ok = right===SST0.n;
+  feedback(ok, it, ok? ("All "+right+" correct!") : ("You got "+right+" of "+SST0.n+".<br>"+fix.join("<br>")+"<br>"));
+}
+
+/* WRITE - self check */
+function rWrite(it){
+  R.wstate = 0;
+  document.getElementById("body").innerHTML =
+    '<textarea id="wa" placeholder="Write your answer here, or say it out loud first."></textarea>'+
+    '<button class="btn warm" style="margin-top:10px" id="showM" onclick="showModel()">Show the model answer</button>'+
+    '<div id="modelZone"></div>';
+}
+function showModel(){
+  var it=R.items[R.i];
+  if(R.lock || R.wstate) return;
+  R.wstate = 1;
+  var b=document.getElementById("showM"); if(b) b.classList.add("hide");
+  document.getElementById("modelZone").innerHTML =
+    '<div class="model"><b>Model answer ('+it.marks+' mark'+(it.marks>1?"s":"")+')</b>'+it.model+'</div>'+
+    '<p class="smallnote">Be honest - that is how you find out what to revise.</p>'+
+    '<div class="rate" id="rateBox"><button class="r1" onclick="rateWrite(2)">I got it</button>'+
+    '<button class="r2" onclick="rateWrite(1)">Half right</button>'+
+    '<button class="r3" onclick="rateWrite(0)">I missed it</button></div><div id="rateFb"></div>';
+}
+function rateWrite(v){
+  if(R.lock || R.wstate!==1) return;
+  R.lock = true; R.wstate = 2;
+  R.results[R.i] = v===2;
+  R.max += 1; if(v===2) R.score += 1; else if(v===1) R.score += 0.5;
+  addXP(v===2?16:(v===1?9:4));
+  var rb=document.getElementById("rateBox"); if(rb) rb.classList.add("hide");
+  document.getElementById("rateFb").innerHTML =
+    '<div class="fb '+(v===2?"good":"bad")+'" style="margin-top:10px"><b>'+
+    (v===2?"&#9989; Marked as learnt":(v===1?"&#9998; Half marks - read it once more":"&#128214; Add this to revision"))+
+    '</b></div>';
+  nextBtn(lastLabel());
+}
+
+/* TASK - book / notebook work, tick every step */
+function rTask(it){
+  R.tick = {}; R.tstate = 0;
+  var already = !!S.tasks[it.id];
+  var h = '<div class="steps">'+it.steps.map(function(st,k){
+    return '<button class="step" id="ST'+k+'" onclick="tickStep('+k+')"><span class="bx" id="SX'+k+'"></span><span>'+st+'</span></button>';
+  }).join("")+'</div>';
+  if(it.hints) h += '<div class="hints"><b>Hint words:</b><br>'+it.hints+'</div>';
+  h += '<button class="btn" style="margin-top:12px" id="taskDone" disabled onclick="taskDone()">'+
+       (it.model?"Done - show me the model":"Done")+'</button>';
+  if(already) h += '<p class="smallnote">&#9989; You finished this before. Doing it again is great practice.</p>';
+  h += '<div id="taskZone"></div>';
+  document.getElementById("body").innerHTML = h;
+}
+function tickStep(k){
+  var it=R.items[R.i];
+  if(R.tstate) return;
+  R.tick[k] = !R.tick[k];
+  document.getElementById("ST"+k).className = "step"+(R.tick[k]?" on":"");
+  document.getElementById("SX"+k).innerHTML = R.tick[k]?"&#10003;":"";
+  var n=0; for(var j=0;j<it.steps.length;j++){ if(R.tick[j]) n++; }
+  document.getElementById("taskDone").disabled = n < it.steps.length;
+}
+function taskDone(){
+  var it=R.items[R.i];
+  if(R.tstate) return;
+  var n=0; for(var j=0;j<it.steps.length;j++){ if(R.tick[j]) n++; }
+  if(n < it.steps.length) return;
+  R.tstate = 1;
+  R.results[R.i] = true;
+  var first = !S.tasks[it.id];
+  S.tasks[it.id] = true;
+  addXP(first?20:5);
+  var b=document.getElementById("taskDone"); if(b) b.classList.add("hide");
+  var h = '';
+  if(it.model){
+    h += '<div class="model"><b>Model paragraph - compare with yours</b>'+it.model+'</div>';
+    if(it.check.length){
+      h += '<p class="sub" style="margin:12px 0 6px"><b>Check your paragraph. Tick what you did:</b></p><div class="steps">'+
+        it.check.map(function(c,k){ return '<button class="step" id="CK'+k+'" onclick="tickCheck('+k+')"><span class="bx" id="CX'+k+'"></span><span>'+c+'</span></button>'; }).join("")+
+        '</div><p class="smallnote">Anything not ticked? Fix it in your notebook with a pencil.</p>';
+    }
+  }
+  h += '<div class="fb good" style="margin-top:10px"><b>&#127881; Task done! +'+(first?20:5)+' XP</b></div>';
+  document.getElementById("taskZone").innerHTML = h;
+  nextBtn(lastLabel());
+}
+function tickCheck(k){
+  var el=document.getElementById("CK"+k); if(!el) return;
+  var on = el.className.indexOf(" on")<0;
+  el.className = "step"+(on?" on":"");
+  document.getElementById("CX"+k).innerHTML = on?"&#10003;":"";
+}
+
+/* =======================================================================
+   RESULTS
+   ======================================================================= */
+function finish(timeUp){
+  clearTimer();
+  if(!R || R.ended) return; R.ended=true;
+  var s = R.s;
+  var pct = R.max ? Math.round(R.score/R.max*100) : 100;
+  var prev = S.best[s.id];
+  if(R.max && (!prev || R.score > prev.score)) S.best[s.id] = {score:Math.round(R.score*10)/10, max:R.max, pct:pct};
+  var newB = [];
+  if(R.max && pct >= 60 && grant(SBADGE[s.id])) newB.push(SBADGE[s.id]);
+  if(R.max && pct === 100 && grant("perfect")) newB.push("perfect");
+  [1,2,3].forEach(function(d){
+    var ids = SESSIONS.filter(function(x){ return x.day===d; }).map(function(x){ return x.id; });
+    var all = ids.every(function(i){ return S.best[i] && S.best[i].pct>=60; });
+    if(all && grant("allday"+d)) newB.push("allday"+d);
+  });
+  save();
+  if(pct>=70) confetti(pct>=90?140:80);
+
+  var msg = pct>=90 ? "Outstanding. You are ready." :
+            pct>=70 ? "Strong work. Just polish the misses." :
+            pct>=50 ? "Good start - go through the wrong ones once more." :
+                      "Worth doing this quest again before the test.";
+  var wrongList = R.items.map(function(it,k){
+    if(it.t==="task" || R.results[k]!==false) return "";
+    var a = it.t==="write" ? "(written answer - re-read the model)" :
+            (it.t==="mcq"||it.t==="tf") ? it.o[it.a] :
+            it.t==="word" ? it.a :
+            it.t==="order" ? it.items.join(" ") :
+            it.t==="sort" ? it.items.map(function(w){ return w[0]+" = "+it.buckets[w[1]]; }).join("; ") :
+            it.pairs.map(function(p){return p[0]+" = "+p[1];}).join("; ");
+    return '<div class="card" style="padding:11px"><div style="font-size:14.5px;font-weight:600">'+it.q+'</div>'+
+           '<div style="font-size:14px;color:#7ee081;margin-top:5px">&#10141; '+a+'</div></div>';
+  }).join("");
+  var tc = taskCount(s), td = tasksDone(s);
+
+  var h='<h1>'+(timeUp?"Time up!":"Quest complete")+'</h1>'+
+    '<div class="card center"><div class="big" style="color:'+(pct>=70?"#3ddc97":"#ffc861")+'">'+pct+'%</div>'+
+    '<div class="sub" style="margin:4px 0 0">'+(Math.round(R.score*10)/10)+' out of '+R.max+'</div>'+
+    (tc?'<div class="sub" style="margin:4px 0 0">&#128221; Book tasks: '+td+' of '+tc+' done</div>':'')+
+    '<p class="sub" style="margin:10px 0 0">'+msg+'</p></div>';
+
+  if(newB.length){
+    h += '<div class="card"><b>New badges!</b><div style="margin-top:8px">'+
+      newB.map(function(b){ return '<span class="badge new">'+BADGES[b][0]+' '+BADGES[b][1]+'</span>'; }).join("")+'</div></div>';
+  }
+  if(wrongList.trim()){
+    h += '<h2>Revise these</h2>'+wrongList;
+  } else if(R.max){
+    h += '<div class="card center"><div style="font-size:34px">&#11088;</div><b>Nothing wrong. Clean sweep.</b></div>';
+  }
+  h += '<div class="row" style="margin-top:14px">'+
+       '<button class="btn" onclick="startSession(\''+s.id+'\')">Play again</button>'+
+       '<button class="btn ghost" onclick="home()">Back to quests</button></div>';
+  app.innerHTML=h; window.scrollTo(0,0); paintHud();
+}
+
+/* =======================================================================
+   BOOT
+   ======================================================================= */
+var BOOT_STAMP = S.updatedAt || 0;
+home();
+
+/* cross-device sync (optional, no-op if firebase-config.js is empty or blocked) */
+if(typeof DikshaSync!=="undefined" && DikshaSync.init()){
+  DikshaSync.pull(KEY).then(function(remote){
+    if(remote && (remote.updatedAt||0) > BOOT_STAMP){
+      for(var k in remote){ if(Object.prototype.hasOwnProperty.call(remote,k)) S[k]=remote[k]; }
+      if(!R || R.ended) home();
+    }
+    DikshaSync.arm();
+    DikshaSync.push(KEY, S);
+  });
+}
+</script>
+</body>
+</html>
