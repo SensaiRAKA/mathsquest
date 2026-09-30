@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="robots" content="noindex">
+<title>Parent Dashboard - Diksha's Study Hub</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<style>
+  :root{
+    --bg:#0f1730; --card:#182548; --card2:#1e2d58; --ink:#eef1ff; --dim:#9aa6d6;
+    --pink:#ff6fa5; --mint:#3ee6b0; --sun:#ffcf5c; --red:#ff6a6a; --line:#2a3a70;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg); color:var(--ink); padding:16px 14px 48px; min-height:100vh;
+  }
+  .wrap{max-width:720px; margin:0 auto}
+  h1{font-size:1.3rem; margin:4px 0 2px}
+  .sub{color:var(--dim); font-size:.85rem; margin:0 0 18px}
+  .gate{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:16px; margin-bottom:18px;
+  }
+  .gate label{display:block; font-size:.8rem; color:var(--dim); margin-bottom:6px}
+  .row{display:flex; gap:8px; flex-wrap:wrap}
+  input[type=text]{
+    flex:1; min-width:160px; background:#0d1530; border:1px solid var(--line); color:var(--ink);
+    border-radius:10px; padding:11px 12px; font-size:1rem; letter-spacing:.03em;
+  }
+  input[type=text]:focus{outline:2px solid var(--mint)}
+  button{
+    background:var(--mint); color:#04261c; border:none; border-radius:10px;
+    padding:11px 18px; font-size:.95rem; font-weight:700; cursor:pointer;
+  }
+  button:active{transform:translateY(1px)}
+  button.ghost{background:transparent; border:1px solid var(--line); color:var(--dim); font-weight:600}
+  .hint{font-size:.78rem; color:var(--dim); margin-top:8px; line-height:1.5}
+  .status{font-size:.85rem; margin-top:10px}
+  .status.err{color:var(--red)}
+  .status.ok{color:var(--mint)}
+  .summary{
+    display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;
+  }
+  .stat{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:10px 14px; flex:1; min-width:110px;
+  }
+  .stat .n{font-size:1.35rem; font-weight:800}
+  .stat .l{font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:.04em}
+  .group{margin-bottom:6px}
+  .group h2{
+    font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim);
+    margin:18px 2px 8px; font-weight:700;
+  }
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:14px;
+    padding:13px 14px; margin-bottom:10px; display:flex; align-items:center; gap:12px;
+  }
+  .card.empty{opacity:.45}
+  .ic{font-size:1.6rem; width:36px; text-align:center; flex-shrink:0}
+  .info{flex:1; min-width:0}
+  .name{font-weight:700; font-size:.95rem; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+  .name a{color:inherit; text-decoration:none; border-bottom:1px dotted var(--dim)}
+  .dot{width:8px; height:8px; border-radius:50%; flex-shrink:0}
+  .dot.fresh{background:var(--mint)}
+  .dot.warm{background:var(--sun)}
+  .dot.cold{background:var(--dim)}
+  .metrics{display:flex; gap:14px; flex-wrap:wrap; margin-top:4px; font-size:.8rem; color:var(--dim)}
+  .metrics b{color:var(--ink)}
+  .mistakes-flag{color:var(--red); font-weight:700}
+  footer{color:var(--dim); font-size:.75rem; text-align:center; margin-top:28px; line-height:1.6}
+  .reload{margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>&#128202; Parent Dashboard</h1>
+  <p class="sub">Read-only view of Diksha's practice progress across every quest. Never writes anything back.</p>
+
+  <div class="gate" id="gate">
+    <label for="codeInput">Her sync code (shown as "Sync code: XXXX-1234" on her device)</label>
+    <div class="row">
+      <input type="text" id="codeInput" placeholder="e.g. TIGER-4271" autocapitalize="characters" autocomplete="off">
+      <button id="loadBtn">Load progress</button>
+    </div>
+    <div class="hint">Find it on her tablet: open any quest, scroll to the bottom footer row, tap the code to copy or just read it. This page never changes her data &mdash; it only pulls a read-only copy.</div>
+    <div class="status" id="status"></div>
+  </div>
+
+  <div id="results" style="display:none">
+    <div class="summary" id="summary"></div>
+    <div id="groups"></div>
+    <button class="ghost reload" id="reloadBtn">Refresh</button>
+  </div>
+
+  <footer>
+    Data comes straight from the same Firestore sync every quest already uses.<br>
+    Not linked from the main hub on purpose &mdash; bookmark this page for yourself.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* Registry of every quest wired to DikshaSync: storage key -> display info.
+   Update this list when a new synced module ships (see CLAUDE.md). Icons/names
+   match index.html so this page stays visually consistent with the hub. */
+var REGISTRY = [
+  { group:"Mid-Term Preparation", items:[
+    { key:"diksha_maths_midterm_v1", icon:"🧮", name:"Maths · Mid-term Quest", href:"maths-midterm.html" },
+    { key:"sstMidQuest_v1",          icon:"🌏", name:"SST · Mid-term Quest", href:"sst-midterm.html" },
+    { key:"diksha_eng_midterm_v1",   icon:"✍️", name:"English · Mid-term Quest", href:"english-midterm.html" },
+    { key:"diksha_cs_midterm_v1",    icon:"🚀", name:"Computers · Mid-term Mission", href:"computer-science-midterm.html" }
+  ]},
+  { group:"Weekly Test Modules", items:[
+    { key:"diksha_cs_v1",  icon:"💻", name:"Computer Science", href:"computer-science.html" },
+    { key:"diksha_eng_v1", icon:"✍️", name:"English", href:"englishquest.html" },
+    { key:"diksha_sci_v1", icon:"🔬", name:"Science", href:"sciencequest.html" },
+    { key:"mdis_sanskrit_u2_v1", icon:"🦜", name:"Sanskrit · Unit 2", href:"sanskrit-u2.html" },
+    { key:"sanskritQuest_v1", icon:"📜", name:"Sanskrit · Unit 1", href:"sanskritquest.html" },
+    { key:"mathsQuest_v1", icon:"🔢", name:"Mathematics · Unit 1", href:"mathsquest.html" }
+  ]},
+  { group:"Special Classes", items:[
+    { key:"specialMathsJuly_v1", icon:"🏫", name:"Maths (Special Class)", href:"special-classes-maths.html" }
+  ]}
+];
+
+var LAST_CODE_KEY = "dikshaParentDashLastCode_v1";
+
+function $(id){ return document.getElementById(id); }
+
+function pickNum(obj, keys){
+  for(var i=0;i<keys.length;i++){ if(typeof obj[keys[i]]==="number") return obj[keys[i]]; }
+  return null;
+}
+function pickStr(obj, keys){
+  for(var i=0;i<keys.length;i++){ if(obj[keys[i]]) return String(obj[keys[i]]); }
+  return null;
+}
+function mistakesCount(obj){
+  if(obj.wrong && typeof obj.wrong==="object" && !Array.isArray(obj.wrong)) return Object.keys(obj.wrong).length;
+  if(Array.isArray(obj.mistakes)) return obj.mistakes.length;
+  if(typeof obj.totalWrong==="number") return obj.totalWrong;
+  return 0;
+}
+function lastActiveISO(obj){
+  var d = pickStr(obj, ["lastDay","lastPlayed","lastPractice"]);
+  if(d) return d;
+  if(typeof obj.updatedAt==="number" && obj.updatedAt>0){
+    var dt = new Date(obj.updatedAt);
+    return dt.toLocaleDateString("en-CA");
+  }
+  return null;
+}
+function daysAgo(iso){
+  if(!iso) return null;
+  var a = new Date(iso+"T00:00:00"), b = new Date(new Date().toLocaleDateString("en-CA")+"T00:00:00");
+  if(isNaN(a.getTime())) return null;
+  return Math.round((b-a)/86400000);
+}
+function freshness(iso){
+  var n = daysAgo(iso);
+  if(n===null) return "cold";
+  if(n<=0) return "fresh";
+  if(n<=2) return "warm";
+  return "cold";
+}
+function fmtDate(iso){
+  if(!iso) return "never";
+  var n = daysAgo(iso);
+  if(n===0) return "today";
+  if(n===1) return "yesterday";
+  if(n!==null && n>1) return n+" days ago";
+  return iso;
+}
+
+function renderCard(entry, data){
+  var div = document.createElement("div");
+  if(!data){
+    div.className = "card empty";
+    div.innerHTML =
+      '<div class="ic">'+entry.icon+'</div>'+
+      '<div class="info">'+
+        '<div class="name"><a href="'+entry.href+'" target="_blank" rel="noopener">'+entry.name+'</a></div>'+
+        '<div class="metrics">No progress synced yet</div>'+
+      '</div>';
+    return div;
+  }
+  var points = pickNum(data, ["xp","stars"]) || 0;
+  var streak = pickNum(data, ["streak"]) || 0;
+  var badges = Array.isArray(data.badges) ? data.badges.length : null;
+  var wrong = mistakesCount(data);
+  var last = lastActiveISO(data);
+  var fresh = freshness(last);
+
+  var metrics = '<span>&#11088; <b>'+points+'</b> pts</span>';
+  metrics += '<span>&#128293; <b>'+streak+'</b> day streak</span>';
+  if(badges!==null) metrics += '<span>&#127942; <b>'+badges+'</b> badges</span>';
+  metrics += '<span>Last active: <b>'+fmtDate(last)+'</b></span>';
+  if(wrong>0) metrics += '<span class="mistakes-flag">&#9888; '+wrong+' to review</span>';
+
+  div.className = "card";
+  div.innerHTML =
+    '<div class="ic">'+entry.icon+'</div>'+
+    '<div class="info">'+
+      '<div class="name"><span class="dot '+fresh+'"></span> <a href="'+entry.href+'" target="_blank" rel="noopener">'+entry.name+'</a></div>'+
+      '<div class="metrics">'+metrics+'</div>'+
+    '</div>';
+  return div;
+}
+
+function loadAll(code){
+  var statusEl = $("status");
+  statusEl.className = "status";
+  statusEl.textContent = "Loading...";
+
+  if(!DikshaSync.init()){
+    statusEl.className = "status err";
+    statusEl.textContent = "Sync isn't configured on this build. Nothing to load.";
+    return;
+  }
+  DikshaSync.setCode(code);
+  try{ localStorage.setItem(LAST_CODE_KEY, code); }catch(e){}
+
+  var allEntries = [];
+  REGISTRY.forEach(function(g){ g.items.forEach(function(it){ allEntries.push(it); }); });
+
+  var pulls = allEntries.map(function(entry){
+    return DikshaSync.pull(entry.key).then(function(data){ return { entry:entry, data:data }; });
+  });
+
+  Promise.all(pulls).then(function(results){
+    var byKey = {};
+    results.forEach(function(r){ byKey[r.entry.key] = r.data; });
+
+    var withData = results.filter(function(r){ return r.data; });
+    var totalPoints = 0, bestStreak = 0, totalMistakes = 0, mostRecent = null;
+    withData.forEach(function(r){
+      totalPoints += (pickNum(r.data, ["xp","stars"]) || 0);
+      bestStreak = Math.max(bestStreak, pickNum(r.data, ["streak"]) || 0);
+      totalMistakes += mistakesCount(r.data);
+      var la = lastActiveISO(r.data);
+      if(la && (!mostRecent || la > mostRecent)) mostRecent = la;
+    });
+
+    var summary = $("summary");
+    summary.innerHTML =
+      '<div class="stat"><div class="n">'+withData.length+'/'+allEntries.length+'</div><div class="l">Modules with progress</div></div>'+
+      '<div class="stat"><div class="n">'+totalPoints+'</div><div class="l">Total points</div></div>'+
+      '<div class="stat"><div class="n">'+bestStreak+'</div><div class="l">Best streak (days)</div></div>'+
+      '<div class="stat"><div class="n">'+fmtDate(mostRecent)+'</div><div class="l">Last practiced</div></div>';
+    if(totalMistakes>0){
+      summary.innerHTML += '<div class="stat"><div class="n" style="color:var(--red)">'+totalMistakes+'</div><div class="l">Mistakes to review</div></div>';
+    }
+
+    var groupsEl = $("groups");
+    groupsEl.innerHTML = "";
+    REGISTRY.forEach(function(g){
+      var h = document.createElement("div");
+      h.className = "group";
+      var title = document.createElement("h2");
+      title.textContent = g.group;
+      h.appendChild(title);
+      g.items.forEach(function(entry){
+        h.appendChild(renderCard(entry, byKey[entry.key]));
+      });
+      groupsEl.appendChild(h);
+    });
+
+    statusEl.className = "status ok";
+    statusEl.textContent = "Loaded for code " + code + ".";
+    $("results").style.display = "";
+  }).catch(function(){
+    statusEl.className = "status err";
+    statusEl.textContent = "Couldn't reach the sync database. Check the connection and try again.";
+  });
+}
+
+$("loadBtn").addEventListener("click", function(){
+  var code = $("codeInput").value.trim().toUpperCase();
+  if(!code){ $("status").className="status err"; $("status").textContent="Enter her sync code first."; return; }
+  loadAll(code);
+});
+$("codeInput").addEventListener("keydown", function(e){
+  if(e.key==="Enter") $("loadBtn").click();
+});
+$("reloadBtn").addEventListener("click", function(){
+  var code = $("codeInput").value.trim().toUpperCase();
+  if(code) loadAll(code);
+});
+
+/* Prefill from this device's own last-used code, if any (never auto-generates one). */
+try{
+  var saved = localStorage.getItem(LAST_CODE_KEY);
+  if(saved) $("codeInput").value = saved;
+}catch(e){}
+</script>
+</body>
+</html>
