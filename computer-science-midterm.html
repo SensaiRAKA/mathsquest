@@ -107,6 +107,11 @@ button{font-family:'Nunito';font-weight:800;border:none;cursor:pointer}
   </div>
 </div>
 
+<div class="sync-row" id="syncRow" style="display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 12px 10px;font-size:12px">
+  <span id="syncCodeLabel" style="background:var(--soft);color:var(--blue-dark);font-weight:800;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid rgba(34,36,58,.12)"></span>
+  <button id="syncChangeBtn" style="background:none;border:none;color:rgba(34,36,58,.55);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline">Use a different code</button>
+</div>
+
 <div class="stats">
   <div class="stat"><div class="n" id="s-xp">0</div><div class="l">XP</div></div>
   <div class="stat"><div class="n" id="s-stars">0</div><div class="l">Stars</div></div>
@@ -748,6 +753,7 @@ toast(hr<12?"Good morning Diksha! ☀️ Mission time.":hr<17?"Hi Diksha! 🌤�
 
 /* cross-device sync (optional, no-op until firebase-config.js is filled in) */
 if(typeof DikshaSync!=="undefined" && DikshaSync.init()){
+  try{ DikshaSync.attachUI(); }catch(e){}
   DikshaSync.pull(LS_KEY).then(function(remote){
     if(remote && (remote.updatedAt||0) > (S.updatedAt||0)){
       S=Object.assign(S,remote);

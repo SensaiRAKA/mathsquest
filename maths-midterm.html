@@ -229,6 +229,9 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
   table.col td{width:32px;font-size:20px}
   .slot{min-width:40px}
 }
+.sync-row{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:10px 12px 16px;font-size:12px}
+.sync-row span{background:var(--card2);color:var(--mint);font-weight:800;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.sync-row button{background:none;border:none;color:var(--dim);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline}
 </style>
 </head>
 <body>
@@ -242,6 +245,10 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
   <div class="streak" id="streak">&#128293; 0</div>
 </div></div>
 <div class="wrap" id="app"></div>
+<div class="sync-row" id="syncRow">
+  <span id="syncCodeLabel"></span>
+  <button id="syncChangeBtn">Use a different code</button>
+</div>
 <script>
 "use strict";
 /* ==========================================================================
@@ -2362,6 +2369,7 @@ var BOOT_STAMP = S.updatedAt || 0;
 home();
 (function(){ var d=DAYS.filter(function(x){ return x.date===todayISO(); })[0]; if(d && d.d>1){ var el=document.getElementById("day"+d.d); if(el && el.scrollIntoView) el.scrollIntoView(); } })();
 if(typeof DikshaSync!=="undefined" && DikshaSync.init()){
+  try{ DikshaSync.attachUI(); }catch(e){}
   DikshaSync.pull(KEY).then(function(remote){
     if(remote && (remote.updatedAt||0) > BOOT_STAMP){
       for(var k in remote){ if(Object.prototype.hasOwnProperty.call(remote,k)) S[k]=remote[k]; }
