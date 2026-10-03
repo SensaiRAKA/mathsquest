@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<title>Lily Pad Science</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700;800&family=Patrick+Hand&display=swap">
+<style>
+/* Layout: one column "pond" - a lily-pad trail for the weekend plan, specimen-tag cards for questions.
+   Single, deliberate daylight palette (kid app on a tablet). */
+:root{
+  --pond:#E7F4EF; --pond2:#D3EBE3; --ink:#173A2E; --muted:#557067; --card:#FFFFFF; --line:#CFE2DA;
+  --leaf:#2E9E5B; --leaf-deep:#1F7543; --leaf-soft:#DDF3E4;
+  --sun:#FFB627; --sun-deep:#C98800; --sun-soft:#FFF2D2;
+  --ok:#1A9A5E; --ok-bg:#DFF5E9; --bad:#D8414D; --bad-bg:#FDE6E8; --sel:#2D6CDF; --sel-bg:#E3ECFD;
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-hand:"Patrick Hand","Comic Sans MS","Chalkboard SE",cursive;
+  --r:18px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--pond);color:var(--ink)}
+body{font-family:var(--f-body);font-size:18px;line-height:1.45;margin:0;min-height:100%;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(circle at 8% 0%,#FFF6DD 0,transparent 32%),radial-gradient(circle at 100% 40%,#DDF0FA 0,transparent 30%),var(--pond)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;text-align:inherit}
+button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+button[disabled]{cursor:default}
+h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:28px 0 10px;text-wrap:balance;line-height:1.15}
+h3{font-family:var(--f-display);font-weight:700;line-height:1.2;margin:0 0 8px;text-wrap:balance}
+b{font-weight:700}
+mark{background:var(--sun-soft);color:inherit;border-radius:4px;padding:0 2px}
+
+/* top bar */
+#top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(231,244,239,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topin{max-width:780px;margin:0 auto;padding:6px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ava{width:42px;height:40px;flex:none}
+.lvl{display:flex;flex-direction:column;flex:1;min-width:110px}
+.lvl b{font-family:var(--f-display);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.xpbar{height:9px;background:var(--pond2);border-radius:9px;overflow:hidden;margin-top:3px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),#FFD36B);border-radius:9px;transition:width .5s}
+.chip{display:inline-flex;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.exam{background:var(--sun-soft);border-color:#F4CF7E;color:#6E4A00}
+.streak{display:inline-flex;gap:4px}
+.streak i{width:10px;height:10px;border-radius:50%;background:var(--pond2);border:1px solid var(--line)}
+.streak i.on{background:var(--leaf);border-color:var(--leaf-deep)}
+
+main{max-width:780px;margin:0 auto;padding:14px 16px 70px}
+
+/* hero */
+.hero{display:flex;gap:10px;align-items:flex-end}
+.bigfrog{width:104px;height:96px;flex:none;animation:bob 3.2s ease-in-out infinite}
+.bigfrog.sm{width:90px;height:82px;margin:0 auto}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--ink);border-radius:22px 22px 22px 6px;padding:12px 14px;box-shadow:4px 4px 0 var(--ink);font-family:var(--f-hand);font-size:21px;line-height:1.3}
+.bubble b{font-family:var(--f-body);font-size:18px}
+.bubble .btnrow{margin-top:10px;font-family:var(--f-body)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:50px;padding:10px 18px;border-radius:14px;font-family:var(--f-display);font-weight:700;font-size:19px;background:var(--leaf);color:#fff;box-shadow:0 4px 0 var(--leaf-deep);transition:transform .08s;text-align:center}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--leaf-deep)}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);border:1px solid var(--line)}
+.btn.ink{background:var(--ink);box-shadow:0 4px 0 #0B1F18}
+.btn.sm{min-height:44px;font-size:16px;padding:8px 12px}
+.btn.danger{background:var(--bad);color:#fff;border-color:var(--bad);box-shadow:0 4px 0 #9E2B35}
+.btn[disabled]{opacity:.4}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btnrow.center{justify-content:center}
+.btnrow.spread{justify-content:space-between}
+.link{color:var(--leaf-deep);text-decoration:underline;font-weight:700;padding:8px}
+.skip{text-align:center;margin:4px 0 0}
+
+/* pond trail */
+.pond{display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,#D7EEF3,#CDE9DE);border-radius:26px;padding:14px;border:2px solid #BFDDD2}
+.dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 4px 0;font-family:var(--f-display)}
+.dayhead b{font-size:20px}
+.dayhead span{font-size:15px;color:var(--muted);font-weight:600}
+.pad{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:6px 10px 6px 6px;border-radius:999px 22px 22px 999px;background:rgba(255,255,255,.72);border:2px solid transparent;transition:transform .1s}
+.pad.alt{margin-left:clamp(0px,6vw,46px);width:calc(100% - clamp(0px,6vw,46px))}
+.pad:active{transform:scale(.98)}
+.pad.next{background:#fff;border-color:var(--sun);box-shadow:0 4px 0 var(--sun-deep)}
+.pad.done{background:rgba(255,255,255,.5)}
+.lily{position:relative;width:62px;height:62px;flex:none;border-radius:50%;background:radial-gradient(circle at 40% 35%,#8FD483,#4FAE58 70%);display:grid;place-items:center;
+  -webkit-mask:conic-gradient(from 100deg,#000 0 330deg,transparent 330deg);mask:conic-gradient(from 100deg,#000 0 330deg,transparent 330deg)}
+.pad.done .lily{background:radial-gradient(circle at 40% 35%,#B5E2A9,#79C374 70%)}
+.lic{font-size:28px;line-height:1}
+.tick{position:absolute;right:2px;bottom:4px;background:var(--ok);color:#fff;border-radius:50%;width:22px;height:22px;font-size:14px;display:grid;place-items:center;font-weight:700}
+.hopper{position:absolute;left:30px;top:-14px;width:40px;height:36px;animation:bob 1.6s ease-in-out infinite;pointer-events:none}
+.pt{display:flex;flex-direction:column;min-width:0;flex:1}
+.pt small{font-size:14px;color:var(--muted);font-weight:700}
+.pt b{font-family:var(--f-display);font-size:19px;line-height:1.15}
+.pt .sub{font-size:15px;color:var(--muted)}
+.stars{color:var(--sun-deep);letter-spacing:2px;font-size:17px}
+.mini{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* chapters */
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.cht{background:var(--card);border-radius:var(--r);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px;display:flex;flex-direction:column;gap:8px;border-top:8px solid var(--hue)}
+.chh{display:flex;gap:10px;align-items:center}
+.ci{font-size:34px;line-height:1}
+.chh small{display:block;font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.chh b{font-family:var(--f-display);font-size:19px;line-height:1.15}
+.chs{font-size:15px;color:var(--muted)}
+.chb{display:flex;gap:6px;flex-wrap:wrap}
+.chb .btn{flex:1;padding:8px 4px;font-size:15px;white-space:nowrap}
+.extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:2px;min-height:110px;box-shadow:0 4px 0 var(--line)}
+.ex span{font-size:30px;line-height:1.1}
+.ex b{font-family:var(--f-display);font-size:18px;line-height:1.15}
+.ex small{font-size:14px;color:var(--muted)}
+.foot{margin-top:30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+
+/* learn */
+.qhead{display:flex;align-items:center;gap:10px}
+.qx{min-width:46px;min-height:46px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:18px;text-align:center}
+.qx.armed{background:var(--bad);color:#fff;border-color:var(--bad);padding:0 10px;font-size:15px}
+.ltitle{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.2}
+.lc{background:var(--card);border-radius:var(--r);padding:16px;border:1px solid var(--line);margin-top:12px;border-left:8px solid var(--hue,var(--leaf))}
+.lch{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.lch h3{font-size:24px;margin:0;flex:1}
+.le{font-size:36px;line-height:1}
+.lnum{font-size:14px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.lc p{margin:8px 0}
+.note{background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin-top:10px}
+.note.red{background:var(--bad-bg)}
+.eqbox{display:flex;flex-wrap:wrap;gap:6px;align-items:center;background:var(--leaf-soft);border-radius:12px;padding:10px;font-weight:700}
+.eqbox span{background:#fff;border-radius:8px;padding:2px 8px}
+.eqbox i{font-style:normal;color:var(--leaf-deep);font-size:15px}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:17px;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+table.t th{background:var(--pond);font-size:15px;white-space:nowrap}
+.dia{max-width:420px;margin:8px auto}
+.leafkey{columns:2;font-size:15px;margin:4px 0 0;padding-left:22px}
+.teethrow,.cycrow{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:center;margin-top:10px}
+figure{margin:0;text-align:center}
+figcaption{font-size:14px;font-weight:700}
+.arr{font-size:22px;color:var(--muted)}
+.emo{font-size:40px;line-height:1}
+.emo.big{font-size:84px}
+.dots{display:flex;gap:6px;justify-content:center;margin:12px 0 0}
+.dots i{width:9px;height:9px;border-radius:9px;background:var(--line)}
+.dots i.on{background:var(--ink)}
+
+/* quiz */
+.pbar{flex:1;height:12px;background:var(--pond2);border-radius:12px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--leaf);transition:width .3s}
+.combo{font-weight:800;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.qn{font-size:15px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.sec{margin:16px 0 6px;font-size:15px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;gap:10px;letter-spacing:.02em}
+.mk{background:var(--sun-soft);color:#6E4A00;border-radius:999px;padding:1px 9px;white-space:nowrap;align-self:flex-start}
+.qc{background:var(--card);border-radius:22px;padding:16px;border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.prompt{font-size:21px;font-weight:700;margin:0 0 10px;line-height:1.35}
+.prompt.sm{font-size:18px}
+.prompt.stmt{font-family:var(--f-hand);font-size:25px;font-weight:400}
+.sentence{line-height:2.1}
+.hint{font-size:15px;color:var(--muted);margin:-4px 0 10px}
+.pic{text-align:center;margin:4px 0 12px}
+.cap{font-weight:700;font-size:18px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts.one{grid-template-columns:1fr}
+.opt{min-height:58px;border-radius:16px;background:var(--pond);border:2px solid var(--line);font-size:19px;font-weight:700;padding:8px 12px;text-align:left;transition:transform .08s;line-height:1.25}
+.opt:active{transform:scale(.97)}
+.opt.spell{font-size:22px;letter-spacing:.02em;text-align:center}
+.opt.sent{font-weight:400;font-size:18px}
+.ol{color:var(--muted);font-weight:700}
+.opt.pick{background:var(--sel-bg);border-color:var(--sel)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad);color:#8A1F29}
+.opt.also{border-color:var(--ok);border-style:dashed}
+.opt.dim{opacity:.5}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tfb{text-align:center;font-size:22px}
+.fixbox{margin-top:14px;border-top:2px dashed var(--line);padding-top:10px}
+.glabel{font-size:15px;font-weight:700;color:var(--muted);margin:10px 0 6px}
+.pin{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--sun);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chp{min-height:50px;padding:8px 14px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:19px;font-weight:700}
+.chp.gone{visibility:hidden}
+.chp.bad{background:var(--bad-bg);border-color:var(--bad)}
+.slot{display:inline-flex;align-items:center;justify-content:center;min-width:96px;min-height:44px;padding:2px 12px;margin:0 4px;border-radius:12px;border:2px dashed #9FC2B5;background:var(--pond);font-weight:700;vertical-align:middle;line-height:1.2}
+.slot.filled{border-style:solid;border-color:var(--sel);background:var(--sel-bg)}
+.slot.sel{border-color:var(--sun-deep);background:var(--sun-soft)}
+.slot.ok{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.slot.bad{border-style:solid;border-color:var(--bad);background:var(--bad-bg)}
+.eqline{display:flex;flex-wrap:wrap;align-items:center;gap:8px;justify-content:center;font-size:18px}
+.eqline .term{background:var(--leaf-soft);border-radius:10px;padding:8px 10px;font-weight:700}
+.eqline .slot{margin:0}
+.arrow{display:inline-flex;flex-direction:column;align-items:center;font-size:26px;line-height:1;color:var(--leaf-deep)}
+.arrow small{font-size:13px;font-weight:700;color:var(--muted)}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mi{min-height:58px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:17px;font-weight:700;padding:6px 10px;text-align:center;line-height:1.2}
+.mi.r{background:#fff}
+.mi.sel{background:var(--sel-bg);border-color:var(--sel)}
+.mi.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.mi.bad{background:var(--bad-bg);border-color:var(--bad)}
+.tray{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--sun-soft);border-radius:16px;padding:12px;margin-bottom:12px;text-align:center}
+.tray small{font-size:14px;color:var(--muted);font-weight:700}
+.tray b{font-size:24px;font-family:var(--f-display)}
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.bk{border-radius:16px;border:2px solid var(--ink);background:#fff;padding:10px;min-height:92px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.bk b{font-family:var(--f-display);font-size:18px}
+.bk .in{display:flex;flex-wrap:wrap;gap:5px}
+.bk .in span{background:var(--ok-bg);border-radius:9px;padding:1px 8px;font-size:15px;font-weight:700}
+.bk .in span.miss{background:var(--bad-bg);outline:1px dashed var(--bad)}
+.bk.bad{border-color:var(--bad);background:var(--bad-bg)}
+.seq{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:8px;counter-reset:s}
+.seq li{flex:1 1 130px;display:flex;align-items:center;gap:8px;border:2px dashed #9FC2B5;border-radius:14px;padding:8px 10px;min-height:58px;background:var(--pond)}
+.seq li.f{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.seq li.cur{border-color:var(--sun-deep);background:var(--sun-soft)}
+.seq .n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none}
+.seq .st{font-weight:700}
+.seq .sp .emo{font-size:30px}
+.cycnote{margin-top:8px}
+.leafans{margin:10px 0 0;padding-left:24px;font-size:16px}
+.leafans li.ok{color:#0D5A37}
+.leafans li.bad{color:#8A1F29}
+.pulse{animation:pl 1s ease-in-out infinite;transform-origin:center;transform-box:fill-box}
+@keyframes pl{50%{opacity:.25}}
+.stepdone{border-radius:12px;padding:8px 10px;margin-bottom:8px;background:var(--ok-bg)}
+.stepdone.bad{background:var(--bad-bg)}
+.stepdone small{display:block;font-size:14px;color:var(--muted)}
+.nb{display:flex;gap:12px;align-items:center;background:repeating-linear-gradient(#fff 0 30px,#D6E4F0 30px 31px);border:1px solid var(--line);border-left:4px solid #E8A0A8;border-radius:12px;padding:12px 14px;font-family:var(--f-hand);font-size:21px}
+.pen{font-size:40px}
+.model{background:var(--leaf-soft);border-radius:12px;padding:10px 12px;margin:6px 0 0;line-height:1.5}
+.kw{font-size:16px;margin-top:10px}
+table.diff td{width:50%}
+
+/* feedback */
+.fb{margin-top:14px;border-radius:18px;padding:14px;border:2px solid var(--ok);background:var(--ok-bg)}
+.fb.bad{border-color:var(--bad);background:var(--bad-bg)}
+.fb .ft{font-family:var(--f-display);font-size:23px;font-weight:800;margin:0 0 4px}
+.fb .fa{font-size:18px;margin:6px 0}
+.fb .tip{font-size:17px;margin:6px 0}
+.bonus{font-size:15px;background:var(--sun);border-radius:999px;padding:2px 8px;vertical-align:middle}
+.slipnote{background:#fff;border:2px dashed var(--bad);border-radius:12px;padding:8px 10px;margin-top:8px;font-size:16px}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pop{animation:pp .3s}
+@keyframes pp{50%{transform:scale(1.08)}}
+
+/* results */
+.res{text-align:center}
+.rt{font-family:var(--f-display);font-size:22px;font-weight:700;margin:6px 0 0}
+.score{font-family:var(--f-display);font-size:58px;font-weight:800;line-height:1.05;margin:4px 0;font-variant-numeric:tabular-nums}
+.stars.big{font-size:44px;letter-spacing:6px;margin:0}
+.sub{color:var(--muted);margin:2px 0}
+.perfect{font-size:20px;font-weight:700}
+.wrongs{margin-top:16px;text-align:left}
+.wrongs h3{font-size:22px}
+.wr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:16px}
+.wr b{font-size:17px}
+.small .model{font-size:16px}
+.shaky{padding-left:20px;font-size:16px}
+.shaky li{margin:4px 0}
+
+.sync-row{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 24px;font-size:14px}
+.sync-row span{background:var(--card);color:var(--leaf-deep);font-weight:700;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.sync-row button{color:var(--muted);font-weight:700;font-size:14px;text-decoration:underline}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20;width:100%;height:100%}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;font-weight:700;z-index:30;max-width:90%;text-align:center}
+@media (max-width:440px){
+  body{font-size:17px}
+  .opts{grid-template-columns:1fr}
+  .prompt{font-size:19px}
+  .emo.big{font-size:70px}
+  .chip.xp{display:none}
+  .mi{font-size:15px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="top"><div class="topin" id="topin"></div></div>
+<main id="app"></main>
+<div class="sync-row" id="syncRow"><span id="syncCodeLabel"></span><button id="syncChangeBtn">Use a different code</button></div>
+<canvas id="fx"></canvas>
+<div class="toast" id="toast" hidden></div>
+<script>
+/* ================= CONTENT BANK =================
+   Source: MDIS Class IV General Science, Revision Assignment-I + Model Test Paper (2026-27).
+   Every answer audited against the marked booklet. Ids are stable (mistake bank keys).
+   slip = her real mistake from the booklet (shown after she answers). */
+
+var CH = [
+  {id:'c1', n:1, name:'Making of Food', short:'Leaf Kitchen', icon:'\u{1F331}', hue:'#2E9E5B'},
+  {id:'c2', n:2, name:'Adaptations in Plants', short:'Plant Homes', icon:'\u{1F335}', hue:'#B7791F'},
+  {id:'c3', n:3, name:'Reproduction in Animals', short:'Life Cycle Pond', icon:'\u{1F438}', hue:'#2C8FD0'},
+  {id:'c4', n:4, name:'Adaptations in Animals', short:'Animal Homes', icon:'\u{1F427}', hue:'#E0702A'},
+  {id:'c5', n:5, name:'Food and Health', short:'Healthy Plate', icon:'\u{1F957}', hue:'#D63F5E'},
+  {id:'c6', n:6, name:'Teeth and Digestion', short:'Tooth Town', icon:'\u{1F9B7}', hue:'#7A5AD6'}
+];
+
+/* ---------- learn cards (HTML) ---------- */
+var LEARN = {
+c1: [
+  {h:'Plants are food factories', b:'<p>Green plants make their own food, so they are called <b>producers</b>. Animals eat plants or other animals, so they are called <b>consumers</b>.</p><p>The <b>leaf</b> is the kitchen. Its green colour comes from <b>chlorophyll</b>.</p>', e:'\u{1F33F}\u{1F3ED}'},
+  {h:'The food recipe', b:'<div class="eqbox"><span>Carbon dioxide</span> + <span>Water</span> <i>→ sunlight + chlorophyll →</i> <span>Food</span> + <span>Oxygen</span></div><p>This is called <b>photosynthesis</b>. Roots take in water and minerals. The <b>stem carries</b> them to every part. Leaves take in carbon dioxide through tiny holes called <b>stomata</b>.</p><div class="note">No sunlight at night, so plants cannot make food at night.</div>', e:'☀️'},
+  {h:'Parts of a leaf', b:'<p><b>Leaf apex</b> = the tip. <b>Lamina</b> = the broad, flat part (leaf blade). <b>Midrib</b> = the main vein in the middle. <b>Side veins</b> branch out from it. <b>Petiole</b> = the stalk that joins the leaf blade to the stem.</p><p>In some leaves the blade is split into many small parts called <b>leaflets</b> (rose, neem).</p>', e:'\u{1F343}', dia:'leaf'},
+  {h:'Where is extra food stored?', b:'<p>Extra food is stored as <b>starch, oil and protein</b>. A drop of <b>iodine</b> turns starch blue-black.</p><table class="t"><tr><th>Leaves</th><td>cabbage, spinach, mint</td></tr><tr><th>Root</th><td>carrot, beetroot, radish</td></tr><tr><th>Stem</th><td>potato, ginger, sugarcane</td></tr><tr><th>Flower</th><td>cauliflower, broccoli</td></tr></table><div class="note red">Potato and ginger grow under the ground but they are <b>stems</b>, not roots!</div>', e:'\u{1F954}\u{1F955}'},
+  {h:'Special plants', b:'<p><b>Non-green plants</b> have no chlorophyll: mushroom, moulds, dodder. <b>Dodder</b> is a <b>parasitic</b> plant – it takes food from another plant.</p><p><b>Croton</b> has red leaves, but chlorophyll is hidden under the red colour, so it <b>can</b> make food. <b>Wolffia</b> is the world’s smallest plant.</p><p><b>Tendrils</b> are thread-like parts that coil around a support to help a plant climb. Fish die in a tank without water plants because the plants give <b>oxygen</b> to the water.</p>', e:'\u{1F344}'}
+],
+c2: [
+  {h:'Habitat and adaptation', b:'<p>The natural home of a plant is its <b>habitat</b>. Special features that help it live there are called <b>adaptations</b>.</p><p>Plants on land = <b>terrestrial</b> plants. Plants in water = <b>aquatic</b> plants.</p>', e:'\u{1F3DE}️'},
+  {h:'Desert plants', b:'<p><b>Cactus, kikar (babool)</b>. Leaves are changed into <b>spines</b> to save water. The thick, fleshy, green <b>stem</b> stores water and food and makes food.</p><p><b>Sunken stomata</b> reduce loss of water. <b>Very deep roots</b> go deep into the soil to absorb water.</p>', e:'\u{1F335}'},
+  {h:'Hills and cold places', b:'<p><b>Pine, deodar, fir</b>. They are <b>conical</b> (cone-shaped) so snow slides off. They have needle-like leaves and <b>cones instead of flowers</b>. <b>Conifers</b> are evergreen trees that bear cones.</p><p><b>Deciduous</b> trees shed their leaves in autumn or winter. <b>Evergreen</b> trees keep their leaves all year.</p>', e:'\u{1F332}'},
+  {h:'Coast and marsh', b:'<p><b>Coconut trees</b> grow in <b>coastal areas</b>. They have thick fleshy leaves that store water.</p><p><b>Mangroves</b> grow in marshy, salty water. The soil has little air, so they have <b>breathing roots</b> that grow above the ground. Marshy plants grow in clayey soil.</p>', e:'\u{1F334}'},
+  {h:'Water plants', b:'<p><b>Floating plants</b> have stems with <b>air pockets</b>, so they are light and float.</p><p><b>Submerged plants</b> (hydrilla, tapegrass) live fully under water. They have <b>no stomata</b> and breathe through their whole <b>body surface</b>.</p>', e:'\u{1F4A7}'},
+  {h:'Special plants', b:'<p><b>Insect-eating plants</b>: pitcher plant, Venus flytrap. <b>Saprophytes</b> (saprotrophs) like mushroom and bread mould get food from <b>dead and decaying</b> plants and animals. They are fungi, <b>not animals</b>.</p><p><b>Grass family</b>: bamboo, lemon grass, wheat, sugarcane. Paper was first made from a grass called <b>papyrus</b>.</p>', e:'\u{1F33E}'}
+],
+c3: [
+  {h:'Reproduction', b:'<p><b>Reproduction</b> is the process by which animals produce young ones like themselves. The time an animal lives is its <b>life span</b>.</p><p>Some animals give birth to young ones. Some lay eggs: birds, fish, frogs, snakes, insects.</p>', e:'\u{1F423}'},
+  {h:'Mammals', b:'<p>Most mammals <b>give birth</b> to young ones, <b>feed them milk</b> and have <b>hair or fur</b>.</p><p>Aquatic mammals: <b>whale, dolphin</b>. A <b>bat</b> is a mammal that can fly – not a bird! Egg-laying mammals: <b>duck-billed platypus, spiny anteater</b>.</p><p>Biggest land mammal: <b>African elephant</b>. Smallest mammal: <b>bumblebee bat</b>.</p>', e:'\u{1F40B}\u{1F987}'},
+  {h:'Inside an egg', b:'<p><b>Shell</b> outside. <b>Albumen</b> = the white: mainly water and protein. <b>Yolk</b> = the yellow: mainly fat and protein. Both are food for the growing chick. The <b>embryo</b> grows into the baby.</p><p>Birds show <b>parental care</b>: they build nests, sit on eggs to keep them warm, and feed and protect the chicks.</p><p>A fish lays hundreds of eggs because many get eaten. Baby fish = <b>fry</b> (fingerlings).</p>', e:'\u{1F95A}'},
+  {h:'Frog life cycle', b:'<p><b>Eggs (spawn)</b> → <b>tadpole</b> → <b>young frog</b> → <b>adult frog</b>.</p><p>The cluster of frog eggs is called <b>spawn</b>. The eggs are covered with jelly. This big change in body shape is called <b>metamorphosis</b>.</p>', e:'\u{1F438}', cyc:'frog'},
+  {h:'Butterfly and cockroach', b:'<p>Butterfly: <b>eggs → caterpillar (larva) → pupa (chrysalis) → butterfly</b>. The caterpillar covers itself in a <b>cocoon</b>. The <b>pupa</b> is the <b>resting stage</b>.</p><p>Cockroach and grasshopper have <b>3 stages</b>: eggs → <b>nymph</b> → adult. A nymph has no wings. It sheds its skin many times – this is <b>moulting</b>.</p>', e:'\u{1F98B}', cyc:'butterfly'}
+],
+c4: [
+  {h:'Where animals live', b:'<table class="t"><tr><th>Terrestrial</th><td>on land: lion, camel, lizard</td></tr><tr><th>Aquatic</th><td>in water: fish, whale, jellyfish</td></tr><tr><th>Aerial</th><td>mostly flying: eagle, sparrow</td></tr><tr><th>Arboreal</th><td>on trees: koala, monkey, squirrel</td></tr><tr><th>Amphibians</th><td>land and water: frog, toad</td></tr></table><p>Terrestrial animals have well developed sense organs to sense changes around them.</p>', e:'\u{1F428}'},
+  {h:'Water animals', b:'<p><b>Streamlined body</b> (fish <b>and</b> birds), <b>fins and tail</b> to swim and change direction. Ducks have <b>webbed feet</b>.</p><p>Whale and dolphin breathe through <b>blowholes</b>. Penguin has a thick fat layer called <b>blubber</b>. Jellyfish sting with <b>tentacles</b>.</p>', e:'\u{1F42C}'},
+  {h:'Body parts that help', b:'<p><b>Ostrich</b>: long, strong legs for running. <b>Elephant, camel</b>: thick skin protects from the heat of the sun. <b>Tortoise, snail</b>: hard shell protects from enemies. <b>Frog, grasshopper</b>: long, strong hind limbs to hop and jump.</p><p><b>Camouflage</b> = blending with the surroundings to hide.</p>', e:'\u{1F422}'},
+  {h:'Food habits', b:'<p><b>Herbivores</b> eat plants (cow, deer). <b>Carnivores</b> eat flesh (lion, tiger) and have sharp <b>canines</b>. Carnivorous birds have sharp claws called <b>talons</b> and a hooked beak. <b>Omnivores</b> eat both (crow, bear).</p><p><b>Scavengers</b> eat dead animals (vulture, hyena). <b>Parasites</b> live on or inside another living animal and get food from it (lice, roundworm, mosquito).</p>', e:'\u{1F981}'},
+  {h:'Sleeping seasons', b:'<p>Winter sleep = <b>hibernation</b>. Summer sleep = <b>aestivation</b>.</p><p>Birds: forelimbs are changed into <b>wings</b>.</p>', e:'\u{1F4A4}'}
+],
+c5: [
+  {h:'Nutrients', b:'<table class="t"><tr><th>Carbohydrates</th><td>energy: rice, potato, roti, sugar. Two types: <b>sugar and starch</b></td></tr><tr><th>Fats</th><td><b>more</b> energy than carbohydrates: butter, ghee, oil, nuts</td></tr><tr><th>Proteins</th><td>body-building, growth and repair: dal, egg, fish, paneer</td></tr><tr><th>Vitamins and minerals</th><td>protective foods: fruits and vegetables</td></tr></table><p>Nails and hair are made of a protein called <b>keratin</b>. Potato and rice contain <b>starch</b>.</p>', e:'\u{1F35A}'},
+  {h:'Vitamins', b:'<p><b>Vitamin A</b> keeps eyes and skin healthy. <b>Vitamin D</b> is made by our body in <b>sunlight</b>. <b>Vitamin C</b> keeps gums healthy (amla, orange).</p><div class="note red">Sunshine = Vitamin <b>D</b>, not A!</div>', e:'\u{1F31E}'},
+  {h:'Minerals', b:'<p><b>Calcium</b> helps make bones, teeth and blood. <b>Iron</b> forms <b>haemoglobin</b> in blood (not sodium). <b>Iodised salt</b> contains <b>iodine and sodium chloride</b>. <b>Potassium</b> helps our muscles and nerves work properly.</p>', e:'\u{1F9C2}'},
+  {h:'Healthy habits', b:'<p>A <b>balanced diet</b> has all nutrients in the right amounts – not lots of fat and sweets. Healthiest lunch: roti, dal, vegetables and fruit.</p><p>Wash vegetables <b>before</b> cutting. <b>Overcooking</b> destroys nutrients. Water fit to drink = <b>potable</b> water. Good posture prevents backache. Rest repairs the body.</p>', e:'\u{1F96A}'},
+  {h:'Cooking and keeping food', b:'<p>Cooking: <b>boiling</b> (rice, milk), <b>steaming</b> (idli, dhokla), <b>frying</b> (puri, pakora), <b>baking</b> (cake, biscuits), <b>roasting</b> (peanuts, corn).</p><p>Preserving: <b>drying, refrigeration, canning, pickling</b> (salt and oil), <b>adding sugar</b> (jams and jellies).</p>', e:'\u{1F373}'}
+],
+c6: [
+  {h:'Two sets of teeth', b:'<p><b>Milk teeth</b> (temporary teeth): <b>20</b>. They fall off. <b>Permanent teeth</b>: <b>32</b>. The last pair to come, much later, are the <b>wisdom teeth</b>.</p>', e:'\u{1F9B7}'},
+  {h:'Four kinds of teeth', b:'<table class="t"><tr><th>Incisors</th><td>front, flat and sharp: bite and cut. Adults have <b>8</b> (4 up + 4 down)</td></tr><tr><th>Canines</th><td>pointed: tear food</td></tr><tr><th>Premolars</th><td>two bumps (cusps): chew and grind</td></tr><tr><th>Molars</th><td>big, at the back: crush and grind</td></tr></table>', e:'\u{1F9B7}', dia:'teeth'},
+  {h:'Inside a tooth', b:'<p><b>Enamel</b> = the white, hard outer covering. <b>Dentine</b> is under it. <b>Pulp</b> is the soft inside with nerves and blood vessels.</p><p><b>Plaque</b> = a layer of microbes on teeth. Germs eat the sugar left on teeth, make acid, and the acid eats the enamel → a hole called a <b>cavity</b>. Floss removes food stuck between teeth.</p>', e:'\u{1F9A0}'},
+  {h:'Journey of food', b:'<p><b>Mouth</b> (teeth chew; <b>3 pairs of salivary glands</b> make saliva to break down food) → <b>bolus</b> (soft lump we swallow) → <b>food pipe</b> (muscles push it in waves = <b>peristalsis</b>) → <b>stomach</b> → <b>small intestine</b> (longest part; digested food goes into the blood here) → <b>large intestine</b>.</p>', e:'\u{1F34E}'},
+  {h:'Microbes and habits', b:'<p>Harmful microbes = <b>germs</b>. Useful ones: <b>yeast</b> makes bread and cake; some microbes make <b>antibiotics</b> (medicines).</p><p>Good habits: eat slowly and chew well, do not overeat, wash hands, rinse your mouth after eating.</p>', e:'\u{1F35E}'}
+]
+};
+
+/* ---------- MCQ (incl. one-word, picture, tooth, habitat) ----------
+   fx:1 = keep option order and show a) b) c) d) (options refer to each other) */
+var MCQ = {
+c1: [
+  {id:'c1m1', q:'_____ carries water and minerals to all the parts of a plant.', o:['Leaf','Stem','Root','Flower'], a:'Stem', fx:1, tip:'The root ABSORBS water from the soil. The STEM CARRIES it to all parts.'},
+  {id:'c1m2', q:'_____ is a parasitic plant.', o:['Wolffia','Croton','Dodder','Mango'], a:'Dodder', fx:1, tip:'Dodder has no chlorophyll. It wraps around another plant and takes food from it.'},
+  {id:'c1m3', q:'The exchange of gases takes place through _____.', o:['stomata','petiole','leaf apex','midrib'], a:'stomata', tip:'Stomata are tiny holes on the leaf. Carbon dioxide goes in, oxygen comes out.'},
+  {id:'c1m4', q:'The broad and flat part of the leaf is called _____.', o:['lamina','vein','apex','midrib'], a:'lamina', fx:1, tip:'Lamina = leaf blade, the broad flat green part.'},
+  {id:'c1m5', q:'Which part of a plant is its food factory?', o:['Leaf','Root','Stem','Flower'], a:'Leaf', tip:'Leaves make food using sunlight.'},
+  {id:'c1m6', q:'Leaves are green because of _____.', o:['chlorophyll','starch','stomata','oxygen'], a:'chlorophyll', tip:'Chlorophyll is the green colouring that traps sunlight.'},
+  {id:'c1m7', q:'Which gas do plants take in to make food?', o:['Carbon dioxide','Oxygen','Nitrogen','Hydrogen'], a:'Carbon dioxide', tip:'Plants take in carbon dioxide and give out oxygen.'},
+  {id:'c1m8', q:'Which gas do plants give out while making food?', o:['Oxygen','Carbon dioxide','Nitrogen','Hydrogen'], a:'Oxygen', tip:'Plants give out oxygen. We breathe it in!'},
+  {id:'c1m9', q:'Which of these is used to test starch?', o:['Iodine','Salt','Sugar','Milk'], a:'Iodine', tip:'A drop of iodine turns starch blue-black.'},
+  {id:'c1m10', q:'The world’s smallest plant is _____.', o:['Wolffia','Dodder','Croton','Mushroom'], a:'Wolffia', tip:'Wolffia is a tiny floating plant – the smallest in the world.'},
+  {id:'c1m11', q:'Croton leaves are red. Can croton make its own food?', o:['Yes – it has chlorophyll hidden under the red colour','No – red plants cannot make food','No – it takes food from other plants','Yes – but only at night'], a:'Yes – it has chlorophyll hidden under the red colour', tip:'The green chlorophyll is hidden under the red colour.'},
+  {id:'c1m12', q:'Which of these is a non-green plant?', o:['Mushroom','Mango','Croton','Rose'], a:'Mushroom', tip:'Mushroom has no chlorophyll. Croton is red but still has chlorophyll.'},
+  {id:'c1m13', q:'Green plants are called _____.', o:['producers','consumers','parasites','scavengers'], a:'producers', tip:'Plants PRODUCE food = producers. Animals CONSUME (eat) = consumers.'},
+  {id:'c1m14', q:'Which part joins the leaf blade to the stem?', o:['Petiole','Apex','Midrib','Lamina'], a:'Petiole', tip:'Petiole = the stalk of the leaf.'}
+],
+c2: [
+  {id:'c2m1', q:'Stomata are absent in the leaves of _____.', o:['tapegrass','water lily','lotus','water lettuce'], a:'tapegrass', fx:1, tip:'Tapegrass lives fully under water (submerged), so it has no stomata.'},
+  {id:'c2m2', q:'_____ plants breathe through their body surface.', o:['Floating','Fixed','Submerged','Desert'], a:'Submerged', fx:1, tip:'Submerged plants have no stomata, so they breathe through their whole body surface.'},
+  {id:'c2m3', q:'Breathing roots are present in _____.', o:['desert plants','mangroves','plants of hilly areas','none of these'], a:'mangroves', fx:1, tip:'Mangrove soil is full of water with little air, so roots grow up to breathe.'},
+  {id:'c2m4', q:'Paper was first made from a grass called _____.', o:['lemon grass','bamboo','papyrus','sugarcane'], a:'papyrus', fx:1, tip:'Papyrus – that is where the word "paper" comes from!'},
+  {id:'c2m5', q:'_____ trees shed their leaves in autumn or winter season.', o:['Mangrove','Deciduous','Evergreen','All of these'], a:'Deciduous', fx:1, tip:'Deciduous trees shed leaves. Evergreen trees keep them all year.'},
+  {id:'c2m6', q:'_____ are evergreen trees that bear cones.', o:['Conifers','Mangroves','Coconut trees','All of these'], a:'Conifers', fx:1, tip:'Conifers = cone-bearing trees like pine.'},
+  {id:'c2m7', q:'In a cactus, the leaves are changed into _____.', o:['spines','tendrils','flowers','roots'], a:'spines', tip:'Leaves become spines to save water. The stem does the food-making.'},
+  {id:'c2m8', q:'Hydrilla is a _____ plant.', o:['submerged','floating','desert','coastal'], a:'submerged', tip:'Hydrilla lives fully under water.'},
+  {id:'c2m9', q:'Which plant traps insects?', o:['Pitcher plant','Cactus','Lotus','Pine'], a:'Pitcher plant', tip:'Pitcher plant and Venus flytrap trap insects.'},
+  {id:'c2m10', q:'Plants in hilly areas are _____ in shape.', o:['conical','round','flat','square'], a:'conical', tip:'Cone shape lets snow slide off.'},
+  {id:'c2m11', q:'Floating plants have _____ in their stems.', o:['air pockets','spines','sunken stomata','breathing roots'], a:'air pockets', tip:'Air pockets make them light so they float.'},
+  {id:'c2m12', q:'The natural home of a plant is called its _____.', o:['habitat','nest','stomata','cone'], a:'habitat', tip:'Habitat = natural home.'},
+  {id:'c2m13', q:'Coconut trees are found in _____ areas.', o:['coastal','desert','hilly','snowy'], a:'coastal', tip:'Coconut trees grow near the sea (coastal areas).'},
+  {id:'c2m14', q:'Mushroom and bread mould get food from dead and decaying things. They are called _____.', o:['saprophytes','parasites','producers','conifers'], a:'saprophytes', tip:'Saprophytes (saprotrophs) feed on dead and decaying things.'}
+],
+c3: [
+  {id:'c3m1', q:'_____ undergoes moulting several times.', o:['Dolphin','Human being','Cockroach','All of these'], a:'Cockroach', fx:1, tip:'A cockroach nymph sheds its skin many times. This is moulting.'},
+  {id:'c3m2', q:'_____ undergoes metamorphosis.', o:['Fish','Hen','Frog','Snake'], a:'Frog', fx:1, tip:'Frog: egg → tadpole → frog. Big change in shape = metamorphosis. (Your sheet printed "metamorphism" – the right word is metamorphosis.)'},
+  {id:'c3m3', q:'Which part of an egg grows into a baby?', o:['Embryo','Yolk','Albumen','Egg shell'], a:'Embryo', fx:1, tip:'The embryo grows into the baby. Yolk and albumen are its food.'},
+  {id:'c3m4', q:'The larva of a butterfly is called _____.', o:['nymph','caterpillar','pupa','chrysalis'], a:'caterpillar', fx:1, tip:'Larva = caterpillar. Pupa = chrysalis.'},
+  {id:'c3m5', q:'The smallest mammal is _____.', o:['spider','bumblebee bat','sloth','fly'], a:'bumblebee bat', fx:1, tip:'Bumblebee bat. (A spider and a fly are not mammals at all.)'},
+  {id:'c3m6', q:'A bat is a mammal that can _____.', o:['swim','fly','crawl','slither'], a:'fly', fx:1, tip:'A bat flies, but it is a mammal, not a bird.'},
+  {id:'c3m7', q:'Which of the following is a mammal?', o:['Fish','Octopus','Whale','Frog'], a:'Whale', fx:1, tip:'A whale gives birth and feeds milk to its baby.'},
+  {id:'c3m8', q:'Which of these mammals lays eggs?', o:['Duck-billed platypus','Dolphin','Bat','Whale'], a:'Duck-billed platypus', tip:'Platypus and spiny anteater are egg-laying mammals.'},
+  {id:'c3m9', q:'The resting stage in the life cycle of a butterfly is the _____.', o:['pupa','egg','caterpillar','adult'], a:'pupa', tip:'The pupa (chrysalis) rests while it changes into a butterfly.'},
+  {id:'c3m10', q:'The young one of a cockroach is called a _____.', o:['nymph','tadpole','caterpillar','fry'], a:'nymph', tip:'Cockroach: egg → nymph → adult.'},
+  {id:'c3m11', q:'The young one of a frog is called a _____.', o:['tadpole','nymph','caterpillar','fry'], a:'tadpole', tip:'Frog: spawn → tadpole → young frog → adult frog.'},
+  {id:'c3m12', q:'The white part of an egg is called _____.', o:['albumen','yolk','embryo','shell'], a:'albumen', tip:'White = albumen. Yellow = yolk.'},
+  {id:'c3m13', q:'The biggest mammal on land is the _____.', o:['African elephant','giraffe','blue whale','rhinoceros'], a:'African elephant', tip:'The blue whale is bigger, but it lives in the sea, not on land.'},
+  {id:'c3m14', q:'How many stages are there in the life cycle of a butterfly?', o:['4','3','2','5'], a:'4', tip:'Eggs → caterpillar → pupa → butterfly = 4 stages.'},
+  {id:'c3p1', q:'Name this stage in the life cycle of a butterfly.', pic:'\u{1F41B}', o:['Caterpillar','Pupa','Egg','Butterfly'], a:'Caterpillar', tip:'Caterpillar = larva. It eats leaves all day.'},
+  {id:'c3p2', q:'Name this stage in the life cycle of a butterfly.', svg:'chrysalis', o:['Pupa (chrysalis)','Caterpillar','Egg','Nymph'], a:'Pupa (chrysalis)', tip:'The pupa hangs still – the resting stage.'},
+  {id:'c3p3', q:'Name this stage in the life cycle of a frog.', svg:'tadpole', o:['Tadpole','Spawn','Young frog','Adult frog'], a:'Tadpole', tip:'Tadpole: big head, long tail, lives in water.'},
+  {id:'c3p4', q:'Name this stage in the life cycle of a frog.', svg:'spawn', o:['Spawn (eggs)','Tadpole','Young frog','Adult frog'], a:'Spawn (eggs)', tip:'Spawn = cluster of frog eggs covered with jelly.'}
+],
+c4: [
+  {id:'c4m1', q:'Penguin has a thick layer of fat under its skin called _____.', o:['spine','shell','sucker','blubber'], a:'blubber', fx:1, tip:'Blubber keeps the penguin warm.'},
+  {id:'c4m2', q:'Which of the following has long legs for running?', o:['Giraffe','Ostrich','Penguin','Snake'], a:'Ostrich', fx:1, slip:'Last time you picked Giraffe here. When Ostrich is in the list, pick OSTRICH.', tip:'Ostrich has long, strong legs for running.'},
+  {id:'c4m3', q:'Which of the following has long legs for running?', o:['Giraffe','Sparrow','Penguin','Snake'], a:'Giraffe', fx:1, tip:'No ostrich in this list, so the answer is Giraffe.'},
+  {id:'c4m4', q:'Which one has a hard shell to protect itself from enemies?', o:['\u{1F422} Tortoise','\u{1F40D} Snake','\u{1F426} Bird','\u{1F41F} Fish'], a:'\u{1F422} Tortoise', fx:1, tip:'Tortoise hides its soft body inside its hard shell.'},
+  {id:'c4m5', q:'Which of the following animals have a streamlined body shape?', o:['Fish','Lion','Bird','Both a and c'], a:'Both a and c', fx:1, slip:'Last time you picked only Fish. BOTH fish and birds are streamlined.', tip:'Fish move through water, birds through air – both are streamlined.'},
+  {id:'c4m6', q:'Which of the following is an arboreal animal?', o:['duck','koala','tiger','frog'], a:'koala', fx:1, tip:'Arboreal = lives on trees.'},
+  {id:'c4m7', q:'Animals that live both on land and in water are called _____.', o:['amphibians','aerial','arboreal','terrestrial'], a:'amphibians', tip:'Frog and toad are amphibians.'},
+  {id:'c4m8', q:'Whales and dolphins breathe through _____.', o:['blowholes','gills','tentacles','fins'], a:'blowholes', tip:'They come up to the surface to breathe through blowholes.'},
+  {id:'c4m9', q:'Jelly fish sting their enemies with their _____.', o:['tentacles','fins','claws','tail'], a:'tentacles', tip:'Tentacles sting.'},
+  {id:'c4m10', q:'Ducks have _____ feet to help them swim.', o:['webbed','hoofed','clawed','hairy'], a:'webbed', tip:'Webbed feet work like paddles.'},
+  {id:'c4m11', q:'Carnivorous birds have sharp claws called _____.', o:['talons','canines','tentacles','fins'], a:'talons', tip:'Talons + hooked beak to catch and tear food.'},
+  {id:'c4m12', q:'Which of these animals is a scavenger?', o:['Vulture','Cow','Koala','Butterfly'], a:'Vulture', tip:'Scavengers eat dead animals: vulture, hyena.'},
+  {id:'c4m13', q:'Which of these animals is an omnivore?', o:['Crow','Cow','Lion','Deer'], a:'Crow', tip:'Omnivores eat plants and animals: crow, bear.'},
+  {id:'c4m14', q:'Which of these is a parasite?', o:['Mosquito','Vulture','Cow','Koala'], a:'Mosquito', tip:'Parasites get food from a living animal: mosquito, lice.'},
+  {id:'c4o1', one:1, q:'Animals that eat both plants and animals', o:['Omnivores','Herbivores','Carnivores','Scavengers'], a:'Omnivores', tip:'Omni = all.'},
+  {id:'c4o2', one:1, q:'Animals in which forelimbs are modified into wings', o:['Birds','Fish','Reptiles','Amphibians'], a:'Birds', tip:'A bird’s front limbs are its wings.'},
+  {id:'c4o3', one:1, q:'Another name for summer sleep', o:['Aestivation','Hibernation','Migration','Camouflage'], a:'Aestivation', tip:'Summer = aestivation. Winter = hibernation.'},
+  {id:'c4o4', one:1, q:'Animals that live on land', o:['Terrestrial','Aquatic','Aerial','Arboreal'], a:'Terrestrial', tip:'Terra = land.'},
+  {id:'c4o5', one:1, q:'Winter sleep is called', o:['Hibernation','Aestivation','Moulting','Camouflage'], a:'Hibernation', tip:'Winter = hibernation.'},
+  {id:'c4o6', one:1, q:'Animals that live on trees', o:['Arboreal','Aerial','Aquatic','Terrestrial'], a:'Arboreal', tip:'Arboreal: koala, monkey, squirrel.'},
+  {id:'c4o7', one:1, q:'Animals that live in water', o:['Aquatic','Terrestrial','Aerial','Arboreal'], a:'Aquatic', tip:'Aqua = water.'},
+  {id:'c4o8', one:1, q:'Animals that eat only plants', o:['Herbivores','Carnivores','Omnivores','Parasites'], a:'Herbivores', tip:'Herbivores: cow, deer, goat.'},
+  {id:'c4o9', one:1, q:'Animals that eat only the flesh of other animals', o:['Carnivores','Herbivores','Omnivores','Producers'], a:'Carnivores', tip:'Carnivores: lion, tiger.'},
+  {id:'c4o10', one:1, q:'Hiding by blending with the surroundings', o:['Camouflage','Hibernation','Aestivation','Migration'], a:'Camouflage', tip:'Camouflage helps animals hide.'}
+],
+c5: [
+  {id:'c5m1', q:'Which nutrient gives us energy?', o:['Carbohydrates','Vitamins','Minerals','Protein'], a:'Carbohydrates', fx:1, tip:'Carbohydrates = energy foods: rice, roti, potato.'},
+  {id:'c5m2', q:'Which lunch box is the healthiest?', o:['Chips and chocolate','Roti, dal, vegetables and fruit','Cake and juice','Pizza and soft drink'], a:'Roti, dal, vegetables and fruit', fx:1, tip:'It has all the nutrients – a balanced meal.'},
+  {id:'c5m3', q:'_____ is produced when exposed to sunlight.', o:['Vitamin A','Vitamin K','Vitamin D','Vitamin C'], a:'Vitamin D', fx:1, slip:'Last time you first ticked Vitamin A. Sunshine = Vitamin D.', tip:'Our skin makes Vitamin D in sunlight.'},
+  {id:'c5m4', q:'Which of the following food items contain starch?', o:['Jam','Potato','Rice','Both b and c'], a:'Both b and c', fx:1, tip:'Potato AND rice both contain starch.'},
+  {id:'c5m5', q:'Nails and hair are made of a protein called _____.', o:['keratin','calcium','iron','iodine'], a:'keratin', tip:'Keratin is a protein.'},
+  {id:'c5m6', q:'Which mineral forms haemoglobin in our blood?', o:['Iron','Sodium','Calcium','Iodine'], a:'Iron', tip:'Iron forms haemoglobin. NOT sodium.'},
+  {id:'c5m7', q:'Vitamin A keeps our _____ healthy.', o:['eyes and skin','gums','muscles','blood'], a:'eyes and skin', tip:'Vitamin A = eyes and skin (carrot, papaya).'},
+  {id:'c5m8', q:'Which of these gives us MORE energy than carbohydrates?', o:['Fats','Minerals','Vitamins','Water'], a:'Fats', tip:'Fats give more energy than carbohydrates.'},
+  {id:'c5m9', q:'Idli and dhokla are cooked by _____.', o:['steaming','frying','baking','roasting'], a:'steaming', tip:'Steam cooks idli and dhokla.'},
+  {id:'c5m10', q:'Cakes and biscuits are cooked by _____.', o:['baking','steaming','boiling','frying'], a:'baking', tip:'Baked in an oven.'},
+  {id:'c5m11', q:'Jams and jellies keep fruits from going bad by adding _____.', o:['sugar','salt','water','ice'], a:'sugar', tip:'Jams and jellies = sugar. Pickles = salt and oil.'},
+  {id:'c5m12', q:'Which nutrient helps our body to grow and repair?', o:['Proteins','Fats','Carbohydrates','Water'], a:'Proteins', tip:'Proteins are body-building foods.'},
+  {id:'c5m13', q:'Water that is fit to drink is called _____ water.', o:['potable','salty','muddy','polluted'], a:'potable', tip:'Potable = safe to drink.'},
+  {id:'c5m14', q:'Which mineral do we get from iodised salt?', o:['Iodine','Iron','Calcium','Potassium'], a:'Iodine', tip:'Iodised salt = iodine + sodium chloride.'}
+],
+c6: [
+  {id:'c6m1', q:'What are milk teeth also called?', o:['Temporary teeth','Permanent teeth','Wisdom teeth','None of these'], a:'Temporary teeth', fx:1, tip:'Milk teeth fall off, so they are temporary.'},
+  {id:'c6m2', q:'How many incisors does an adult have in total?', o:['4','6','8','10'], a:'8', fx:1, slip:'In the model paper you wrote "four front teeth". It is 4 on top + 4 at the bottom = 8.', tip:'4 upper + 4 lower = 8 incisors.'},
+  {id:'c6m3', q:'The digested food is absorbed by blood in the _____.', o:['heart','lungs','stomach','small intestine'], a:'small intestine', fx:1, slip:'Your tick was on "stomach". The answer is SMALL INTESTINE (the sheet had a misprint).', tip:'Digested food passes into the blood in the small intestine.'},
+  {id:'c6m4', q:'Saliva helps to _____.', o:['break down food','make teeth stronger','pump blood','breathe'], a:'break down food', fx:1, tip:'Saliva softens food and starts breaking it down.'},
+  {id:'c6m5', q:'Which part of the tooth is the outer white covering?', o:['Dentine','Pulp','Enamel','Root'], a:'Enamel', fx:1, tip:'Enamel is the hardest part of the body.'},
+  {id:'c6m6', q:'How many milk teeth do we have?', o:['20','32','28','12'], a:'20', tip:'20 milk teeth, 32 permanent teeth.'},
+  {id:'c6m7', q:'How many permanent teeth does an adult have?', o:['32','20','28','16'], a:'32', tip:'32 permanent teeth, including 4 wisdom teeth.'},
+  {id:'c6m8', q:'Which teeth tear food?', o:['Canines','Incisors','Molars','Premolars'], a:'Canines', tip:'Canines are pointed for tearing.'},
+  {id:'c6m9', q:'Which teeth bite and cut food?', o:['Incisors','Canines','Molars','Premolars'], a:'Incisors', tip:'Incisors are the flat front teeth.'},
+  {id:'c6m10', q:'Which teeth crush and grind food?', o:['Molars','Incisors','Canines','Milk teeth'], a:'Molars', tip:'Molars are the big back teeth.'},
+  {id:'c6m11', q:'The longest part of the digestive system is the _____.', o:['small intestine','large intestine','food pipe','stomach'], a:'small intestine', tip:'"Small" because it is thin – but it is the longest!'},
+  {id:'c6m12', q:'Which microbe is used to make bread and cake?', o:['Yeast','Germs','Plaque','Saliva'], a:'Yeast', tip:'Yeast makes dough rise.'},
+  {id:'c6m13', q:'The soft inner part of a tooth with nerves and blood vessels is the _____.', o:['pulp','enamel','crown','plaque'], a:'pulp', tip:'Enamel outside, dentine next, pulp inside.'},
+  {id:'c6i1', q:'Identify this type of tooth.', svg:'incisor', o:['Incisor','Canine','Premolar','Molar'], a:'Incisor', fx:1, tip:'Flat, chisel-like edge for cutting = incisor.'},
+  {id:'c6i2', q:'Identify this type of tooth.', svg:'canine', o:['Incisor','Canine','Premolar','Molar'], a:'Canine', fx:1, tip:'One sharp point and one long root = canine.'},
+  {id:'c6i3', q:'Identify this type of tooth.', svg:'premolar', o:['Incisor','Canine','Premolar','Molar'], a:'Premolar', fx:1, tip:'Two bumps (cusps) on top = premolar.'},
+  {id:'c6i4', q:'Identify this type of tooth.', svg:'molar', o:['Incisor','Canine','Premolar','Molar'], a:'Molar', fx:1, tip:'Big and wide with many bumps = molar.'}
+]
+};
+
+/* habitat pictures (Model Q5 iii) - options fixed */
+var HAB_O = ['Terrestrial','Aquatic','Aerial','Arboreal'];
+var HABITAT = [
+  {id:'c4h1', pic:'\u{1F428}', cap:'Koala', a:'Arboreal'},
+  {id:'c4h2', pic:'\u{1F98E}', cap:'Lizard', a:'Terrestrial'},
+  {id:'c4h3', pic:'\u{1F42C}', cap:'Dolphin', a:'Aquatic'},
+  {id:'c4h4', pic:'\u{1F985}', cap:'Eagle', a:'Aerial'},
+  {id:'c4h5', pic:'\u{1F412}', cap:'Monkey', a:'Arboreal'},
+  {id:'c4h6', pic:'\u{1F42B}', cap:'Camel', a:'Terrestrial'},
+  {id:'c4h7', pic:'\u{1F420}', cap:'Fish', a:'Aquatic'},
+  {id:'c4h8', pic:'\u{1F43F}️', cap:'Squirrel', a:'Arboreal'},
+  {id:'c4h9', pic:'\u{1F981}', cap:'Lion', a:'Terrestrial'}
+];
+
+/* ---------- Fill in the blanks ----------
+   a: one array per blank, first item is what the chip shows; any:1 = blanks in any order */
+var FILL = {
+c1: [
+  {id:'c1f1', q:'In plants, extra food is stored in the form of oil, ___ and ___.', a:[['starch'],['protein']], any:1, bank:['chlorophyll','oxygen','water']},
+  {id:'c1f2', q:'___ is a non-green plant.', a:[['Mushroom']], bank:['Croton','Mango','Cactus']},
+  {id:'c1f3', q:'Green plants are called ___ and animals are called ___.', a:[['producers'],['consumers']], bank:['parasites','scavengers']},
+  {id:'c1f4', q:'Plants without chlorophyll are called ___ plants.', a:[['non-green']], bank:['green','desert','water']},
+  {id:'c1f5', q:'___ is the world’s smallest plant.', a:[['Wolffia']], bank:['Dodder','Croton','Papyrus']},
+  {id:'c1f6', q:'Tiny holes on a leaf are called ___.', a:[['stomata']], bank:['veins','petiole','lamina']},
+  {id:'c1f7', q:'Plants take in ___ and give out ___ while making food.', a:[['carbon dioxide'],['oxygen']], bank:['nitrogen','hydrogen']},
+  {id:'c1f8', q:'Animals breathe out ___, which plants use to make food.', a:[['carbon dioxide']], bank:['oxygen','nitrogen','hydrogen']},
+  {id:'c1f9', q:'Thin, thread-like parts that help a plant climb are called ___.', a:[['tendrils']], bank:['roots','spines','stomata']}
+],
+c2: [
+  {id:'c2f1', q:'The desert plants have ___ stomata.', a:[['sunken']], bank:['open','floating','many']},
+  {id:'c2f2', q:'Pine trees have ___ instead of flowers.', a:[['cones']], bank:['spines','tendrils','leaflets']},
+  {id:'c2f3', q:'Plants that grow on land are called ___ plants.', a:[['terrestrial']], bank:['aquatic','aerial','arboreal']},
+  {id:'c2f4', q:'___ get their food from dead plants and animals.', a:[['Saprophytes']], bank:['Parasites','Producers','Conifers']},
+  {id:'c2f5', q:'The natural home of a plant is called its ___.', a:[['habitat']], bank:['nest','petiole','cone']},
+  {id:'c2f6', q:'Mangroves have ___ roots to take in air.', a:[['breathing']], bank:['deep','floating','sunken']},
+  {id:'c2f7', q:'In desert plants, ___ are changed into spines.', a:[['leaves']], bank:['flowers','roots','stems']},
+  {id:'c2f8', q:'Paper was first made from ___.', a:[['papyrus']], bank:['bamboo','cactus','pine']}
+],
+c3: [
+  {id:'c3f1', q:'The life cycle of a grasshopper has ___ stages.', a:[['three']], bank:['four','two','five']},
+  {id:'c3f2', q:'The cluster of eggs laid by a frog is called ___.', a:[['spawn']], bank:['cocoon','nest','larva']},
+  {id:'c3f3', q:'Baby fish is also called ___.', a:[['fry']], bank:['fries','tadpole','nymph'], slip:'You wrote "fries" – fries are potato chips! A baby fish is a FRY (or a fingerling).'},
+  {id:'c3f4', q:'A caterpillar covers itself in a ___.', a:[['cocoon']], bank:['spawn','shell','nest']},
+  {id:'c3f5', q:'___ is the biggest mammal on land.', a:[['African elephant']], bank:['Blue whale','Giraffe','Rhinoceros']},
+  {id:'c3f6', q:'The pupa of a moth or butterfly is called ___.', a:[['chrysalis']], bank:['caterpillar','nymph','tadpole']},
+  {id:'c3f7', q:'___ is the resting stage.', a:[['Pupa']], bank:['Egg','Caterpillar','Adult']},
+  {id:'c3f8', q:'The period of time for which an animal lives is called its ___.', a:[['life span']], bank:['life cycle','habitat','metamorphosis']},
+  {id:'c3f9', q:'The process by which animals produce young ones is called ___.', a:[['reproduction']], bank:['moulting','digestion','hibernation']},
+  {id:'c3f10', q:'A nymph sheds its old skin many times. This is called ___.', a:[['moulting']], bank:['metamorphosis','hibernation','spawning']}
+],
+c4: [
+  {id:'c4f1', q:'Aquatic animals have ___ and ___ which help them to swim in water and change directions.', a:[['fins'],['tail']], any:1, bank:['legs','wings','tentacles']},
+  {id:'c4f2', q:'Jelly fish use their ___ to sting their enemies.', a:[['tentacles']], bank:['fins','talons','blubber']},
+  {id:'c4f3', q:'___ and ___ come to the water surface to breathe through blowholes.', a:[['Whale'],['Dolphin']], any:1, bank:['Shark','Octopus','Fish']},
+  {id:'c4f4', q:'___ are organisms that feed on dead and decaying living things.', a:[['Scavengers']], bank:['Parasites','Producers','Herbivores']},
+  {id:'c4f5', q:'Animals that spend most of their time in flying are called ___ animals.', a:[['aerial']], bank:['arial','arboreal','aquatic'], slip:'You wrote "arial". Spell it A-E-R-I-A-L.'},
+  {id:'c4f6', q:'Penguin has a thick layer of fat called ___.', a:[['blubber']], bank:['shell','spine','talon']},
+  {id:'c4f7', q:'Animals that live on trees are called ___ animals.', a:[['arboreal']], bank:['aerial','aquatic','terrestrial']},
+  {id:'c4f8', q:'Carnivores have sharp, pointed teeth called ___ to tear flesh.', a:[['canines']], bank:['molars','incisors','talons']}
+],
+c5: [
+  {id:'c5f1', q:'___ helps in the formation of bones, teeth and blood.', a:[['Calcium']], bank:['Iodine','Sodium','Potassium']},
+  {id:'c5f2', q:'Iodised salt contains ___ and ___.', a:[['iodine'],['sodium chloride']], any:1, bank:['sugar','calcium'], slip:'Last time you wrote only "sodium". Write the full name: SODIUM CHLORIDE.'},
+  {id:'c5f3', q:'___ and ___ are two types of carbohydrates.', a:[['Sugar'],['Starch']], any:1, bank:['Protein','Fat']},
+  {id:'c5f4', q:'Water that is fit to drink is called ___ water.', a:[['potable']], bank:['polluted','salty','muddy']},
+  {id:'c5f5', q:'___ destroys many nutrients in food.', a:[['Overcooking']], bank:['Washing hands','Eating fruit','Drinking water']},
+  {id:'c5f6', q:'Our body makes ___ in sunlight.', a:[['Vitamin D']], bank:['Vitamin A','Vitamin C','Iron']},
+  {id:'c5f7', q:'Proteins are ___ foods.', a:[['body-building']], bank:['energy-giving','protective','sweet']},
+  {id:'c5f8', q:'Fats give us ___ energy than carbohydrates.', a:[['more']], bank:['less','no']},
+  {id:'c5f9', q:'Nails and hair are made of a protein called ___.', a:[['keratin']], bank:['calcium','iodine','iron']}
+],
+c6: [
+  {id:'c6f1', q:'___ is a layer on the teeth formed by microbes.', a:[['Plaque']], bank:['Enamel','Bolus','Saliva']},
+  {id:'c6f2', q:'A lump of soft, semi-digested food swallowed is called ___.', a:[['bolus']], bank:['plaque','saliva','pulp']},
+  {id:'c6f3', q:'There are three pairs of ___ in our mouth.', a:[['salivary glands']], bank:['tongues','food pipes','stomachs']},
+  {id:'c6f4', q:'___ is the longest part of the digestive system.', a:[['Small intestine']], bank:['Large intestine','Food pipe','Stomach']},
+  {id:'c6f5', q:'Harmful microbes are called ___.', a:[['germs']], bank:['yeast','antibiotics','enamel']},
+  {id:'c6f6', q:'The muscles of the food pipe gently push food down to the stomach in a wave-like action. This is called ___.', a:[['peristalsis']], bank:['digestion','chewing','saliva']},
+  {id:'c6f7', q:'Another name for temporary teeth is ___ teeth.', a:[['milk']], bank:['wisdom','permanent','front']},
+  {id:'c6f8', q:'The last pair of teeth that appear in later life are called ___ teeth.', a:[['wisdom']], bank:['milk','temporary','front'], slip:'You first wrote "milk teeth" here. Milk teeth come FIRST; WISDOM teeth come LAST.'},
+  {id:'c6f9', q:'The white, hard outer covering of a tooth is called ___.', a:[['enamel']], bank:['dentine','pulp','plaque']}
+]
+};
+
+/* photosynthesis equation (Revision Q7) */
+var EQ = {id:'c1e1', terms:['Carbon dioxide','Water','Food','Oxygen'], over:['Sunlight','Chlorophyll'], bank:['Nitrogen','Soil','Moonlight','Salt']};
+
+/* ---------- True / False (fix = make the false one true) ---------- */
+var TF = {
+c1: [
+  {id:'c1t1', q:'The petiole of the leaf attaches the leaf blade to the stem.', a:true},
+  {id:'c1t2', q:'Cactus plant stores food in its spines.', a:false, fix:{q:'Correct it: Cactus stores food and water in its …', o:['stem','spines','thorns','flowers'], a:'stem'}},
+  {id:'c1t3', q:'Iodine is used to test starch.', a:true},
+  {id:'c1t4', q:'Animals breathe out carbon dioxide.', a:true},
+  {id:'c1t5', q:'Tendrils are thread like sensitive structures which can coil around a support.', a:true},
+  {id:'c1t6', q:'Plants take in oxygen and give out carbon dioxide during photosynthesis.', a:false, fix:{q:'Correct it: During photosynthesis plants take in …', o:['carbon dioxide and give out oxygen','oxygen and give out carbon dioxide','nitrogen and give out oxygen'], a:'carbon dioxide and give out oxygen'}},
+  {id:'c1t7', q:'Plants can make food at night.', a:false, fix:{q:'Why can plants NOT make food at night?', o:['There is no sunlight at night','Plants sleep at night','Leaves fall off at night'], a:'There is no sunlight at night'}},
+  {id:'c1t8', q:'Plants depend on animals for food.', a:false, fix:{q:'Correct it:', o:['Animals depend on plants for food','Plants get food from animals','Plants get food from the soil only'], a:'Animals depend on plants for food'}},
+  {id:'c1t9', q:'Dodder is a parasitic plant.', a:true},
+  {id:'c1t10', q:'Croton cannot make its own food because its leaves are red.', a:false, fix:{q:'Correct it: Croton CAN make food because …', o:['it has chlorophyll hidden under the red colour','it eats insects','it takes food from other plants'], a:'it has chlorophyll hidden under the red colour'}}
+],
+c2: [
+  {id:'c2t1', q:'Floating plants have stems with air pockets.', a:true},
+  {id:'c2t2', q:'In a cactus plant, flowers are modified into spines.', a:false, fix:{q:'Correct it: In a cactus plant, ___ are modified into spines.', o:['leaves','flowers','roots'], a:'leaves'}},
+  {id:'c2t3', q:'Deciduous trees have waterproof leaves.', a:false, fix:{q:'Correct it: Deciduous trees …', o:['shed their leaves in autumn or winter','have breathing roots','have sunken stomata'], a:'shed their leaves in autumn or winter'}},
+  {id:'c2t4', q:'Plants in hilly areas are conical in shape.', a:true},
+  {id:'c2t5', q:'Marshy plants grow in clayey soil.', a:true},
+  {id:'c2t6', q:'Submerged plants have many stomata on their leaves.', a:false, fix:{q:'Correct it: Submerged plants …', o:['have no stomata and breathe through their body surface','have sunken stomata','have breathing roots'], a:'have no stomata and breathe through their body surface'}},
+  {id:'c2t7', q:'Desert plants have sunken stomata to reduce loss of water.', a:true},
+  {id:'c2t8', q:'Mangroves have breathing roots.', a:true},
+  {id:'c2t9', q:'Pine trees have flowers.', a:false, fix:{q:'Correct it: Pine trees have …', o:['cones instead of flowers','spines instead of leaves','breathing roots'], a:'cones instead of flowers'}},
+  {id:'c2t10', q:'Hydrilla is a submerged plant.', a:true}
+],
+c3: [
+  {id:'c3t1', q:'In pupa stage, caterpillar weaves a protective layer around itself.', a:true},
+  {id:'c3t2', q:'A fish lays one egg at a time.', a:false, fix:{q:'Correct it: A fish lays …', o:['hundreds of eggs at a time','no eggs at all','two eggs at a time'], a:'hundreds of eggs at a time'}},
+  {id:'c3t3', q:'The period of time for which an animal lives is called its life span.', a:true},
+  {id:'c3t4', q:'Eggs of frog are covered with a jelly like material.', a:true},
+  {id:'c3t5', q:'Bats can fly as they are birds.', a:false, fix:{q:'Correct it: Bats can fly, but they are …', o:['mammals','birds','insects'], a:'mammals'}},
+  {id:'c3t6', q:'The life cycle of a cockroach has three stages.', a:true},
+  {id:'c3t7', q:'Yolk is a rich source of vitamins and minerals.', a:false, note:'In your class discussion of the model paper this was marked False.', fix:{q:'Yolk is mainly made of …', o:['fat and protein','only water','only sugar'], a:'fat and protein'}},
+  {id:'c3t8', q:'All mammals give birth to young ones.', a:false, fix:{q:'Which mammals lay eggs?', o:['Duck-billed platypus and spiny anteater','Whale and dolphin','Bat and cow'], a:'Duck-billed platypus and spiny anteater'}},
+  {id:'c3t9', q:'A whale is a fish.', a:false, fix:{q:'Correct it: A whale is a …', o:['mammal','fish','amphibian'], a:'mammal'}},
+  {id:'c3t10', q:'A butterfly undergoes metamorphosis.', a:true}
+],
+c4: [
+  {id:'c4t1', q:'Camouflage helps the animals to be active at night.', a:false, fix:{q:'Correct it: Camouflage helps animals to …', o:['hide by blending with their surroundings','see in the dark','run very fast'], a:'hide by blending with their surroundings'}},
+  {id:'c4t2', q:'Mosquito is an example of a parasite.', a:true},
+  {id:'c4t3', q:'Lizard is a terrestrial animal.', a:true},
+  {id:'c4t4', q:'Fish and birds both have a streamlined body.', a:true},
+  {id:'c4t5', q:'Whales breathe through gills.', a:false, fix:{q:'Correct it: Whales breathe through …', o:['blowholes','gills','tentacles'], a:'blowholes'}},
+  {id:'c4t6', q:'Koala is an aquatic animal.', a:false, fix:{q:'Correct it: Koala is …', o:['an arboreal animal','an aerial animal','a fish'], a:'an arboreal animal'}},
+  {id:'c4t7', q:'Vultures are scavengers.', a:true},
+  {id:'c4t8', q:'Herbivores have sharp canines to tear flesh.', a:false, fix:{q:'Correct it: ___ have sharp canines to tear flesh.', o:['Carnivores','Herbivores','Plants'], a:'Carnivores'}},
+  {id:'c4t9', q:'Frogs and grasshoppers have long and strong hind limbs to hop and jump.', a:true},
+  {id:'c4t10', q:'Tortoise and snails have a hard shell to protect themselves from enemies.', a:true}
+],
+c5: [
+  {id:'c5t1', q:'Sodium forms haemoglobin in blood.', a:false, fix:{q:'Correct it: ___ forms haemoglobin in blood.', o:['Iron','Sodium','Iodine'], a:'Iron'}},
+  {id:'c5t2', q:'Good posture prevents backache and muscle pain.', a:true},
+  {id:'c5t3', q:'Minerals give us more energy than carbohydrates.', a:false, fix:{q:'Correct it: ___ give us more energy than carbohydrates.', o:['Fats','Minerals','Vitamins'], a:'Fats'}},
+  {id:'c5t4', q:'Nails and hair are made of a protein called keratin.', a:true},
+  {id:'c5t5', q:'A balanced diet should have a large amount of fat-rich food and sweets.', a:false, fix:{q:'Correct it: A balanced diet has …', o:['all the nutrients in the right amounts','lots of sweets and fried food','only fruits'], a:'all the nutrients in the right amounts'}},
+  {id:'c5t6', q:'Vegetables should be washed after cutting them.', a:false, fix:{q:'Correct it: Vegetables should be washed …', o:['before cutting them','after cooking them','never'], a:'before cutting them'}},
+  {id:'c5t7', q:'Vitamin C keeps our eyes healthy.', a:false, fix:{q:'Correct it: ___ keeps our eyes healthy.', o:['Vitamin A','Vitamin C','Vitamin K'], a:'Vitamin A'}},
+  {id:'c5t8', q:'Potato and rice contain starch.', a:true},
+  {id:'c5t9', q:'Water helps to remove waste from our body.', a:true},
+  {id:'c5t10', q:'Overcooking destroys many nutrients in food.', a:true}
+],
+c6: [
+  {id:'c6t1', q:'The white, hard outer covering of teeth is called dentine.', a:false, fix:{q:'Correct it: The white, hard outer covering of teeth is called …', o:['enamel','pulp','plaque'], a:'enamel'}},
+  {id:'c6t2', q:'There are 32 milk teeth in total.', a:false, fix:{q:'Correct it: There are ___ milk teeth in total.', o:['20','32','8'], a:'20'}},
+  {id:'c6t3', q:'Some microbes produce antibiotics which are used as medicines.', a:true},
+  {id:'c6t4', q:'Yeast is used to make bread and cake.', a:true},
+  {id:'c6t5', q:'Digested food is absorbed into the blood in the stomach.', a:false, fix:{q:'Correct it: Digested food is absorbed into the blood in the …', o:['small intestine','stomach','food pipe'], a:'small intestine'}},
+  {id:'c6t6', q:'Flossing removes food stuck between the teeth.', a:true},
+  {id:'c6t7', q:'An adult has 4 incisors in total.', a:false, slip:'In the model paper you wrote "four front teeth".', fix:{q:'Correct it: An adult has ___ incisors in total.', o:['8','4','12'], a:'8'}},
+  {id:'c6t8', q:'Saliva is made by the salivary glands.', a:true},
+  {id:'c6t9', q:'Food moves down the food pipe by peristalsis.', a:true},
+  {id:'c6t10', q:'Eating lots of sweets is good for our teeth.', a:false, fix:{q:'Correct it: Too many sweets …', o:['cause tooth decay','make teeth stronger','make teeth whiter'], a:'cause tooth decay'}}
+]
+};
+
+/* ---------- Give two examples (pick 2 correct) ---------- */
+var TWO = {
+c1: [
+  {id:'c1w1', q:'Plants that store food in their leaves', ok:['Cabbage','Mint','Spinach','Lettuce'], no:['Carrot','Potato','Cauliflower','Ginger']},
+  {id:'c1w2', q:'Plants that store food in their roots', ok:['Carrot','Beetroot','Radish','Turnip'], no:['Potato','Ginger','Cabbage','Broccoli'], tip:'Potato and ginger look like roots but they are STEMS.'},
+  {id:'c1w3', q:'Plants that store food in their stem', ok:['Potato','Ginger','Sugarcane'], no:['Carrot','Beetroot','Radish','Cabbage'], tip:'Potato grows under the ground but it is a stem.'},
+  {id:'c1w4', q:'Plants that store food in their flowers', ok:['Cauliflower','Broccoli'], no:['Cabbage','Carrot','Potato','Mint']},
+  {id:'c1w5', q:'Non-green plants', ok:['Mushroom','Moulds','Dodder'], no:['Croton','Mango','Cactus','Wolffia'], tip:'Croton is red but it has chlorophyll. Wolffia is green.'}
+],
+c2: [
+  {id:'c2w1', q:'Plants of the grass family', ok:['Bamboo','Lemon grass','Wheat','Sugarcane'], no:['Cactus','Pine','Lotus','Mango']},
+  {id:'c2w2', q:'Plants that trap insects', ok:['Venus flytrap','Pitcher plant'], no:['Cactus','Dodder','Lotus','Bamboo']},
+  {id:'c2w3', q:'Plants found in the desert', ok:['Cactus','Kikar (babool)'], no:['Lotus','Pine','Mangrove','Coconut'], tip:'Spelling your teacher used: KIKAR.'},
+  {id:'c2w4', q:'Submerged plants', ok:['Hydrilla','Tapegrass'], no:['Lotus','Cactus','Pine','Coconut']},
+  {id:'c2w5', q:'Plants of hilly areas', ok:['Pine','Deodar','Fir'], no:['Cactus','Coconut','Lotus','Mangrove']},
+  {id:'c2w6', q:'Non-green plants', ok:['Mushroom','Moulds','Dodder'], no:['Croton','Cactus','Lotus','Pine']}
+],
+c3: [
+  {id:'c3w1', q:'Aquatic mammals', ok:['Whale','Dolphin','Seal'], no:['Shark','Octopus','Frog','Crocodile'], tip:'A shark is a fish, not a mammal.'},
+  {id:'c3w2', q:'Egg-laying mammals', ok:['Duck-billed platypus','Spiny anteater'], no:['Bat','Whale','Dolphin','Cow']},
+  {id:'c3w3', q:'Animals that undergo metamorphosis', ok:['Frog','Butterfly','Moth'], no:['Hen','Fish','Dog','Snake']},
+  {id:'c3w4', q:'Animals that lay eggs', ok:['Hen','Fish','Frog','Snake'], no:['Cow','Dog','Bat','Whale']},
+  {id:'c3w5', q:'Animals with a nymph stage', ok:['Cockroach','Grasshopper'], no:['Butterfly','Frog','Hen','Fish']}
+],
+c4: [
+  {id:'c4w1', q:'Arboreal animals', ok:['Koala','Monkey','Squirrel'], no:['Fish','Lion','Camel','Duck']},
+  {id:'c4w2', q:'Omnivores', ok:['Crow','Bear','Human'], no:['Cow','Deer','Lion','Tiger']},
+  {id:'c4w3', q:'Scavengers', ok:['Vulture','Hyena'], no:['Cow','Koala','Mosquito','Lice']},
+  {id:'c4w4', q:'Parasites', ok:['Lice','Mosquito','Roundworm'], no:['Vulture','Hyena','Cow','Koala']},
+  {id:'c4w5', q:'Aquatic animals', ok:['Fish','Whale','Dolphin'], no:['Camel','Lion','Koala','Ostrich']},
+  {id:'c4w6', q:'Herbivores', ok:['Cow','Deer','Goat'], no:['Lion','Tiger','Crow','Vulture']},
+  {id:'c4w7', q:'Carnivores', ok:['Lion','Tiger'], no:['Cow','Goat','Crow','Deer'], tip:'Crow eats plants too, so it is an omnivore.'}
+],
+c5: [
+  {id:'c5w1', q:'Energy-giving (carbohydrate) foods', ok:['Rice','Potato','Roti','Sugar'], no:['Dal','Egg','Fish','Paneer']},
+  {id:'c5w2', q:'Body-building (protein) foods', ok:['Dal','Egg','Fish','Paneer'], no:['Rice','Sugar','Butter','Potato']},
+  {id:'c5w3', q:'Fat-rich foods', ok:['Butter','Ghee','Oil','Nuts'], no:['Apple','Rice','Spinach','Water']},
+  {id:'c5w4', q:'Foods cooked by steaming', ok:['Idli','Dhokla'], no:['Puri','Cake','Pakora','Biscuits']},
+  {id:'c5w5', q:'Foods cooked by frying', ok:['Puri','Pakora','Samosa'], no:['Idli','Cake','Dhokla','Boiled egg']},
+  {id:'c5w6', q:'Ways of preserving food', ok:['Drying','Refrigeration','Canning','Pickling'], no:['Leaving it open','Adding water','Cutting into pieces']},
+  {id:'c5w7', q:'Foods cooked by baking', ok:['Cake','Biscuits','Bread'], no:['Idli','Puri','Pakora','Boiled rice']}
+],
+c6: [
+  {id:'c6w1', q:'Healthy eating habits', ok:['Eat slowly and chew well','Do not overeat','Wash hands before eating','Rinse mouth after eating'], no:['Eat lots of chocolates','Skip breakfast','Gulp food quickly']},
+  {id:'c6w2', q:'Effects of tooth decay', ok:['Toothache','Holes (cavities) in teeth'], no:['Stronger teeth','Whiter teeth','Longer teeth','More teeth']},
+  {id:'c6w3', q:'Useful microbes', ok:['Yeast (bread and cake)','Microbes that make antibiotics'], no:['Germs that cause disease','Microbes that form plaque','Microbes that cause cavities','Microbes that spoil food']},
+  {id:'c6w4', q:'Ways to keep teeth healthy', ok:['Brush twice a day','Floss your teeth','Rinse after eating','Visit the dentist'], no:['Eat sticky toffees','Open bottles with teeth','Skip brushing at night']}
+]
+};
+
+/* ---------- Spell it right (the exam is written) ---------- */
+var SPELL = {
+c1: [
+  {id:'c1s1', q:'The green colouring in leaves', a:'chlorophyll', w:['chlorofyll','clorophyll','chlorophil']},
+  {id:'c1s2', q:'Tiny holes on a leaf', a:'stomata', w:['stomota','stometa','stomatta']},
+  {id:'c1s3', q:'How green plants make food', a:'photosynthesis', w:['photosynthsis','fotosynthesis','photosynthasis']},
+  {id:'c1s4', q:'The stalk of a leaf', a:'petiole', w:['petiol','petoile','pitiole']},
+  {id:'c1s5', q:'Green plants are called …', a:'producers', w:['producres','prodoosers','producars']},
+  {id:'c1s6', q:'Animals are called …', a:'consumers', w:['consumors','consummers','cunsumers']}
+],
+c2: [
+  {id:'c2s1', q:'Fungi that get food from dead and decaying things', a:'saprophytes', w:['saprotophs','saprofites','saprophites'], slip:'You wrote "Saprotophs". Spell it S-A-P-R-O-P-H-Y-T-E-S.'},
+  {id:'c2s2', q:'Plants that grow on land', a:'terrestrial', w:['terestrial','terrestial','terrestriel']},
+  {id:'c2s3', q:'Trees that shed leaves in autumn', a:'deciduous', w:['decidious','desiduous','deciduos']},
+  {id:'c2s4', q:'Evergreen trees with cones', a:'conifers', w:['conifiers','conefers','coniphers']},
+  {id:'c2s5', q:'Trees with breathing roots', a:'mangroves', w:['mangrooves','mangrovs','mangroes']},
+  {id:'c2s6', q:'Paper was first made from it', a:'papyrus', w:['papirus','papyris','pappyrus']}
+],
+c3: [
+  {id:'c3s1', q:'Big change in body shape in a life cycle', a:'metamorphosis', w:['metamorphism','metamorphosys','metamorfosis'], tip:'Your sheet printed "metamorphism" – in your answer write metamorphosis.'},
+  {id:'c3s2', q:'The pupa of a butterfly', a:'chrysalis', w:['crysalis','chrysallis','chrysalys']},
+  {id:'c3s3', q:'Baby frog with a long tail', a:'tadpole', w:['tadpol','tedpole','tadpoal']},
+  {id:'c3s4', q:'The larva of a butterfly', a:'caterpillar', w:['caterpiller','catterpillar','caterpilar']},
+  {id:'c3s5', q:'Shedding of old skin', a:'moulting', w:['moulding','moultting','multing']},
+  {id:'c3s6', q:'The white part of an egg', a:'albumen', w:['albuman','albumane','allbumen']},
+  {id:'c3s7', q:'Cluster of frog eggs', a:'spawn', w:['spaun','spown','spawne']}
+],
+c4: [
+  {id:'c4s1', q:'Animals that spend most of their time flying', a:'aerial', w:['arial','ariel','aireal'], slip:'You wrote "arial". It is A-E-R-I-A-L.'},
+  {id:'c4s2', q:'Animals that live on trees', a:'arboreal', w:['arborial','arborael','arbooreal']},
+  {id:'c4s3', q:'Summer sleep', a:'aestivation', w:['aestivasion','astivation','aestivetion']},
+  {id:'c4s4', q:'Winter sleep', a:'hibernation', w:['hybernation','hibernasion','hibernetion']},
+  {id:'c4s5', q:'Thick fat under a penguin’s skin', a:'blubber', w:['blubbar','bluber','blubbur']},
+  {id:'c4s6', q:'A jellyfish stings with these', a:'tentacles', w:['tentacals','tentickles','tentacels']},
+  {id:'c4s7', q:'Animals that feed on dead animals', a:'scavengers', w:['scavangers','scavengars','scavenjers']},
+  {id:'c4s8', q:'Hiding by blending in', a:'camouflage', w:['camoflage','camouflague','camouflaje']},
+  {id:'c4s9', q:'Animals that eat plants and animals', a:'omnivores', w:['omnivors','omnivoures','omnevores']}
+],
+c5: [
+  {id:'c5s1', q:'Nutrients that give us energy', a:'carbohydrates', w:['carbohydretes','carbohidrates','carbohydrats']},
+  {id:'c5s2', q:'Water fit to drink', a:'potable', w:['portable','potabel','potible'], tip:'Portable means "easy to carry". Drinking water is POTABLE.'},
+  {id:'c5s3', q:'Protein in nails and hair', a:'keratin', w:['keratine','keretin','kerotin']},
+  {id:'c5s4', q:'The part of blood made with iron', a:'haemoglobin', w:['haemoglobine','heamoglobin','haemogloben']},
+  {id:'c5s5', q:'Mineral for bones and teeth', a:'calcium', w:['calsium','calcuim','kalcium']},
+  {id:'c5s6', q:'Mineral that helps muscles', a:'potassium', w:['potasium','pottasium','potassiam']}
+],
+c6: [
+  {id:'c6s1', q:'Wave-like push in the food pipe', a:'peristalsis', w:['peristalses','peristelsis','paristalsis']},
+  {id:'c6s2', q:'Layer of germs on teeth', a:'plaque', w:['plack','plaqe','plauqe']},
+  {id:'c6s3', q:'Hard white covering of teeth', a:'enamel', w:['enamal','enamle','enammel']},
+  {id:'c6s4', q:'Front cutting teeth', a:'incisors', w:['incissors','incisers','insicors']},
+  {id:'c6s5', q:'Glands that make saliva', a:'salivary', w:['salivery','saliviary','salavary']},
+  {id:'c6s6', q:'Soft lump of chewed food', a:'bolus', w:['bolous','boluss','bolas']},
+  {id:'c6s7', q:'Big grinding teeth at the back', a:'molars', w:['molers','mollars','molaars']},
+  {id:'c6s8', q:'Pointed tearing teeth', a:'canines', w:['canins','cannines','kanines']}
+]
+};
+
+/* ---------- Match the following (g = never put two of the same group together) ---------- */
+var MATCH = {
+c1: {id:'c1x', pairs:[['Stomata','tiny holes for gases'],['Lamina','broad flat part of a leaf'],['Petiole','joins leaf to stem'],['Chlorophyll','green colour of leaves'],['Iodine','test for starch'],['Dodder','parasitic plant','ng'],['Wolffia','smallest plant'],['Tendrils','help a plant climb'],['Mushroom','non-green plant','ng'],['Croton','red leaves, still makes food']]},
+c2: {id:'c2x', pairs:[['Hydrilla','submerged plant'],['Cactus','desert plant'],['Coconut tree','coastal area'],['Pine','hilly area'],['Mangrove','breathing roots'],['Pitcher plant','traps insects'],['Dodder','parasitic plant','fung'],['Mushroom','saprophyte','fung'],['Papyrus','first paper']]},
+c3: {id:'c3x', pairs:[['Larva of butterfly','caterpillar'],['Young one of frog','tadpole'],['Young one of cockroach','nymph'],['Baby fish','fry'],['Cluster of frog eggs','spawn'],['Pupa of butterfly','chrysalis'],['White of an egg','albumen','egg'],['Yellow of an egg','yolk','egg'],['Grows into a baby','embryo'],['Smallest mammal','bumblebee bat'],['Biggest land mammal','African elephant'],['Egg-laying mammal','platypus']]},
+c4: {id:'c4x', pairs:[['Toad','amphibian'],['Koala','arboreal'],['Vulture','scavenger'],['Lice','parasite'],['Penguin','blubber'],['Jellyfish','tentacles'],['Whale','blowhole'],['Duck','webbed feet'],['Ostrich','long legs for running'],['Tortoise','hard shell'],['Eagle','talons'],['Camel','thick skin']]},
+c5: {id:'c5x', pairs:[['Vitamin A','healthy eyes and skin'],['Vitamin D','made in sunlight','bone'],['Vitamin C','healthy gums'],['Calcium','strong bones and teeth','bone'],['Iron','haemoglobin in blood'],['Iodine','iodised salt'],['Potassium','muscles work properly'],['Keratin','nails and hair'],['Potable water','fit to drink'],['Steaming','idli'],['Baking','cake'],['Frying','puri']]},
+c6: {id:'c6x', pairs:[['Incisors','bite and cut'],['Canines','tear food'],['Molars','crush and grind'],['Enamel','hard white covering'],['Pulp','nerves and blood vessels'],['Plaque','layer of microbes on teeth'],['Bolus','lump of chewed food'],['Peristalsis','wave-like push in food pipe'],['Saliva','makes food soft and wet'],['Small intestine','digested food goes into blood'],['Yeast','bread and cake'],['Floss','cleans between teeth']]}
+};
+/* Model paper Q3 style (mixed chapters) */
+var BOSS_MATCH = {id:'bx', pairs:[['Toad','amphibian'],['Bat','mammal'],['Coconut tree','coastal area'],['Hydrilla','submerged plant'],['Cactus','desert plant'],['Koala','arboreal animal'],['Vulture','scavenger'],['Mosquito','parasite'],['Pine','hilly area'],['Mangrove','breathing roots'],['Dodder','parasitic plant'],['Penguin','blubber']]};
+
+/* ---------- Sort it out (n per bucket) ---------- */
+var SORT = {
+c1: [{id:'c1k1', q:'Where is the food stored?', buckets:['Leaves','Root','Stem','Flower'], per:2, items:[['Cabbage',0],['Spinach',0],['Mint',0],['Carrot',1],['Beetroot',1],['Radish',1],['Potato',2],['Ginger',2],['Sugarcane',2],['Cauliflower',3],['Broccoli',3]]}],
+c2: [{id:'c2k1', q:'Where does it grow?', buckets:['Desert','Water','Hills','Coast or marsh'], per:2, items:[['Cactus',0],['Kikar',0],['Hydrilla',1],['Tapegrass',1],['Pine',2],['Deodar',2],['Fir',2],['Coconut tree',3],['Mangrove',3]]}],
+c3: [{id:'c3k1', q:'Lays eggs or gives birth?', buckets:['Lays eggs','Gives birth'], per:4, items:[['Hen',0],['Fish',0],['Frog',0],['Snake',0],['Duck-billed platypus',0],['Butterfly',0],['Cow',1],['Whale',1],['Bat',1],['Dolphin',1],['Dog',1],['Human',1]]}],
+c4: [
+  {id:'c4k1', q:'What does it eat?', buckets:['Herbivore','Carnivore','Omnivore'], per:2, items:[['Cow',0],['Deer',0],['Goat',0],['Lion',1],['Tiger',1],['Eagle',1],['Crow',2],['Bear',2],['Human',2]]},
+  {id:'c4k2', q:'Differentiate: scavengers or parasites?', buckets:['Scavengers','Parasites'], per:3, items:[['Eat the flesh of dead animals',0],['Vulture',0],['Hyena',0],['Live on or inside another living animal',1],['Get food from a living animal',1],['Lice',1],['Roundworm',1],['Mosquito',1]]},
+  {id:'c4k3', q:'Where does it live?', buckets:['Terrestrial','Aquatic','Aerial','Arboreal'], per:2, items:[['Lion',0],['Camel',0],['Lizard',0],['Fish',1],['Whale',1],['Jellyfish',1],['Eagle',2],['Sparrow',2],['Koala',3],['Monkey',3],['Squirrel',3]]}
+],
+c5: [
+  {id:'c5k1', q:'Which nutrient is it rich in?', buckets:['Carbohydrates','Proteins','Fats'], per:2, items:[['Rice',0],['Potato',0],['Sugar',0],['Roti',0],['Dal',1],['Egg',1],['Fish',1],['Paneer',1],['Butter',2],['Ghee',2],['Oil',2],['Nuts',2]]},
+  {id:'c5k2', q:'How is it cooked?', buckets:['Boiling','Steaming','Frying','Baking'], per:2, items:[['Rice',0],['Milk',0],['Idli',1],['Dhokla',1],['Puri',2],['Pakora',2],['Cake',3],['Biscuits',3]]}
+],
+c6: [{id:'c6k1', q:'Good or bad for teeth?', buckets:['Good for teeth','Bad for teeth'], per:3, items:[['Brush twice a day',0],['Floss',0],['Rinse after eating',0],['Visit the dentist',0],['Eat lots of sweets',1],['Sticky toffees',1],['Skip brushing at night',1],['Open bottles with teeth',1]]}]
+};
+
+/* ---------- Sequences / life cycles ---------- */
+var SEQ = {
+  frog: {id:'c3c1', ch:'c3', q:'Complete the life cycle of a frog', steps:['Eggs (spawn)','Tadpole','Young frog','Adult frog'], pics:['svg:spawn','svg:tadpole','svg:froglet','\u{1F438}'], cyc:1},
+  butterfly: {id:'c3c2', ch:'c3', q:'Complete the life cycle of a butterfly', steps:['Eggs','Caterpillar','Pupa (chrysalis)','Butterfly'], pics:['svg:leafeggs','\u{1F41B}','svg:chrysalis','\u{1F98B}'], cyc:1},
+  cockroach: {id:'c3c3', ch:'c3', q:'Complete the life cycle of a cockroach', steps:['Eggs','Nymph','Adult cockroach'], cyc:1},
+  grasshopper: {id:'c3c4', ch:'c3', q:'Complete the life cycle of a grasshopper', steps:['Eggs','Nymph','Adult grasshopper'], cyc:1},
+  food: {id:'c6c1', ch:'c6', q:'Put the journey of food in order', steps:['Mouth','Food pipe','Stomach','Small intestine','Large intestine'], cyc:0}
+};
+
+/* ---------- Leaf diagram parts ---------- */
+var LEAF_PARTS = ['Leaf apex','Lamina (leaf blade)','Midrib (main vein)','Side vein','Petiole (stalk)'];
+
+/* ---------- Picture: identify and answer (Revision Adaptations-in-Plants Q5) ---------- */
+var STEPS = [
+  {id:'c2p1', ch:'c2', pic:'\u{1F335}', parts:[
+    {q:'Identify the plant.', o:['Cactus','Pine','Coconut tree','Lotus'], a:'Cactus'},
+    {q:'It is found in …', o:['deserts','coastal areas','hilly areas','ponds'], a:'deserts'},
+    {q:'Why does it have sunken stomata?', o:['To reduce loss of water','To trap insects','To float on water','To let snow slide off'], a:'To reduce loss of water'},
+    {q:'Why does it have very deep roots?', o:['To absorb water from deep under the ground','To breathe air','To climb on walls','To store seeds'], a:'To absorb water from deep under the ground'}]},
+  {id:'c2p2', ch:'c2', pic:'\u{1F334}', parts:[
+    {q:'Identify the plant.', o:['Coconut tree','Cactus','Pine','Mangrove'], a:'Coconut tree'},
+    {q:'It is found in …', o:['coastal areas','deserts','hilly areas','under water'], a:'coastal areas'},
+    {q:'Why does it have thick fleshy leaves?', o:['To store water','To trap insects','To shed them in winter','To grow cones'], a:'To store water'}]},
+  {id:'c2p3', ch:'c2', pic:'\u{1F332}', parts:[
+    {q:'Identify the plant.', o:['Pine','Cactus','Coconut tree','Hydrilla'], a:'Pine'},
+    {q:'It is found in …', o:['hilly areas','deserts','coastal areas','ponds'], a:'hilly areas'},
+    {q:'Why is it conical in shape?', o:['So that snow slides off easily','To store water','To trap insects','To float on water'], a:'So that snow slides off easily'},
+    {q:'Instead of flowers it has …', o:['cones','spines','tendrils','breathing roots'], a:'cones'}]}
+];
+
+/* ---------- Written answers (Answer Builder + Notebook) ----------
+   k: reason | answer | explain | diff ; m = marks in the paper */
+var WRITTEN = [
+  /* c1 */
+  {id:'c1r1', ch:'c1', k:'answer', m:2, q:'Why do fish die in a tank without water plants?', pts:['Water plants give out oxygen into the water.','Fish breathe the oxygen dissolved in the water.','Without water plants the oxygen runs out, so the fish die.'], bad:['Fish eat the water plants for food.','Water plants make the water dirty.'], kw:['oxygen','dissolved']},
+  {id:'c1r2', ch:'c1', k:'answer', m:1, q:'What are leaflets?', pts:['In some leaves the leaf blade is divided into many small parts.','Each small part is called a leaflet (rose, neem).'], bad:['Leaflets are the tiny holes on a leaf.','Leaflets are the veins of a leaf.'], kw:['leaf blade','leaflet']},
+  {id:'c1r3', ch:'c1', k:'answer', m:2, q:'Write any two functions of a leaf.', pts:['Leaves make food for the plant using sunlight.','Leaves help in exchange of gases through stomata.'], bad:['Leaves absorb water and minerals from the soil.','Leaves carry water to all parts of the plant.'], kw:['food','exchange of gases','stomata']},
+  {id:'c1r4', ch:'c1', k:'answer', m:1, q:'How do tendrils help a plant?', pts:['Tendrils are thin, thread-like parts.','They coil around a support and help weak plants climb up.'], bad:['Tendrils make food for the plant.','Tendrils store water for the plant.'], kw:['coil','support','climb']},
+  {id:'c1r5', ch:'c1', k:'reason', m:1, q:'Plants cannot make food at night.', pts:['Plants need sunlight to make food.','There is no sunlight at night.'], bad:['Plants sleep at night.','Leaves close their veins at night.'], kw:['sunlight']},
+  {id:'c1r6', ch:'c1', k:'reason', m:1, q:'Crotons are red coloured plants, yet they can make their food.', pts:['Croton leaves have chlorophyll.','The green chlorophyll is hidden under the red colour.'], bad:['Crotons eat insects for food.','Crotons take food from other plants.'], kw:['chlorophyll','hidden']},
+  {id:'c1r7', ch:'c1', k:'answer', m:2, q:'How are plants and animals interdependent?', pts:['Animals depend on plants for food and oxygen.','Plants use the carbon dioxide that animals breathe out.','Animals help plants by spreading their seeds.'], bad:['Plants depend on animals for food.','Animals make food for plants.'], kw:['food','oxygen','carbon dioxide','seeds']},
+  {id:'c1r8', ch:'c1', k:'explain', m:1, q:'Food chain', pts:['A food chain shows who eats whom in nature.','It starts with green plants (producers) and goes on to animals (consumers).','Example: grass → grasshopper → frog → snake → eagle.'], bad:['A food chain shows how food is cooked.','A food chain always starts with a lion.'], kw:['who eats whom','producers','consumers']},
+  {id:'c1r9', ch:'c1', k:'explain', m:1, q:'Photosynthesis', pts:['Green plants make their own food in their leaves.','They use carbon dioxide, water, sunlight and chlorophyll, and give out oxygen.'], bad:['Plants take ready food from the soil.','Plants make food only at night.'], kw:['carbon dioxide','water','sunlight','chlorophyll']},
+  /* c2 */
+  {id:'c2r1', ch:'c2', k:'reason', m:1, q:'Desert plants like cactus have sunken stomata.', pts:['Deserts are very hot and dry with little water.','Sunken stomata reduce the loss of water from the plant.'], bad:['Sunken stomata help the plant float.','Sunken stomata trap insects.'], kw:['reduce','loss of water']},
+  {id:'c2r2', ch:'c2', k:'reason', m:1, q:'A cactus has very deep roots.', pts:['There is very little water near the surface of a desert.','Very deep roots go deep into the soil to absorb water.'], bad:['Deep roots help the cactus climb.','Deep roots make food for the plant.'], kw:['deep','absorb water'], slip:'Last time this answer got muddled. Keep it simple: deep roots reach water deep under the ground.'},
+  {id:'c2r3', ch:'c2', k:'reason', m:1, q:'Coconut trees have thick fleshy leaves.', pts:['Coconut trees grow in coastal areas with sandy soil.','Their thick fleshy leaves store water.'], bad:['Thick leaves help the tree trap insects.','Thick leaves fall off in winter.'], kw:['store water']},
+  {id:'c2r4', ch:'c2', k:'reason', m:1, q:'Trees in hilly areas are conical in shape.', pts:['Hilly areas get a lot of snow in winter.','The cone shape lets snow slide off easily.'], bad:['The cone shape helps them float.','The cone shape stores water.'], kw:['snow','slide off']},
+  {id:'c2r5', ch:'c2', k:'reason', m:1, q:'Mangroves have breathing roots.', pts:['Mangroves grow in marshy soil full of water, which has very little air.','Breathing roots grow above the ground to take in air.'], bad:['Breathing roots store food.','Breathing roots trap insects.'], kw:['marshy','take in air']},
+  {id:'c2r6', ch:'c2', k:'answer', m:1, q:'How do submerged plants breathe?', pts:['Submerged plants have no stomata.','They take in air from the water through their whole body surface.'], bad:['They come up to the surface to breathe.','They breathe through breathing roots.'], kw:['no stomata','body surface']},
+  {id:'c2r7', ch:'c2', k:'answer', m:2, q:'How do fungi obtain their food?', pts:['Fungi have no chlorophyll, so they cannot make their own food.','Some fungi take food from other living things. They are parasites.','Some fungi get food from dead and decaying things. They are saprophytes.'], bad:['Fungi make food using sunlight.','Fungi catch insects to eat.'], kw:['no chlorophyll','parasites','saprophytes']},
+  {id:'c2r8', ch:'c2', k:'explain', m:1, q:'Saprotrophs', pts:['Saprotrophs (saprophytes) get their food from dead and decaying plants and animals.','Examples: mushroom and bread mould (fungi).'], bad:['Saprotrophs are animals that hunt other animals.','Saprotrophs make their own food using sunlight.'], kw:['dead and decaying','mushroom'], slip:'In the model paper you wrote "ANIMALS that feed on dead matter". Saprotrophs are fungi like mushroom and bread mould – not animals!'},
+  {id:'c2r9', ch:'c2', k:'answer', m:1, q:'How do floating plants float on water?', pts:['Floating plants have stems with air pockets.','The air makes them light, so they float.'], bad:['They have very deep roots.','They have sunken stomata.'], kw:['air pockets','light']},
+  /* c3 */
+  {id:'c3r1', ch:'c3', k:'answer', m:2, q:'Write any three characteristic features of mammals.', pts:['Most mammals give birth to young ones.','Mammals feed milk to their babies.','Mammals have hair or fur on their body.'], bad:['Mammals have feathers on their body.','Mammals breathe through gills.'], kw:['give birth','milk','hair'], slip:'Last time your first point was "they give them shelter" – that is parental care, not a feature of mammals.'},
+  {id:'c3r2', ch:'c3', k:'answer', m:2, q:'How are albumen and yolk useful in the development of a chick?', pts:['Albumen (the white) is mainly water and protein.','Yolk (the yellow) is mainly fat and protein.','Both give food to the growing chick (embryo).'], bad:['The yolk grows into the baby chick.','Albumen makes the shell hard.'], kw:['albumen','yolk','food','embryo']},
+  {id:'c3r3', ch:'c3', k:'answer', m:2, q:'How do birds show parental care?', pts:['Birds build nests to lay their eggs.','They sit on the eggs to keep them warm till the chicks hatch.','They feed the chicks and protect them from enemies.'], bad:['Birds feed milk to their chicks.','Birds leave their eggs in the water.'], kw:['nests','keep them warm','protect']},
+  {id:'c3r4', ch:'c3', k:'reason', m:1, q:'A fish lays so many eggs.', pts:['Many fish eggs are eaten by other water animals.','So the fish lays many eggs, so that at least some survive.'], bad:['Fish eggs are very big and strong.','Fish look after every egg.'], kw:['eaten','survive']},
+  {id:'c3r5', ch:'c3', k:'answer', m:2, q:'How does a nymph change into an adult cockroach?', pts:['A nymph looks like a small adult but has no wings.','It sheds its old skin many times. This is called moulting.','After the last moulting it has wings and becomes an adult.'], bad:['The nymph makes a cocoon around itself.','The nymph turns into a caterpillar.'], kw:['no wings','moulting']},
+  {id:'c3r6', ch:'c3', k:'explain', m:1, q:'Reproduction', pts:['Reproduction is the process by which animals produce young ones.','The young ones are like their parents.'], bad:['Reproduction means shedding old skin.','Reproduction means sleeping through winter.'], kw:['process','young ones']},
+  {id:'c3r7', ch:'c3', k:'explain', m:1, q:'Life span', pts:['Life span is the period of time for which an animal lives.','Different animals have different life spans.'], bad:['Life span is the number of stages in a life cycle.','Life span is the natural home of an animal.'], kw:['period of time','lives'], slip:'Say it in one clean line: the period of time for which an animal lives is its life span.'},
+  {id:'c3r8', ch:'c3', k:'answer', m:1, q:'What is spawn?', pts:['Spawn is a cluster of eggs laid by a frog.','The eggs are covered with jelly and are laid in water.'], bad:['Spawn is a baby fish.','Spawn is the hard cover of a pupa.'], kw:['cluster of eggs','frog'], slip:'Last time you wrote "cluster of large no. of eggs". Add WHO lays them: eggs laid by a FROG.'},
+  {id:'c3r9', ch:'c3', k:'explain', m:1, q:'Albumen', pts:['Albumen is the white part of an egg.','It is mainly water and protein. It is food for the growing chick.'], bad:['Albumen is the yellow part of the egg.','Albumen grows into the baby.'], kw:['white part','protein']},
+  {id:'c3r10', ch:'c3', k:'explain', m:1, q:'Metamorphosis', pts:['Metamorphosis is the big change in body shape of an animal during its life cycle.','Example: egg → tadpole → frog.'], bad:['Metamorphosis is sleeping through the summer.','Metamorphosis means laying eggs.'], kw:['change','body shape']},
+  /* c4 */
+  {id:'c4r1', ch:'c4', k:'reason', m:1, q:'Elephant and camel have thick skin.', pts:['Elephants and camels live in hot places.','Their thick skin protects them from the heat of the sun.'], bad:['Thick skin helps them swim fast.','Thick skin helps them fly.'], kw:['protects','heat of the sun']},
+  {id:'c4r2', ch:'c4', k:'reason', m:1, q:'Tortoise and snails have a hard shell.', pts:['The hard shell protects them from enemies.','In danger, they pull their soft body inside the shell.'], bad:['The hard shell helps them run fast.','The shell keeps them warm in snow.'], kw:['protects','enemies']},
+  {id:'c4r3', ch:'c4', k:'reason', m:1, q:'Terrestrial animals have well developed sense organs.', pts:['Sense organs help them sense changes in their surroundings.','They can find food and escape from enemies.'], bad:['Sense organs help them breathe under water.','Sense organs help them fly.'], kw:['sense changes','surroundings']},
+  {id:'c4r4', ch:'c4', k:'reason', m:1, q:'Frogs and grasshoppers have long and strong hind limbs.', pts:['Long, strong hind limbs help them hop and jump long distances.','Jumping helps them catch food and escape from enemies.'], bad:['Long hind limbs help them fly.','Long hind limbs help them breathe.'], kw:['hop','jump']},
+  {id:'c4r5', ch:'c4', k:'answer', m:2, q:'What adaptation allows aquatic animals to swim quickly?', pts:['They have a streamlined body.','Fins and tail help them swim and change direction.','Water birds like ducks have webbed feet.'], bad:['They have long legs for running.','They have thick fur to keep warm.'], kw:['streamlined','fins','tail','webbed feet']},
+  {id:'c4r6', ch:'c4', k:'answer', m:2, q:'What do carnivorous animals eat? What kind of teeth do they have?', pts:['Carnivores eat only the flesh of other animals.','They have sharp, pointed teeth called canines to tear flesh.','Carnivorous birds have sharp claws (talons) and a hooked beak.'], bad:['Carnivores eat only grass and leaves.','They have flat teeth to chew grass.'], kw:['flesh','canines','talons']},
+  {id:'c4r7', ch:'c4', k:'answer', m:2, q:'How are animals classified according to their food habits? (any two)', pts:['Herbivores eat only plants – e.g. cow, deer.','Carnivores eat only the flesh of other animals – e.g. lion, tiger.','Omnivores eat both plants and animals – e.g. crow, bear.'], bad:['Producers make food for animals – e.g. lion.','Parasites eat only grass – e.g. cow.'], kw:['herbivores','carnivores','omnivores']},
+  {id:'c4r8', ch:'c4', k:'answer', m:2, q:'What is a habitat? Name any two habitats.', pts:['The natural home of a plant or animal is called its habitat.','Land (terrestrial) is one habitat.','Water (aquatic) is another habitat.'], bad:['A habitat is the food an animal eats.','A habitat is a long winter sleep.'], kw:['natural home','land','water']},
+  {id:'c4r9', ch:'c4', k:'explain', m:1, q:'Aerial animals', pts:['Animals that spend most of their time flying are called aerial animals.','Examples: eagle, sparrow.'], bad:['Animals that live on trees are aerial animals.','Animals that live in water are aerial animals.'], kw:['flying']},
+  {id:'c4r10', ch:'c4', k:'reason', m:1, q:'Penguins have a thick layer of fat (blubber).', pts:['Penguins live in very cold places.','Blubber keeps their body warm.'], bad:['Blubber helps them fly.','Blubber helps them run fast.'], kw:['cold','warm']},
+  {id:'c4d1', ch:'c4', k:'diff', m:2, q:'Differentiate between Scavengers and Parasites.', A:'Scavengers', B:'Parasites', rowA:'Feed on the flesh of dead animals.', rowB:'Live on or inside another living animal and get food from it.', exA:'vulture, hyena', exB:'lice, roundworm', pts:['Scavengers feed on the flesh of dead animals.','Examples of scavengers: vulture, hyena.','Parasites live on or inside another living animal and get food from it.','Examples of parasites: lice, roundworm.'], bad:['Scavengers live inside other animals.','Parasites eat only plants.'], kw:['dead animals','living animal']},
+  /* c5 */
+  {id:'c5r1', ch:'c5', k:'reason', m:1, q:'Vitamin A is essential for our body.', pts:['Vitamin A keeps our eyes healthy.','It also keeps our skin healthy.'], bad:['Vitamin A makes our bones strong.','Vitamin A gives us the most energy.'], kw:['eyes','skin']},
+  {id:'c5r2', ch:'c5', k:'reason', m:1, q:'Muscles need potassium.', pts:['Potassium helps our muscles work properly.','It also helps our nerves work. Bananas give us potassium.'], bad:['Potassium helps muscles stretch like rubber.','Potassium makes our hair grow.'], kw:['muscles','work properly'], slip:'Last time you wrote "for stretching". Better: potassium helps our muscles and nerves work properly.'},
+  {id:'c5r3', ch:'c5', k:'reason', m:1, q:'Vegetables should be washed before cutting them.', pts:['If we wash vegetables after cutting, vitamins and minerals get washed away.','Washing before cutting keeps the nutrients in.'], bad:['Cut vegetables cannot be washed.','Washing before cutting makes them sweet.'], kw:['vitamins','minerals','washed away']},
+  {id:'c5r4', ch:'c5', k:'reason', m:1, q:'Water is essential for proper functioning of our body.', pts:['Water helps in digestion and in absorbing nutrients from food.','Water removes waste from our body through urine and sweat.'], bad:['Water gives us the most energy.','Water makes our nails and hair.'], kw:['digestion','removes waste']},
+  {id:'c5r5', ch:'c5', k:'answer', m:2, q:'Write the importance of taking rest.', pts:['Rest removes tiredness.','It helps the body recover and repair itself.','Sleep refreshes our body and mind.'], bad:['Rest makes our bones weak.','Only old people need rest.'], kw:['tiredness','repair']},
+  {id:'c5r6', ch:'c5', k:'answer', m:2, q:'What are the different ways of cooking food?', pts:['Boiling – rice, milk','Steaming – idli, dhokla','Frying – puri, pakora','Baking – cake, biscuits','Roasting – peanuts, corn'], bad:['Washing – vegetables','Cutting – apples'], kw:['boiling','steaming','frying','baking','roasting']},
+  {id:'c5r7', ch:'c5', k:'answer', m:2, q:'Write different ways of food preservation.', pts:['Drying – keeping food in the sun','Refrigeration – keeping food cold','Canning – sealing food in airtight cans','Pickling – adding salt and oil','Adding sugar – jams and jellies'], bad:['Leaving food open in the kitchen','Adding lots of water to food'], kw:['drying','refrigeration','canning','pickling']},
+  {id:'c5r8', ch:'c5', k:'answer', m:2, q:'What is fat? What is its role in our body?', pts:['Fat is an energy-giving food. It gives more energy than carbohydrates.','Fat stored under the skin keeps our body warm.','We get fat from butter, ghee, oil and nuts.'], bad:['Fat makes our nails and hair.','Fat is found only in fruits.'], kw:['energy','warm']},
+  {id:'c5r9', ch:'c5', k:'explain', m:1, q:'Balanced diet', pts:['A diet that has all the nutrients in the right amounts is a balanced diet.','It also has roughage and water.'], bad:['A diet with lots of sweets and fried food.','A diet with only one kind of food.'], kw:['all the nutrients','right amounts']},
+  /* c6 */
+  {id:'c6r1', ch:'c6', k:'answer', m:1, q:'List two healthy eating habits.', pts:['Eat slowly and chew the food properly.','Do not overeat.','Wash hands before eating and rinse the mouth after eating.'], bad:['Eat lots of sweets between meals.','Gulp food without chewing.'], kw:['chew','overeat']},
+  {id:'c6r2', ch:'c6', k:'answer', m:1, q:'Write the effects of tooth decay (any two).', pts:['Tooth decay causes toothache.','It makes holes (cavities) in the teeth.'], bad:['Tooth decay makes teeth stronger.','Tooth decay makes us grow taller.'], kw:['toothache','cavities']},
+  {id:'c6r3', ch:'c6', k:'answer', m:1, q:'Why is flossing important?', pts:['Flossing removes food particles stuck between the teeth.','It stops germs and plaque from forming there.'], bad:['Flossing makes teeth longer.','Flossing helps us swallow food.'], kw:['between the teeth','germs']},
+  {id:'c6r4', ch:'c6', k:'answer', m:2, q:'How are cavities formed?', pts:['Germs in our mouth feed on the sugar in food left on our teeth.','They make an acid that slowly eats away the enamel.','This makes a hole in the tooth called a cavity.'], bad:['Cavities are formed by drinking water.','Cavities are formed when milk teeth fall.'], kw:['germs','sugar','acid','enamel']},
+  {id:'c6r5', ch:'c6', k:'explain', m:1, q:'Incisors', pts:['Incisors are the flat, sharp front teeth used for biting and cutting food.','An adult has 8 incisors – 4 in the upper jaw and 4 in the lower jaw.'], bad:['Incisors are the back teeth used for grinding.','An adult has only 4 incisors.'], kw:['front teeth','biting','8'], slip:'Last time you wrote "four front teeth". It is 8 in total – 4 up, 4 down.'},
+  {id:'c6r6', ch:'c6', k:'answer', m:1, q:'What is the role of saliva?', pts:['Saliva makes food soft and wet, so it is easy to swallow.','It starts breaking down food in the mouth.'], bad:['Saliva pumps blood.','Saliva makes teeth white.'], kw:['soft','breaking down']},
+  {id:'c6r7', ch:'c6', k:'explain', m:1, q:'Bolus', pts:['Bolus is a lump of soft, chewed food.','We swallow it and it goes down the food pipe.'], bad:['Bolus is a layer of germs on teeth.','Bolus is the longest part of the digestive system.'], kw:['lump','swallow']},
+  {id:'c6r8', ch:'c6', k:'explain', m:1, q:'Peristalsis', pts:['The muscles of the food pipe push the food down to the stomach.','They move in a wave-like way. This is called peristalsis.'], bad:['Peristalsis is chewing food with molars.','Peristalsis is a kind of tooth.'], kw:['food pipe','wave-like']}
+];
+
+/* ---------- Slip Doctor: her real mistakes from the booklet ---------- */
+var SLIP_IDS = ['c2r8','c6m2','c6r5','c5r2','c3r1','c3r8','c4s1','c3f3','c6m3','c4m5','c4m2','c5m3','c5f2','c6f8','c2s1','c6m5','c1w3','c3s1'];
+
+/* ---------- Weekend plan (Sat 3 Oct - Mon 5 Oct 2026) ---------- */
+var PLAN = [
+  {id:'S1', day:3, when:'Sat 3:00 pm', kind:'ch', ch:'c1', title:'Making of Food', mins:30},
+  {id:'S2', day:3, when:'Sat 3:45 pm', kind:'ch', ch:'c2', title:'Adaptations in Plants', mins:30},
+  {id:'S3', day:3, when:'Sat 6:30 pm', kind:'lab', chs:['c1','c2'], title:'Plant Answer Lab', mins:30, sub:'Write 6 answers in your notebook'},
+  {id:'S4', day:4, when:'Sun 10:00 am', kind:'ch', ch:'c3', title:'Reproduction in Animals', mins:30},
+  {id:'S5', day:4, when:'Sun 10:45 am', kind:'ch', ch:'c4', title:'Adaptations in Animals', mins:30, sub:'Then draw both life cycles on paper'},
+  {id:'S6', day:4, when:'Sun 3:00 pm', kind:'ch', ch:'c5', title:'Food and Health', mins:30},
+  {id:'S7', day:4, when:'Sun 3:45 pm', kind:'ch', ch:'c6', title:'Teeth and Digestion', mins:30},
+  {id:'S8', day:4, when:'Sun 6:00 pm', kind:'boss', title:'Boss: Model Paper', mins:45, sub:'Section A in the app, Section B in your notebook'},
+  {id:'S9', day:4, when:'Sun bedtime', kind:'slip', title:'Slip Doctor', mins:10, sub:'Your own past mistakes'},
+  {id:'S10', day:5, when:'Mon morning', kind:'flash', title:'Flash Round', mins:10, sub:'Quick warm-up. Nothing new!'}
+];
+
+/* ================= DRAWINGS (inline SVG, generic subjects) ================= */
+var ART = (function(){
+  var INK = '#173A2E';
+  function frogBody(extra){
+    return '<ellipse cx="60" cy="70" rx="42" ry="32" fill="#4DBA6E"/>'+
+      '<ellipse cx="60" cy="80" rx="26" ry="18" fill="#C9EDBE"/>'+
+      '<circle cx="38" cy="38" r="16" fill="#4DBA6E"/><circle cx="82" cy="38" r="16" fill="#4DBA6E"/>'+
+      '<circle cx="38" cy="38" r="10" fill="#fff"/><circle cx="82" cy="38" r="10" fill="#fff"/>'+
+      '<circle cx="40" cy="40" r="5" fill="'+INK+'"/><circle cx="84" cy="40" r="5" fill="'+INK+'"/>'+
+      '<circle cx="42" cy="38" r="1.6" fill="#fff"/><circle cx="86" cy="38" r="1.6" fill="#fff"/>'+
+      '<path d="M42 70 Q60 86 78 70" stroke="'+INK+'" stroke-width="3" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="30" cy="66" r="5" fill="#FF9AA2" opacity=".7"/><circle cx="90" cy="66" r="5" fill="#FF9AA2" opacity=".7"/>'+
+      '<ellipse cx="34" cy="100" rx="15" ry="6" fill="#2F9E5A"/><ellipse cx="86" cy="100" rx="15" ry="6" fill="#2F9E5A"/>'+
+      (extra||'');
+  }
+  function spawnCluster(){
+    var pts=[[34,40],[56,34],[78,42],[26,62],[48,58],[70,62],[92,64],[38,82],[60,82],[82,84]], s='';
+    pts.forEach(function(p){ s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="12" fill="#D4ECF7" stroke="#9CCFE6" stroke-width="2"/><circle cx="'+p[0]+'" cy="'+p[1]+'" r="4.5" fill="'+INK+'"/>'; });
+    return s;
+  }
+  function tadpole(legs){
+    return '<path d="M66 50 C86 36 100 70 118 52 C104 82 86 58 66 70 Z" fill="#3F7A55"/>'+
+      (legs?'<path d="M58 74 L66 92 L74 92" stroke="#3F7A55" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 78 L44 96 L52 96" stroke="#3F7A55" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>':'')+
+      '<ellipse cx="46" cy="58" rx="28" ry="24" fill="#3F7A55"/><ellipse cx="44" cy="66" rx="16" ry="11" fill="#7FB08A"/>'+
+      '<circle cx="36" cy="50" r="7" fill="#fff"/><circle cx="37" cy="51" r="3.5" fill="'+INK+'"/>'+
+      '<path d="M28 66 Q34 71 40 66" stroke="'+INK+'" stroke-width="2.5" fill="none" stroke-linecap="round"/>';
+  }
+  var HAT = '<ellipse cx="60" cy="22" rx="34" ry="6" fill="#B98F4E"/><path d="M40 22 Q42 3 60 3 Q78 3 80 22 Z" fill="#DDBE7E"/><rect x="41" y="15" width="38" height="4" fill="#7A5A2B"/>';
+  var CAP = '<path d="M42 17 L78 17 L76 29 Q60 35 44 29 Z" fill="'+INK+'"/><polygon points="60,2 98,14 60,26 22,14" fill="'+INK+'"/><path d="M60 14 L92 17 L92 32" stroke="#FFB627" stroke-width="2.5" fill="none"/><circle cx="92" cy="34" r="4" fill="#FFB627"/>';
+  var TAIL = '<path d="M98 80 Q116 84 117 102 Q106 92 95 90 Z" fill="#4DBA6E"/>';
+
+  function mascot(level){
+    var inner;
+    if(level<=0) inner = spawnCluster();
+    else if(level===1) inner = tadpole(false);
+    else if(level===2) inner = tadpole(true);
+    else if(level===3) inner = TAIL + frogBody();
+    else if(level===4) inner = frogBody();
+    else if(level===5) inner = frogBody(HAT);
+    else inner = frogBody(CAP);
+    return '<svg viewBox="0 0 120 110" width="100%" height="100%" aria-hidden="true">'+inner+'</svg>';
+  }
+
+  /* ---- leaf diagram ---- */
+  var LEAF_PINS = [[275,38],[178,152],[214,87],[128,132],[76,212]];
+  function leaf(opts){
+    opts = opts||{};
+    var ask = opts.ask || [0,1,2,3,4];      // which parts get a pin
+    var state = opts.state || {};           // idx -> 'ok'|'bad'
+    var cur = (typeof opts.cur==='number') ? opts.cur : -1;
+    var showNames = !!opts.names;
+    var s = '<svg class="leafsvg" viewBox="0 0 320 250" width="100%" role="img" aria-label="Diagram of a leaf">';
+    s += '<path d="M95 185 Q80 205 60 236" stroke="#5E8C3A" stroke-width="8" fill="none" stroke-linecap="round"/>';
+    s += '<path d="M95 185 C60 110 150 30 275 38 C255 110 175 205 95 185 Z" fill="#7CC66B" stroke="#4E8F3A" stroke-width="3"/>';
+    s += '<path d="M95 185 Q190 105 275 38" stroke="#3E7A2E" stroke-width="4" fill="none"/>';
+    var veins=[[142,146,115,118],[142,146,158,166],[187,108,150,80],[187,108,208,135],[232,72,205,52],[232,72,244,90]];
+    veins.forEach(function(v){ s += '<path d="M'+v[0]+' '+v[1]+' L'+v[2]+' '+v[3]+'" stroke="#3E7A2E" stroke-width="2.4" stroke-linecap="round"/>'; });
+    ask.forEach(function(pi, k){
+      var p = LEAF_PINS[pi], st = state[pi], fill = '#fff', col = INK;
+      if(st==='ok'){ fill='#1A9A5E'; col='#fff'; } else if(st==='bad'){ fill='#D8414D'; col='#fff'; } else if(pi===cur){ fill='#FFB627'; }
+      if(pi===cur && !st) s += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="20" fill="none" stroke="#FFB627" stroke-width="3" class="pulse"/>';
+      s += '<circle cx="'+p[0]+'" cy="'+p[1]+'" r="13" fill="'+fill+'" stroke="'+INK+'" stroke-width="2.5"/>';
+      s += '<text x="'+p[0]+'" y="'+(p[1]+5)+'" text-anchor="middle" font-size="15" font-weight="700" fill="'+col+'" font-family="system-ui,sans-serif">'+(k+1)+'</text>';
+    });
+    s += '</svg>';
+    if(showNames){
+      s += '<ol class="leafkey">'+ask.map(function(pi){ return '<li>'+LEAF_PARTS[pi]+'</li>'; }).join('')+'</ol>';
+    }
+    return s;
+  }
+
+  /* ---- teeth ---- */
+  var TOOTH = {
+    incisor: '<path d="M26 60 Q40 150 54 60 Z" fill="#F5EEDC" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><path d="M22 12 L58 12 L60 56 Q40 66 20 56 Z" fill="#FFFDF6" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/>',
+    canine: '<path d="M27 58 Q40 160 53 58 Z" fill="#F5EEDC" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><path d="M40 4 L61 42 Q58 60 40 62 Q22 60 19 42 Z" fill="#FFFDF6" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/>',
+    premolar: '<path d="M22 60 Q26 132 36 64 Z" fill="#F5EEDC" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><path d="M44 64 Q54 132 58 60 Z" fill="#F5EEDC" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><path d="M17 32 Q23 6 32 22 Q40 30 48 22 Q57 6 63 32 L61 60 Q40 68 19 60 Z" fill="#FFFDF6" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/>',
+    molar: '<path d="M10 62 Q12 132 28 68 Z" fill="#F5EEDC" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><path d="M52 68 Q68 132 70 62 Z" fill="#F5EEDC" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><path d="M5 34 Q10 12 20 26 Q28 10 37 26 Q45 10 53 26 Q62 12 75 34 L72 62 Q40 72 8 62 Z" fill="#FFFDF6" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/>'
+  };
+  function tooth(kind, w){
+    return '<svg viewBox="0 0 80 150" width="'+(w||70)+'" role="img" aria-label="A tooth">'+TOOTH[kind]+'</svg>';
+  }
+
+  /* ---- life-cycle stages ---- */
+  var STAGE = {
+    spawn: function(){ var pts=[[24,30],[46,24],[68,30],[18,52],[40,50],[62,54],[82,50],[30,74],[52,76],[74,74]], s='<rect x="2" y="8" width="96" height="88" rx="40" fill="#E6F4FA"/>'; pts.forEach(function(p){ s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="10" fill="#D4ECF7" stroke="#8CC5DE" stroke-width="2"/><circle cx="'+p[0]+'" cy="'+p[1]+'" r="3.8" fill="'+INK+'"/>'; }); return s; },
+    tadpole: function(){ return '<g transform="translate(-6 -6) scale(.9)">'+tadpole(false)+'</g>'; },
+    froglet: function(){ return '<g transform="translate(6 10) scale(.72)">'+TAIL+frogBody()+'</g>'; },
+    leafeggs: function(){ var s='<path d="M8 80 C10 30 60 8 94 14 C88 60 50 92 8 80 Z" fill="#7CC66B" stroke="#4E8F3A" stroke-width="3"/>'; [[40,52],[52,44],[60,56],[48,62],[66,40],[70,52]].forEach(function(p){ s+='<circle cx="'+p[0]+'" cy="'+p[1]+'" r="5" fill="#FFF6D8" stroke="#C9A646" stroke-width="1.5"/>'; }); return s; },
+    chrysalis: function(){ return '<path d="M20 8 L80 8" stroke="#8B6B3E" stroke-width="5" stroke-linecap="round"/><path d="M50 8 L50 18" stroke="#8B6B3E" stroke-width="2"/><path d="M50 18 C66 30 68 62 50 92 C32 62 34 30 50 18 Z" fill="#A6CF74" stroke="#5C7D32" stroke-width="3"/><path d="M42 40 Q50 46 58 40 M40 56 Q50 62 60 56" stroke="#5C7D32" stroke-width="2" fill="none"/><circle cx="46" cy="30" r="2" fill="#E3B23C"/><circle cx="54" cy="30" r="2" fill="#E3B23C"/>'; }
+  };
+  function stage(kind, w){
+    if(!STAGE[kind]) return '';
+    return '<svg viewBox="0 0 100 100" width="'+(w||80)+'" role="img" aria-label="'+kind+'">'+STAGE[kind]()+'</svg>';
+  }
+  /* pic: emoji string or 'svg:name' */
+  function pic(p, w){
+    if(!p) return '';
+    if(p.indexOf('svg:')===0) return stage(p.slice(4), w);
+    return '<span class="emo">'+p+'</span>';
+  }
+
+  return {mascot:mascot, leaf:leaf, tooth:tooth, stage:stage, pic:pic, LEAF_PINS:LEAF_PINS, TOOTH_KINDS:Object.keys(TOOTH)};
+})();
+
+(function(){
+'use strict';
+
+/* ---------------- config ---------------- */
+var STORE_KEY = 'diksha_science_midterm_v1';
+var DB_PATH = 'progress/diksha';
+var LEVEL_XP = 180;
+var TITLES = ['Frog Spawn','Tadpole','Tadpole with legs','Froglet','Young Frog','Frog Explorer','Professor Frog'];
+var KID = 'Diksha';
+var EXAM_Y = 2026, EXAM_M = 9, EXAM_D = 5;          /* Monday 5 Oct 2026 (month is 0-based) */
+var LBL = ['a','b','c','d','e','f','g','h'];
+var PRAISE = ['Brilliant!','Super, Diksha!','Spot on!','You got it!','Hop hop hooray!','Science star!'];
+var OOPS = ['Nearly! Now you know.','Oops – let’s remember this one.','Good try! Look at the answer.'];
+
+/* ---------------- rng ---------------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+var rnd = (typeof window.__SCI_SEED === 'number') ? mulberry(window.__SCI_SEED) : Math.random;
+function ri(n){return Math.floor(rnd()*n);}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=ri(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function sample(a,n){return shuffle(a).slice(0,n);}
+function pick(a){return a[ri(a.length)];}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function nowMs(){ return (typeof window.__SCI_NOW==='number') ? window.__SCI_NOW : Date.now(); }
+function dayKey(ms){ var d=new Date(ms); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+
+/* ---------------- template index ---------------- */
+var TPL = {};
+function reg(t, ch, d){ if(TPL[d.id]) throw new Error('duplicate id '+d.id); TPL[d.id] = {t:t, ch:ch, d:d}; }
+CH.forEach(function(c){
+  (MCQ[c.id]||[]).forEach(function(d){ reg('mcq', c.id, d); });
+  (FILL[c.id]||[]).forEach(function(d){ reg('fill', c.id, d); });
+  (TF[c.id]||[]).forEach(function(d){ reg('tf', c.id, d); });
+  (TWO[c.id]||[]).forEach(function(d){ reg('two', c.id, d); });
+  (SPELL[c.id]||[]).forEach(function(d){ reg('spell', c.id, d); });
+  (SORT[c.id]||[]).forEach(function(d){ reg('sort', c.id, d); });
+  if(MATCH[c.id]) reg('match', c.id, MATCH[c.id]);
+});
+HABITAT.forEach(function(d){ reg('hab', 'c4', d); });
+reg('eq', 'c1', EQ);
+Object.keys(SEQ).forEach(function(k){ reg('seq', SEQ[k].ch, SEQ[k]); });
+STEPS.forEach(function(d){ reg('steps', d.ch, d); });
+WRITTEN.forEach(function(d){ reg('w', d.ch, d); });
+reg('label', 'c1', {id:'c1l1'});
+reg('match', 'mix', BOSS_MATCH);
+
+function idsOf(type, ch, filter){
+  return Object.keys(TPL).filter(function(id){ var T=TPL[id]; return T.t===type && (!ch || T.ch===ch) && (!filter || filter(T.d)); });
+}
+function fillBlanks(d){ return d.q.split('___').length-1; }
+function article(w){ return /^[AEIOU]/.test(w) ? 'an '+w.toLowerCase() : 'a '+w.toLowerCase(); }
+var KIND_LABEL = {reason:'Give reason', answer:'Answer this', explain:'Explain', diff:'Differentiate'};
+function wPrompt(d){ return d.k==='reason' ? 'Give reason: '+d.q : d.k==='explain' ? 'Explain: '+d.q : d.q; }
+
+/* ---------------- build a runtime question from a template ---------------- */
+function make(id, o){
+  o = o||{};
+  var T = TPL[id]; if(!T) throw new Error('no template '+id);
+  var d = T.d;
+  var q = {key:id, ch:T.ch, marks:o.marks||1, sec:o.sec||'', part:o.part||''};
+  if(T.t==='mcq'){
+    q.type='mcq'; q.prompt=d.q; q.pic=d.pic||''; q.svg=d.svg||''; q.fx=!!d.fx; q.opts=d.fx?d.o.slice():shuffle(d.o); q.ans=d.a;
+    q.tip=d.tip||''; q.slip=d.slip||'';
+    q.label = d.one ? 'Give one word' : (ART.TOOTH_KINDS.indexOf(d.svg)>=0 ? 'Identify the tooth' : ((d.pic||d.svg) ? 'Picture question' : 'Multiple choice'));
+  } else if(T.t==='hab'){
+    q.type='mcq'; q.prompt='Write the habitat of this animal.'; q.pic=d.pic; q.cap=d.cap; q.fx=true; q.opts=HAB_O.slice(); q.ans=d.a;
+    q.tip=d.cap+' is '+article(d.a)+' animal.'; q.label='Habitat';
+  } else if(T.t==='spell'){
+    q.type='mcq'; q.spell=true; q.prompt=d.q; q.opts=shuffle([d.a].concat(d.w)); q.ans=d.a; q.slip=d.slip||'';
+    q.tip=(d.tip?d.tip+' ':'')+'Spell it: '+d.a.toUpperCase().split('').join('-'); q.label='Spell it right';
+  } else if(T.t==='tf'){
+    q.type='tf'; q.prompt=d.q; q.ans=d.a; q.tip=d.tip||''; q.slip=d.slip||''; q.note=d.note||''; q.label='True or False';
+    q.fix = d.fix ? {prompt:d.fix.q, opts:shuffle(d.fix.o), ans:d.fix.a} : null;
+  } else if(T.t==='fill'){
+    q.type='fill'; q.parts=d.q.split('___'); q.ans=d.a; q.any=!!d.any; q.slip=d.slip||''; q.tip=d.tip||'';
+    q.chips=shuffle(d.a.map(function(x){return x[0];}).concat(d.bank)); q.label='Fill in the blanks';
+  } else if(T.t==='eq'){
+    var r = ri(2), p = 2+ri(2);
+    q.type='fill'; q.eq=true; q.terms=d.terms.slice(); q.blank=[r,p]; q.over=d.over;
+    q.ans=[[d.terms[r]],[d.terms[p]]]; q.any=false;
+    q.chips=shuffle([d.terms[r], d.terms[p]].concat(sample(d.bank,2)));
+    q.tip='Carbon dioxide + Water → (sunlight, chlorophyll) → Food + Oxygen'; q.label='Complete the equation';
+  } else if(T.t==='two'){
+    var nOk = Math.min(3, d.ok.length), okC = sample(d.ok, nOk), noC = sample(d.no, Math.min(d.no.length, 6-nOk));
+    q.type='two'; q.prompt=d.q; q.ok=okC; q.chips=shuffle(okC.concat(noC)); q.need=2; q.tip=d.tip||''; q.label='Give two examples';
+  } else if(T.t==='match'){
+    var n = o.n||4, chosen=[], used={};
+    shuffle(d.pairs).forEach(function(p){ if(chosen.length<n && !(p[2] && used[p[2]])){ chosen.push(p); if(p[2]) used[p[2]]=1; } });
+    var right = shuffle(chosen.map(function(p){return p[1];}));
+    q.type='match'; q.prompt='Match the following'; q.left=chosen.map(function(p){return p[0];}); q.right=right;
+    q.pair=chosen.map(function(p){return right.indexOf(p[1]);}); q.label='Match the following';
+  } else if(T.t==='sort'){
+    var items=[];
+    d.buckets.forEach(function(b,bi){ sample(d.items.filter(function(it){return it[1]===bi;}), d.per).forEach(function(it){ items.push({t:it[0], b:bi}); }); });
+    q.type='sort'; q.prompt=d.q; q.buckets=d.buckets.slice(); q.items=shuffle(items); q.label=/^Differentiate/.test(d.q)?'Differentiate':'Sort it out';
+  } else if(T.t==='seq'){
+    var anchor = !!d.cyc, rest = d.steps.slice(anchor?1:0), ch2 = shuffle(rest), guard=0;
+    while(rest.length>1 && ch2.join('|')===rest.join('|') && guard++<20) ch2 = shuffle(rest);
+    q.type='seq'; q.prompt=d.q; q.steps=d.steps.slice(); q.pics=d.pics||null; q.cyc=!!d.cyc; q.anchor=anchor; q.chips=ch2;
+    q.label = d.cyc ? 'Complete the life cycle' : 'Put in order';
+  } else if(T.t==='label'){
+    var ask = o.ask ? o.ask.slice() : shuffle([0,1,2,3,4]);
+    q.type='label'; q.prompt='Label the parts of a leaf.'; q.ask=ask; q.chips=shuffle(ask.map(function(i){return LEAF_PARTS[i];}));
+    if(o.ask && o.ask.length<5){ q.chips = shuffle(q.chips.concat(sample(LEAF_PARTS.filter(function(nm,i){return ask.indexOf(i)<0;}), 2))); }
+    q.label='Label the diagram';
+  } else if(T.t==='steps'){
+    q.type='steps'; q.pic=d.pic; q.prompt='Identify the plant and answer.';
+    q.parts=d.parts.map(function(p){ return {prompt:p.q, opts:shuffle(p.o), ans:p.a}; }); q.label='Identify and answer';
+  } else if(T.t==='w'){
+    q.kind=d.k; q.wm=d.m; q.prompt=wPrompt(d); q.kw=d.kw||[]; q.pts=d.pts.slice(); q.slip=d.slip||''; q.diff=d.k==='diff'?d:null;
+    if(o.mode==='note'){
+      q.type='note'; q.label='Write in your notebook'; q.marks=o.marks||d.m;
+    } else {
+      var good = d.pts.length>3 ? sample(d.pts,3) : d.pts.slice();
+      q.type='build'; q.good=good; q.chips=shuffle(good.concat(d.bad)); q.label='Answer builder – '+KIND_LABEL[d.k];
+    }
+  }
+  return q;
+}
+
+/* ---------------- sets ---------------- */
+function mcqIds(ch){ return idsOf('mcq', ch, function(d){ return !d.svg && !d.pic; }); }
+function specials(ch){
+  if(ch==='c1') return ['c1l1','c1e1'];
+  if(ch==='c2') return [pick(idsOf('steps','c2'))];
+  if(ch==='c3') return [pick(['c3c1','c3c2']), pick(['c3p1','c3p2','c3p3','c3p4'])];
+  if(ch==='c4') { var h=shuffle(idsOf('hab','c4')), a=h[0], b=null; for(var i=1;i<h.length;i++){ if(TPL[h[i]].d.a!==TPL[a].d.a){ b=h[i]; break; } } return [a,b]; }
+  if(ch==='c6') return [pick(['c6i1','c6i2','c6i3','c6i4']), 'c6c1'];
+  return [];
+}
+function chapterSet(ch){
+  var m = sample(mcqIds(ch),3), f = sample(idsOf('fill',ch),2), t = sample(idsOf('tf',ch),2);
+  var sp = pick(idsOf('spell',ch)), tw = pick(idsOf('two',ch));
+  var ms = idsOf('match',ch).concat(idsOf('sort',ch));
+  var sx = specials(ch);
+  var msPick = sample(ms, sx.length===0 ? 2 : 1);
+  var w = sample(idsOf('w',ch,function(d){return d.k!=='diff';}),2);
+  var order = [m[0], t[0], f[0], m[1], sx[0]||msPick[1], t[1], sp, f[1], tw, m[2], sx[1], msPick[0]];
+  var Q = order.filter(Boolean).map(function(id){ return make(id); });
+  w.forEach(function(id){ Q.push(make(id,{mode:'build'})); });
+  return Q;
+}
+function labSet(chs){
+  var Q=[];
+  if(chs.indexOf('c1')>=0){ Q.push(make('c1l1')); Q.push(make('c1e1')); }
+  var per = chs.length>1 ? 3 : 5;
+  chs.forEach(function(ch){
+    var ids = idsOf('w', ch);
+    var slips = ids.filter(function(id){ return TPL[id].d.slip; });
+    var rest = shuffle(ids.filter(function(id){ return !TPL[id].d.slip; }));
+    shuffle(slips).concat(rest).slice(0, per).forEach(function(id){ Q.push(make(id,{mode:'note'})); });
+  });
+  return Q;
+}
+function bossA(){
+  var Q=[], s;
+  s='Q.1 Multiple Choice Questions';
+  CH.forEach(function(c,k){ Q.push(make(pick(idsOf('mcq',c.id,function(d){return !d.svg && !d.pic && !d.one;})),{marks:.5, sec:s, part:LBL[k]})); });
+  s='Q.2 Fill in the blanks';
+  var total=0, k2=0;
+  shuffle(idsOf('fill')).forEach(function(id){ var n=fillBlanks(TPL[id].d); if(total+n<=8){ Q.push(make(id,{marks:.5*n, sec:s, part:LBL[k2++]})); total+=n; } });
+  Q.push(make('bx',{marks:2, sec:'Q.3 Match the following', n:4}));
+  s='Q.4 State True or False';
+  CH.forEach(function(c,k){ Q.push(make(pick(idsOf('tf',c.id)),{marks:.5, sec:s, part:LBL[k]})); });
+  Q.push(make('c1l1',{marks:1, sec:'Q.5 (i) Label the parts of a leaf', ask:sample([0,1,2,3,4],2)}));
+  sample(['c6i1','c6i2','c6i3','c6i4'],2).forEach(function(id,k){ Q.push(make(id,{marks:.5, sec:'Q.5 (ii) Identify each type of tooth', part:LBL[k]})); });
+  specials('c4').forEach(function(id,k){ Q.push(make(id,{marks:.5, sec:'Q.5 (iii) Write the habitat', part:LBL[k]})); });
+  return Q;
+}
+function bossB(){
+  var Q=[];
+  sample(CH,3).forEach(function(c,k){ Q.push(make(pick(idsOf('two',c.id)),{marks:1, sec:'Q.6 Give two examples', part:LBL[k]})); });
+  Q.push(make('c3c2',{marks:2, sec:'Q.7 Stages of a butterfly'}));
+  Q.push(make('c3f6',{marks:.5, sec:'Q.7 Stages of a butterfly', part:'a'}));
+  Q.push(make('c3f7',{marks:.5, sec:'Q.7 Stages of a butterfly', part:'b'}));
+  function wp(kind, n, marks, sec){
+    var ids = shuffle(idsOf('w', null, function(d){ return d.k===kind && (marks===2 ? d.m===2 : true); })), used={}, out=[];
+    ids.forEach(function(id){ var ch=TPL[id].ch; if(out.length<n && !used[ch]){ out.push(id); used[ch]=1; } });
+    out.forEach(function(id,k){ Q.push(make(id,{mode:'note', marks:marks, sec:sec, part:LBL[k]})); });
+  }
+  wp('explain',3,1,'Q.8 Explain the following');
+  wp('reason',3,1,'Q.9 Give reasons');
+  wp('answer',4,2,'Q.10 Answer the following questions');
+  Q.push(make('c4d1',{mode:'note', marks:2, sec:'Q.11 Differentiate between'}));
+  return Q;
+}
+function asTappable(id){ return TPL[id].t==='w' ? make(id,{mode:'build'}) : make(id); }
+function slipSet(){ return shuffle(SLIP_IDS).map(asTappable); }
+function flashSet(){
+  var mk = Object.keys(S.mist).filter(function(id){return TPL[id];}).sort(function(a,b){ return (S.mist[b].n-S.mist[a].n) || (S.mist[a].t-S.mist[b].t); }).slice(0,10);
+  var ids = mk.slice();
+  shuffle(SLIP_IDS.filter(function(id){ return !S.cured[id] && ids.indexOf(id)<0; })).forEach(function(id){ if(ids.length<12) ids.push(id); });
+  shuffle(idsOf('mcq',null,function(d){return !d.svg && !d.pic;}).concat(idsOf('tf'))).forEach(function(id){ if(ids.length<15 && ids.indexOf(id)<0) ids.push(id); });
+  return ids.map(asTappable);
+}
+function mixNoteSet(){ return shuffle(CH).map(function(c){ return make(pick(idsOf('w', c.id, function(d){return d.k!=='diff';})),{mode:'note'}); }); }
+function spellSet(){ return sample(idsOf('spell'),12).map(function(id){ return make(id); }); }
+
+/* ---------------- state ---------------- */
+function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, sound:true, t:0}; }
+function normalize(o){
+  var f = fresh(); if(!o || typeof o!=='object') return f;
+  Object.keys(f).forEach(function(k){ if(o[k]===undefined || typeof o[k]!==typeof f[k]) o[k]=f[k]; });
+  return o;
+}
+var lsOK = false;
+function loadLocal(){
+  try{ var raw = window.localStorage.getItem(STORE_KEY); lsOK = true; return raw ? normalize(JSON.parse(raw)) : fresh(); }
+  catch(e){ lsOK = false; return fresh(); }
+}
+function saveLocal(){ try{ window.localStorage.setItem(STORE_KEY, JSON.stringify(S)); lsOK = true; }catch(e){ lsOK = false; } }
+var S = loadLocal();
+
+/* optional cloud copy through the artifact runtime (absent on GitHub Pages / signed out) */
+var SYNC = {ref:null, status: lsOK ? 'device' : 'memory', writing:false, pending:false, timer:null};
+function better(a,b){ return (a.xp||0)>(b.xp||0) || ((a.xp||0)===(b.xp||0) && (a.t||0)>(b.t||0)); }
+function summary(){
+  var o = {xp:S.xp, level:lvl(S.xp)};
+  CH.forEach(function(c){ var r=S.ch[c.id]; o[c.id+'_best'] = r ? Math.round(r.best*100) : -1; });
+  o.mistakes = Object.keys(S.mist).join(',');
+  o.bossA = S.boss.a ? S.boss.a.got+'/'+S.boss.a.max : '';
+  o.bossB = S.boss.b ? S.boss.b.got+'/'+S.boss.b.max : '';
+  return o;
+}
+function flush(){
+  if(!SYNC.ref) return;
+  if(SYNC.writing){ SYNC.pending=true; return; }
+  SYNC.writing = true;
+  SYNC.ref.set({s:JSON.stringify(S), t:S.t, summary:summary()}).then(function(){ SYNC.status='cloud'; }, function(e){
+    if(e && (e.code==='invalid_argument' || e.code==='revoked' || e.code==='not_granted')){ SYNC.ref=null; SYNC.status = lsOK?'device':'memory'; }
+  }).then(function(){ SYNC.writing=false; paintSync(); if(SYNC.pending){ SYNC.pending=false; flush(); } });
+}
+function save(){ S.t = nowMs(); saveLocal(); if(typeof DikshaSync!=='undefined'){ try{ DikshaSync.push(STORE_KEY, S); }catch(e){} } if(!SYNC.ref && SYNC.status!=='cloud') SYNC.status = lsOK?'device':'memory'; if(SYNC.ref){ clearTimeout(SYNC.timer); SYNC.timer=setTimeout(flush, 1500); } }
+function initCloud(){
+  var c = window.claude;
+  if(!c || typeof c.use!=='function') return;
+  var p; try{ p = c.use('db'); }catch(e){ return; }
+  Promise.resolve(p).then(function(db){
+    if(!db) return;
+    var ref = db.doc(DB_PATH);
+    return ref.get().then(function(snap){
+      SYNC.ref = ref; SYNC.status='cloud';
+      var remote = null;
+      if(snap && snap.exists){ try{ remote = normalize(JSON.parse(snap.data().s)); }catch(e){ remote=null; } }
+      if(remote && better(remote, S)){ S = remote; saveLocal(); render(); }
+      else if(!remote || better(S, remote)){ flush(); }
+      paintSync();
+    });
+  }).catch(function(){ SYNC.ref=null; paintSync(); });
+}
+function paintSync(){
+  var el = document.getElementById('syncnote'); if(!el) return;
+  el.textContent = SYNC.status==='cloud' ? 'Progress is saved to your Claude account.' : SYNC.status==='device' ? 'Progress is saved on this device.' : 'Progress will reset if this page is closed.';
+}
+
+function lvl(xp){ return Math.min(TITLES.length-1, Math.floor(xp/LEVEL_XP)); }
+function addXP(n){
+  if(n<=0) return;
+  var before = lvl(S.xp);
+  S.xp += n; var k = dayKey(nowMs()); S.days[k] = (S.days[k]||0)+n;
+  if(lvl(S.xp)>before){ toast('Level up! You are now a '+TITLES[lvl(S.xp)]+'!'); confetti(80); }
+}
+function markMistake(id){ var m = S.mist[id] || {n:0,t:0}; m.n++; m.t = nowMs(); S.mist[id]=m; }
+function clearMistake(id){ if(S.mist[id]){ S.mist[id].n--; if(S.mist[id].n<=0) delete S.mist[id]; } }
+
+/* ---------------- dates / plan ---------------- */
+function planDay(){
+  var d = new Date(nowMs());
+  if(d.getFullYear()!==EXAM_Y || d.getMonth()!==EXAM_M) return 0;
+  return d.getDate();
+}
+function examChip(){
+  var d = new Date(nowMs()); var t0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  var ex = new Date(EXAM_Y, EXAM_M, EXAM_D).getTime();
+  var days = Math.round((ex - t0)/86400000);
+  if(days>1) return 'Exam in '+days+' days';
+  if(days===1) return 'Exam tomorrow';
+  if(days===0) return 'Exam today!';
+  return 'Exam done';
+}
+function planDone(p){
+  if(p.kind==='ch') return !!(S.ch[p.ch] && S.ch[p.ch].plays>0);
+  if(p.kind==='boss') return !!(S.boss.a && S.boss.b);
+  return !!S.done[p.id];
+}
+function nextPlan(){ for(var i=0;i<PLAN.length;i++){ if(!planDone(PLAN[i])) return PLAN[i]; } return null; }
+
+/* ---------------- sound / fx ---------------- */
+var AC = null;
+function beep(ok){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    var notes = ok ? [660, 880] : [240, 190];
+    notes.forEach(function(f,i){
+      var o = AC.createOscillator(), g = AC.createGain(); o.type = ok?'triangle':'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, AC.currentTime+i*0.11); g.gain.exponentialRampToValueAtTime(0.18, AC.currentTime+i*0.11+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime+i*0.11+0.16);
+      o.connect(g); g.connect(AC.destination); o.start(AC.currentTime+i*0.11); o.stop(AC.currentTime+i*0.11+0.18);
+    });
+  }catch(e){}
+}
+var reduceMotion = false;
+try{ reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+function confetti(n){
+  if(reduceMotion) return;
+  var cv = document.getElementById('fx'); if(!cv || !cv.getContext) return;
+  var ctx; try{ ctx = cv.getContext('2d'); }catch(e){ return; } if(!ctx) return;
+  var W = cv.width = window.innerWidth, H = cv.height = window.innerHeight, P=[], cols=['#2E9E5B','#FFB627','#2C8FD0','#D63F5E','#7A5AD6','#E0702A'];
+  for(var i=0;i<n;i++) P.push({x:W/2+(rnd()-.5)*W*.4, y:H*.35, vx:(rnd()-.5)*9, vy:-rnd()*9-3, s:5+rnd()*6, c:pick(cols), r:rnd()*6});
+  var t=0;
+  (function step(){
+    ctx.clearRect(0,0,W,H); t++;
+    P.forEach(function(p){ p.vy+=0.28; p.x+=p.vx; p.y+=p.vy; p.r+=0.1; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); ctx.restore(); });
+    if(t<110) requestAnimationFrame(step); else ctx.clearRect(0,0,W,H);
+  })();
+}
+var toastTimer=null;
+function toast(msg){
+  var el = document.getElementById('toast'); if(!el) return;
+  el.textContent = msg; el.hidden = false; clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.hidden = true; }, 2600);
+}
+
+/* ---------------- view state ---------------- */
+var V = {name:'home'};            /* home | learn | quiz | result | parent */
+var QZ = null;                    /* active quiz */
+var armed = {};                   /* two-tap confirmations */
+
+function startQuiz(mode, list, meta){
+  QZ = {mode:mode, list:list, i:0, ui:newUI(list[0]), res:[], xp:0, combo:0, best:0, meta:meta||{}, started:nowMs()};
+  V = {name:'quiz'}; render(); scrollTop();
+}
+function newUI(q){
+  if(!q) return {};
+  switch(q.type){
+    case 'mcq': return {picked:null, done:false};
+    case 'tf': return {picked:null, fixPicked:null, done:false};
+    case 'fill': return {slots:q.ans.map(function(){return null;}), sel:0, done:false};
+    case 'two': return {sel:[], done:false};
+    case 'match': return {L:null, R:null, got:q.left.map(function(){return false;}), miss:q.left.map(function(){return false;}), flash:null, done:false};
+    case 'sort': return {i:0, placed:[], miss:0, flash:null, done:false};
+    case 'seq': return {filled:q.anchor?[q.steps[0]]:[], used:{}, miss:{}, flash:null, done:false};
+    case 'label': return {k:0, got:[], done:false};
+    case 'steps': return {k:0, picks:[], done:false};
+    case 'build': return {sel:[], done:false};
+    case 'note': return {phase:'write', ticks:q.pts.map(function(){return false;}), done:false};
+  }
+  return {};
+}
+function scrollTop(){ try{ window.scrollTo(0,0); }catch(e){} }
+
+/* ---------------- grading ---------------- */
+function grade(q, u){
+  switch(q.type){
+    case 'mcq': return u.picked===q.ans ? 1 : 0;
+    case 'tf': return u.picked===q.ans ? 1 : 0;
+    case 'fill': return fillScore(q,u.slots).score;
+    case 'two': var c=u.sel.filter(function(x){return q.ok.indexOf(x)>=0;}).length; return c/q.need;
+    case 'match': return u.miss.filter(function(m){return !m;}).length/q.left.length;
+    case 'sort': return u.placed.filter(function(p){return p.ok;}).length/q.items.length;
+    case 'seq': var slots=q.steps.length-(q.anchor?1:0), miss=Object.keys(u.miss).length; return (slots-miss)/slots;
+    case 'label': return u.got.filter(function(g){return g.ok;}).length/q.ask.length;
+    case 'steps': return u.picks.filter(function(p,k){return p===q.parts[k].ans;}).length/q.parts.length;
+    case 'build':
+      var g=u.sel.filter(function(x){return q.good.indexOf(x)>=0;}).length, b=u.sel.length-g;
+      if(g===q.good.length && b===0) return 1;
+      return Math.max(0, (g-b)/q.good.length);
+    case 'note': return u.ticks.filter(Boolean).length/q.pts.length;
+  }
+  return 0;
+}
+function fillScore(q, slots){
+  var res = slots.map(function(){return false;});
+  if(q.any){
+    var pool = q.ans.map(function(a){return a;}), usedA = {};
+    slots.forEach(function(v,i){
+      for(var j=0;j<pool.length;j++){ if(!usedA[j] && v!==null && pool[j].indexOf(v)>=0){ usedA[j]=1; res[i]=true; break; } }
+    });
+  } else {
+    slots.forEach(function(v,i){ res[i] = v!==null && q.ans[i].indexOf(v)>=0; });
+  }
+  var ok = res.filter(Boolean).length;
+  return {res:res, score: ok/slots.length};
+}
+
+function finishQ(){
+  var q = QZ.list[QZ.i], u = QZ.ui;
+  if(u.done) return;
+  u.done = true;
+  var sc = grade(q, u);
+  var ok = sc>=0.999;
+  QZ.res[QZ.i] = {score:sc, ok:ok};
+  var xp = q.type==='note' ? u.ticks.filter(Boolean).length*4 : Math.round(10*sc);
+  if(ok){ QZ.combo++; if(QZ.combo>=3) xp += Math.min(QZ.combo-2,5)*2; } else QZ.combo = 0;
+  QZ.best = Math.max(QZ.best, QZ.combo);
+  QZ.xp += xp; addXP(xp);
+  if(ok){ clearMistake(q.key); if(QZ.mode==='slip') S.cured[q.key]=true; }
+  else markMistake(q.key);
+  if(q.type!=='note') beep(ok);
+  save();
+}
+
+/* ---------------- actions ---------------- */
+var ACT = {};
+ACT.home = function(){ V={name:'home'}; QZ=null; render(); scrollTop(); };
+ACT.parent = function(){ V={name:'parent'}; render(); scrollTop(); };
+ACT.sound = function(){ S.sound=!S.sound; save(); render(); };
+ACT.reset = function(el){
+  if(!armed.reset){ armed.reset=true; render(); setTimeout(function(){ armed.reset=false; }, 4000); return; }
+  armed.reset=false; S = fresh(); save(); toast('Progress cleared.'); V={name:'home'}; render();
+};
+ACT.learn = function(el){ V={name:'learn', ch:el.getAttribute('data-ch'), i:0, then:el.getAttribute('data-then')||''}; render(); scrollTop(); };
+ACT.lnext = function(){ var n=LEARN[V.ch].length; if(V.i<n-1){ V.i++; render(); scrollTop(); } };
+ACT.lprev = function(){ if(V.i>0){ V.i--; render(); scrollTop(); } };
+ACT.quest = function(el){
+  var ch = el.getAttribute('data-ch');
+  S.learned[ch] = true; save();
+  startQuiz('ch', chapterSet(ch), {ch:ch, title:CHMAP[ch].name});
+};
+ACT.plan = function(el){
+  var p = PLAN.filter(function(x){return x.id===el.getAttribute('data-id');})[0]; if(!p) return;
+  if(p.kind==='ch'){ V={name:'learn', ch:p.ch, i:0, then:'quest'}; render(); scrollTop(); return; }
+  if(p.kind==='lab') return startQuiz('lab', labSet(p.chs), {title:p.title, sid:p.id});
+  if(p.kind==='boss') return startQuiz(S.boss.a ? 'bossB' : 'bossA', S.boss.a ? bossB() : bossA(), {title: S.boss.a ? 'Boss – Section B' : 'Boss – Section A'});
+  if(p.kind==='slip') return startQuiz('slip', slipSet(), {title:'Slip Doctor', sid:p.id});
+  if(p.kind==='flash') return startQuiz('flash', flashSet(), {title:'Flash Round', sid:p.id});
+};
+ACT.lab = function(el){ var ch=el.getAttribute('data-ch'); startQuiz('lab', labSet([ch]), {title:CHMAP[ch].name+' – Notebook'}); };
+ACT.bossA = function(){ startQuiz('bossA', bossA(), {title:'Boss – Section A'}); };
+ACT.bossB = function(){ startQuiz('bossB', bossB(), {title:'Boss – Section B'}); };
+ACT.slip = function(){ startQuiz('slip', slipSet(), {title:'Slip Doctor', sid:'S9'}); };
+ACT.flash = function(){ startQuiz('flash', flashSet(), {title:'Flash Round', sid:'S10'}); };
+ACT.mixnote = function(){ startQuiz('lab', mixNoteSet(), {title:'Mixed notebook'}); };
+ACT.spell = function(){ startQuiz('spell', spellSet(), {title:'Spelling Bee'}); };
+ACT.quit = function(){
+  if(!armed.quit){ armed.quit=true; render(); setTimeout(function(){ armed.quit=false; var b=document.querySelector('[data-act="quit"]'); if(b){ b.classList.remove('armed'); b.textContent='✕'; } }, 3000); return; }
+  armed.quit=false; ACT.home();
+};
+ACT.next = function(){
+  if(!QZ) return;
+  if(QZ.i < QZ.list.length-1){ QZ.i++; QZ.ui = newUI(QZ.list[QZ.i]); render(); scrollTop(); }
+  else endQuiz();
+};
+ACT.again = function(){
+  var m = QZ && QZ.mode, meta = QZ && QZ.meta;
+  if(m==='ch') return startQuiz('ch', chapterSet(meta.ch), meta);
+  if(m==='bossA') return ACT.bossA();
+  if(m==='bossB') return ACT.bossB();
+  if(m==='slip') return ACT.slip();
+  if(m==='flash') return ACT.flash();
+  if(m==='spell') return ACT.spell();
+  ACT.home();
+};
+/* question interactions */
+ACT.opt = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  u.picked = q.opts[+el.getAttribute('data-i')]; finishQ(); render();
+};
+ACT.tf = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.picked!==null) return;
+  u.picked = el.getAttribute('data-v')==='1';
+  if(!q.fix){ finishQ(); render(); return; }
+  var sc = u.picked===q.ans ? 1 : 0; beep(sc===1);
+  render();
+};
+ACT.fix = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done || u.picked===null) return;
+  u.fixPicked = q.fix.opts[+el.getAttribute('data-i')];
+  var wasOk = u.picked===q.ans; var sv = S.sound; S.sound = false; finishQ(); S.sound = sv;
+  if(u.fixPicked===q.fix.ans){ QZ.xp += 5; addXP(5); save(); }
+  render();
+};
+ACT.slot = function(el){
+  var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i');
+  if(u.slots[i]!==null){ u.slots[i]=null; }
+  u.sel = i; render();
+};
+ACT.chip = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')];
+  if(u.slots.indexOf(c)>=0) return;
+  var tgt = (u.sel!==null && u.slots[u.sel]===null) ? u.sel : u.slots.indexOf(null);
+  if(tgt<0) return;
+  u.slots[tgt]=c;
+  var nx = u.slots.indexOf(null); u.sel = nx>=0 ? nx : null;
+  render();
+};
+ACT.check = function(){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  if(q.type==='fill' && u.slots.indexOf(null)>=0) return;
+  if(q.type==='two' && u.sel.length<q.need) return;
+  if(q.type==='build' && u.sel.length<1) return;
+  finishQ(); render();
+};
+ACT.tog = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')], k = u.sel.indexOf(c);
+  if(k>=0) u.sel.splice(k,1);
+  else { if(q.type==='two' && u.sel.length>=q.need) u.sel.shift(); u.sel.push(c); }
+  render();
+};
+ACT.ml = function(el){ var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i'); if(u.got[i]) return; u.L=i; u.flash=null; tryPair(); };
+ACT.mr = function(el){ var u=QZ.ui; if(u.done) return; var j=+el.getAttribute('data-i'); if(QZ.list[QZ.i].pair.indexOf(j)>=0 && u.got[QZ.list[QZ.i].pair.indexOf(j)]) return; u.R=j; u.flash=null; tryPair(); };
+function tryPair(){
+  var q=QZ.list[QZ.i], u=QZ.ui;
+  if(u.L===null || u.R===null){ render(); return; }
+  if(q.pair[u.L]===u.R){ u.got[u.L]=true; beep(true); }
+  else { u.miss[u.L]=true; u.flash={L:u.L, R:u.R}; beep(false); }
+  u.L=null; u.R=null;
+  if(u.got.every(Boolean)){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+}
+ACT.bucket = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var b=+el.getAttribute('data-i'), it=q.items[u.i], ok = it.b===b;
+  u.placed.push({t:it.t, b:it.b, ok:ok}); u.flash = ok ? null : b; if(!ok) u.miss++;
+  beep(ok); u.i++;
+  if(u.i>=q.items.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.seq = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')]; if(u.used[c]) return;
+  var slot = u.filled.length, want = q.steps[slot];
+  if(c===want){ u.filled.push(c); u.used[c]=1; u.flash=null; beep(true); }
+  else { u.miss[slot]=1; u.flash=c; beep(false); }
+  if(u.filled.length===q.steps.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.lab1 = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')], part = q.ask[u.k], ok = c===LEAF_PARTS[part];
+  u.got.push({pick:c, ok:ok}); u.k++; beep(ok);
+  if(u.k>=q.ask.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.step = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var p = q.parts[u.k], c = p.opts[+el.getAttribute('data-i')];
+  u.picks.push(c); beep(c===p.ans); u.k++;
+  if(u.k>=q.parts.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.nbshow = function(){ var u=QZ.ui; if(u.phase==='write'){ u.phase='check'; render(); } };
+ACT.nbpt = function(el){ var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i'); u.ticks[i]=!u.ticks[i]; render(); };
+ACT.nbdone = function(){ var u=QZ.ui; if(u.done || u.phase!=='check') return; finishQ(); render(); };
+
+function endQuiz(){
+  var tot=0, got=0, marks=0, maxM=0;
+  QZ.list.forEach(function(q,i){ var r=QZ.res[i]||{score:0}; tot++; got+=r.score; maxM+=q.marks; marks += Math.round(r.score*q.marks*2)/2; });
+  var pct = tot ? got/tot : 0;
+  var stars = pct>=0.9 ? 3 : pct>=0.7 ? 2 : 1;
+  QZ.pct = pct; QZ.stars = stars; QZ.marks = marks; QZ.maxM = maxM;
+  var m = QZ.mode;
+  if(m==='ch'){ var r = S.ch[QZ.meta.ch] || {best:0, stars:0, plays:0}; r.best=Math.max(r.best,pct); r.stars=Math.max(r.stars,stars); r.plays++; S.ch[QZ.meta.ch]=r; }
+  if(m==='lab'){ if(QZ.meta.sid) S.done[QZ.meta.sid]={pct:pct, t:nowMs()}; QZ.list.forEach(function(q,i){ if(q.type==='note'){ S.lab[q.key]={got:QZ.list[i]? (QZ.res[i]?Math.round(QZ.res[i].score*q.pts.length):0):0, of:q.pts.length, t:nowMs()}; } }); }
+  if(m==='bossA') S.boss.a = {got:marks, max:maxM, t:nowMs()};
+  if(m==='bossB') S.boss.b = {got:marks, max:maxM, t:nowMs()};
+  if(m==='slip') S.done.S9 = {pct:pct, t:nowMs()};
+  if(m==='flash') S.done.S10 = {pct:pct, t:nowMs()};
+  save();
+  V = {name:'result'}; render(); scrollTop();
+  if(stars>=2) confetti(stars===3?140:70);
+}
+
+/* ---------------- rendering ---------------- */
+var CHMAP = {}; CH.forEach(function(c){ CHMAP[c.id]=c; });
+function starStr(n, of){ var s=''; for(var i=0;i<(of||3);i++) s += i<n ? '★' : '☆'; return s; }
+function hl(text, kw){
+  var t = esc(text);
+  (kw||[]).forEach(function(k){
+    var re = new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','i');
+    t = t.replace(re,'<mark>$1</mark>');
+  });
+  return t;
+}
+
+function renderTop(){
+  var L = lvl(S.xp), into = S.xp - L*LEVEL_XP, pct = L>=TITLES.length-1 ? 100 : Math.round(into/LEVEL_XP*100);
+  var dots = [3,4,5].map(function(d){ var k='2026-10-0'+d; return '<i class="'+(S.days[k]?'on':'')+'" title="'+['Sat','Sun','Mon'][d-3]+'"></i>'; }).join('');
+  return '<div class="topin">'+
+    '<div class="ava">'+ART.mascot(L)+'</div>'+
+    '<div class="lvl"><b>'+esc(TITLES[L])+'</b><div class="xpbar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<span class="chip xp">'+S.xp+' XP</span>'+
+    '<span class="chip exam">'+examChip()+'</span>'+
+    '<span class="streak" aria-label="Days practised">'+dots+'</span>'+
+  '</div>';
+}
+
+function heroMsg(){
+  var d = planDay(), nx = nextPlan();
+  if(d===3) return '<b>Hi '+KID+'!</b> Saturday is <b>Plant Day</b> \u{1F331}'+(nx?' Next up: <b>'+esc(nx.title)+'</b>.':'');
+  if(d===4) return '<b>Sunday, '+KID+'!</b> Animals in the morning, your body in the afternoon, the Boss at 6.'+(nx?' Next up: <b>'+esc(nx.title)+'</b>.':'');
+  if(d===5) return '<b>Exam day!</b> Only the Flash Round today – nothing new. You’ve practised hard. You’ve got this! \u{1F4AA}';
+  if(d>5) return '<b>Exam done, '+KID+'!</b> Hop back in any time to practise.';
+  return '<b>Hi '+KID+'!</b> Hop across the lily pads, one session at a time.';
+}
+
+function renderHome(){
+  var nx = nextPlan(), h = '';
+  h += '<section class="hero"><div class="bigfrog">'+ART.mascot(Math.max(3,lvl(S.xp)))+'</div><div class="bubble">'+heroMsg()+
+    (nx ? '<div class="btnrow"><button class="btn" data-act="plan" data-id="'+nx.id+'">▶ Start '+esc(nx.title)+'</button></div>' : '<p>All sessions done! \u{1F389}</p>')+'</div></section>';
+  /* pond trail */
+  var days = [{d:3, t:'Saturday 3 Oct', s:'Plant Day'},{d:4, t:'Sunday 4 Oct', s:'Animals, Body and the Boss'},{d:5, t:'Monday 5 Oct', s:'Exam Day'}];
+  h += '<h2>Weekend lily pads</h2><div class="pond">';
+  days.forEach(function(D){
+    h += '<div class="dayhead"><b>'+D.t+'</b><span>'+D.s+'</span></div>';
+    PLAN.filter(function(p){return p.day===D.d;}).forEach(function(p, k){
+      var done = planDone(p), isNext = nx && nx.id===p.id;
+      var icon = p.kind==='ch' ? CHMAP[p.ch].icon : p.kind==='lab' ? '✍️' : p.kind==='boss' ? '\u{1F451}' : p.kind==='slip' ? '\u{1FA7A}' : '⚡';
+      var st = '';
+      if(p.kind==='ch' && S.ch[p.ch]) st = '<span class="stars">'+starStr(S.ch[p.ch].stars)+'</span>';
+      if(p.kind==='boss') st = '<span class="mini">'+(S.boss.a?'A: '+S.boss.a.got+'/'+S.boss.a.max:'A: –')+' · '+(S.boss.b?'B: '+S.boss.b.got+'/'+S.boss.b.max:'B: –')+'</span>';
+      h += '<button class="pad'+(done?' done':'')+(isNext?' next':'')+(k%2?' alt':'')+'" data-act="plan" data-id="'+p.id+'">'+
+        '<span class="lily"><span class="lic">'+icon+'</span>'+(done?'<span class="tick">✓</span>':'')+'</span>'+(isNext?'<span class="hopper">'+ART.mascot(4)+'</span>':'')+
+        '<span class="pt"><small>'+esc(p.when)+' · '+p.mins+' min</small><b>'+esc(p.id.replace('S','Session '))+': '+esc(p.title)+'</b>'+(p.sub?'<span class="sub">'+esc(p.sub)+'</span>':'')+st+'</span>'+
+      '</button>';
+    });
+  });
+  h += '</div>';
+  /* chapters */
+  h += '<h2>Practise any chapter</h2><div class="chgrid">';
+  CH.forEach(function(c){
+    var r = S.ch[c.id];
+    h += '<div class="cht" style="--hue:'+c.hue+'"><div class="chh"><span class="ci">'+c.icon+'</span><span><small>Chapter '+c.n+'</small><b>'+esc(c.name)+'</b></span></div>'+
+      '<div class="chs">'+(r?'<span class="stars">'+starStr(r.stars)+'</span> best '+Math.round(r.best*100)+'%':'Not started yet')+'</div>'+
+      '<div class="chb"><button class="btn ghost sm" data-act="learn" data-ch="'+c.id+'">\u{1F4D6} Learn</button><button class="btn sm" data-act="quest" data-ch="'+c.id+'">\u{1F3AF} Quest</button><button class="btn ghost sm" data-act="lab" data-ch="'+c.id+'">✍️ Notebook</button></div></div>';
+  });
+  h += '</div>';
+  /* extras */
+  var mcount = Object.keys(S.mist).length;
+  h += '<h2>Special rounds</h2><div class="extras">'+
+    '<button class="ex" data-act="slip"><span>\u{1FA7A}</span><b>Slip Doctor</b><small>Mistakes from your booklet</small></button>'+
+    '<button class="ex" data-act="spell"><span>\u{1F41D}</span><b>Spelling Bee</b><small>12 science words to spell</small></button>'+
+    '<button class="ex" data-act="bossA"><span>\u{1F451}</span><b>Boss: Section A</b><small>Model paper, 15 marks</small></button>'+
+    '<button class="ex" data-act="bossB"><span>\u{1F4DD}</span><b>Boss: Section B</b><small>Notebook answers</small></button>'+
+    '<button class="ex" data-act="mixnote"><span>\u270D\uFE0F</span><b>Mixed notebook</b><small>6 written answers, one per chapter</small></button>'+
+    '<button class="ex" data-act="flash"><span>⚡</span><b>Flash Round</b><small>'+(mcount?mcount+' to fix':'Quick warm-up')+'</small></button>'+
+  '</div>';
+  h += '<div class="foot"><button class="btn ghost sm" data-act="parent">For grown-ups</button><button class="btn ghost sm" data-act="sound">'+(S.sound?'\u{1F50A} Sound on':'\u{1F507} Sound off')+'</button><span id="syncnote"></span></div>';
+  return h;
+}
+
+function learnDia(c){
+  if(c.dia==='leaf') return '<div class="dia">'+ART.leaf({names:true})+'</div>';
+  if(c.dia==='teeth') return '<div class="teethrow">'+['incisor','canine','premolar','molar'].map(function(k){ return '<figure>'+ART.tooth(k,56)+'<figcaption>'+k.charAt(0).toUpperCase()+k.slice(1)+'</figcaption></figure>'; }).join('')+'</div>';
+  if(c.cyc){ var s = SEQ[c.cyc]; return '<div class="cycrow">'+s.steps.map(function(st,i){ return '<figure>'+(s.pics?ART.pic(s.pics[i],60):'')+'<figcaption>'+esc(st)+'</figcaption></figure>'; }).join('<span class="arr">→</span>')+'<span class="arr">↺</span></div>'; }
+  return '';
+}
+function renderLearn(){
+  var ch = CHMAP[V.ch], cards = LEARN[V.ch], c = cards[V.i];
+  var h = '<div class="qhead"><button class="qx" data-act="home" aria-label="Back home">←</button><div class="ltitle" style="--hue:'+ch.hue+'">'+ch.icon+' Chapter '+ch.n+': '+esc(ch.name)+'</div></div>';
+  h += '<article class="lc" style="--hue:'+ch.hue+'"><div class="lch"><span class="le">'+c.e+'</span><h3>'+esc(c.h)+'</h3><span class="lnum">'+(V.i+1)+' / '+cards.length+'</span></div>'+c.b+learnDia(c)+'</article>';
+  h += '<div class="dots">'+cards.map(function(x,i){return '<i class="'+(i===V.i?'on':'')+'"></i>';}).join('')+'</div>';
+  h += '<div class="btnrow spread">'+(V.i>0?'<button class="btn ghost" data-act="lprev">← Back</button>':'<span></span>')+
+    (V.i<cards.length-1 ? '<button class="btn" data-act="lnext">Next →</button>' : '<button class="btn" data-act="quest" data-ch="'+ch.id+'">\u{1F3AF} Start the quest</button>')+'</div>';
+  if(V.i<cards.length-1) h += '<p class="skip"><button class="link" data-act="quest" data-ch="'+ch.id+'">Skip to the quest</button></p>';
+  return h;
+}
+
+/* ----- question bodies ----- */
+function optBtn(q, u, o, i, act, picked, ans, done){
+  var cls='opt'+(q.spell?' spell':'');
+  if(done){ if(o===ans) cls+=' ok'; else if(o===picked) cls+=' bad'; else cls+=' dim'; }
+  return '<button class="'+cls+'" data-act="'+act+'" data-i="'+i+'"'+(done?' disabled':'')+'>'+(q.fx?'<span class="ol">'+LBL[i]+')</span> ':'')+esc(o)+'</button>';
+}
+function longOpts(opts){ return opts.some(function(o){ return o.length>24; }); }
+function picHTML(q){
+  var h='';
+  if(q.svg){ h += '<div class="pic">'+(ART.TOOTH_KINDS.indexOf(q.svg)>=0 ? ART.tooth(q.svg,90) : ART.stage(q.svg,120))+'</div>'; }
+  else if(q.pic){ h += '<div class="pic"><span class="emo big">'+q.pic+'</span>'+(q.cap?'<div class="cap">'+esc(q.cap)+'</div>':'')+'</div>'; }
+  return h;
+}
+function bodyMCQ(q,u){
+  return '<p class="prompt">'+esc(q.prompt)+'</p>'+picHTML(q)+
+    '<div class="opts'+(longOpts(q.opts)?' one':'')+'">'+q.opts.map(function(o,i){ return optBtn(q,u,o,i,'opt',u.picked,q.ans,u.done); }).join('')+'</div>';
+}
+function bodyTF(q,u){
+  var h = '<p class="prompt stmt">“'+esc(q.prompt)+'”</p><div class="tfrow">';
+  [[true,'✔ True'],[false,'✘ False']].forEach(function(v){
+    var cls='opt tfb';
+    if(u.picked!==null){ if(v[0]===q.ans) cls+=' ok'; else if(v[0]===u.picked) cls+=' bad'; else cls+=' dim'; }
+    h += '<button class="'+cls+'" data-act="tf" data-v="'+(v[0]?1:0)+'"'+(u.picked!==null?' disabled':'')+'>'+v[1]+'</button>';
+  });
+  h += '</div>';
+  if(u.picked!==null && q.fix){
+    h += '<div class="fixbox"><p class="glabel">'+(u.picked===q.ans?'Yes, it is FALSE! Now fix it for a bonus:':'It is FALSE. Can you fix it?')+'</p><p class="prompt sm">'+esc(q.fix.prompt)+'</p><div class="opts one">'+
+      q.fix.opts.map(function(o,i){ return optBtn({fx:false},u,o,i,'fix',u.fixPicked,q.fix.ans,u.done); }).join('')+'</div></div>';
+  }
+  return h;
+}
+function bodyFill(q,u){
+  var res = u.done ? fillScore(q,u.slots).res : null;
+  function slot(i){
+    var v=u.slots[i], cls='slot'+(v!==null?' filled':'')+(!u.done && u.sel===i?' sel':'');
+    if(res) cls += res[i] ? ' ok' : ' bad';
+    return '<button class="'+cls+'" data-act="slot" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+(v!==null?esc(v):' ? ')+'</button>';
+  }
+  var h;
+  if(q.eq){
+    var cells = q.terms.map(function(t,i){ var b=q.blank.indexOf(i); return b>=0 ? slot(b) : '<span class="term">'+esc(t)+'</span>'; });
+    h = '<p class="prompt">Complete the equation.</p><div class="eqline">'+cells[0]+'<b>+</b>'+cells[1]+'<span class="arrow"><small>'+esc(q.over[0])+'</small>⟶<small>'+esc(q.over[1])+'</small></span>'+cells[2]+'<b>+</b>'+cells[3]+'</div>';
+  } else {
+    h = '<p class="prompt sentence">';
+    q.parts.forEach(function(p,i){ h += esc(p); if(i<q.parts.length-1) h += slot(i); });
+    h += '</p>';
+  }
+  h += '<div class="chips">'+q.chips.map(function(c,i){ var used=u.slots.indexOf(c)>=0; return '<button class="chp'+(used?' gone':'')+'" data-act="chip" data-i="'+i+'"'+(u.done||used?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.slots.indexOf(null)>=0?' disabled':'')+'>Check</button></div>';
+  return h;
+}
+function bodyTwo(q,u){
+  var h = '<p class="prompt">Give two examples: <b>'+esc(q.prompt)+'</b></p><p class="hint">Tap the 2 that fit.</p><div class="opts">';
+  q.chips.forEach(function(c,i){
+    var sel = u.sel.indexOf(c)>=0, cls='opt';
+    if(u.done){ var good=q.ok.indexOf(c)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':' dim'); }
+    else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="tog" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(c)+'</button>';
+  });
+  h += '</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<q.need?' disabled':'')+'>Check</button></div>';
+  return h;
+}
+function bodyMatch(q,u){
+  var h = '<p class="prompt">Tap one on the left, then its partner on the right.</p><div class="mrow"><div class="mcol">';
+  q.left.forEach(function(l,i){
+    var cls='mi'+(u.got[i]?' ok':'')+(u.L===i?' sel':'')+(u.flash&&u.flash.L===i?' bad shake':'');
+    h += '<button class="'+cls+'" data-act="ml" data-i="'+i+'"'+(u.got[i]||u.done?' disabled':'')+'>'+esc(l)+'</button>';
+  });
+  h += '</div><div class="mcol">';
+  q.right.forEach(function(r,j){
+    var li = q.pair.indexOf(j), cls='mi r'+(u.got[li]?' ok':'')+(u.R===j?' sel':'')+(u.flash&&u.flash.R===j?' bad shake':'');
+    h += '<button class="'+cls+'" data-act="mr" data-i="'+j+'"'+(u.got[li]||u.done?' disabled':'')+'>'+esc(r)+'</button>';
+  });
+  return h + '</div></div>';
+}
+function bodySort(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(!u.done){ var it=q.items[u.i]; h += '<div class="tray"><small>'+(u.i+1)+' of '+q.items.length+' · Where does this go?</small><b class="pop">'+esc(it.t)+'</b></div>'; }
+  h += '<div class="buckets">';
+  q.buckets.forEach(function(b,bi){
+    var inB = u.placed.filter(function(p){return p.b===bi;});
+    h += '<button class="bk'+(u.flash===bi?' bad shake':'')+'" data-act="bucket" data-i="'+bi+'"'+(u.done?' disabled':'')+'><b>'+esc(b)+'</b><span class="in">'+
+      inB.map(function(p){ return '<span class="'+(p.ok?'':'miss')+'">'+esc(p.t)+'</span>'; }).join('')+'</span></button>';
+  });
+  return h + '</div>';
+}
+function bodySeq(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><p class="hint">'+(q.anchor?'The first stage is done for you. ':'')+'Tap the stages in the right order.</p><ol class="seq'+(q.cyc?' cyc':'')+'">';
+  q.steps.forEach(function(st,i){
+    var f = u.filled[i];
+    h += '<li class="'+(f?'f':'')+(i===u.filled.length&&!u.done?' cur':'')+'"><span class="n">'+(i+1)+'</span>'+(f && q.pics ? '<span class="sp">'+ART.pic(q.pics[i],44)+'</span>' : '')+'<span class="st">'+(f?esc(f):'?')+'</span></li>';
+  });
+  h += '</ol>'+(q.cyc?'<p class="hint cycnote">↺ and back to the start!</p>':'');
+  h += '<div class="chips">'+q.chips.map(function(c,i){ return '<button class="chp'+(u.used[c]?' gone':'')+(u.flash===c?' bad shake':'')+'" data-act="seq" data-i="'+i+'"'+(u.used[c]||u.done?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  return h;
+}
+function bodyLabel(q,u){
+  var state={}; u.got.forEach(function(g,k){ state[q.ask[k]] = g.ok?'ok':'bad'; });
+  var cur = u.done ? -1 : q.ask[u.k];
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><div class="dia">'+ART.leaf({ask:q.ask, state:state, cur:cur})+'</div>';
+  if(!u.done) h += '<p class="glabel">What is part number <b class="pin">'+(u.k+1)+'</b>?</p>';
+  h += '<div class="chips">'+q.chips.map(function(c,i){ var used = u.got.some(function(g){return g.pick===c && g.ok;}); return '<button class="chp'+(used?' gone':'')+'" data-act="lab1" data-i="'+i+'"'+(u.done||used?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  if(u.got.length){ h += '<ol class="leafans">'+u.got.map(function(g,k){ return '<li class="'+(g.ok?'ok':'bad')+'">'+(g.ok?esc(g.pick):'<s>'+esc(g.pick)+'</s> → '+esc(LEAF_PARTS[q.ask[k]]))+'</li>'; }).join('')+'</ol>'; }
+  return h;
+}
+function bodySteps(q,u){
+  var h = '<div class="pic"><span class="emo big">'+q.pic+'</span></div>';
+  q.parts.forEach(function(p,k){
+    if(k<u.k){ var ok=u.picks[k]===p.ans; h += '<div class="stepdone '+(ok?'ok':'bad')+'"><small>'+esc(p.prompt)+'</small><b>'+(ok?'✓ ':'✗ '+esc(u.picks[k])+' → ')+esc(p.ans)+'</b></div>'; }
+  });
+  if(!u.done){ var p=q.parts[u.k]; h += '<p class="prompt">'+(u.k===0?'':LBL[u.k-1]+') ')+esc(p.prompt)+'</p><div class="opts'+(longOpts(p.opts)?' one':'')+'">'+p.opts.map(function(o,i){ return '<button class="opt" data-act="step" data-i="'+i+'">'+esc(o)+'</button>'; }).join('')+'</div>'; }
+  return h;
+}
+function bodyBuild(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><p class="hint">Tap all the sentences that belong in a good answer. There are <b>'+q.good.length+'</b>.</p><div class="opts one">';
+  q.chips.forEach(function(c,i){
+    var sel=u.sel.indexOf(c)>=0, cls='opt sent';
+    if(u.done){ var good=q.good.indexOf(c)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':' dim'); } else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="tog" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(c)+'</button>';
+  });
+  h += '</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<1?' disabled':'')+'>Check</button></div>';
+  return h;
+}
+function modelHTML(q){
+  if(q.diff){
+    var d=q.diff;
+    return '<div class="tw"><table class="t diff"><tr><th>'+esc(d.A)+'</th><th>'+esc(d.B)+'</th></tr><tr><td>'+esc(d.rowA)+'</td><td>'+esc(d.rowB)+'</td></tr><tr><td>e.g. '+esc(d.exA)+'</td><td>e.g. '+esc(d.exB)+'</td></tr></table></div>';
+  }
+  return '<p class="model">'+q.pts.map(function(p){ return hl(p,q.kw); }).join(' ')+'</p>';
+}
+function bodyNote(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(u.phase==='write'){
+    h += '<div class="nb"><span class="pen">✍️</span><p>Write your answer in your <b>notebook</b>. It is worth <b>'+q.marks+' mark'+(q.marks>1?'s':'')+'</b>, so write '+(q.marks>1?'3 or 4 full sentences':'1 or 2 full sentences')+'.</p></div>';
+    h += '<div class="btnrow"><button class="btn" data-act="nbshow">I’ve written it – check</button></div>';
+    return h;
+  }
+  h += '<p class="glabel">Tick each idea you wrote:</p><div class="opts one">';
+  q.pts.forEach(function(p,i){ var on=u.ticks[i]; h += '<button class="opt sent'+(on?' ok':'')+'" data-act="nbpt" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+(on?'☑ ':'☐ ')+hl(p,q.kw)+'</button>'; });
+  h += '</div>';
+  if(q.diff) h += '<p class="glabel">Draw it as a table:</p>'+modelHTML(q);
+  if(q.kw && q.kw.length) h += '<p class="kw">Key words to spell right: '+q.kw.map(function(k){return '<b>'+esc(k)+'</b>';}).join(', ')+'</p>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="nbdone">Done</button></div>';
+  return h;
+}
+function fixSentence(fix){
+  var p = fix.prompt.replace(/^Correct it: ?/,'');
+  if(p.indexOf('___')>=0) return p.replace('___', fix.ans);
+  if(p.indexOf('…')>=0) return p.replace('…', fix.ans);
+  return (p ? p+' ' : '')+fix.ans;
+}
+function answerLine(q,u){
+  switch(q.type){
+    case 'mcq': return 'Answer: <b>'+esc(q.ans)+'</b>';
+    case 'tf': return 'Answer: <b>'+(q.ans?'True':'False')+'</b>'+(q.fix?'<br>Correct version: <b>'+esc(fixSentence(q.fix))+'</b>':'');
+    case 'fill':
+      if(q.eq){ return 'Carbon dioxide + Water ⟶ Food + Oxygen'; }
+      var i=0; return q.parts.map(function(p,k){ return esc(p)+(k<q.parts.length-1?'<b>'+esc(q.ans[k][0])+'</b>':''); }).join('');
+    case 'two': return 'Right answers: <b>'+q.ok.map(esc).join(', ')+'</b>';
+    case 'match': return q.left.map(function(l,i){ return esc(l)+' → <b>'+esc(q.right[q.pair[i]])+'</b>'; }).join('<br>');
+    case 'sort': return '';
+    case 'seq': return '<b>'+q.steps.map(esc).join(' → ')+'</b>'+(q.cyc?' ↺':'');
+    case 'label': return '';
+    case 'steps': return '';
+    case 'build': return '<span class="glabel">Write it like this:</span>'+modelHTML(q);
+    case 'note': return '';
+  }
+  return '';
+}
+function fbHTML(q,u,r){
+  var ok = r.ok, h = '<div class="fb'+(ok?'':' bad')+'">';
+  if(q.type==='note'){
+    var n=u.ticks.filter(Boolean).length;
+    h += '<p class="ft">'+(n===q.pts.length?'Full marks! '+PRAISE[0]:n?'You got '+n+' of '+q.pts.length+' ideas.':'Let’s learn this one.')+'</p>';
+    if(n<q.pts.length) h += '<p class="tip">Add the missing ideas in your notebook in a different colour.</p>';
+  } else {
+    var tfFix = q.type==='tf' && q.fix && u.fixPicked!==null;
+    h += '<p class="ft">'+(ok?pick(PRAISE):pick(OOPS))+(tfFix && u.fixPicked===q.fix.ans ? ' <span class="bonus">+5 fix bonus</span>':'')+'</p>';
+    var al = answerLine(q,u); if(al && (!ok || q.type==='build' || q.type==='tf')) h += '<div class="fa">'+al+'</div>';
+  }
+  if(q.tip) h += '<p class="tip">'+esc(q.tip)+'</p>';
+  if(q.note) h += '<p class="tip">'+esc(q.note)+'</p>';
+  if(q.slip) h += '<div class="slipnote">\u{1FA7A} '+esc(q.slip)+'</div>';
+  h += '<div class="btnrow"><button class="btn" data-act="next">'+(QZ.i<QZ.list.length-1?'Next →':'See my score')+'</button></div></div>';
+  return h;
+}
+function renderQuiz(){
+  var q = QZ.list[QZ.i], u = QZ.ui, n = QZ.list.length;
+  var h = '<div class="qhead"><button class="qx'+(armed.quit?' armed':'')+'" data-act="quit" aria-label="Quit">'+(armed.quit?'Tap again to quit':'✕')+'</button>'+
+    '<div class="pbar"><i style="width:'+Math.round(QZ.i/n*100)+'%"></i></div><span class="combo">'+(QZ.combo>=2?'\u{1F525}'+QZ.combo:'')+'</span><span class="qn">'+(QZ.i+1)+'/'+n+'</span></div>';
+  var marks = (QZ.mode==='bossA'||QZ.mode==='bossB') ? '<span class="mk">'+q.marks+' mark'+(q.marks===1?'':'s')+'</span>' : '';
+  h += '<div class="sec"><span>'+esc(q.sec || q.label)+(q.part?' · '+q.part+')':'')+'</span>'+marks+'</div>';
+  var body = '';
+  switch(q.type){
+    case 'mcq': body=bodyMCQ(q,u); break; case 'tf': body=bodyTF(q,u); break; case 'fill': body=bodyFill(q,u); break;
+    case 'two': body=bodyTwo(q,u); break; case 'match': body=bodyMatch(q,u); break; case 'sort': body=bodySort(q,u); break;
+    case 'seq': body=bodySeq(q,u); break; case 'label': body=bodyLabel(q,u); break; case 'steps': body=bodySteps(q,u); break;
+    case 'build': body=bodyBuild(q,u); break; case 'note': body=bodyNote(q,u); break;
+  }
+  h += '<div class="qc" data-type="'+q.type+'">'+body+'</div>';
+  if(u.done) h += fbHTML(q,u,QZ.res[QZ.i]);
+  return h;
+}
+function renderResult(){
+  var boss = QZ.mode==='bossA'||QZ.mode==='bossB';
+  var h = '<div class="res"><div class="bigfrog sm">'+ART.mascot(lvl(S.xp))+'</div><p class="rt">'+esc(QZ.meta.title||'Done')+'</p>';
+  if(boss) h += '<p class="score">'+QZ.marks+' / '+QZ.maxM+'</p><p class="sub">marks'+(QZ.mode==='bossB'?' (notebook answers are self-checked)':'')+'</p>';
+  else h += '<p class="score">'+Math.round(QZ.pct*100)+'%</p>';
+  h += '<p class="stars big">'+starStr(QZ.stars)+'</p><p class="sub">+'+QZ.xp+' XP'+(QZ.best>=3?' · best streak \u{1F525}'+QZ.best:'')+'</p>';
+  var wrong = QZ.list.map(function(q,i){return {q:q, r:QZ.res[i]};}).filter(function(x){ return x.r && !x.r.ok; });
+  if(wrong.length){
+    h += '<div class="wrongs"><h3>Remember these</h3>'+wrong.map(function(x){
+      var q=x.q, line = q.type==='note' || q.type==='build' ? '<div class="small">'+modelHTML(q)+'</div>' : (answerLine(q,{})||'');
+      return '<div class="wr"><b>'+esc(q.prompt||q.label)+'</b><div>'+line+'</div></div>';
+    }).join('')+'</div>';
+  } else h += '<p class="perfect">Every single one right! \u{1F31F}</p>';
+  if(QZ.mode==='bossA' && !S.boss.b) h += '<div class="btnrow center"><button class="btn" data-act="bossB">Go to Section B →</button></div>';
+  h += '<div class="btnrow center"><button class="btn ghost" data-act="again">Play again</button><button class="btn" data-act="home">Back to the pond</button></div></div>';
+  return h;
+}
+function renderParent(){
+  var h = '<div class="qhead"><button class="qx" data-act="home" aria-label="Back home">←</button><div class="ltitle">For grown-ups</div></div>';
+  h += '<div class="lc"><h3>Weekend plan</h3><div class="tw"><table class="t"><tr><th>Session</th><th>When</th><th>Status</th></tr>'+
+    PLAN.map(function(p){ return '<tr><td>'+esc(p.id+' '+p.title)+'</td><td>'+esc(p.when)+'</td><td>'+(planDone(p)?'✅ done':'–')+'</td></tr>'; }).join('')+'</table></div></div>';
+  h += '<div class="lc"><h3>Chapters</h3><div class="tw"><table class="t"><tr><th>Chapter</th><th>Best</th><th>Plays</th></tr>'+
+    CH.map(function(c){ var r=S.ch[c.id]; return '<tr><td>'+esc(c.n+'. '+c.name)+'</td><td>'+(r?Math.round(r.best*100)+'%':'–')+'</td><td>'+(r?r.plays:0)+'</td></tr>'; }).join('')+'</table></div>'+
+    '<p>Boss A: <b>'+(S.boss.a?S.boss.a.got+' / '+S.boss.a.max:'not yet')+'</b> · Boss B: <b>'+(S.boss.b?S.boss.b.got+' / '+S.boss.b.max:'not yet')+'</b> (Section B is self-checked – worth a look at her notebook).</p></div>';
+  var mk = Object.keys(S.mist).filter(function(id){return TPL[id];}).sort(function(a,b){return S.mist[b].n-S.mist[a].n;});
+  h += '<div class="lc"><h3>Still shaky ('+mk.length+')</h3>'+(mk.length? '<ul class="shaky">'+mk.slice(0,25).map(function(id){ var d=TPL[id].d; return '<li><b>'+esc(CHMAP[TPL[id].ch]?('Ch '+CHMAP[TPL[id].ch].n):'Mixed')+'</b> '+esc(d.q||d.id)+' <span class="mini">×'+S.mist[id].n+'</span></li>'; }).join('')+'</ul>' : '<p>Nothing yet.</p>')+'</div>';
+  h += '<div class="lc"><h3>Settings</h3><p id="syncnote"></p><div class="btnrow"><button class="btn ghost'+(armed.reset?' danger':'')+'" data-act="reset">'+(armed.reset?'Tap again to clear all progress':'Clear progress')+'</button></div></div>';
+  return h;
+}
+function render(){
+  var top = document.getElementById('topin'); if(top) top.innerHTML = renderTop();
+  var app = document.getElementById('app'); if(!app) return;
+  var h = '';
+  if(V.name==='home') h = renderHome();
+  else if(V.name==='learn') h = renderLearn();
+  else if(V.name==='quiz') h = renderQuiz();
+  else if(V.name==='result') h = renderResult();
+  else if(V.name==='parent') h = renderParent();
+  app.innerHTML = h;
+  paintSync();
+}
+
+document.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if(!el || el.disabled) return;
+  var a = el.getAttribute('data-act');
+  if(a!=='quit' && armed.quit){ armed.quit=false; }
+  if(a!=='reset' && armed.reset){ armed.reset=false; }
+  if(ACT[a]) ACT[a](el);
+});
+
+render();
+setTimeout(initCloud, 0);
+
+/* Study Hub cross-device sync (GitHub Pages build loads firebase + sync.js; absent elsewhere = no-op) */
+if(typeof DikshaSync!=='undefined' && DikshaSync.init()){
+  try{ DikshaSync.attachUI(); }catch(e){}
+  DikshaSync.pull(STORE_KEY).then(function(remote){
+    if(remote && typeof remote==='object' && (remote.t||0) > (S.t||0)){ S = normalize(remote); saveLocal(); if(V.name!=='quiz') render(); }
+    DikshaSync.arm();
+    try{ DikshaSync.push(STORE_KEY, S); }catch(e){}
+  });
+}
+
+/* QA hooks */
+window.__SCI = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, mixNoteSet:mixNoteSet,
+  grade:grade, fillScore:fillScore, start:startQuiz, state:function(){return S;}, quiz:function(){return QZ;}, view:function(){return V;}, act:ACT, render:render, idsOf:idsOf, planDone:planDone, sync:function(){return SYNC;}};
+})();
+
+</script>
+</body>
+</html>
