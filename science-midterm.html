@@ -76,6 +76,21 @@ main{max-width:780px;margin:0 auto;padding:14px 16px 70px}
 .link{color:var(--leaf-deep);text-decoration:underline;font-weight:700;padding:8px}
 .skip{text-align:center;margin:4px 0 0}
 
+/* my mistakes */
+.mist{margin-top:18px;background:#FFF8EC;border:2px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--ink);padding:14px}
+.misth{display:flex;gap:12px;align-items:center}
+.mic{font-size:40px;line-height:1}
+.mtx h2{margin:0}
+.mtx p{margin:2px 0 0;font-size:16px;color:var(--muted)}
+.mgrp{margin-top:10px}
+.mgrp small{font-size:14px;font-weight:700;color:var(--muted)}
+.mgrp ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mgrp li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:16px;line-height:1.3;display:flex;gap:8px;align-items:baseline}
+.mgrp li.more{background:none;border:0;padding:0 4px;color:var(--muted);font-weight:700}
+.mchip{flex:none;font-size:12px;font-weight:700;background:var(--pond2);border-radius:999px;padding:1px 7px}
+.btn.mbtn{background:var(--sun);color:var(--ink);box-shadow:0 4px 0 var(--sun-deep)}
+.fixline{font-weight:700;font-size:17px;margin:4px 0}
+
 /* pond trail */
 .pond{display:flex;flex-direction:column;gap:10px;background:linear-gradient(180deg,#D7EEF3,#CDE9DE);border-radius:26px;padding:14px;border:2px solid #BFDDD2}
 .dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 4px 0;font-family:var(--f-display)}
@@ -640,8 +655,7 @@ c2: [
   {id:'c2w2', q:'Plants that trap insects', ok:['Venus flytrap','Pitcher plant'], no:['Cactus','Dodder','Lotus','Bamboo']},
   {id:'c2w3', q:'Plants found in the desert', ok:['Cactus','Kikar (babool)'], no:['Lotus','Pine','Mangrove','Coconut'], tip:'Spelling your teacher used: KIKAR.'},
   {id:'c2w4', q:'Submerged plants', ok:['Hydrilla','Tapegrass'], no:['Lotus','Cactus','Pine','Coconut']},
-  {id:'c2w5', q:'Plants of hilly areas', ok:['Pine','Deodar','Fir'], no:['Cactus','Coconut','Lotus','Mangrove']},
-  {id:'c2w6', q:'Non-green plants', ok:['Mushroom','Moulds','Dodder'], no:['Croton','Cactus','Lotus','Pine']}
+  {id:'c2w5', q:'Plants of hilly areas', ok:['Pine','Deodar','Fir'], no:['Cactus','Coconut','Lotus','Mangrove']}
 ],
 c3: [
   {id:'c3w1', q:'Aquatic mammals', ok:['Whale','Dolphin','Seal'], no:['Shark','Octopus','Frog','Crocodile'], tip:'A shark is a fish, not a mammal.'},
@@ -744,7 +758,7 @@ c5: {id:'c5x', pairs:[['Vitamin A','healthy eyes and skin'],['Vitamin D','made i
 c6: {id:'c6x', pairs:[['Incisors','bite and cut'],['Canines','tear food'],['Molars','crush and grind'],['Enamel','hard white covering'],['Pulp','nerves and blood vessels'],['Plaque','layer of microbes on teeth'],['Bolus','lump of chewed food'],['Peristalsis','wave-like push in food pipe'],['Saliva','makes food soft and wet'],['Small intestine','digested food goes into blood'],['Yeast','bread and cake'],['Floss','cleans between teeth']]}
 };
 /* Model paper Q3 style (mixed chapters) */
-var BOSS_MATCH = {id:'bx', pairs:[['Toad','amphibian'],['Bat','mammal'],['Coconut tree','coastal area'],['Hydrilla','submerged plant'],['Cactus','desert plant'],['Koala','arboreal animal'],['Vulture','scavenger'],['Mosquito','parasite'],['Pine','hilly area'],['Mangrove','breathing roots'],['Dodder','parasitic plant'],['Penguin','blubber']]};
+var BOSS_MATCH = {id:'bx', pairs:[['Toad','amphibian'],['Bat','mammal'],['Coconut tree','coastal area'],['Hydrilla','submerged plant'],['Cactus','desert plant'],['Koala','arboreal animal'],['Vulture','scavenger'],['Mosquito','parasite','par'],['Pine','hilly area'],['Mangrove','breathing roots'],['Dodder','parasitic plant','par'],['Penguin','blubber']]};
 
 /* ---------- Sort it out (n per bucket) ---------- */
 var SORT = {
@@ -873,7 +887,7 @@ var PLAN = [
   {id:'S6', day:4, when:'Sun 3:00 pm', kind:'ch', ch:'c5', title:'Food and Health', mins:30},
   {id:'S7', day:4, when:'Sun 3:45 pm', kind:'ch', ch:'c6', title:'Teeth and Digestion', mins:30},
   {id:'S8', day:4, when:'Sun 6:00 pm', kind:'boss', title:'Boss: Model Paper', mins:45, sub:'Section A in the app, Section B in your notebook'},
-  {id:'S9', day:4, when:'Sun bedtime', kind:'slip', title:'Slip Doctor', mins:10, sub:'Your own past mistakes'},
+  {id:'S9', day:4, when:'Sun bedtime', kind:'fix', title:'Fix my mistakes', mins:15, sub:'Booklet mistakes + this weekend\u2019s mistakes'},
   {id:'S10', day:5, when:'Mon morning', kind:'flash', title:'Flash Round', mins:10, sub:'Quick warm-up. Nothing new!'}
 ];
 
@@ -1041,7 +1055,9 @@ function make(id, o){
   var d = T.d;
   var q = {key:id, ch:T.ch, marks:o.marks||1, sec:o.sec||'', part:o.part||''};
   if(T.t==='mcq'){
-    q.type='mcq'; q.prompt=d.q; q.pic=d.pic||''; q.svg=d.svg||''; q.fx=!!d.fx; q.opts=d.fx?d.o.slice():shuffle(d.o); q.ans=d.a;
+    var refOpts = d.o.some(function(x){ return /^(both|all of these|none of these)/i.test(x); });
+    var keep = d.fx && (refOpts || !o.reshuffle);
+    q.type='mcq'; q.prompt=d.q; q.pic=d.pic||''; q.svg=d.svg||''; q.fx=keep; q.opts=keep?d.o.slice():shuffle(d.o); q.ans=d.a;
     q.tip=d.tip||''; q.slip=d.slip||'';
     q.label = d.one ? 'Give one word' : (ART.TOOTH_KINDS.indexOf(d.svg)>=0 ? 'Identify the tooth' : ((d.pic||d.svg) ? 'Picture question' : 'Multiple choice'));
   } else if(T.t==='hab'){
@@ -1067,9 +1083,10 @@ function make(id, o){
     q.type='two'; q.prompt=d.q; q.ok=okC; q.chips=shuffle(okC.concat(noC)); q.need=2; q.tip=d.tip||''; q.label='Give two examples';
   } else if(T.t==='match'){
     var n = o.n||4, chosen=[], used={};
-    var av = o.avoid||{}, pool = d.pairs.filter(function(p){ return !av[norm(p[0])] && !av[norm(p[1])]; });
-    if(pool.length<n+1) pool = d.pairs;
-    shuffle(pool).forEach(function(p){ if(chosen.length<n && !(p[2] && used[p[2]])){ chosen.push(p); if(p[2]) used[p[2]]=1; } });
+    var av = o.avoid||{}, avk = Object.keys(av);
+    function pairClash(p){ var t=' '+norm(p[0]+' '+p[1])+' '; return avk.some(function(f){ return t.indexOf(' '+f+' ')>=0; }); }
+    var clean = shuffle(d.pairs.filter(function(p){ return !pairClash(p); })), dirty = shuffle(d.pairs.filter(pairClash));
+    clean.concat(dirty).forEach(function(p){ if(chosen.length<n && !(p[2] && used[p[2]])){ chosen.push(p); if(p[2]) used[p[2]]=1; } });
     var right = shuffle(chosen.map(function(p){return p[1];}));
     q.type='match'; q.prompt='Match the following'; q.left=chosen.map(function(p){return p[0];}); q.right=right;
     q.pair=chosen.map(function(p){return right.indexOf(p[1]);}); q.label='Match the following';
@@ -1105,7 +1122,7 @@ function make(id, o){
 /* ---------------- sets ---------------- */
 function mcqIds(ch){ return idsOf('mcq', ch, function(d){ return !d.svg && !d.pic; }); }
 function specials(ch){
-  if(ch==='c1') return ['c1l1','c1e1'];
+  if(ch==='c1'){ var sn=S.seen||{}; return [(sn.c1l1||0)<=(sn.c1e1||0) ? 'c1l1' : 'c1e1']; }
   if(ch==='c2') return [pick(idsOf('steps','c2'))];
   if(ch==='c3') return [pick(['c3c1','c3c2']), pick(['c3p1','c3p2','c3p3','c3p4'])];
   if(ch==='c4') { var h=shuffle(idsOf('hab','c4')), a=h[0], b=null; for(var i=1;i<h.length;i++){ if(TPL[h[i]].d.a!==TPL[a].d.a){ b=h[i]; break; } } return [a,b]; }
@@ -1114,8 +1131,30 @@ function specials(ch){
 }
 /* ---- no repeats: one fact per quest, and rotate through the bank across replays ---- */
 function norm(x){ return String(x).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+var ANSWERS = null;
+var COMMON = {water:1, plant:1, plants:1, animal:1, animals:1, teeth:1, tooth:1, leaves:1};
+function ownAnswers(T){
+  var d=T.d, out=[];
+  if(T.t==='mcq'||T.t==='hab'||T.t==='spell') out.push(d.a);
+  else if(T.t==='fill') d.a.forEach(function(a){ out = out.concat(a); });
+  else if(T.t==='tf' && d.fix) out.push(d.fix.a);
+  else if(T.t==='steps') d.parts.forEach(function(p){ out.push(p.a); });
+  return out.map(norm).filter(function(x){ return x.length>0; });
+}
+function promptText(T){
+  var d=T.d, t=[d.q||''];
+  if(T.t==='two') t = t.concat(d.ok);
+  if(T.t==='steps') d.parts.forEach(function(p){ t.push(p.q); });
+  if(T.t==='hab') t.push(d.cap);
+  return ' '+norm(t.join(' '))+' ';
+}
 function factsOf(id){
+  if(!ANSWERS){ ANSWERS={}; Object.keys(TPL).forEach(function(k){ ownAnswers(TPL[k]).forEach(function(a){ if(a.length>=5 && !COMMON[a]) ANSWERS[a]=1; }); }); }
   var T=TPL[id], d=T.d, out=[];
+  if(T.t!=='w' && T.t!=='match' && T.t!=='sort'){
+    var pt = promptText(T);
+    Object.keys(ANSWERS).forEach(function(a){ if(pt.indexOf(' '+a+' ')>=0) out.push(a); });
+  }
   if(T.t==='mcq'||T.t==='hab'||T.t==='spell') out.push(d.a);
   else if(T.t==='fill') d.a.forEach(function(a){ out = out.concat(a); });
   else if(T.t==='tf' && d.fix) out.push(d.fix.a);
@@ -1128,7 +1167,8 @@ function useFacts(id, used){ factsOf(id).forEach(function(f){ used[f]=1; }); }
 function rotate(ids, n, used){
   var seen = S.seen||{};
   var ok = ids.filter(function(id){ return !clash(id, used); });
-  var ordered = ok.map(function(id){ return {id:id, k:(seen[id]||0) + rnd()*1000}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.id; });
+  var sf = S.seenF||{};
+  var ordered = ok.map(function(id){ var k = seen[id]||0; ownAnswers(TPL[id]).forEach(function(f){ if((sf[f]||0)>k) k=sf[f]; }); return {id:id, k:k + rnd()*1000}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.id; });
   var out=[];
   ordered.forEach(function(id){ if(out.length<n && !clash(id, used)){ out.push(id); useFacts(id, used); } });
   return out;
@@ -1139,6 +1179,8 @@ function chapterSet(ch){
   var m = rotate(mcqIds(ch),3,used), f = rotate(idsOf('fill',ch),2,used), t = rotate(idsOf('tf',ch),2,used);
   var sp = rotate(idsOf('spell',ch),1,used)[0], tw = rotate(idsOf('two',ch),1,used)[0];
   var ms = idsOf('match',ch).concat(idsOf('sort',ch));
+  function cleanPairs(id){ var d=TPL[id].d, avk=Object.keys(used); return d.pairs.filter(function(p){ var t=' '+norm(p[0]+' '+p[1])+' '; return !avk.some(function(f){ return t.indexOf(' '+f+' ')>=0; }); }).reduce(function(acc,p){ if(!p[2]) acc.n++; else if(!acc.g[p[2]]){ acc.g[p[2]]=1; acc.n++; } return acc; }, {n:0,g:{}}).n; }
+  ms = ms.filter(function(id){ return TPL[id].t!=='match' || cleanPairs(id)>=4; });
   var msPick = rotate(ms, sx.length===0 ? 2 : 1, {});
   var w = rotate(idsOf('w',ch,function(d){return d.k!=='diff';}),2,{});
   var order = [m[0], t[0], f[0], m[1], sx[0]||msPick[1], t[1], sp, f[1], tw, m[2], sx[1], msPick[0]];
@@ -1159,15 +1201,17 @@ function labSet(chs){
   return Q;
 }
 function bossA(){
-  var Q=[], s;
+  var Q=[], s, used={};
   s='Q.1 Multiple Choice Questions';
-  CH.forEach(function(c,k){ Q.push(make(pick(idsOf('mcq',c.id,function(d){return !d.svg && !d.pic && !d.one;})),{marks:.5, sec:s, part:LBL[k]})); });
+  CH.forEach(function(c,k){ Q.push(make(rotate(idsOf('mcq',c.id,function(d){return !d.svg && !d.pic && !d.one;}),1,used)[0],{marks:.5, sec:s, part:LBL[k]})); });
+  s='Q.4 State True or False';
+  var tfs = CH.map(function(c){ return rotate(idsOf('tf',c.id),1,used)[0]; });
   s='Q.2 Fill in the blanks';
   var total=0, k2=0;
-  shuffle(idsOf('fill')).forEach(function(id){ var n=fillBlanks(TPL[id].d); if(total+n<=8){ Q.push(make(id,{marks:.5*n, sec:s, part:LBL[k2++]})); total+=n; } });
-  Q.push(make('bx',{marks:2, sec:'Q.3 Match the following', n:4}));
+  shuffle(idsOf('fill')).forEach(function(id){ var n=fillBlanks(TPL[id].d); if(total+n<=8 && !clash(id,used)){ Q.push(make(id,{marks:.5*n, sec:s, part:LBL[k2++]})); total+=n; useFacts(id,used); } });
+  Q.push(make('bx',{marks:2, sec:'Q.3 Match the following', n:4, avoid:used}));
   s='Q.4 State True or False';
-  CH.forEach(function(c,k){ Q.push(make(pick(idsOf('tf',c.id)),{marks:.5, sec:s, part:LBL[k]})); });
+  tfs.forEach(function(id,k){ Q.push(make(id,{marks:.5, sec:s, part:LBL[k]})); });
   Q.push(make('c1l1',{marks:1, sec:'Q.5 (i) Label the parts of a leaf', ask:sample([0,1,2,3,4],2)}));
   sample(['c6i1','c6i2','c6i3','c6i4'],2).forEach(function(id,k){ Q.push(make(id,{marks:.5, sec:'Q.5 (ii) Identify each type of tooth', part:LBL[k]})); });
   specials('c4').forEach(function(id,k){ Q.push(make(id,{marks:.5, sec:'Q.5 (iii) Write the habitat', part:LBL[k]})); });
@@ -1190,7 +1234,24 @@ function bossB(){
   Q.push(make('c4d1',{mode:'note', marks:2, sec:'Q.11 Differentiate between'}));
   return Q;
 }
-function asTappable(id){ return TPL[id].t==='w' ? make(id,{mode:'build'}) : make(id); }
+function asTappable(id, o){ o=o||{}; return TPL[id].t==='w' ? make(id,{mode:'build'}) : make(id,{reshuffle:!!o.reshuffle}); }
+function weekendIds(){ return Object.keys(S.mist).filter(function(id){return TPL[id];}).sort(function(a,b){ return (S.mist[b].n-S.mist[a].n) || (S.mist[a].t-S.mist[b].t); }); }
+function bookletIds(){ var wk=S.mist; return SLIP_IDS.filter(function(id){ return !S.cured[id] && !wk[id]; }); }
+function fixSet(ids){ return (ids || weekendIds().concat(bookletIds())).slice(0,15).map(function(id){ return asTappable(id,{reshuffle:true}); }); }
+function shortQ(id){
+  var T=TPL[id], d=T.d, t;
+  if(T.t==='hab') t='Habitat of the '+d.cap.toLowerCase();
+  else if(T.t==='spell') t='Spell: '+d.q;
+  else if(T.t==='w') t=wPrompt(d);
+  else if(T.t==='two') t='Two examples: '+d.q;
+  else if(T.t==='match') t='Match the following';
+  else if(T.t==='label') t='Label the leaf';
+  else if(T.t==='eq') t='Food-making equation';
+  else if(T.t==='steps') t='Identify the plant';
+  else t=d.q||id;
+  t=t.replace(/_+/g,'___');
+  return t.length>72 ? t.slice(0,70)+'\u2026' : t;
+}
 function slipSet(){ return shuffle(SLIP_IDS).map(asTappable); }
 function flashSet(){
   var mk = Object.keys(S.mist).filter(function(id){return TPL[id];}).sort(function(a,b){ return (S.mist[b].n-S.mist[a].n) || (S.mist[a].t-S.mist[b].t); }).slice(0,10);
@@ -1200,10 +1261,10 @@ function flashSet(){
   return ids.map(asTappable);
 }
 function mixNoteSet(){ return shuffle(CH).map(function(c){ return make(pick(idsOf('w', c.id, function(d){return d.k!=='diff';})),{mode:'note'}); }); }
-function spellSet(){ return sample(idsOf('spell'),12).map(function(id){ return make(id); }); }
+function spellSet(){ return rotate(idsOf('spell'),12,{}).map(function(id){ return make(id); }); }
 
 /* ---------------- state ---------------- */
-function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, seen:{}, sound:true, t:0}; }
+function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, seen:{}, seenF:{}, sound:true, t:0}; }
 function normalize(o){
   var f = fresh(); if(!o || typeof o!=='object') return f;
   Object.keys(f).forEach(function(k){ if(o[k]===undefined || typeof o[k]!==typeof f[k]) o[k]=f[k]; });
@@ -1397,12 +1458,12 @@ function finishQ(){
   var sc = grade(q, u);
   var ok = sc>=0.999;
   QZ.res[QZ.i] = {score:sc, ok:ok};
-  S.seen = S.seen||{}; S.seen[q.key] = nowMs();
+  S.seen = S.seen||{}; S.seen[q.key] = nowMs(); S.seenF = S.seenF||{}; if(TPL[q.key]) ownAnswers(TPL[q.key]).forEach(function(f){ S.seenF[f] = nowMs(); });
   var xp = q.type==='note' ? u.ticks.filter(Boolean).length*4 : Math.round(10*sc);
   if(ok){ QZ.combo++; if(QZ.combo>=3) xp += Math.min(QZ.combo-2,5)*2; } else QZ.combo = 0;
   QZ.best = Math.max(QZ.best, QZ.combo);
   QZ.xp += xp; addXP(xp);
-  if(ok){ clearMistake(q.key); if(QZ.mode==='slip') S.cured[q.key]=true; }
+  if(ok){ if(QZ.mode==='fix'){ delete S.mist[q.key]; if(SLIP_IDS.indexOf(q.key)>=0) S.cured[q.key]=true; QZ.fixed=(QZ.fixed||0)+1; } else clearMistake(q.key); if(QZ.mode==='slip') S.cured[q.key]=true; }
   else markMistake(q.key);
   if(q.type!=='note') beep(ok);
   save();
@@ -1431,11 +1492,14 @@ ACT.plan = function(el){
   if(p.kind==='lab') return startQuiz('lab', labSet(p.chs), {title:p.title, sid:p.id});
   if(p.kind==='boss') return startQuiz(S.boss.a ? 'bossB' : 'bossA', S.boss.a ? bossB() : bossA(), {title: S.boss.a ? 'Boss – Section B' : 'Boss – Section A'});
   if(p.kind==='slip') return startQuiz('slip', slipSet(), {title:'Slip Doctor', sid:p.id});
+  if(p.kind==='fix') return ACT.fixmine();
   if(p.kind==='flash') return startQuiz('flash', flashSet(), {title:'Flash Round', sid:p.id});
 };
 ACT.lab = function(el){ var ch=el.getAttribute('data-ch'); startQuiz('lab', labSet([ch]), {title:CHMAP[ch].name+' – Notebook'}); };
 ACT.bossA = function(){ startQuiz('bossA', bossA(), {title:'Boss – Section A'}); };
 ACT.bossB = function(){ startQuiz('bossB', bossB(), {title:'Boss – Section B'}); };
+ACT.fixmine = function(){ var L=fixSet(); if(!L.length){ toast('Nothing to fix right now!'); return; } startQuiz('fix', L, {title:'Fix my mistakes', sid:'S9'}); };
+ACT.fixthese = function(){ var ids=[]; QZ.list.forEach(function(q,i){ var r=QZ.res[i]; if(r && !r.ok && ids.indexOf(q.key)<0) ids.push(q.key); }); if(!ids.length) return; startQuiz('fix', fixSet(ids), {title:'Fix my mistakes'}); };
 ACT.slip = function(){ startQuiz('slip', slipSet(), {title:'Slip Doctor', sid:'S9'}); };
 ACT.flash = function(){ startQuiz('flash', flashSet(), {title:'Flash Round', sid:'S10'}); };
 ACT.mixnote = function(){ startQuiz('lab', mixNoteSet(), {title:'Mixed notebook'}); };
@@ -1455,6 +1519,7 @@ ACT.again = function(){
   if(m==='bossA') return ACT.bossA();
   if(m==='bossB') return ACT.bossB();
   if(m==='slip') return ACT.slip();
+  if(m==='fix') return ACT.fixmine();
   if(m==='flash') return ACT.flash();
   if(m==='spell') return ACT.spell();
   ACT.home();
@@ -1564,7 +1629,7 @@ function endQuiz(){
   if(m==='lab'){ if(QZ.meta.sid) S.done[QZ.meta.sid]={pct:pct, t:nowMs()}; QZ.list.forEach(function(q,i){ if(q.type==='note'){ S.lab[q.key]={got:QZ.list[i]? (QZ.res[i]?Math.round(QZ.res[i].score*q.pts.length):0):0, of:q.pts.length, t:nowMs()}; } }); }
   if(m==='bossA') S.boss.a = {got:marks, max:maxM, t:nowMs()};
   if(m==='bossB') S.boss.b = {got:marks, max:maxM, t:nowMs()};
-  if(m==='slip') S.done.S9 = {pct:pct, t:nowMs()};
+  if(m==='slip' || m==='fix') S.done.S9 = {pct:pct, t:nowMs()};
   if(m==='flash') S.done.S10 = {pct:pct, t:nowMs()};
   save();
   V = {name:'result'}; render(); scrollTop();
@@ -1604,10 +1669,26 @@ function heroMsg(){
   return '<b>Hi '+KID+'!</b> Hop across the lily pads, one session at a time.';
 }
 
+function mistakeSection(){
+  var wk = weekendIds(), bk = bookletIds(), n = wk.length + bk.length;
+  var h = '<section class="mist" id="mistakes"><div class="misth"><span class="mic">\u{1F4D2}</span><div class="mtx"><h2>My Mistakes</h2><p>'+
+    (n ? '<b>'+n+'</b> to fix. Get one right here and it comes off the list.' : 'Nothing to fix right now. Brilliant! \u{1F31F}')+'</p></div></div>';
+  function grp(title, ids){
+    if(!ids.length) return '';
+    return '<div class="mgrp"><small>'+title+' ('+ids.length+')</small><ul>'+ids.slice(0,4).map(function(id){ var c=CHMAP[TPL[id].ch]; return '<li><span class="mchip">'+(c?'Ch '+c.n:'Mix')+'</span>'+esc(shortQ(id))+'</li>'; }).join('')+
+      (ids.length>4?'<li class="more">+ '+(ids.length-4)+' more</li>':'')+'</ul></div>';
+  }
+  if(n){
+    h += grp('From this weekend', wk) + grp('From my booklet', bk);
+    h += '<div class="btnrow"><button class="btn mbtn" data-act="fixmine">\u{1F527} Fix my mistakes ('+Math.min(n,15)+')</button></div>';
+  }
+  return h + '</section>';
+}
 function renderHome(){
   var nx = nextPlan(), h = '';
   h += '<section class="hero"><div class="bigfrog">'+ART.mascot(Math.max(3,lvl(S.xp)))+'</div><div class="bubble">'+heroMsg()+
     (nx ? '<div class="btnrow"><button class="btn" data-act="plan" data-id="'+nx.id+'">▶ Start '+esc(nx.title)+'</button></div>' : '<p>All sessions done! \u{1F389}</p>')+'</div></section>';
+  h += mistakeSection();
   /* pond trail */
   var days = [{d:3, t:'Saturday 3 Oct', s:'Plant Day'},{d:4, t:'Sunday 4 Oct', s:'Animals, Body and the Boss'},{d:5, t:'Monday 5 Oct', s:'Exam Day'}];
   h += '<h2>Weekend lily pads</h2><div class="pond">';
@@ -1615,7 +1696,7 @@ function renderHome(){
     h += '<div class="dayhead"><b>'+D.t+'</b><span>'+D.s+'</span></div>';
     PLAN.filter(function(p){return p.day===D.d;}).forEach(function(p, k){
       var done = planDone(p), isNext = nx && nx.id===p.id;
-      var icon = p.kind==='ch' ? CHMAP[p.ch].icon : p.kind==='lab' ? '✍️' : p.kind==='boss' ? '\u{1F451}' : p.kind==='slip' ? '\u{1FA7A}' : '⚡';
+      var icon = p.kind==='ch' ? CHMAP[p.ch].icon : p.kind==='lab' ? '✍️' : p.kind==='boss' ? '\u{1F451}' : p.kind==='slip' ? '\u{1FA7A}' : p.kind==='fix' ? '\u{1F4D2}' : '⚡';
       var st = '';
       if(p.kind==='ch' && S.ch[p.ch]) st = '<span class="stars">'+starStr(S.ch[p.ch].stars)+'</span>';
       if(p.kind==='boss') st = '<span class="mini">'+(S.boss.a?'A: '+S.boss.a.got+'/'+S.boss.a.max:'A: –')+' · '+(S.boss.b?'B: '+S.boss.b.got+'/'+S.boss.b.max:'B: –')+'</span>';
@@ -1638,7 +1719,6 @@ function renderHome(){
   /* extras */
   var mcount = Object.keys(S.mist).length;
   h += '<h2>Special rounds</h2><div class="extras">'+
-    '<button class="ex" data-act="slip"><span>\u{1FA7A}</span><b>Slip Doctor</b><small>Mistakes from your booklet</small></button>'+
     '<button class="ex" data-act="spell"><span>\u{1F41D}</span><b>Spelling Bee</b><small>12 science words to spell</small></button>'+
     '<button class="ex" data-act="bossA"><span>\u{1F451}</span><b>Boss: Section A</b><small>Model paper, 15 marks</small></button>'+
     '<button class="ex" data-act="bossB"><span>\u{1F4DD}</span><b>Boss: Section B</b><small>Notebook answers</small></button>'+
@@ -1848,6 +1928,7 @@ function fbHTML(q,u,r){
     h += '<p class="ft">'+(ok?pick(PRAISE):pick(OOPS))+(tfFix && u.fixPicked===q.fix.ans ? ' <span class="bonus">+5 fix bonus</span>':'')+'</p>';
     var al = answerLine(q,u); if(al && (!ok || q.type==='build' || q.type==='tf')) h += '<div class="fa">'+al+'</div>';
   }
+  if(QZ.mode==='fix') h += '<p class="fixline">'+(ok?'\u2705 Fixed! It is off your list.':'\u{1F4D2} Still on your list. You will see it again.')+'</p>';
   if(q.tip) h += '<p class="tip">'+esc(q.tip)+'</p>';
   if(q.note) h += '<p class="tip">'+esc(q.note)+'</p>';
   if(q.slip) h += '<div class="slipnote">\u{1FA7A} '+esc(q.slip)+'</div>';
@@ -1878,12 +1959,14 @@ function renderResult(){
   else h += '<p class="score">'+Math.round(QZ.pct*100)+'%</p>';
   h += '<p class="stars big">'+starStr(QZ.stars)+'</p><p class="sub">+'+QZ.xp+' XP'+(QZ.best>=3?' · best streak \u{1F525}'+QZ.best:'')+'</p>';
   var wrong = QZ.list.map(function(q,i){return {q:q, r:QZ.res[i]};}).filter(function(x){ return x.r && !x.r.ok; });
+  if(QZ.mode!=='fix' && wrong.length) h += '<div class="btnrow center"><button class="btn mbtn" data-act="fixthese">\u{1F527} Fix these now ('+wrong.length+')</button></div>';
   if(wrong.length){
     h += '<div class="wrongs"><h3>Remember these</h3>'+wrong.map(function(x){
       var q=x.q, line = q.type==='note' || q.type==='build' ? '<div class="small">'+modelHTML(q)+'</div>' : (answerLine(q,{})||'');
       return '<div class="wr"><b>'+esc(q.prompt||q.label)+'</b><div>'+line+'</div></div>';
     }).join('')+'</div>';
   } else h += '<p class="perfect">Every single one right! \u{1F31F}</p>';
+  if(QZ.mode==='fix'){ var left = weekendIds().length + bookletIds().length; h += '<p class="perfect">Fixed '+(QZ.fixed||0)+' of '+QZ.list.length+'. '+(left?left+' still on your list.':'Your list is empty! \u{1F389}')+'</p>'; }
   if(QZ.mode==='bossA' && !S.boss.b) h += '<div class="btnrow center"><button class="btn" data-act="bossB">Go to Section B →</button></div>';
   h += '<div class="btnrow center"><button class="btn ghost" data-act="again">Play again</button><button class="btn" data-act="home">Back to the pond</button></div></div>';
   return h;
@@ -1936,7 +2019,7 @@ if(typeof DikshaSync!=='undefined' && DikshaSync.init()){
 }
 
 /* QA hooks */
-window.__SCI = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, mixNoteSet:mixNoteSet, factsOf:factsOf, norm:norm,
+window.__SCI = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, mixNoteSet:mixNoteSet, factsOf:factsOf, norm:norm, weekendIds:weekendIds, bookletIds:bookletIds, fixSet:fixSet,
   grade:grade, fillScore:fillScore, start:startQuiz, state:function(){return S;}, quiz:function(){return QZ;}, view:function(){return V;}, act:ACT, render:render, idsOf:idsOf, planDone:planDone, sync:function(){return SYNC;}};
 })();
 
