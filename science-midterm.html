@@ -1067,7 +1067,9 @@ function make(id, o){
     q.type='two'; q.prompt=d.q; q.ok=okC; q.chips=shuffle(okC.concat(noC)); q.need=2; q.tip=d.tip||''; q.label='Give two examples';
   } else if(T.t==='match'){
     var n = o.n||4, chosen=[], used={};
-    shuffle(d.pairs).forEach(function(p){ if(chosen.length<n && !(p[2] && used[p[2]])){ chosen.push(p); if(p[2]) used[p[2]]=1; } });
+    var av = o.avoid||{}, pool = d.pairs.filter(function(p){ return !av[norm(p[0])] && !av[norm(p[1])]; });
+    if(pool.length<n+1) pool = d.pairs;
+    shuffle(pool).forEach(function(p){ if(chosen.length<n && !(p[2] && used[p[2]])){ chosen.push(p); if(p[2]) used[p[2]]=1; } });
     var right = shuffle(chosen.map(function(p){return p[1];}));
     q.type='match'; q.prompt='Match the following'; q.left=chosen.map(function(p){return p[0];}); q.right=right;
     q.pair=chosen.map(function(p){return right.indexOf(p[1]);}); q.label='Match the following';
@@ -1110,15 +1112,37 @@ function specials(ch){
   if(ch==='c6') return [pick(['c6i1','c6i2','c6i3','c6i4']), 'c6c1'];
   return [];
 }
+/* ---- no repeats: one fact per quest, and rotate through the bank across replays ---- */
+function norm(x){ return String(x).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+function factsOf(id){
+  var T=TPL[id], d=T.d, out=[];
+  if(T.t==='mcq'||T.t==='hab'||T.t==='spell') out.push(d.a);
+  else if(T.t==='fill') d.a.forEach(function(a){ out = out.concat(a); });
+  else if(T.t==='tf' && d.fix) out.push(d.fix.a);
+  else if(T.t==='steps') d.parts.forEach(function(p){ out.push(p.a); });
+  if(/paper/i.test(d.q||'')) out.push('papyrus');
+  return out.map(norm).filter(function(x){ return x.length>0; });
+}
+function clash(id, used){ return factsOf(id).some(function(f){ return used[f]; }); }
+function useFacts(id, used){ factsOf(id).forEach(function(f){ used[f]=1; }); }
+function rotate(ids, n, used){
+  var seen = S.seen||{};
+  var ok = ids.filter(function(id){ return !clash(id, used); });
+  var ordered = ok.map(function(id){ return {id:id, k:(seen[id]||0) + rnd()*1000}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.id; });
+  var out=[];
+  ordered.forEach(function(id){ if(out.length<n && !clash(id, used)){ out.push(id); useFacts(id, used); } });
+  return out;
+}
 function chapterSet(ch){
-  var m = sample(mcqIds(ch),3), f = sample(idsOf('fill',ch),2), t = sample(idsOf('tf',ch),2);
-  var sp = pick(idsOf('spell',ch)), tw = pick(idsOf('two',ch));
+  var used = {};
+  var sx = specials(ch); sx.forEach(function(id){ useFacts(id, used); });
+  var m = rotate(mcqIds(ch),3,used), f = rotate(idsOf('fill',ch),2,used), t = rotate(idsOf('tf',ch),2,used);
+  var sp = rotate(idsOf('spell',ch),1,used)[0], tw = rotate(idsOf('two',ch),1,used)[0];
   var ms = idsOf('match',ch).concat(idsOf('sort',ch));
-  var sx = specials(ch);
-  var msPick = sample(ms, sx.length===0 ? 2 : 1);
-  var w = sample(idsOf('w',ch,function(d){return d.k!=='diff';}),2);
+  var msPick = rotate(ms, sx.length===0 ? 2 : 1, {});
+  var w = rotate(idsOf('w',ch,function(d){return d.k!=='diff';}),2,{});
   var order = [m[0], t[0], f[0], m[1], sx[0]||msPick[1], t[1], sp, f[1], tw, m[2], sx[1], msPick[0]];
-  var Q = order.filter(Boolean).map(function(id){ return make(id); });
+  var Q = order.filter(Boolean).map(function(id){ return TPL[id].t==='match' ? make(id,{avoid:used}) : make(id); });
   w.forEach(function(id){ Q.push(make(id,{mode:'build'})); });
   return Q;
 }
@@ -1179,7 +1203,7 @@ function mixNoteSet(){ return shuffle(CH).map(function(c){ return make(pick(idsO
 function spellSet(){ return sample(idsOf('spell'),12).map(function(id){ return make(id); }); }
 
 /* ---------------- state ---------------- */
-function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, sound:true, t:0}; }
+function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, seen:{}, sound:true, t:0}; }
 function normalize(o){
   var f = fresh(); if(!o || typeof o!=='object') return f;
   Object.keys(f).forEach(function(k){ if(o[k]===undefined || typeof o[k]!==typeof f[k]) o[k]=f[k]; });
@@ -1373,6 +1397,7 @@ function finishQ(){
   var sc = grade(q, u);
   var ok = sc>=0.999;
   QZ.res[QZ.i] = {score:sc, ok:ok};
+  S.seen = S.seen||{}; S.seen[q.key] = nowMs();
   var xp = q.type==='note' ? u.ticks.filter(Boolean).length*4 : Math.round(10*sc);
   if(ok){ QZ.combo++; if(QZ.combo>=3) xp += Math.min(QZ.combo-2,5)*2; } else QZ.combo = 0;
   QZ.best = Math.max(QZ.best, QZ.combo);
@@ -1911,7 +1936,7 @@ if(typeof DikshaSync!=='undefined' && DikshaSync.init()){
 }
 
 /* QA hooks */
-window.__SCI = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, mixNoteSet:mixNoteSet,
+window.__SCI = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, mixNoteSet:mixNoteSet, factsOf:factsOf, norm:norm,
   grade:grade, fillScore:fillScore, start:startQuiz, state:function(){return S;}, quiz:function(){return QZ;}, view:function(){return V;}, act:ACT, render:render, idsOf:idsOf, planDone:planDone, sync:function(){return SYNC;}};
 })();
 
