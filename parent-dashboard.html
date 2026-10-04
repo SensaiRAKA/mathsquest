@@ -115,7 +115,8 @@ var REGISTRY = [
     { key:"diksha_maths_midterm_v1", icon:"🧮", name:"Maths · Mid-term Quest", href:"maths-midterm.html" },
     { key:"sstMidQuest_v1",          icon:"🌏", name:"SST · Mid-term Quest", href:"sst-midterm.html" },
     { key:"diksha_eng_midterm_v1",   icon:"✍️", name:"English · Mid-term Quest", href:"english-midterm.html" },
-    { key:"diksha_cs_midterm_v1",    icon:"🚀", name:"Computers · Mid-term Mission", href:"computer-science-midterm.html" }
+    { key:"diksha_cs_midterm_v1",    icon:"🚀", name:"Computers · Mid-term Mission", href:"computer-science-midterm.html" },
+    { key:"diksha_science_midterm_v1", icon:"🐸", name:"Science · Mid-term Lily Pads", href:"science-midterm.html" }
   ]},
   { group:"Weekly Test Modules", items:[
     { key:"diksha_cs_v1",  icon:"💻", name:"Computer Science", href:"computer-science.html" },
@@ -146,6 +147,8 @@ function mistakesCount(obj){
   if(obj.wrong && typeof obj.wrong==="object" && !Array.isArray(obj.wrong)) return Object.keys(obj.wrong).length;
   if(Array.isArray(obj.mistakes)) return obj.mistakes.length;
   if(typeof obj.totalWrong==="number") return obj.totalWrong;
+  /* Science mid-term: mist = {questionId: {n, t}}; entries are deleted once fixed. */
+  if(obj.mist && typeof obj.mist==="object" && !Array.isArray(obj.mist)) return Object.keys(obj.mist).length;
   return 0;
 }
 function lastActiveISO(obj){
@@ -155,7 +158,40 @@ function lastActiveISO(obj){
     var dt = new Date(obj.updatedAt);
     return dt.toLocaleDateString("en-CA");
   }
+  /* Science mid-term: t = epoch ms of the last save. The 1e12 floor rejects
+     anything that is not a millisecond timestamp. */
+  if(typeof obj.t==="number" && obj.t>1e12){
+    return new Date(obj.t).toLocaleDateString("en-CA");
+  }
   return null;
+}
+/* Streak: use the quest's own number when it keeps one; otherwise derive it from a
+   days map ({"YYYY-MM-DD": xpEarned}) as consecutive active days ending today or
+   yesterday (a streak isn't broken until a full day is missed). */
+function streakOf(obj){
+  var s = pickNum(obj, ["streak"]);
+  if(s!==null) return s;
+  if(!obj.days || typeof obj.days!=="object" || Array.isArray(obj.days)) return 0;
+  var active = {};
+  Object.keys(obj.days).forEach(function(k){
+    if(/^\d{4}-\d{2}-\d{2}$/.test(k) && typeof obj.days[k]==="number" && obj.days[k]>0) active[k] = true;
+  });
+  var cur = new Date(new Date().toLocaleDateString("en-CA")+"T00:00:00");
+  function key(dt){ return dt.toLocaleDateString("en-CA"); }
+  if(!active[key(cur)]) cur.setDate(cur.getDate()-1);
+  var n = 0;
+  while(active[key(cur)]){ n++; cur.setDate(cur.getDate()-1); }
+  return n;
+}
+/* Optional mock-paper scores ({a:{got,max}, b:{got,max}}), shown when a quest records them. */
+function bossText(obj){
+  if(!obj.boss || typeof obj.boss!=="object") return "";
+  var parts = [];
+  [["a","Sec A"],["b","Sec B"]].forEach(function(p){
+    var r = obj.boss[p[0]];
+    if(r && typeof r.got==="number" && typeof r.max==="number") parts.push(p[1]+" "+r.got+"/"+r.max);
+  });
+  return parts.join(" · ");
 }
 function daysAgo(iso){
   if(!iso) return null;
@@ -192,8 +228,9 @@ function renderCard(entry, data){
     return div;
   }
   var points = pickNum(data, ["xp","stars"]) || 0;
-  var streak = pickNum(data, ["streak"]) || 0;
+  var streak = streakOf(data);
   var badges = Array.isArray(data.badges) ? data.badges.length : null;
+  var boss = bossText(data);
   var wrong = mistakesCount(data);
   var last = lastActiveISO(data);
   var fresh = freshness(last);
@@ -201,6 +238,7 @@ function renderCard(entry, data){
   var metrics = '<span>&#11088; <b>'+points+'</b> pts</span>';
   metrics += '<span>&#128293; <b>'+streak+'</b> day streak</span>';
   if(badges!==null) metrics += '<span>&#127942; <b>'+badges+'</b> badges</span>';
+  if(boss) metrics += '<span>&#128081; Boss: <b>'+boss+'</b></span>';
   metrics += '<span>Last active: <b>'+fmtDate(last)+'</b></span>';
   if(wrong>0) metrics += '<span class="mistakes-flag">&#9888; '+wrong+' to review</span>';
 
@@ -242,7 +280,7 @@ function loadAll(code){
     var totalPoints = 0, bestStreak = 0, totalMistakes = 0, mostRecent = null;
     withData.forEach(function(r){
       totalPoints += (pickNum(r.data, ["xp","stars"]) || 0);
-      bestStreak = Math.max(bestStreak, pickNum(r.data, ["streak"]) || 0);
+      bestStreak = Math.max(bestStreak, streakOf(r.data));
       totalMistakes += mistakesCount(r.data);
       var la = lastActiveISO(r.data);
       if(la && (!mostRecent || la > mostRecent)) mostRecent = la;
