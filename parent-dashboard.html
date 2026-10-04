@@ -8,7 +8,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 <script src="firebase-config.js"></script>
-<script src="sync.js"></script>
 <style>
   :root{
     --bg:#0f1730; --card:#182548; --card2:#1e2d58; --ink:#eef1ff; --dim:#9aa6d6;
@@ -73,6 +72,8 @@
   .metrics{display:flex; gap:14px; flex-wrap:wrap; margin-top:4px; font-size:.8rem; color:var(--dim)}
   .metrics b{color:var(--ink)}
   .mistakes-flag{color:var(--red); font-weight:700}
+  .localonly{font-size:.78rem; color:var(--dim); margin:2px 2px 10px; line-height:1.5}
+  .localonly b{color:var(--ink); font-weight:600}
   footer{color:var(--dim); font-size:.75rem; text-align:center; margin-top:28px; line-height:1.6}
   .reload{margin-top:14px}
 </style>
@@ -99,42 +100,57 @@
   </div>
 
   <footer>
-    Data comes straight from the same Firestore sync every quest already uses.<br>
-    Not linked from the main hub on purpose &mdash; bookmark this page for yourself.
+    Modules are read live from the hub page, so new quests appear here on their own.<br>
+    Not linked from the main hub on purpose &mdash; bookmark this page for yourself.<br>
+    <span id="buildStamp"></span>
   </footer>
 </div>
 
 <script>
 "use strict";
 
-/* Registry of every quest wired to DikshaSync: storage key -> display info.
-   Update this list when a new synced module ships (see CLAUDE.md). Icons/names
-   match index.html so this page stays visually consistent with the hub. */
-var REGISTRY = [
-  { group:"Mid-Term Preparation", items:[
-    { key:"diksha_maths_midterm_v1", icon:"🧮", name:"Maths · Mid-term Quest", href:"maths-midterm.html" },
-    { key:"sstMidQuest_v1",          icon:"🌏", name:"SST · Mid-term Quest", href:"sst-midterm.html" },
-    { key:"diksha_eng_midterm_v1",   icon:"✍️", name:"English · Mid-term Quest", href:"english-midterm.html" },
-    { key:"diksha_cs_midterm_v1",    icon:"🚀", name:"Computers · Mid-term Mission", href:"computer-science-midterm.html" },
-    { key:"diksha_science_midterm_v1", icon:"🐸", name:"Science · Mid-term Lily Pads", href:"science-midterm.html" }
-  ]},
-  { group:"Weekly Test Modules", items:[
-    { key:"diksha_cs_v1",  icon:"💻", name:"Computer Science", href:"computer-science.html" },
-    { key:"diksha_eng_v1", icon:"✍️", name:"English", href:"englishquest.html" },
-    { key:"diksha_sci_v1", icon:"🔬", name:"Science", href:"sciencequest.html" },
-    { key:"mdis_sanskrit_u2_v1", icon:"🦜", name:"Sanskrit · Unit 2", href:"sanskrit-u2.html" },
-    { key:"sanskritQuest_v1", icon:"📜", name:"Sanskrit · Unit 1", href:"sanskritquest.html" },
-    { key:"mathsQuest_v1", icon:"🔢", name:"Mathematics · Unit 1", href:"mathsquest.html" }
-  ]},
-  { group:"Special Classes", items:[
-    { key:"specialMathsJuly_v1", icon:"🏫", name:"Maths (Special Class)", href:"special-classes-maths.html" }
-  ]}
-];
+/* Bump BUILD on every change to this file. On load the page fetches its own
+   latest copy and, if BUILD differs, reloads itself under a new URL, so a
+   browser holding a cached copy (GitHub Pages sends max-age=600) updates itself. */
+var BUILD = "2026-10-04.2";
 
 var LAST_CODE_KEY = "dikshaParentDashLastCode_v1";
+var SCAN_KEY = "dikshaParentDashScan_v1";
+
+/* How it finds modules (nothing to maintain when a new quest ships):
+   1. The module list, names, icons and groups come from index.html's GROUPS,
+      fetched fresh on every load.
+   2. Each module's storage key and whether it syncs are read from its own page
+      (the sync.js tag and its STORE_KEY / STORAGE_KEY / KEY constant), then
+      cached on this device. Pages already seen are not fetched again.
+   3. Her whole progress document is read in one go, and every key in it is
+      shown: matched to a hub module, or listed under "Other synced data".
+   KNOWN only skips the page fetch for modules whose key is already known. */
+var KNOWN = {
+  "maths-midterm.html":            { key:"diksha_maths_midterm_v1",   synced:true },
+  "sst-midterm.html":              { key:"sstMidQuest_v1",            synced:true },
+  "english-midterm.html":          { key:"diksha_eng_midterm_v1",     synced:true },
+  "computer-science-midterm.html": { key:"diksha_cs_midterm_v1",      synced:true },
+  "science-midterm.html":          { key:"diksha_science_midterm_v1", synced:true },
+  "computer-science.html":         { key:"diksha_cs_v1",              synced:true },
+  "englishquest.html":             { key:"diksha_eng_v1",             synced:true },
+  "sciencequest.html":             { key:"diksha_sci_v1",             synced:true },
+  "sanskrit-u2.html":              { key:"mdis_sanskrit_u2_v1",       synced:true },
+  "sanskritquest.html":            { key:"sanskritQuest_v1",          synced:true },
+  "mathsquest.html":               { key:"mathsQuest_v1",             synced:true },
+  "special-classes-maths.html":    { key:"specialMathsJuly_v1",       synced:true }
+};
 
 function $(id){ return document.getElementById(id); }
+function esc(s){
+  return String(s == null ? "" : s).replace(/[&<>"']/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];
+  });
+}
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){} }
 
+/* ---------- reading her saved state (field names differ between quests) ---------- */
 function pickNum(obj, keys){
   for(var i=0;i<keys.length;i++){ if(typeof obj[keys[i]]==="number") return obj[keys[i]]; }
   return null;
@@ -143,6 +159,7 @@ function pickStr(obj, keys){
   for(var i=0;i<keys.length;i++){ if(obj[keys[i]]) return String(obj[keys[i]]); }
   return null;
 }
+function pointsOf(obj){ return pickNum(obj, ["xp","stars","points"]) || 0; }
 function mistakesCount(obj){
   if(obj.wrong && typeof obj.wrong==="object" && !Array.isArray(obj.wrong)) return Object.keys(obj.wrong).length;
   if(Array.isArray(obj.mistakes)) return obj.mistakes.length;
@@ -155,19 +172,16 @@ function lastActiveISO(obj){
   var d = pickStr(obj, ["lastDay","lastPlayed","lastPractice"]);
   if(d) return d;
   if(typeof obj.updatedAt==="number" && obj.updatedAt>0){
-    var dt = new Date(obj.updatedAt);
-    return dt.toLocaleDateString("en-CA");
+    return new Date(obj.updatedAt).toLocaleDateString("en-CA");
   }
-  /* Science mid-term: t = epoch ms of the last save. The 1e12 floor rejects
-     anything that is not a millisecond timestamp. */
+  /* t = epoch ms of the last save; the 1e12 floor rejects anything that isn't one. */
   if(typeof obj.t==="number" && obj.t>1e12){
     return new Date(obj.t).toLocaleDateString("en-CA");
   }
   return null;
 }
-/* Streak: use the quest's own number when it keeps one; otherwise derive it from a
-   days map ({"YYYY-MM-DD": xpEarned}) as consecutive active days ending today or
-   yesterday (a streak isn't broken until a full day is missed). */
+/* Use the quest's own streak number; otherwise derive it from a days map
+   ({"YYYY-MM-DD": xpEarned}) as consecutive active days ending today or yesterday. */
 function streakOf(obj){
   var s = pickNum(obj, ["streak"]);
   if(s!==null) return s;
@@ -183,7 +197,7 @@ function streakOf(obj){
   while(active[key(cur)]){ n++; cur.setDate(cur.getDate()-1); }
   return n;
 }
-/* Optional mock-paper scores ({a:{got,max}, b:{got,max}}), shown when a quest records them. */
+/* Mock-paper scores ({a:{got,max}, b:{got,max}}), shown when a quest records them. */
 function bossText(obj){
   if(!obj.boss || typeof obj.boss!=="object") return "";
   var parts = [];
@@ -214,113 +228,307 @@ function fmtDate(iso){
   if(n!==null && n>1) return n+" days ago";
   return iso;
 }
+function asState(v){
+  if(typeof v==="string"){ try{ v = JSON.parse(v); }catch(e){ return null; } }
+  return (v && typeof v==="object" && !Array.isArray(v)) ? v : null;
+}
 
+/* ---------- discovering modules from the hub ---------- */
+/* Returns the source text of the first [...] literal after `marker`, skipping strings and comments. */
+function extractArrayLiteral(src, marker){
+  var i = src.indexOf(marker); if(i<0) return null;
+  var start = src.indexOf("[", i); if(start<0) return null;
+  var depth = 0, q = null;
+  for(var k=start; k<src.length; k++){
+    var c = src.charAt(k);
+    if(q){ if(c==="\\"){ k++; continue; } if(c===q) q = null; continue; }
+    if(c==="\"" || c==="'" || c==="`"){ q = c; continue; }
+    if(c==="/" && src.charAt(k+1)==="*"){ var e = src.indexOf("*/", k+2); if(e<0) return null; k = e+1; continue; }
+    if(c==="/" && src.charAt(k+1)==="/"){ var e2 = src.indexOf("\n", k); if(e2<0) return null; k = e2; continue; }
+    if(c==="[" || c==="{") depth++;
+    else if(c==="]" || c==="}"){ depth--; if(depth===0) return src.slice(start, k+1); }
+  }
+  return null;
+}
+function fetchHub(){
+  return fetch("index.html", {cache:"no-store"}).then(function(r){
+    if(!r.ok) throw new Error("hub " + r.status);
+    return r.text();
+  }).then(function(t){
+    var lit = extractArrayLiteral(t, "const GROUPS");
+    if(!lit) throw new Error("no GROUPS");
+    var groups = (new Function("return (" + lit + ");"))();
+    if(!Array.isArray(groups)) throw new Error("GROUPS not a list");
+    return groups.filter(function(g){ return g && Array.isArray(g.items); }).map(function(g){
+      return { id:g.id || "", name:String(g.name || ""), items:g.items.filter(function(it){
+        return it && typeof it.href==="string" && /\.html$/i.test(it.href);
+      }).map(function(it){ return { icon:it.icon || "📘", name:String(it.name || it.href), href:it.href }; }) };
+    });
+  });
+}
+
+var KEY_RE = /\b(?:STORE_KEY|STORAGE_KEY|KEY)\s*=\s*["']([^"']+)["']/;
+var SYNC_RE = /<script[^>]*\bsrc=["'](?:\.\/)?sync\.js["']/i;
+function scanPage(href, docKeys){
+  return fetch(href, {cache:"no-store"}).then(function(r){
+    if(!r.ok) throw new Error(href + " " + r.status);
+    return r.text();
+  }).then(function(t){
+    var synced = SYNC_RE.test(t);
+    var key = null;
+    /* Prefer a key that actually holds data and appears quoted in the page. */
+    for(var i=0; i<docKeys.length && !key; i++){
+      var k = docKeys[i];
+      if(t.indexOf("\""+k+"\"")>=0 || t.indexOf("'"+k+"'")>=0) key = k;
+    }
+    if(!key){ var m = t.match(KEY_RE); key = m ? m[1] : null; }
+    return { key:key, synced:synced };
+  }).catch(function(){ return null; });
+}
+function loadScanCache(){
+  try{ var c = JSON.parse(lsGet(SCAN_KEY) || "{}"); return (c && typeof c==="object") ? c : {}; }catch(e){ return {}; }
+}
+
+/* ---------- reading her progress document ---------- */
+function initDb(){
+  var cfg = window.DIKSHA_FIREBASE_CONFIG;
+  if(!cfg || !cfg.apiKey || typeof firebase==="undefined") return null;
+  try{
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+    return firebase.firestore();
+  }catch(e){ return null; }
+}
+function withTimeout(p, ms){
+  return new Promise(function(resolve, reject){
+    var t = setTimeout(function(){ reject(new Error("timeout")); }, ms);
+    p.then(function(v){ clearTimeout(t); resolve(v); }, function(e){ clearTimeout(t); reject(e); });
+  });
+}
+function readDoc(db, code){
+  var ref = db.collection("progress").doc(code);
+  return withTimeout(ref.get({source:"server"}).catch(function(){ return ref.get(); }), 15000)
+    .then(function(snap){ return snap.exists ? (snap.data() || {}) : null; });
+}
+
+/* ---------- rendering ---------- */
 function renderCard(entry, data){
   var div = document.createElement("div");
+  var link = entry.href
+    ? '<a href="'+esc(entry.href)+'" target="_blank" rel="noopener">'+esc(entry.name)+'</a>'
+    : esc(entry.name);
   if(!data){
     div.className = "card empty";
     div.innerHTML =
-      '<div class="ic">'+entry.icon+'</div>'+
+      '<div class="ic">'+esc(entry.icon)+'</div>'+
       '<div class="info">'+
-        '<div class="name"><a href="'+entry.href+'" target="_blank" rel="noopener">'+entry.name+'</a></div>'+
+        '<div class="name">'+link+'</div>'+
         '<div class="metrics">No progress synced yet</div>'+
       '</div>';
     return div;
   }
-  var points = pickNum(data, ["xp","stars"]) || 0;
+  var points = pointsOf(data);
   var streak = streakOf(data);
   var badges = Array.isArray(data.badges) ? data.badges.length : null;
   var boss = bossText(data);
   var wrong = mistakesCount(data);
   var last = lastActiveISO(data);
-  var fresh = freshness(last);
 
   var metrics = '<span>&#11088; <b>'+points+'</b> pts</span>';
   metrics += '<span>&#128293; <b>'+streak+'</b> day streak</span>';
   if(badges!==null) metrics += '<span>&#127942; <b>'+badges+'</b> badges</span>';
-  if(boss) metrics += '<span>&#128081; Boss: <b>'+boss+'</b></span>';
-  metrics += '<span>Last active: <b>'+fmtDate(last)+'</b></span>';
+  if(boss) metrics += '<span>&#128081; Boss: <b>'+esc(boss)+'</b></span>';
+  metrics += '<span>Last active: <b>'+esc(fmtDate(last))+'</b></span>';
   if(wrong>0) metrics += '<span class="mistakes-flag">&#9888; '+wrong+' to review</span>';
 
   div.className = "card";
   div.innerHTML =
-    '<div class="ic">'+entry.icon+'</div>'+
+    '<div class="ic">'+esc(entry.icon)+'</div>'+
     '<div class="info">'+
-      '<div class="name"><span class="dot '+fresh+'"></span> <a href="'+entry.href+'" target="_blank" rel="noopener">'+entry.name+'</a></div>'+
+      '<div class="name"><span class="dot '+freshness(last)+'"></span> '+link+'</div>'+
       '<div class="metrics">'+metrics+'</div>'+
     '</div>';
   return div;
 }
 
+function render(code, groups, scanned, doc, hubOk){
+  var docKeys = Object.keys(doc).filter(function(k){ return asState(doc[k]); });
+  var matched = {};
+  var sections = [];
+  var syncedCount = 0;
+  var withData = [];
+
+  groups.forEach(function(g, gi){
+    var cards = [], localOnly = [], latest = null;
+    g.items.forEach(function(it){
+      var info = scanned[it.href];
+      if(info && info.synced === false){ localOnly.push(it.name); return; }
+      var data = (info && info.key) ? asState(doc[info.key]) : null;
+      if(info && info.key) matched[info.key] = true;
+      syncedCount++;
+      if(data){
+        withData.push(data);
+        var la = lastActiveISO(data);
+        if(la && (!latest || la > latest)) latest = la;
+      }
+      cards.push({ entry:it, data:data });
+    });
+    sections.push({ name:g.name, cards:cards, localOnly:localOnly, latest:latest, order:gi });
+  });
+
+  var orphans = docKeys.filter(function(k){ return !matched[k]; });
+  if(orphans.length){
+    var oc = [], latestO = null;
+    orphans.forEach(function(k){
+      var d = asState(doc[k]);
+      withData.push(d);
+      var la = lastActiveISO(d);
+      if(la && (!latestO || la > latestO)) latestO = la;
+      oc.push({ entry:{ icon:"🗂️", name:k, href:"" }, data:d });
+    });
+    syncedCount += orphans.length;
+    sections.push({ name: hubOk ? "Other synced data" : "Synced modules", cards:oc, localOnly:[], latest:latestO, order:999 });
+  }
+
+  /* Groups with the most recent practice come first; the rest keep hub order.
+     Leftover keys with no hub module always go last. */
+  sections.sort(function(a, b){
+    if((a.order===999) !== (b.order===999)) return a.order===999 ? 1 : -1;
+    if(a.latest && b.latest && a.latest !== b.latest) return a.latest < b.latest ? 1 : -1;
+    if(a.latest && !b.latest) return -1;
+    if(!a.latest && b.latest) return 1;
+    return a.order - b.order;
+  });
+
+  var totalPoints = 0, bestStreak = 0, totalMistakes = 0, mostRecent = null;
+  withData.forEach(function(d){
+    totalPoints += pointsOf(d);
+    bestStreak = Math.max(bestStreak, streakOf(d));
+    totalMistakes += mistakesCount(d);
+    var la = lastActiveISO(d);
+    if(la && (!mostRecent || la > mostRecent)) mostRecent = la;
+  });
+
+  var summary = $("summary");
+  summary.innerHTML =
+    '<div class="stat"><div class="n">'+withData.length+'/'+syncedCount+'</div><div class="l">Modules with progress</div></div>'+
+    '<div class="stat"><div class="n">'+totalPoints+'</div><div class="l">Total points</div></div>'+
+    '<div class="stat"><div class="n">'+bestStreak+'</div><div class="l">Best streak (days)</div></div>'+
+    '<div class="stat"><div class="n">'+esc(fmtDate(mostRecent))+'</div><div class="l">Last practiced</div></div>';
+  if(totalMistakes>0){
+    summary.innerHTML += '<div class="stat"><div class="n" style="color:var(--red)">'+totalMistakes+'</div><div class="l">Mistakes to review</div></div>';
+  }
+
+  var groupsEl = $("groups");
+  groupsEl.innerHTML = "";
+  sections.forEach(function(s){
+    if(!s.cards.length && !s.localOnly.length) return;
+    var h = document.createElement("div");
+    h.className = "group";
+    var title = document.createElement("h2");
+    title.textContent = s.name;
+    h.appendChild(title);
+    s.cards.forEach(function(c){ h.appendChild(renderCard(c.entry, c.data)); });
+    if(s.localOnly.length){
+      var lo = document.createElement("div");
+      lo.className = "localonly";
+      lo.innerHTML = "Not synced, so progress stays on her tablet: <b>" + s.localOnly.map(esc).join("</b>, <b>") + "</b>";
+      h.appendChild(lo);
+    }
+    groupsEl.appendChild(h);
+  });
+
+  var st = $("status");
+  st.className = hubOk ? "status ok" : "status err";
+  st.textContent = hubOk
+    ? "Loaded for code " + code + "."
+    : "Loaded for code " + code + ", but the hub list couldn't be read, so modules show by storage key.";
+  $("results").style.display = "";
+}
+
+var loading = false;
 function loadAll(code){
+  if(loading) return;
   var statusEl = $("status");
   statusEl.className = "status";
   statusEl.textContent = "Loading...";
-
-  if(!DikshaSync.init()){
+  var db = initDb();
+  if(!db){
     statusEl.className = "status err";
     statusEl.textContent = "Sync isn't configured on this build. Nothing to load.";
     return;
   }
-  DikshaSync.setCode(code);
-  try{ localStorage.setItem(LAST_CODE_KEY, code); }catch(e){}
+  loading = true;
+  lsSet(LAST_CODE_KEY, code);
 
-  var allEntries = [];
-  REGISTRY.forEach(function(g){ g.items.forEach(function(it){ allEntries.push(it); }); });
+  var hubP = fetchHub().then(function(g){ return { ok:true, groups:g }; }, function(){ return { ok:false, groups:[] }; });
+  var docP = readDoc(db, code);
 
-  var pulls = allEntries.map(function(entry){
-    return DikshaSync.pull(entry.key).then(function(data){ return { entry:entry, data:data }; });
-  });
-
-  Promise.all(pulls).then(function(results){
-    var byKey = {};
-    results.forEach(function(r){ byKey[r.entry.key] = r.data; });
-
-    var withData = results.filter(function(r){ return r.data; });
-    var totalPoints = 0, bestStreak = 0, totalMistakes = 0, mostRecent = null;
-    withData.forEach(function(r){
-      totalPoints += (pickNum(r.data, ["xp","stars"]) || 0);
-      bestStreak = Math.max(bestStreak, streakOf(r.data));
-      totalMistakes += mistakesCount(r.data);
-      var la = lastActiveISO(r.data);
-      if(la && (!mostRecent || la > mostRecent)) mostRecent = la;
-    });
-
-    var summary = $("summary");
-    summary.innerHTML =
-      '<div class="stat"><div class="n">'+withData.length+'/'+allEntries.length+'</div><div class="l">Modules with progress</div></div>'+
-      '<div class="stat"><div class="n">'+totalPoints+'</div><div class="l">Total points</div></div>'+
-      '<div class="stat"><div class="n">'+bestStreak+'</div><div class="l">Best streak (days)</div></div>'+
-      '<div class="stat"><div class="n">'+fmtDate(mostRecent)+'</div><div class="l">Last practiced</div></div>';
-    if(totalMistakes>0){
-      summary.innerHTML += '<div class="stat"><div class="n" style="color:var(--red)">'+totalMistakes+'</div><div class="l">Mistakes to review</div></div>';
+  Promise.all([hubP, docP]).then(function(res){
+    var hub = res[0], doc = res[1];
+    if(doc === null){
+      loading = false;
+      statusEl.className = "status err";
+      statusEl.textContent = "No progress found for code " + code + ". Check the code shown at the bottom of a quest on her tablet.";
+      $("results").style.display = "none";
+      return;
     }
+    var docKeys = Object.keys(doc).filter(function(k){ return asState(doc[k]); });
+    var cache = loadScanCache();
+    var hrefs = [];
+    hub.groups.forEach(function(g){ g.items.forEach(function(it){ if(hrefs.indexOf(it.href)<0) hrefs.push(it.href); }); });
 
-    var groupsEl = $("groups");
-    groupsEl.innerHTML = "";
-    REGISTRY.forEach(function(g){
-      var h = document.createElement("div");
-      h.className = "group";
-      var title = document.createElement("h2");
-      title.textContent = g.group;
-      h.appendChild(title);
-      g.items.forEach(function(entry){
-        h.appendChild(renderCard(entry, byKey[entry.key]));
+    var scanned = {};
+    /* A page's own scan (cache) beats the KNOWN shortcut, in case its key ever changes. */
+    hrefs.forEach(function(h){ scanned[h] = cache[h] || KNOWN[h] || null; });
+    var knownKeys = {};
+    hrefs.forEach(function(h){ if(scanned[h] && scanned[h].key) knownKeys[scanned[h].key] = true; });
+    var unmatched = docKeys.filter(function(k){ return !knownKeys[k]; });
+    var seenOrphans = (cache.__orphans && typeof cache.__orphans==="object") ? cache.__orphans : {};
+    var newOrphan = unmatched.some(function(k){ return !seenOrphans[k]; });
+
+    /* Fetch pages never seen before; re-check everything only when her data holds
+       a key no module is known to use (a page changed its key or gained sync). */
+    var toScan = newOrphan ? hrefs.slice() : hrefs.filter(function(h){ return !scanned[h]; });
+
+    Promise.all(toScan.map(function(h){
+      return scanPage(h, docKeys).then(function(r){ return { href:h, r:r }; });
+    })).then(function(results){
+      results.forEach(function(x){
+        if(x.r){ scanned[x.href] = x.r; cache[x.href] = x.r; }
       });
-      groupsEl.appendChild(h);
+      var mappedNow = {};
+      hrefs.forEach(function(h){ if(scanned[h] && scanned[h].key) mappedNow[scanned[h].key] = true; });
+      var orphanMemo = {};
+      docKeys.forEach(function(k){ if(!mappedNow[k]) orphanMemo[k] = true; });
+      cache.__orphans = orphanMemo;
+      lsSet(SCAN_KEY, JSON.stringify(cache));
+      loading = false;
+      render(code, hub.groups, scanned, doc, hub.ok);
     });
-
-    statusEl.className = "status ok";
-    statusEl.textContent = "Loaded for code " + code + ".";
-    $("results").style.display = "";
   }).catch(function(){
+    loading = false;
     statusEl.className = "status err";
     statusEl.textContent = "Couldn't reach the sync database. Check the connection and try again.";
   });
 }
 
+/* ---------- self-update ---------- */
+var BUILD_RE = new RegExp("var BUILD" + " = \"([^\"]+)\"");
+function checkForNewerBuild(){
+  return fetch("parent-dashboard.html", {cache:"no-store"}).then(function(r){ return r.ok ? r.text() : ""; })
+    .then(function(t){
+      var m = t.match(BUILD_RE);
+      if(m && m[1] !== BUILD){
+        var v = new URLSearchParams(location.search).get("v");
+        if(v !== m[1]){ location.replace(location.pathname + "?v=" + encodeURIComponent(m[1])); return true; }
+      }
+      return false;
+    }).catch(function(){ return false; });
+}
+
+function codeFromInput(){ return $("codeInput").value.trim().toUpperCase(); }
 $("loadBtn").addEventListener("click", function(){
-  var code = $("codeInput").value.trim().toUpperCase();
+  var code = codeFromInput();
   if(!code){ $("status").className="status err"; $("status").textContent="Enter her sync code first."; return; }
   loadAll(code);
 });
@@ -328,15 +536,20 @@ $("codeInput").addEventListener("keydown", function(e){
   if(e.key==="Enter") $("loadBtn").click();
 });
 $("reloadBtn").addEventListener("click", function(){
-  var code = $("codeInput").value.trim().toUpperCase();
-  if(code) loadAll(code);
+  checkForNewerBuild().then(function(updated){
+    var code = codeFromInput();
+    if(!updated && code) loadAll(code);
+  });
 });
 
-/* Prefill from this device's own last-used code, if any (never auto-generates one). */
-try{
-  var saved = localStorage.getItem(LAST_CODE_KEY);
-  if(saved) $("codeInput").value = saved;
-}catch(e){}
+$("buildStamp").textContent = "Dashboard build " + BUILD;
+
+/* Prefill this device's last-used code and load straight away (never generates a code). */
+var savedCode = lsGet(LAST_CODE_KEY);
+if(savedCode) $("codeInput").value = savedCode;
+checkForNewerBuild().then(function(updated){
+  if(!updated && savedCode) loadAll(savedCode);
+});
 </script>
 </body>
 </html>

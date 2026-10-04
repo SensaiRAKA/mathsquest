@@ -15,7 +15,8 @@ This is zero-impact work on a personal study site. Always take it all the way li
 3. Watch the "Deploy to GitHub Pages" workflow run for that push until it
    succeeds, then smoke test the live URL at phone width (390px) and report
    the live link. Local-only testing is not "done". For a synced quest, also
-   confirm the live `parent-dashboard.html` lists it (see Conventions).
+   confirm the live `parent-dashboard.html` shows its card in the right group
+   (see Conventions).
 4. Report anything that deviated from the handoff notes.
 
 ## Conventions
@@ -33,27 +34,26 @@ This is zero-impact work on a personal study site. Always take it all the way li
 - Every quest that should sync across devices loads, in `<head>`, in this order:
   the two Firebase compat SDK scripts, `firebase-config.js`, then `sync.js`.
   A quest with only `sync.js` silently runs local-only - add the missing tags.
-- Every synced quest must also be listed on the parent dashboard
-  (`parent-dashboard.html`, not linked from the hub). It reads only the keys in
-  its `REGISTRY`, so a quest left out is invisible there even though its sync
-  works. Add one entry `{ key, icon, name, href }` to the group matching the
-  quest's hub sub-section: `key` is the quest's own storage key, and `icon`,
-  `name`, `href` copy its `index.html` entry. Then check that the dashboard can
-  read the quest's saved state. It looks for points in `xp`/`stars`; streak in
-  `streak`, or a `days` map of `"YYYY-MM-DD": number`; mistakes in `wrong`
-  (object), `mistakes` (array), `totalWrong` or `mist` (object); last active in
-  `lastDay`/`lastPlayed`/`lastPractice`, or epoch ms in `updatedAt`/`t`; mock
-  scores in `boss.a`/`boss.b` as `{got, max}`. If the quest names a field
-  differently, add a fallback reader after the existing ones, so other cards
-  never change. Editing the dashboard this way is the one allowed exception to
-  "do not touch other files" below. Done means the live dashboard renders the
-  new card with real-shaped data (stub `sync.js` in Playwright) and every other
-  card is unchanged. A quick audit check: every `*.html` that loads `sync.js`,
-  apart from the dashboard itself, has its storage key in `REGISTRY`.
+- The parent dashboard (`parent-dashboard.html`, not linked from the hub) finds
+  modules on its own: it reads `index.html`'s `GROUPS` on every load, reads each
+  new page once for its `sync.js` tag and its `STORE_KEY` / `STORAGE_KEY` / `KEY`
+  constant, and shows every key in her progress document. So a new quest needs
+  no dashboard edit, as long as (a) it is in `GROUPS`, (b) `GROUPS` stays a
+  plain array literal declared as `const GROUPS = [`, and (c) the quest declares
+  its storage key as one of those three constants with a quoted literal value.
+  `KNOWN` in the dashboard is only a shortcut that skips fetching pages.
+- The dashboard reads progress fields by name: points in `xp`/`stars`/`points`;
+  streak in `streak`, or a `days` map of `"YYYY-MM-DD": number`; mistakes in
+  `wrong` (object), `mistakes` (array), `totalWrong` or `mist` (object); last
+  active in `lastDay`/`lastPlayed`/`lastPractice`, or epoch ms in `updatedAt`/`t`;
+  mock scores in `boss.a`/`boss.b` as `{got, max}`. If a new quest uses other
+  names, add a fallback reader after the existing ones so no other card changes.
+  That edit is allowed despite "do not touch other files" below. Bump the
+  dashboard's `BUILD` string on any change to it, because that is what makes a
+  cached copy reload itself.
 - Each quest owns one localStorage key (`diksha_<subject>_v1` style). Confirm
   it is unused by any other file before shipping.
-- Do not touch other quests, `sync.js`, or `firebase-config.js` when adding a module
-  (the parent-dashboard `REGISTRY` entry above is required, not optional).
+- Do not touch other quests, `sync.js`, or `firebase-config.js` when adding a module.
 - Verify with the handoff's own suites if provided (`node qa.js`, `node soak.js`,
   need `npm i jsdom` in a scratch dir), plus a Playwright walk of the module's
   tabs at 390px using the preinstalled Chromium.
