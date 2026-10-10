@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Daily Maths Garden - Class IV</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<style>
+:root{
+  --bg:#12172e; --card:#1e2748; --card2:#27345f; --ink:#f1f4ff; --dim:#a7b3d9; --line:#34437a;
+  --pink:#ff7eb6; --sun:#ffd166; --mint:#4de0b5; --sky:#5ec8ff; --grape:#b18cff; --coral:#ff8a70;
+  --ok:#3ddc97; --bad:#ff6b7a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{background:radial-gradient(1100px 600px at 50% -10%,#35306b 0%,#12172e 62%);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh;padding-bottom:40px}
+.wrap{max-width:820px;margin:0 auto;padding:12px}
+button{font-family:inherit;cursor:pointer;border:none}
+
+/* HUD */
+.hud{position:sticky;top:0;z-index:40;background:rgba(18,23,46,.94);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:8px 12px}
+.hud-in{max-width:820px;margin:0 auto;display:flex;align-items:center;gap:10px}
+.avatar{width:42px;height:42px;border-radius:14px;background:linear-gradient(140deg,var(--pink),var(--grape));display:flex;align-items:center;justify-content:center;font-size:22px;flex:0 0 auto}
+.hud-mid{flex:1;min-width:0}
+.hud-top{display:flex;align-items:baseline;gap:8px;font-size:13px;color:var(--dim)}
+.hud-top b{color:var(--ink);font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.xpbar{height:9px;border-radius:9px;background:#2a3458;overflow:hidden;margin-top:5px}
+.xpfill{height:100%;background:linear-gradient(90deg,var(--pink),var(--sun));width:0%;transition:width .5s}
+.streak{flex:0 0 auto;background:#3a2336;border:1px solid #6b3a5e;border-radius:12px;padding:5px 9px;font-size:13px;font-weight:700;color:var(--sun)}
+
+/* generic */
+h1{font-size:23px;margin:14px 0 2px}
+h2{font-size:18px;margin:18px 0 8px}
+.sub{color:var(--dim);font-size:13.5px;margin:0 0 12px;line-height:1.5}
+.card{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid #3d4f8a;border-radius:18px;padding:14px;margin:10px 0;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.btn{background:linear-gradient(140deg,#ff9ec9,#ff6fa8);color:#3b0520;font-weight:800;border-radius:14px;padding:13px 16px;font-size:16px;width:100%;box-shadow:0 4px 0 #a33a6b}
+.btn:active{transform:translateY(2px);box-shadow:0 2px 0 #a33a6b}
+.btn.ghost{background:transparent;border:1.5px solid #5163a3;color:var(--ink);box-shadow:none;font-weight:700}
+.btn.warm{background:linear-gradient(140deg,#ffd166,#ffa94d);color:#3a2200;box-shadow:0 4px 0 #b06a1d}
+.btn.mint{background:linear-gradient(140deg,#6ff0c8,#34c49b);color:#06281d;box-shadow:0 4px 0 #1f7d60}
+.btn[disabled]{opacity:.4}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.pill{display:inline-block;background:#2a3765;border:1px solid #4a5da0;border-radius:999px;padding:3px 10px;font-size:12px;color:var(--dim);margin:0 6px 4px 0}
+.center{text-align:center}
+.hide{display:none!important}
+.smallnote{font-size:12px;color:var(--dim);line-height:1.5;margin-top:12px}
+.warnbox{background:#3b2f14;border:1px solid #7a6127;border-radius:14px;padding:12px;font-size:13.5px;line-height:1.55}
+.howto{background:#1c2f55;border:1px solid #3b6fb0;border-radius:16px;padding:12px 14px;font-size:14px;line-height:1.6}
+.howto ol{margin:6px 0 0 18px;padding:0}
+
+/* day cards */
+.daytag{display:flex;align-items:center;gap:8px;margin:22px 0 4px}
+.daytag .dot{width:10px;height:10px;border-radius:50%;background:var(--sun)}
+.daytag h2{margin:0}
+.daytag .today{background:var(--pink);color:#3b0520;font-size:11px;font-weight:900;border-radius:8px;padding:2px 8px;letter-spacing:.5px}
+.slist{display:grid;gap:10px}
+.scard{display:flex;gap:12px;align-items:center;background:linear-gradient(150deg,var(--card),var(--card2));border:1px solid #3d4f8a;border-radius:18px;padding:12px;width:100%;text-align:left;color:var(--ink)}
+.scard.done{border-color:var(--ok)}
+.scard .em{width:46px;height:46px;border-radius:14px;background:#161d3a;display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto}
+.scard .t{font-weight:800;font-size:15.5px}
+.scard .d{font-size:12.5px;color:var(--dim);margin-top:2px;line-height:1.4}
+.scard .r{flex:0 0 auto;font-size:12px;color:var(--dim);text-align:right;line-height:1.5}
+.ring{font-weight:800;font-size:13px;color:var(--mint)}
+.boss{border-color:var(--coral);background:linear-gradient(150deg,#3a2333,#4a2a3a)}
+.boss .em{background:#5a2b34}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.tool{background:#1a2347;border:1.5px solid #4a5da0;border-radius:16px;padding:12px;color:var(--ink);text-align:left}
+.tool .t{font-weight:800;font-size:15px}
+.tool .d{font-size:12px;color:var(--dim);margin-top:3px}
+.tag2{display:inline-block;background:#7b5bd6;color:#fff;border-radius:8px;padding:2px 7px;font-size:10.5px;font-weight:800;margin-left:6px;vertical-align:middle}
+details.papa{background:#1a2347;border:1px solid #4a5da0;border-radius:16px;padding:10px 12px;margin:12px 0}
+details.papa summary{font-weight:800;color:var(--sun);cursor:pointer;font-size:14.5px}
+details.papa li{margin:5px 0;font-size:13.5px;line-height:1.5}
+
+/* question frame */
+.qtop{display:flex;align-items:center;gap:8px;margin:6px 0 10px}
+.qtop .back{background:#2a3765;border-radius:12px;padding:8px 12px;color:var(--ink);font-weight:700;font-size:14px}
+.dots{flex:1;display:flex;gap:4px;flex-wrap:wrap}
+.dt{width:9px;height:9px;border-radius:50%;background:#3a4677}
+.dt.ok{background:var(--ok)} .dt.no{background:var(--bad)} .dt.cur{background:var(--sun);transform:scale(1.35)} .dt.lrn{background:var(--sky)}
+.timer{font-weight:800;color:var(--sun);font-size:15px;font-variant-numeric:tabular-nums}
+.qtype{font-size:11.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mint);font-weight:800}
+.qtext{font-size:18.5px;line-height:1.5;margin:8px 0 14px;font-weight:600}
+.src{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.6px;color:#1b1030;background:var(--sun);border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.nb{background:#2d2350;border:1.5px dashed #8f75e6;border-radius:13px;padding:10px 12px;font-size:14px;line-height:1.5;margin-bottom:12px}
+.opts{display:grid;gap:9px}
+.opts.two{grid-template-columns:1fr 1fr}
+.opt{background:#161d3a;border:1.5px solid #4a5da0;border-radius:14px;padding:13px 14px;font-size:17px;color:var(--ink);text-align:left;width:100%;line-height:1.4}
+.opt.big{font-size:26px;text-align:center;font-weight:800;padding:10px}
+.opt:active{background:#222b52}
+.opt.good{background:#134b39;border-color:var(--ok)}
+.opt.bad{background:#4b1d2a;border-color:var(--bad)}
+.opt .k{display:inline-block;width:24px;font-weight:800;color:var(--dim)}
+.fb{margin-top:12px;border-radius:14px;padding:12px;font-size:15px;line-height:1.55}
+.fb.good{background:#123f31;border:1px solid #2f7d61}
+.fb.bad{background:#42182a;border:1px solid #8a3a52}
+.fb b.h{display:block;margin-bottom:4px;font-size:15.5px}
+.work{background:#16213f;border:1px solid #3b6fb0;border-radius:12px;padding:10px 12px;margin-top:10px;font-size:15px;line-height:1.6}
+.work .wt{font-size:11.5px;letter-spacing:1px;text-transform:uppercase;color:var(--sky);font-weight:800;margin-bottom:4px}
+
+/* fractions */
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;line-height:1.05;font-weight:700}
+.fr>span{display:block;padding:0 3px;text-align:center;min-width:14px}
+.fr>span:first-child{border-bottom:2px solid currentColor;padding-bottom:2px}
+.fr>span:last-child{padding-top:2px}
+.mx{display:inline-flex;align-items:center;white-space:nowrap}
+.mx>b{margin-right:1px}
+.qtext .fr{font-size:17px}
+
+/* blanks + keypad */
+.tplbox{font-size:20px;line-height:2.1;margin:4px 0 12px;font-weight:700}
+.tplbox .fr>span:first-child{padding-bottom:4px}
+.slot{display:inline-block;min-width:46px;height:40px;vertical-align:middle;background:#0f1530;border:2px solid #5163a3;border-radius:10px;color:var(--ink);font-size:20px;font-weight:800;padding:0 8px;margin:2px;line-height:36px;font-variant-numeric:tabular-nums}
+.slot.w1{min-width:34px;padding:0 4px}
+.slot.cur{border-color:var(--sun);box-shadow:0 0 0 3px rgba(255,209,102,.25)}
+.slot.good{border-color:var(--ok);background:#134b39}
+.slot.bad{border-color:var(--bad);background:#4b1d2a}
+.pad{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin:8px 0 12px}
+.pad button{background:#2a3765;border:1.5px solid #4a5da0;border-radius:12px;color:var(--ink);font-size:22px;font-weight:800;padding:10px 0;font-variant-numeric:tabular-nums}
+.pad button:active{background:#3a4a86}
+.pad .fn{font-size:15px;background:#23305a}
+.pad .nx{background:#3a2e63;color:var(--sun);font-size:15px}
+.corr{font-size:14px;color:var(--mint);margin-top:6px}
+
+/* column sums */
+table.col{border-collapse:collapse;margin:0 auto 6px;font-variant-numeric:tabular-nums}
+table.col td{width:38px;height:44px;text-align:center;font-size:22px;font-weight:800;padding:0}
+table.col td.op{width:26px;color:var(--sun)}
+table.col tr.tot td{border-top:2.5px solid var(--ink)}
+table.col .slot{min-width:34px;padding:0 3px}
+
+/* factor tree */
+.tree{text-align:center;font-size:20px;font-weight:800}
+.tree .lv{display:flex;justify-content:center;align-items:center;gap:6px;margin:6px 0}
+.tree .nd{display:inline-flex;align-items:center;justify-content:center;min-width:48px;height:44px;border:2px solid #7f93d6;border-radius:22px;padding:0 8px;background:#161d3a}
+.tree .nd .slot{margin:0;border:none;background:transparent;height:36px;line-height:32px}
+.tree .ar{color:var(--dim);font-size:15px}
+
+/* order / build */
+.slots{display:grid;gap:8px;margin-bottom:12px}
+.oslot{border:1.5px dashed #5163a3;border-radius:13px;padding:10px 12px;min-height:46px;font-size:17px;color:var(--dim);display:flex;align-items:center;gap:8px}
+.oslot.filled{border-style:solid;background:#161d3a;color:var(--ink)}
+.oslot.good{border-color:var(--ok);background:#134b39;color:#fff}
+.oslot.bad{border-color:var(--bad);background:#4b1d2a;color:#fff}
+.oslot .n{font-size:12px;color:var(--dim);font-weight:800}
+.pool{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:#2a3765;border:1.5px solid #4a5da0;border-radius:999px;padding:10px 14px;font-size:16px;color:var(--ink);font-weight:700}
+.chip.used{opacity:.25}
+.bline{display:flex;flex-wrap:wrap;gap:6px;min-height:52px;background:#0f1530;border:1.5px solid #5163a3;border-radius:14px;padding:8px;margin-bottom:12px;align-items:center}
+.bline .chip{padding:7px 11px;font-size:15px}
+.bline.good{border-color:var(--ok)} .bline.bad{border-color:var(--bad)}
+
+/* match */
+.mgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.mcol{display:grid;gap:9px}
+.mi{background:#161d3a;border:1.5px solid #4a5da0;border-radius:13px;padding:11px;font-size:16px;color:var(--ink);text-align:left;line-height:1.3}
+.mi.active{border-color:var(--sun);background:#2e2b1f}
+.mi.paired{opacity:.55}
+.mi.good{background:#134b39;border-color:var(--ok);opacity:1}
+.mi.bad{background:#4b1d2a;border-color:var(--bad);opacity:1}
+.mi .tag{display:inline-block;background:#41558f;border-radius:6px;padding:1px 6px;font-size:11px;margin-left:6px}
+
+/* sort */
+.srow{background:#161d3a;border:1.5px solid #4a5da0;border-radius:13px;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.srow.good{border-color:var(--ok);background:#133b31}
+.srow.bad{border-color:var(--bad);background:#3f1a26}
+.srow .w{font-weight:800;font-size:18px;min-width:64px}
+#nextZone{margin-top:12px}
+.bks{display:flex;flex-wrap:wrap;gap:6px}
+.bk{background:#2a3765;border:1.5px solid #4a5da0;border-radius:999px;padding:8px 12px;font-size:14px;color:var(--ink)}
+.bk.sel{background:var(--sun);border-color:var(--sun);color:#3a2200;font-weight:800}
+
+/* pick all */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(64px,1fr));gap:8px;margin-bottom:12px}
+.pk{background:#161d3a;border:1.5px solid #4a5da0;border-radius:12px;padding:12px 4px;font-size:19px;font-weight:800;color:var(--ink)}
+.pk.on{background:#3a2e63;border-color:var(--sun);color:var(--sun)}
+.pk.good{background:#134b39;border-color:var(--ok);color:#fff}
+.pk.bad{background:#4b1d2a;border-color:var(--bad);color:#fff}
+.pk.miss{border-color:var(--ok);border-style:dashed;color:var(--ok)}
+
+/* shade + pictures */
+.shadebox{display:flex;justify-content:center;margin:6px 0 12px}
+svg .part{fill:#1b2446;stroke:#9fb0e8;stroke-width:2;cursor:pointer}
+svg .part.on{fill:#ff7eb6}
+svg .part.lock{cursor:default}
+.pics{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin:8px 0}
+
+/* learn */
+.learn{background:linear-gradient(160deg,#1d3150,#24406a);border-color:#3b8ad0}
+.learn h3{margin:2px 0 8px;font-size:20px}
+.learn p{font-size:16px;line-height:1.6;margin:8px 0}
+.learn ul{margin:6px 0 6px 20px;padding:0;font-size:15.5px;line-height:1.65}
+.learn .ex{background:#11203a;border-radius:12px;padding:10px 12px;margin:10px 0;font-size:16px;line-height:1.7}
+.learn .oops{background:#3b1d2e;border:1px solid #8a3a62;border-radius:12px;padding:9px 12px;font-size:14.5px;line-height:1.55;margin:10px 0}
+.learn .yay{background:#123f31;border:1px solid #2f7d61;border-radius:12px;padding:9px 12px;font-size:14.5px;line-height:1.55;margin:10px 0}
+table.pvt{border-collapse:collapse;margin:8px auto;font-size:14px;text-align:center}
+table.pvt td,table.pvt th{border:1px solid #4a6ea8;padding:5px 6px;min-width:30px}
+table.pvt th{background:#2a4a7a;font-size:11px;color:#dbe7ff}
+table.pvt td{font-size:18px;font-weight:800}
+table.pvt td.hl{background:#ff7eb6;color:#3b0520}
+table.pvt tr.per th{background:#3a2e63;color:var(--sun);font-size:11.5px}
+.rainbow{font-size:17px;line-height:1.9;text-align:center}
+.rainbow b{color:var(--sun)}
+
+/* task */
+.task{background:linear-gradient(160deg,#2a2440,#33295a);border-color:#6a55b8}
+.steps{display:grid;gap:8px;margin-top:4px}
+.step{display:flex;gap:10px;align-items:flex-start;background:#161d3a;border:1.5px solid #4a5da0;border-radius:13px;padding:11px;font-size:15px;color:var(--ink);text-align:left;width:100%;line-height:1.45}
+.step .bx{flex:0 0 auto;width:24px;height:24px;border-radius:7px;border:2px solid #7f93d6;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px}
+.step.on{border-color:var(--ok);background:#133b31}
+.step.on .bx{background:var(--ok);border-color:var(--ok);color:#06202b}
+.model{background:#122a3c;border:1px solid #2f7d8a;border-radius:14px;padding:12px;margin-top:10px;font-size:15px;line-height:1.65}
+
+/* results + badges */
+.big{font-size:44px;font-weight:900;letter-spacing:-1px}
+.badge{display:inline-flex;align-items:center;gap:6px;background:#2a3765;border:1px solid #5163a3;border-radius:999px;padding:7px 12px;font-size:13px;margin:4px 4px 0 0}
+.badge.new{background:#3b2f14;border-color:var(--sun);color:var(--sun)}
+canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:90}
+.rule{border-bottom:1px solid #34437a;padding:10px 0}
+.rule:last-child{border-bottom:none}
+@media (max-width:400px){
+  .qtext{font-size:17px}
+  .pad button{font-size:20px;padding:9px 0}
+  table.col td{width:32px;font-size:20px}
+  .slot{min-width:40px}
+}
+.sync-row{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:10px 12px 16px;font-size:12px}
+.sync-row span{background:var(--card2);color:var(--mint);font-weight:800;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.sync-row button{background:none;border:none;color:var(--dim);font-weight:700;font-size:12px;cursor:pointer;font-family:inherit;text-decoration:underline}
+
+/* daily garden additions */
+.today{border-color:#ff9ec9;background:linear-gradient(160deg,#2b2350,#3a2a5e)}
+.today.done{border-color:var(--ok);background:linear-gradient(160deg,#173b37,#1e4a44)}
+.tbig{font-size:21px;font-weight:900;margin:6px 0 8px}
+.mixline{margin:0 0 12px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:12px 0 4px}
+.wd{background:#1a2347;border:1.5px solid #3d4f8a;border-radius:12px;text-align:center;padding:6px 0 4px}
+.wd span{display:block;height:20px;font-size:16px;font-weight:900;color:#06281d}
+.wd b{font-size:11px;color:var(--dim)}
+.wd.on{background:linear-gradient(160deg,#6ff0c8,#34c49b);border-color:#34c49b}
+.wd.on b{color:#06281d}
+.wd.now{box-shadow:0 0 0 2px var(--sun)}
+.garden{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.plant{background:linear-gradient(160deg,var(--card),var(--card2));border:1px solid #3d4f8a;border-radius:16px;padding:10px;text-align:center}
+.plant .pe{font-size:36px;line-height:1.2}
+.plant .pn{font-weight:800;font-size:13.5px;margin-top:4px;line-height:1.3}
+.plant .ps{font-size:12px;color:var(--dim);margin-top:2px}
+.pbar{height:7px;border-radius:7px;background:#2a3458;overflow:hidden;margin-top:6px}
+.pbar i{display:block;height:100%;background:linear-gradient(90deg,#4de0b5,#ffd166)}
+.sktable{margin-top:8px}
+.skh{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:14px 0 4px;font-weight:800;font-size:14px;color:var(--sun)}
+.skr{display:grid;grid-template-columns:1fr 28px 42px 62px;gap:6px;align-items:center;font-size:12.5px;padding:5px 0;border-bottom:1px solid #2c3866}
+.skr .nm{line-height:1.3}
+.skr .ac,.skr .nx{color:var(--dim);text-align:right}
+.bx6{display:inline-flex;align-items:center;justify-content:center;width:24px;height:22px;border-radius:7px;font-weight:900;font-size:12px}
+.bx6.b0{background:#2a3458;color:var(--dim)}
+.bx6.br{background:#5a2433;color:#ffb3c0}
+.bx6.ba{background:#5a4a1d;color:#ffe08a}
+.bx6.bg{background:#16503d;color:#9ff3d0}
+.bx6.dl{background:#2d3f74;color:var(--sky)}
+.tog{background:#2a3458;border:1.5px solid #4a5da0;border-radius:999px;color:var(--dim);padding:5px 12px;font-size:12px;font-weight:800}
+.tog.on{background:#16503d;border-color:var(--ok);color:#9ff3d0}
+
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="hud"><div class="hud-in">
+  <div class="avatar" id="mascot">&#127793;</div>
+  <div class="hud-mid">
+    <div class="hud-top"><b id="lvlName">Level 1</b><span id="xpTxt">0 XP</span></div>
+    <div class="xpbar"><div class="xpfill" id="xpFill"></div></div>
+  </div>
+  <div class="streak" id="streak">&#128293; 0</div>
+</div></div>
+<div class="wrap" id="app"></div>
+<div class="sync-row" id="syncRow">
+  <span id="syncCodeLabel"></span>
+  <button id="syncChangeBtn">Use a different code</button>
+</div>
+<script>
+"use strict";
+/* ==========================================================================
+   DAILY MATHS GARDEN - Class IV, everyday spaced review
+   Every Class IV maths skill so far (tables 2-15, Ch 1-5, special-class
+   extras) sits in a review box. A short daily session brings back what is due,
+   tries skills not yet seen, replays two old mistakes, and drills two table
+   facts. Question generators, rule cards and fixed banks are shared with the
+   audited mid-term quest (maths-midterm.html).
+   Single file. Tap-only (on-screen keypad). localStorage isolated.
+   No native dialogs.
+   ========================================================================== */
+
+/* ---------------- random + small utils ---------------- */
+function ri(a, b){ return a + Math.floor(Math.random() * (b - a + 1)); }
+function pick(arr){ return arr[Math.floor(Math.random() * arr.length)]; }
+function shuffle(a){ for(var i=a.length-1;i>0;i--){ var j=(Math.random()*(i+1))|0; var t=a[i]; a[i]=a[j]; a[j]=t; } return a; }
+function uniq(a){ var o=[], s={}; a.forEach(function(x){ var k=String(x); if(!s[k]){ s[k]=1; o.push(x); } }); return o; }
+function range(a, b){ var o=[]; for(var i=a;i<=b;i++) o.push(i); return o; }
+function gcd(a, b){ a=Math.abs(a); b=Math.abs(b); while(b){ var t=a%b; a=b; b=t; } return a; }
+function lcm(a, b){ return a / gcd(a, b) * b; }
+function pow10(k){ var p=1; for(var i=0;i<k;i++) p*=10; return p; }
+function isPrime(n){ if(n<2) return false; for(var i=2;i*i<=n;i++){ if(n%i===0) return false; } return true; }
+function primeFactors(n){ var o=[], p=2; while(n>1){ while(n%p===0){ o.push(p); n=n/p; } p++; } return o; }
+function factorsOf(n){ var o=[]; for(var i=1;i<=n;i++){ if(n%i===0) o.push(i); } return o; }
+function digitSum(n){ return String(n).split("").reduce(function(s,c){ return s+(+c); }, 0); }
+
+/* ---------------- number formatting ---------------- */
+function fmtIN(n){
+  var s=String(n); if(s.length<=3) return s;
+  var last3=s.slice(-3), rest=s.slice(0,-3), parts=[];
+  while(rest.length>2){ parts.unshift(rest.slice(-2)); rest=rest.slice(0,-2); }
+  if(rest) parts.unshift(rest);
+  return parts.join(",")+","+last3;
+}
+function fmtINT(n){
+  var s=String(n), o=[];
+  while(s.length>3){ o.unshift(s.slice(-3)); s=s.slice(0,-3); }
+  o.unshift(s); return o.join(",");
+}
+var ONES=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve",
+  "thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+var TENS=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function w99(n){ return n<20 ? ONES[n] : TENS[Math.floor(n/10)] + (n%10 ? " "+ONES[n%10] : ""); }
+function w999(n){
+  var h=Math.floor(n/100), r=n%100, s="";
+  if(h) s = ONES[h]+" hundred";
+  if(r) s += (h?" ":"") + w99(r);
+  return s;
+}
+/* chunks: [[words, periodName], ...]  (the school writes no "and" and no hyphens) */
+function chunksINT(n){
+  var o=[], m=Math.floor(n/1e6), t=Math.floor(n/1000)%1000, u=n%1000;
+  if(m) o.push([w999(m),"million"]);
+  if(t) o.push([w999(t),"thousand"]);
+  if(u) o.push([w999(u),""]);
+  return o;
+}
+function chunksIN(n){
+  var o=[], c=Math.floor(n/1e7), l=Math.floor(n/1e5)%100, t=Math.floor(n/1000)%100, u=n%1000;
+  if(c) o.push([w999(c),"crore"]);
+  if(l) o.push([w99(l),"lakh"]);
+  if(t) o.push([w99(t),"thousand"]);
+  if(u) o.push([w999(u),""]);
+  return o;
+}
+function nameOf(ch){ return ch.map(function(c){ return c[0]+(c[1]?" "+c[1]:""); }).join(" "); }
+function nameINT(n){ return nameOf(chunksINT(n)); }
+function nameIN(n){ return nameOf(chunksIN(n)); }
+function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+
+var RMAP=[[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]];
+function toRoman(n){ var o=""; RMAP.forEach(function(p){ while(n>=p[0]){ o+=p[1]; n-=p[0]; } }); return o; }
+
+/* ---------------- html helpers ---------------- */
+function F(n, d){ return '<span class="fr"><span>'+n+'</span><span>'+d+'</span></span>'; }
+function MX(w, n, d){ return '<span class="mx"><b>'+w+'</b>'+F(n,d)+'</span>'; }
+function FS(n, d){ return n+"/"+d; }             /* plain text version for answers lists */
+/* Reduce and present a fraction value as html: whole, proper, or mixed */
+function fracHtml(n, d){
+  var g=gcd(n,d); n/=g; d/=g;
+  if(d===1) return String(n);
+  if(n>d) return MX(Math.floor(n/d), n%d, d);
+  return F(n,d);
+}
+
+/* fraction pictures (not interactive) */
+function pic(shape, parts, shaded, size){
+  size = size || 120;
+  var on = {}; for(var i=0;i<shaded;i++) on[i]=1;
+  return svgShape(shape, parts, on, size, false, "");
+}
+function svgShape(shape, parts, on, size, live, idp){
+  var h="", i;
+  var cls=function(k){ return "part"+(on[k]?" on":"")+(live?"":" lock"); };
+  var tap=function(k){ return live ? ' id="'+idp+k+'" onclick="shadeTap('+k+')"' : ""; };
+  if(shape==="circle"){
+    var r=size/2-4, cx=size/2, cy=size/2;
+    if(parts===1){ h+='<circle class="'+cls(0)+'"'+tap(0)+' cx="'+cx+'" cy="'+cy+'" r="'+r+'"/>'; }
+    else for(i=0;i<parts;i++){
+      var a0=(i/parts)*2*Math.PI-Math.PI/2, a1=((i+1)/parts)*2*Math.PI-Math.PI/2;
+      var x0=cx+r*Math.cos(a0), y0=cy+r*Math.sin(a0), x1=cx+r*Math.cos(a1), y1=cy+r*Math.sin(a1);
+      var large=(a1-a0)>Math.PI?1:0;
+      h+='<path class="'+cls(i)+'"'+tap(i)+' d="M'+cx+' '+cy+' L'+x0.toFixed(2)+' '+y0.toFixed(2)+' A'+r+' '+r+' 0 '+large+' 1 '+x1.toFixed(2)+' '+y1.toFixed(2)+' Z"/>';
+    }
+    return '<svg width="'+size+'" height="'+size+'" viewBox="0 0 '+size+' '+size+'">'+h+'</svg>';
+  }
+  if(shape==="grid"){
+    var cols = parts%4===0 && parts>4 ? 4 : (parts%3===0 && parts>3 ? 3 : (parts%2===0 ? 2 : parts));
+    var rows = parts/cols, cw=Math.floor((size*1.5-4)/cols), chh=Math.floor((size-4)/rows);
+    for(i=0;i<parts;i++){
+      var c=i%cols, rr=Math.floor(i/cols);
+      h+='<rect class="'+cls(i)+'"'+tap(i)+' x="'+(2+c*cw)+'" y="'+(2+rr*chh)+'" width="'+cw+'" height="'+chh+'"/>';
+    }
+    return '<svg width="'+(cols*cw+4)+'" height="'+(rows*chh+4)+'">'+h+'</svg>';
+  }
+  /* bar */
+  var W=Math.min(300, Math.max(parts*34, 180)), H=58, pw=(W-4)/parts;
+  for(i=0;i<parts;i++){
+    h+='<rect class="'+cls(i)+'"'+tap(i)+' x="'+(2+i*pw).toFixed(2)+'" y="2" width="'+pw.toFixed(2)+'" height="'+(H-4)+'"/>';
+  }
+  return '<svg width="'+W+'" height="'+H+'">'+h+'</svg>';
+}
+
+/* ---------------- item builders (plain data, so mistakes can be saved) ---------------- */
+/* MCQ with options shuffled. correct = string, wrongs = strings */
+function MQ(q, correct, wrongs, why, x){
+  var o = uniq([correct].concat(wrongs.filter(function(w){ return w!==correct; })));
+  var fixedOrder = x && x.keep;
+  if(!fixedOrder) shuffle(o);
+  return ext({t:"mcq", q:q, o:o, a:o.indexOf(correct), why:why||""}, x);
+}
+/* MCQ keeping the given option order (like the booklet) */
+function MK(q, opts, ai, why, x){ return ext({t:"mcq", q:q, o:opts, a:ai, why:why||""}, x); }
+function SIGN(q, sign, why, x){ return ext({t:"mcq", q:q, o:["&gt;","&lt;","="], a:[">","<","="].indexOf(sign), why:why||"", big:true}, x); }
+function YN(q, yes, why, x){ return ext({t:"mcq", q:q, o:["Yes","No"], a:yes?0:1, why:why||"", two:true}, x); }
+function TF(q, t, why, x){ return ext({t:"mcq", q:q, o:["True","False"], a:t?0:1, why:why||"", two:true}, x); }
+/* word bank chips */
+function WB(q, ans, bank, why, x){
+  var o = uniq([ans].concat(bank)); shuffle(o);
+  return ext({t:"mcq", q:q, o:o, a:o.indexOf(ans), why:why||"", chips:true}, x);
+}
+/* blanks: tpl uses [[0]], [[1]] ... ; ans = [[accepted...], ...] */
+function BL(q, tpl, ans, why, x){
+  ans = ans.map(function(a){ return (Array.isArray(a)?a:[a]).map(String); });
+  return ext({t:"blanks", q:q, tpl:tpl, ans:ans, why:why||""}, x);
+}
+function NUM(q, ans, why, x){ return BL(q, (x&&x.pre?x.pre:"")+"[[0]]"+(x&&x.post?x.post:""), [ans], why, x); }
+function QR(q, Q, R, why, x){ return BL(q, "Quotient = [[0]] &nbsp; Remainder = [[1]]", [Q, R], why, x); }
+function FRA(q, n, d, why, x){ return BL(q, (x&&x.pre?x.pre:"")+F("[[0]]","[[1]]"), [n, d], why, x); }
+function MIXB(q, w, n, d, why, x){ return BL(q, (x&&x.pre?x.pre:"")+'<span class="mx">[[0]]'+F("[[1]]","[[2]]")+'</span>', [w, n, d], why, x); }
+function ROM(q, r, why, x){ x=x||{}; x.pad="roman"; return BL(q, (x.pre||"")+"[[0]]", [r], why, x); }
+function ORD(q, items, why, x){ return ext({t:"order", q:q, items:items, why:why||""}, x); }
+function BUILD(q, items, extra, why, x){ return ext({t:"order", q:q, items:items, extra:extra, build:true, why:why||""}, x); }
+function MA(q, pairs, why, x){ return ext({t:"match", q:q, pairs:pairs, why:why||""}, x); }
+function SO(q, buckets, items, why, x){ return ext({t:"sort", q:q, buckets:buckets, items:items, why:why||""}, x); }
+function PA(q, opts, correct, why, x){
+  var a=[]; opts.forEach(function(o,i){ if(correct.indexOf(o)>=0) a.push(i); });
+  return ext({t:"pickall", q:q, o:opts.map(String), a:a, why:why||""}, x);
+}
+function SH(q, shape, parts, need, why, x){ return ext({t:"shade", q:q, shape:shape, parts:parts, need:need, why:why||""}, x); }
+function TK(id, q, steps, model, check){ return {t:"task", id:id, q:q, steps:steps, model:model||"", check:check||[]}; }
+function ext(o, x){ if(x){ for(var k in x){ if(k!=="pre" && k!=="post" && k!=="keep") o[k]=x[k]; } } return o; }
+
+/* column layout for working (not interactive) */
+function colWork(rows, op, total){
+  var w = Math.max.apply(null, rows.concat([total]).map(function(r){ return String(r).length; }));
+  var tr = function(s, o, cls){
+    s=String(s); var pad=w-s.length, h='<tr'+(cls?' class="'+cls+'"':'')+'><td class="op">'+(o||"")+'</td>';
+    for(var i=0;i<w;i++) h+='<td>'+(i<pad?"":s.charAt(i-pad))+'</td>';
+    return h+'</tr>';
+  };
+  var h='<table class="col">';
+  rows.forEach(function(r,i){ h+=tr(r, i===rows.length-1?op:""); });
+  h+=tr(total,"","tot")+'</table>';
+  return h;
+}
+/* =======================================================================
+   ELI5 LESSON CARDS  (shown inside quests and collected in the Rule Book)
+   ======================================================================= */
+var LS = {
+ slipintro:{ch:"How to", title:"&#129658; Slip Doctor: how it works", html:
+  '<p>Everybody makes slips. Champions <b>find</b> them and <b>fix</b> them.</p>'+
+  '<p>Every question here comes from a place where your booklet or model paper went a little wrong. '+
+  'Try it first. Then read the <b>easy explanation</b>. Then a <b>fresh one</b> checks that the fix stuck.</p>'+
+  '<div class="yay">Wrong answers are not bad. They go into your <b>Mistakes Bank</b> so you can beat them later.</div>'},
+
+ house:{ch:"Ch 1 Large Numbers", title:"&#127968; The Number House", html:
+  '<p>Big numbers live in a house. Each <b>floor</b> is called a <b>period</b>. Commas show where one floor ends.</p>'+
+  '<p><b>Indian system:</b> first comma after 3 digits from the right, then after every 2 digits.</p>'+
+  '<table class="pvt"><tr class="per"><th colspan="2">Lakhs</th><th colspan="2">Thousands</th><th colspan="3">Ones</th></tr>'+
+  '<tr><th>TL</th><th>L</th><th>TTh</th><th>Th</th><th>H</th><th>T</th><th>O</th></tr>'+
+  '<tr><td></td><td>8</td><td>1</td><td>6</td><td>4</td><td>5</td><td>2</td></tr></table>'+
+  '<div class="ex center">8,16,452</div>'+
+  '<p><b>International system:</b> a comma after every 3 digits.</p>'+
+  '<table class="pvt"><tr class="per"><th>Millions</th><th colspan="3">Thousands</th><th colspan="3">Ones</th></tr>'+
+  '<tr><th>M</th><th>HTh</th><th>TTh</th><th>Th</th><th>H</th><th>T</th><th>O</th></tr>'+
+  '<tr><td>8</td><td class="hl">6</td><td>5</td><td>4</td><td>2</td><td>9</td><td>1</td></tr></table>'+
+  '<div class="ex center">8,654,291</div>'+
+  '<ul><li>1 million = 10 lakh = 1000 thousands</li><li>1 crore = 10 million</li></ul>'},
+
+ pvfv:{ch:"Ch 1 Large Numbers", title:"&#127917; Face value and place value", html:
+  '<p><b>Face value</b> is the digit itself, like your <b>name</b>. It never changes.</p>'+
+  '<p><b>Place value</b> depends on where the digit lives, like your <b>address</b>.</p>'+
+  '<div class="ex"><b>Zero trick:</b> write the digit, then one zero for <b>every digit on its right</b>.<br>'+
+  'In 8,654,291 the 6 has <b>5</b> digits on its right &#8594; 6 and five zeros = <b>600,000</b>.</div>'+
+  '<div class="oops">Your booklet wrote an extra zero here. Count the digits on the right with your pencil tip before you write.</div>'+
+  '<p>In 89,456: face value of 4 = 4, place value = 400, sum = <b>404</b>.</p>'},
+
+ zero:{ch:"Ch 1 Large Numbers", title:"0&#65039;&#8419; Zero keeps the room", html:
+  '<p>Expanded form tells you who lives in each room. If a room is <b>empty</b>, a <b>0</b> sits there so the others do not slide down.</p>'+
+  '<div class="ex">6 &times; 1,00,000 + 7 &times; 10,000 + 3 &times; 1,000 + 2 &times; 10</div>'+
+  '<table class="pvt"><tr><th>L</th><th>TTh</th><th>Th</th><th>H</th><th>T</th><th>O</th></tr>'+
+  '<tr><td>6</td><td>7</td><td>3</td><td class="hl">0</td><td>2</td><td class="hl">0</td></tr></table>'+
+  '<div class="ex center"><b>6,73,020</b></div>'+
+  '<div class="oops">Nobody lives in hundreds and ones, so they get 0. Missing this zero was one of your booklet slips.</div>'},
+
+ names:{ch:"Ch 1 Large Numbers", title:"&#128483;&#65039; Reading big numbers", html:
+  '<ul><li>Put the commas first.</li><li>Read each floor like a small number, then say the floor&#39;s name.</li><li>Never say &#34;ones&#34; out loud.</li></ul>'+
+  '<div class="ex">4,983,016 &#8594;<br><b>four</b> million | <b>nine hundred eighty three</b> thousand | <b>sixteen</b></div>'+
+  '<div class="oops">Your model paper said &#34;Five million nine hundred eighty the thousand sixteen&#34;. The first digit is 4, and the thousands floor holds 983.</div>'+
+  '<div class="ex">8,16,452 (Indian) &#8594; <b>eight</b> lakh | <b>sixteen</b> thousand | <b>four hundred fifty two</b></div>'},
+
+ make:{ch:"Ch 1 Large Numbers", title:"&#129521; Greatest and smallest numbers", html:
+  '<p><b>Greatest:</b> put the biggest digit first and go down. Not enough digits? <b>Repeat the biggest.</b></p>'+
+  '<p><b>Smallest:</b> put the smallest digit first. But <b>0 can never go first</b>, so start with the smallest non-zero digit, then repeat the smallest digit (0 if you have it).</p>'+
+  '<div class="ex">Digits 7, 0, 1, 6 (6-digit numbers)<br>Greatest: <b>7,77,610</b><br>Smallest: <b>1,00,067</b></div>'+
+  '<div class="ex">Digits 5, 8, 2, 3, 4<br>Greatest: <b>8,85,432</b> &nbsp; Smallest: <b>2,23,458</b></div>'},
+
+ succ:{ch:"Ch 1 Large Numbers", title:"&#128073; Successor and predecessor", html:
+  '<p><b>Successor</b> = the number just <b>after</b> = add 1.<br><b>Predecessor</b> = the number just <b>before</b> = take away 1.</p>'+
+  '<div class="ex">Successor of 7654909 = 7654910<br>Predecessor of 148199 = 148198<br>Predecessor of 40000 = 39999</div>'},
+
+ roman:{ch:"Ch 1 Large Numbers", title:"&#127963;&#65039; Roman numerals", html:
+  '<table class="pvt"><tr><th>I</th><th>V</th><th>X</th><th>L</th><th>C</th></tr><tr><td>1</td><td>5</td><td>10</td><td>50</td><td>100</td></tr></table>'+
+  '<ul><li>Same letter up to <b>3 times</b>: III = 3, XXX = 30.</li>'+
+  '<li><b>Small before big = take away:</b> IV = 4, IX = 9, XL = 40, XC = 90.</li>'+
+  '<li><b>Big before small = add:</b> VI = 6, LX = 60, LXXXII = 82.</li>'+
+  '<li>V and L are <b>never</b> repeated.</li></ul>'+
+  '<div class="ex"><b>Solving Roman sums:</b> Roman &#8594; numbers &#8594; work it out &#8594; back to Roman.<br>XLV &divide; IX = 45 &divide; 9 = 5 = <b>V</b></div>'+
+  '<div class="oops">On the model paper you tried long division with Roman letters. Change to numbers first. It is much easier.</div>'},
+
+ addwords:{ch:"Ch 2 Addition & Subtraction", title:"&#10133;&#10134; Adding and subtracting words", html:
+  '<div class="ex">Addend + Addend = <b>Sum</b><br>Minuend &minus; <b>Subtrahend</b> = <b>Difference</b></div>'+
+  '<p>The <b>subtrahend</b> is the number that is taken away.</p>'+
+  '<ul><li>a + 0 = a &nbsp; and &nbsp; a &minus; 0 = a</li><li>a &minus; a = 0</li>'+
+  '<li>Order does not matter when adding: 278456 + 19007 = 19007 + 278456</li>'+
+  '<li>Grouping does not matter when adding: (a + b) + c = (b + c) + a</li>'+
+  '<li>For subtraction, order <b>does</b> matter.</li></ul>'},
+
+ check:{ch:"Ch 2 Addition & Subtraction", title:"&#9989; Check subtraction by adding back", html:
+  '<p>After subtracting, add the answer to the number you took away. You must get the top number again.</p>'+
+  '<div class="ex">48359 &minus; 34066 = 14293<br>Check: 14293 + 34066 = 48359 &#10004;</div>'+
+  '<div class="oops">Your model paper shows 19293 and 14213 before the right answer. The add-back check catches that in 20 seconds.</div>'},
+
+ missing:{ch:"Ch 2 Addition & Subtraction", title:"&#128269; Missing-digit detective", html:
+  '<ul><li>Start from the <b>ones</b> column.</li><li>Find the one missing digit in that column.</li>'+
+  '<li>Remember the <b>carry</b> (adding) or the <b>borrow</b> (subtracting).</li><li>Move one column left and repeat.</li></ul>'+
+  '<div class="ex">Ones: 9 + 4 + ? ends in 4 &#8594; ? = 1 (14, carry 1)<br>Tens: 5 + ? + 2 + 1 ends in 8 &#8594; ? = 0</div>'},
+
+ story:{ch:"Ch 2 Addition & Subtraction", title:"&#128214; Story sums: which sign?", html:
+  '<table class="pvt"><tr><th>Add +</th><th>Subtract &minus;</th></tr>'+
+  '<tr><td style="font-size:14px;font-weight:600">in all, total, altogether, sum, more than, raised, together</td>'+
+  '<td style="font-size:14px;font-weight:600">left, rest, remaining, difference, how many more, less than, discarded</td></tr>'+
+  '<tr><th>Multiply &times;</th><th>Divide &divide;</th></tr>'+
+  '<tr><td style="font-size:14px;font-weight:600">each has, in all (equal groups), total weight of many</td>'+
+  '<td style="font-size:14px;font-weight:600">shared equally, each gets, in each row, per day</td></tr></table>'+
+  '<p>Always write: <b>What I know &#8594; What I find &#8594; Working &#8594; Answer with unit</b> (m, &#8377;, g, beads).</p>'+
+  '<div class="oops">Copy the numbers slowly and check them once. In your booklet 4,78,523 became 4,18,523 and 576 became 516.</div>'},
+
+ zeros:{ch:"Ch 3 Multiplication & Division", title:"&#128287; &times; and &divide; by 10, 100, 1000", html:
+  '<p><b>&times; 10, 100, 1000:</b> stick 1, 2 or 3 zeros on the end.<br>524 &times; 1000 = 5,24,000</p>'+
+  '<p><b>&divide; 10, 100, 1000:</b> cover the last 1, 2 or 3 digits with your finger.</p>'+
+  '<div class="ex">49287 &divide; 1000 &#8594; cover <b>287</b><br>Quotient = <b>49</b>, Remainder = <b>287</b></div>'+
+  '<div class="oops">You left this blank on the model paper. Now it is a 5-second question.</div>'},
+
+ divwords:{ch:"Ch 3 Multiplication & Division", title:"&#128106; The division family", html:
+  '<div class="ex">Dividend &divide; Divisor = Quotient, and the leftover is the Remainder.<br>'+
+  '<b>Check:</b> Dividend = Divisor &times; Quotient + Remainder</div>'+
+  '<ul><li>The remainder is always <b>smaller</b> than the divisor.</li>'+
+  '<li>n &divide; 1 = n &nbsp;&nbsp; n &divide; n = 1 &nbsp;&nbsp; 0 &divide; n = 0</li>'+
+  '<li><b>n &divide; 0 is NOT possible.</b></li></ul>'+
+  '<div class="yay">Why? Share 10 laddoos among <b>0</b> friends. There is nobody to give them to, so it cannot be done.</div>'},
+
+ props:{ch:"Ch 3 Multiplication & Division", title:"&#10006;&#65039; Multiplication tricks", html:
+  '<div class="ex">Multiplicand &times; Multiplier = Product</div>'+
+  '<p>The <b>multiplicand</b> is the number to be multiplied.</p>'+
+  '<ul><li>Order does not matter: 125 &times; 126 &times; 127 = 127 &times; 126 &times; 125</li>'+
+  '<li>&times; 0 gives 0. &nbsp; &times; 1 gives the same number.</li>'+
+  '<li>Spread it out: 729 &times; (11 + 4) = 729 &times; 11 + 729 &times; 4</li></ul>'+
+  '<div class="ex"><b>Break the multiplicand:</b><br>458 &times; 5 = (400 + 50 + 8) &times; 5<br>= 2000 + 250 + 40 = <b>2290</b></div>'},
+
+ unitary:{ch:"Ch 3 Multiplication & Division", title:"&#127820; Unitary method: find ONE, then MANY", html:
+  '<p><b>Step 1:</b> find the value of <b>one</b> (divide).<br><b>Step 2:</b> multiply by the number the question asks for.</p>'+
+  '<div class="ex">12 bananas cost &#8377;48<br>1 banana = 48 &divide; 12 = &#8377;4<br>8 bananas = 4 &times; 8 = <b>&#8377;32</b></div>'+
+  '<div class="oops">Your booklet stopped at &#8377;4. Always finish step 2. It is also called the <b>method of one</b>.</div>'},
+
+ longdiv:{ch:"Ch 3 Multiplication & Division", title:"&#128106; Long division: Dad, Mom, Sister, Brother", html:
+  '<p><b>D</b>ivide, <b>M</b>ultiply, <b>S</b>ubtract, <b>B</b>ring down. Then repeat.</p>'+
+  '<div class="ex">88524 &divide; 26: 88 &#8594; 3, bring 5 &#8594; 105 &#8594; 4, bring 2 &#8594; 12 &#8594; <b>0</b>, bring 4 &#8594; 124 &#8594; 4<br>Quotient = 3404, Remainder = 20</div>'+
+  '<div class="yay">If the divisor does not fit after you bring down, write <b>0</b> in the quotient. That 0 is easy to forget.</div>'},
+
+ rows:{ch:"Ch 3 Multiplication & Division", title:"&#127967;&#65039; Rows and leftovers", html:
+  '<div class="ex">9528 people, 42 seats in a row<br>9528 &divide; 42 = 226, remainder 36</div>'+
+  '<p><b>Quotient</b> = full rows (226). <b>Remainder</b> = people sitting in the last row (36).</p>'},
+
+ fm:{ch:"Ch 4 Factors & Multiples", title:"&#129513; Factors and multiples", html:
+  '<p><b>Factors</b> divide a number exactly, with no remainder. They are small, and there are only a few (<b>finite</b>).</p>'+
+  '<p><b>Multiples</b> are the times table. They go on forever (<b>infinite</b>).</p>'+
+  '<ul><li>1 is a factor of every number.</li><li>Every number is a factor and a multiple of <b>itself</b>.</li>'+
+  '<li>A factor is always <b>less than or equal to</b> the number.</li><li>The 8th multiple of 16 = 16 &times; 8 = 128.</li></ul>'},
+
+ rainbow:{ch:"Ch 4 Factors & Multiples", title:"&#127752; The rainbow method for factors", html:
+  '<p>Find pairs that multiply to the number. Start from 1 and stop when the pairs meet.</p>'+
+  '<div class="rainbow">48 = <b>1</b>&times;<b>48</b>, <b>2</b>&times;<b>24</b>, <b>3</b>&times;<b>16</b>, <b>4</b>&times;<b>12</b>, <b>6</b>&times;<b>8</b><br>'+
+  'Factors: 1, 2, 3, 4, 6, 8, 12, 16, 24, 48</div>'+
+  '<div class="oops">Your book missed 7 in the factors of 35 (5 &times; 7) and 16 in the factors of 32 (2 &times; 16). The rainbow never misses a partner.</div>'},
+
+ prime:{ch:"Ch 4 Factors & Multiples", title:"&#11088; Prime, composite and the special 1", html:
+  '<ul><li><b>Prime</b>: exactly 2 factors (1 and itself). 2, 3, 5, 7, 11, 13, 17, 19, 23, 29...</li>'+
+  '<li><b>Composite</b>: more than 2 factors. 4, 6, 8, 9, 10...</li>'+
+  '<li><b>1</b> has only one factor, so it is <b>neither</b> prime nor composite. Your book calls it <b>unique</b>.</li>'+
+  '<li>2 is the smallest prime and the only even prime. 4 is the smallest composite. 9 is the smallest odd composite.</li>'+
+  '<li><b>Twin primes</b> have a difference of 2: (3, 5), (11, 13), (17, 19).</li>'+
+  '<li><b>Co-primes</b> have only 1 as a common factor: (8, 9).</li></ul>'+
+  '<div class="ex" style="font-size:14px">Primes up to 100: 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71 73 79 83 89 <b>97</b></div>'},
+
+ pf:{ch:"Ch 4 Factors & Multiples", title:"&#127795; Prime factorisation: multiply back to check", html:
+  '<p>Keep splitting until every branch is a prime. Write the answer with <b>&times;</b>, never with +.</p>'+
+  '<div class="ex">45 = 3 &times; 15 = 3 &times; 3 &times; 5<br>Check: 3 &times; 3 &times; 5 = 45 &#10004;</div>'+
+  '<div class="oops">Your booklet wrote 45 = 3 &times; 5 &times; 7, and it got a tick! But 3 &times; 5 &times; 7 = 105. '+
+  'The model paper also had 18 = 2 &times; 3 + 3. Multiplying back catches both slips.</div>'},
+
+ hcflcm:{ch:"Ch 4 Factors & Multiples", title:"&#129309; HCF and LCM", html:
+  '<p><b>HCF</b> (Highest Common Factor) is the biggest number that divides all of them. Multiply the primes they <b>share</b>.</p>'+
+  '<div class="ex">20 = 2&times;2&times;<b>5</b>, 35 = <b>5</b>&times;7, 45 = 3&times;3&times;<b>5</b> &#8594; HCF = <b>5</b></div>'+
+  '<p><b>LCM</b> (Lowest Common Multiple): divide all the numbers together by primes until every one becomes 1. Multiply the side numbers.</p>'+
+  '<div class="ex">18, 24, 30 &#8594; 2&times;2&times;2&times;3&times;3&times;5 = <b>360</b></div>'+
+  '<ul><li>Co-primes: HCF = 1, and LCM = their product.</li><li>If one number divides the other (21, 63): HCF = the smaller, LCM = the bigger.</li></ul>'},
+
+ div:{ch:"Ch 4 Factors & Multiples", title:"&#128270; Divisibility rules", html:
+  '<table class="pvt"><tr><th>By</th><th>Rule</th></tr>'+
+  '<tr><td>2</td><td style="font-size:14px;font-weight:600;text-align:left">last digit 0, 2, 4, 6 or 8</td></tr>'+
+  '<tr><td>3</td><td style="font-size:14px;font-weight:600;text-align:left">add the digits; the sum divides by 3</td></tr>'+
+  '<tr><td>5</td><td style="font-size:14px;font-weight:600;text-align:left">last digit 0 or 5</td></tr>'+
+  '<tr><td>6</td><td style="font-size:14px;font-weight:600;text-align:left">passes BOTH the 2 and 3 tests</td></tr>'+
+  '<tr><td>9</td><td style="font-size:14px;font-weight:600;text-align:left">add the digits; the sum divides by 9</td></tr>'+
+  '<tr><td>10</td><td style="font-size:14px;font-weight:600;text-align:left">last digit 0</td></tr></table>'+
+  '<div class="ex">374298: 3+7+4+2+9+8 = 33. Not a multiple of 9, so <b>not divisible by 9</b>. 33 is a multiple of 3, so it <b>is</b> divisible by 3.</div>'},
+
+ frac:{ch:"Ch 5 Fractions", title:"&#127829; What is a fraction?", html:
+  '<div class="pics">'+pic("circle",4,3,110)+'</div>'+
+  '<p>A pizza is cut into 4 <b>equal</b> slices and you eat 3 &#8594; '+F(3,4)+'</p>'+
+  '<ul><li><b>Numerator</b> (top) = slices taken</li><li><b>Denominator</b> (bottom) = equal slices in the whole</li><li>A fraction is also division: '+F(3,4)+' = 3 &divide; 4</li></ul>'+
+  '<table class="pvt"><tr><th>Proper</th><th>Improper</th><th>Mixed</th></tr>'+
+  '<tr><td>'+F(3,5)+'</td><td>'+F(7,4)+' '+F(3,3)+'</td><td>'+MX(1,3,4)+'</td></tr>'+
+  '<tr><td style="font-size:12px">top smaller<br>less than 1</td><td style="font-size:12px">top bigger or equal<br>1 or more</td><td style="font-size:12px">whole + proper</td></tr></table>'+
+  '<ul><li><b>Unit</b> fraction: numerator is 1 ('+F(1,5)+')</li><li><b>Like</b> fractions: same denominator. <b>Unlike</b>: different.</li></ul>'},
+
+ mad:{ch:"Ch 5 Fractions", title:"&#128545; Mixed to improper: the MAD trick", html:
+  '<p><b>M</b>ultiply the whole by the denominator.<br><b>A</b>dd the numerator.<br>The <b>D</b>enominator stays the same.</p>'+
+  '<div class="ex">'+MX(2,4,13)+' &#8594; 2 &times; 13 = 26, 26 + 4 = 30 &#8594; '+F(30,13)+'</div>'+
+  '<div class="oops">Your book answer was '+F(30,41)+'. The bottom number never changes!</div>'+
+  '<p><b>Improper to mixed:</b> divide. Quotient = whole, remainder = new top, the bottom stays.</p>'+
+  '<div class="ex">'+F(29,7)+' &#8594; 29 &divide; 7 = 4, remainder 1 &#8594; '+MX(4,1,7)+'</div>'},
+
+ equiv:{ch:"Ch 5 Fractions", title:"&#127829;&#127829; Equivalent fractions: same pizza, more slices", html:
+  '<div class="pics">'+pic("bar",2,1,0)+pic("bar",4,2,0)+pic("bar",8,4,0)+'</div>'+
+  '<p>'+F(1,2)+' = '+F(2,4)+' = '+F(4,8)+'. Same amount of pizza, just cut into more slices.</p>'+
+  '<p>Multiply (or divide) the top <b>and</b> the bottom by the <b>same</b> number.</p>'+
+  '<div class="ex">'+F(2,7)+' = '+F(4,14)+' = '+F(6,21)+' = '+F(8,28)+'</div>'+
+  '<p><b>Check two fractions:</b> cross-multiply. If the answers are equal, the fractions are equivalent.</p>'+
+  '<div class="ex">'+F(6,7)+' and '+F(15,27)+': 6 &times; 27 = 162, 7 &times; 15 = 105 &#8594; not equal &#8594; <b>not</b> equivalent</div>'},
+
+ simplest:{ch:"Ch 5 Fractions", title:"&#9986;&#65039; Simplest form", html:
+  '<p>Divide the top and the bottom by their <b>HCF</b>. When only 1 divides both, it is in its lowest terms.</p>'+
+  '<div class="ex">'+F(28,35)+': HCF 7 &#8594; '+F(4,5)+'<br>'+F(54,21)+': HCF 3 &#8594; '+F(18,7)+' = '+MX(2,4,7)+'<br>'+F(60,15)+': HCF 15 &#8594; 4</div>'},
+
+ compare:{ch:"Ch 5 Fractions", title:"&#9878;&#65039; Comparing fractions", html:
+  '<ul><li><b>Same bottom:</b> the bigger top wins. '+F(5,8)+' &gt; '+F(3,8)+'</li>'+
+  '<li><b>Same top:</b> the <b>smaller</b> bottom wins. Fewer people share the pizza, so each slice is bigger. '+F(9,2)+' &gt; '+F(9,5)+'</li>'+
+  '<li><b>Both different:</b> cross-multiply. '+F(2,3)+' and '+F(3,5)+': 2&times;5 = 10, 3&times;3 = 9 &#8594; '+F(2,3)+' &gt; '+F(3,5)+'</li></ul>'+
+  '<div class="ex"><b>Ascending</b> = small to big, use &lt;<br><b>Descending</b> = big to small, use &gt;</div>'+
+  '<div class="oops">On your model paper you wrote '+F(2,11)+' &gt; '+F(4,11)+' in an ascending list. The order was right but the sign was wrong.</div>'},
+
+ addsub:{ch:"Ch 5 Fractions", title:"&#10133; Adding and subtracting like fractions", html:
+  '<p>Add or subtract the <b>tops</b>. The bottom stays the same.</p>'+
+  '<div class="ex">'+F(7,11)+' + '+F(3,11)+' = '+F(10,11)+' &nbsp; (NOT '+F(10,22)+')</div>'+
+  '<p>Then simplify, and turn improper answers into mixed fractions:</p>'+
+  '<div class="ex">'+F(7,8)+' + '+F(15,8)+' = '+F(22,8)+' = '+F(11,4)+' = '+MX(2,3,4)+'</div>'+
+  '<div class="ex">1 &minus; '+F(3,8)+': write 1 as '+F(8,8)+' &#8594; '+F(8,8)+' &minus; '+F(3,8)+' = '+F(5,8)+'</div>'},
+
+ of:{ch:"Ch 5 Fractions", title:"&#127822; Fraction of a number", html:
+  '<p>&#34;of&#34; means &times;. Divide by the bottom, then multiply by the top.</p>'+
+  '<div class="ex">'+F(5,7)+' of 21 &#8594; 21 &divide; 7 = 3 &#8594; 3 &times; 5 = <b>15</b></div>'+
+  '<div class="oops">'+F(2,5)+' of 30 is 12, not 300! First divide 30 by 5 (= 6), then multiply by 2.</div>'+
+  '<ul><li>1 day = 24 hours, 1 hour = 60 minutes</li><li>1 week = 7 days, 1 year = 12 months</li><li>1 kg = 1000 g, 1 dozen = 12</li></ul>'}
+};
+/* =======================================================================
+   GENERATORS - fresh numbers every time a quest is played.
+   Each item carries m:{...} so the QA suite can re-check the maths
+   independently.
+   ======================================================================= */
+var G = {};
+var NAMES = ["Aarav","Diya","Kabir","Meera","Ishaan","Anaya","Vihaan","Sara","Rohan","Tara","Arjun","Kiara","Dev","Zoya","Advik","Myra"];
+function he(n){ return ["Diya","Meera","Anaya","Sara","Tara","Kiara","Zoya","Myra"].indexOf(n)>=0 ? "she" : "he"; }
+function until(fn){ for(var i=0;i<500;i++){ var r=fn(); if(r) return r; } throw new Error("generator failed"); }
+function randDigits(len){ var d=[ri(1,9)]; for(var i=1;i<len;i++) d.push(ri(0,9)); return d; }
+function ord(n){ var s=["th","st","nd","rd"], v=n%100; return n+(s[(v-20)%10]||s[v]||s[0]); }
+function T(sys){ return sys==="INT" ? "International" : "Indian"; }
+function fmt(sys, n){ return sys==="INT" ? fmtINT(n) : fmtIN(n); }
+
+/* ---------------- Chapter 1 ---------------- */
+G.placeValue = function(sys){
+  sys = sys || pick(["INT","IN"]);
+  return until(function(){
+    var len=ri(6,8), digs=randDigits(len), pos=ri(2,len-1), dg=digs[len-1-pos];
+    if(dg===0) return null;
+    if(digs.filter(function(x){ return x===dg; }).length!==1) return null;
+    var n=+digs.join(""), pv=dg*pow10(pos);
+    return NUM("What is the <b>place value</b> of <b>"+dg+"</b> in <b>"+fmt(sys,n)+"</b>?", pv,
+      dg+" has <b>"+pos+"</b> digit"+(pos>1?"s":"")+" on its right, so write "+dg+" and "+pos+" zero"+(pos>1?"s":"")+": <b>"+fmt(sys,pv)+"</b>.",
+      {m:{op:"pv", n:n, d:dg, ans:pv}, w:[pos+2], tag:"ch1"});
+  });
+};
+G.pvSum = function(){
+  return until(function(){
+    var len=ri(5,6), digs=randDigits(len), pos=ri(1,len-1), dg=digs[len-1-pos];
+    if(dg===0 || digs.filter(function(x){ return x===dg; }).length!==1) return null;
+    var n=+digs.join(""), pv=dg*pow10(pos);
+    return NUM("Find the <b>sum</b> of the place value and the face value of <b>"+dg+"</b> in <b>"+fmtIN(n)+"</b>.", pv+dg,
+      "Place value = "+fmtIN(pv)+", face value = "+dg+". Sum = "+fmtIN(pv)+" + "+dg+" = <b>"+fmtIN(pv+dg)+"</b>.",
+      {m:{op:"pvsum", n:n, d:dg, ans:pv+dg}, tag:"ch1"});
+  });
+};
+G.pvDiff = function(){
+  return until(function(){
+    var len=ri(6,7), digs=randDigits(len), dg=ri(2,9);
+    var p1=ri(3,len-1), p2=ri(0,p1-2);
+    digs[len-1-p1]=dg; digs[len-1-p2]=dg;
+    if(digs[0]===0) return null;
+    if(digs.filter(function(x){ return x===dg; }).length!==2) return null;
+    var n=+digs.join(""), a=dg*pow10(p1), b=dg*pow10(p2);
+    return NUM("Find the <b>difference</b> of the place values of the two <b>"+dg+"</b>s in <b>"+fmtIN(n)+"</b>.", a-b,
+      "Place value of the first "+dg+" = "+fmtIN(a)+". Place value of the second "+dg+" = "+fmtIN(b)+". Difference = <b>"+fmtIN(a-b)+"</b>.",
+      {m:{op:"pvdiff", n:n, d:dg, ans:a-b}, nb:true, tag:"ch1",
+       work:"Big place value &minus; small place value:<br>"+colWork([a,b],"&minus;",a-b)});
+  });
+};
+G.period = function(sys){
+  sys = sys || pick(["INT","IN"]);
+  return until(function(){
+    var len = sys==="INT" ? ri(7,9) : ri(6,8), digs=randDigits(len), pos=ri(0,len-1), dg=digs[len-1-pos];
+    if(digs.filter(function(x){ return x===dg; }).length!==1) return null;
+    var n=+digs.join(""), per, opts;
+    if(sys==="INT"){ per = pos<3?"Ones":(pos<6?"Thousands":"Millions"); opts=["Ones","Thousands","Millions","Lakhs"]; }
+    else { per = pos<3?"Ones":(pos<5?"Thousands":(pos<7?"Lakhs":"Crores")); opts=["Ones","Thousands","Lakhs","Crores"]; }
+    return MK("In <b>"+fmt(sys,n)+"</b> ("+T(sys)+" system), the digit <b>"+dg+"</b> is in which <b>period</b>?", opts, opts.indexOf(per),
+      "The commas split the number into periods. Count them from the right: "+(sys==="INT"?"Ones, Thousands, Millions.":"Ones, Thousands, Lakhs, Crores.")+" "+dg+" is in the <b>"+per+"</b> period.",
+      {m:{op:"period", sys:sys, n:n, pos:pos, ans:per}, tag:"ch1"});
+  });
+};
+G.nameBuild = function(sys){
+  sys = sys || pick(["INT","IN"]);
+  return until(function(){
+    var n, ch;
+    if(sys==="INT"){ n=ri(1000000,9999999); if(Math.floor(n/1000)%1000===0 || n%1000===0) return null; ch=chunksINT(n); }
+    else { n=ri(100000,9999999); if(Math.floor(n/1000)%100===0 || n%1000===0 || Math.floor(n/1e5)%100===0) return null; ch=chunksIN(n); }
+    var items=[]; ch.forEach(function(c){ items.push(c[0]); if(c[1]) items.push(c[1]); });
+    var first = sys==="INT" ? Math.floor(n/1e6) : (n>=1e7 ? Math.floor(n/1e7) : Math.floor(n/1e5)%100);
+    var near = first>=9 ? first-1 : first+1;
+    var extra = [sys==="INT"?"lakh":"million", sys==="INT" ? w999(near) : w99(near), "and"];
+    extra = extra.filter(function(e){ return items.indexOf(e)<0; });
+    return BUILD("Build the number name of <b>"+fmt(sys,n)+"</b> ("+T(sys)+" system). Tap the chips in order.", items, extra,
+      "Read each period, then say its name: <b>"+cap(nameOf(ch))+"</b>. We never say &#34;and&#34; or &#34;ones&#34;.",
+      {m:{op:"name", sys:sys, n:n, ans:items.join(" ")}, tag:"ch1"});
+  });
+};
+G.figures = function(sys){
+  sys = sys || pick(["INT","IN"]);
+  return until(function(){
+    var n = sys==="INT" ? ri(1000000,9999999) : ri(100000,9999999);
+    if(String(n).indexOf("0")<0 && Math.random()<0.6) n = +String(n).replace(/\d(?=\d{2}$)/,"0");
+    var nm = sys==="INT" ? nameINT(n) : nameIN(n);
+    return NUM("Write in figures: <b>"+cap(nm)+"</b>", n,
+      "Fill each period one at a time. Empty places get 0: <b>"+fmt(sys,n)+"</b>.",
+      {m:{op:"figures", sys:sys, n:n, words:nm, ans:n}, w:[9], tag:"ch1"});
+  });
+};
+G.succPred = function(){
+  var base = ri(100,99999)*100 + pick([0,99,9,90]);
+  var succ = Math.random()<0.5;
+  return NUM("What is the <b>"+(succ?"successor":"predecessor")+"</b> of <b>"+base+"</b>?", succ?base+1:base-1,
+    (succ?"Successor = add 1":"Predecessor = take away 1")+": "+base+(succ?" + 1 = ":" &minus; 1 = ")+"<b>"+(succ?base+1:base-1)+"</b>.",
+    {m:{op:"succpred", n:base, succ:succ, ans:succ?base+1:base-1}, tag:"ch1"});
+};
+function expandStr(n){
+  var s=String(n), L=s.length, o=[];
+  for(var i=0;i<L;i++){ var d=+s[i], p=pow10(L-1-i); o.push(d===0?"0":fmtIN(d*p)); }
+  return o.join(" + ");
+}
+G.expand = function(){
+  return until(function(){
+    var digs=randDigits(5), zi=pick([1,3]);
+    digs[zi]=0;
+    if(digs.filter(function(x){ return x===0; }).length!==1) return null;
+    var n=+digs.join(""), right=expandStr(n);
+    var noZero=+digs.filter(function(x){ return x!==0; }).join("");
+    var faces=digs.join(" + ");
+    var s=String(n), shiftArr=[];
+    for(var i=0;i<5;i++){ var d=+s[i]; if(d) shiftArr.push(fmtIN(d*pow10(5-1-i+(i===0?0:0)))); }
+    var w3 = expandStr(noZero);
+    var w4 = (function(){ var t=digs.slice(); var j=digs.indexOf(0); t[j]=t[j+1]; t[j+1]=0; return expandStr(+t.join("")); })();
+    return MQ("Which is the <b>expanded form</b> of <b>"+fmtIN(n)+"</b>?", right, [w3, faces, w4],
+      "Each digit &times; the value of its place. The 0 keeps its place: <b>"+right+"</b>.",
+      {m:{op:"expand", n:n, ans:right}, tag:"ch1"});
+  });
+};
+G.shortForm = function(){
+  return until(function(){
+    var digs=randDigits(6), z1=ri(1,4);
+    digs[z1]=0; if(Math.random()<0.5) digs[5]=0;
+    var n=+digs.join(""), parts=[];
+    digs.forEach(function(d,i){ if(d) parts.push(d+" &times; "+fmtIN(pow10(5-i))); });
+    if(parts.length<3) return null;
+    return NUM("Write the short form: <b>"+parts.join(" + ")+"</b>", n,
+      "Put each digit in its room. Empty rooms get <b>0</b>: <b>"+fmtIN(n)+"</b>.",
+      {m:{op:"short", digs:digs.slice(), ans:n}, w:[8], tag:"ch1"});
+  });
+};
+function greatestSmallest(digs){
+  var k=digs.length, extra=6-k, desc=digs.slice().sort(function(a,b){ return b-a; }), asc=digs.slice().sort(function(a,b){ return a-b; });
+  var g=[]; for(var i=0;i<extra;i++) g.push(desc[0]); g=g.concat(desc);
+  var s;
+  if(asc[0]===0){
+    var nz=asc.filter(function(x){ return x!==0; })[0], rest=asc.slice(); rest.splice(rest.indexOf(nz),1);
+    s=[nz]; for(i=0;i<extra;i++) s.push(0); s=s.concat(rest);
+  } else { s=[]; for(i=0;i<extra;i++) s.push(asc[0]); s=s.concat(asc); }
+  return [+g.join(""), +s.join("")];
+}
+G.makeNum = function(){
+  var k=ri(4,5), pool=shuffle(range(1,9)), digs=pool.slice(0,k);
+  if(Math.random()<0.55) digs[0]=0;
+  var gs=greatestSmallest(digs);
+  return BL("Form the <b>greatest</b> and the <b>smallest 6-digit</b> numbers using the digits <b>"+digs.join(", ")+"</b>. (You may repeat digits. Use every digit at least once.)",
+    "Greatest: [[0]]<br>Smallest: [[1]]", [gs[0], gs[1]],
+    "Greatest: biggest first, repeat the biggest &#8594; <b>"+fmtIN(gs[0])+"</b>. Smallest: smallest non-zero first, then repeat the smallest digit &#8594; <b>"+fmtIN(gs[1])+"</b>.",
+    {m:{op:"make", digs:digs, ans:gs}, w:[7,7], tag:"ch1"});
+};
+G.orderNums = function(){
+  var base=ri(2,8)*10000+ri(0,9)*1000, arr=[];
+  while(arr.length<5){ var v=base+ri(0,9999)+(Math.random()<0.4?ri(-9,9)*1000:0); if(v>=10000 && v<=99999 && arr.indexOf(v)<0) arr.push(v); }
+  var asc=Math.random()<0.5;
+  var sorted=arr.slice().sort(function(a,b){ return asc?a-b:b-a; });
+  return ORD("Arrange in <b>"+(asc?"ascending":"descending")+"</b> order ("+(asc?"smallest first":"biggest first")+").", sorted.map(fmtIN),
+    "Compare from the left: first the ten-thousands, then the thousands, and so on.",
+    {m:{op:"order", arr:arr, asc:asc}, tag:"ch1"});
+};
+G.romanTo = function(){ var n=ri(11,99); return NUM("Write <b>"+toRoman(n)+"</b> as a number.", n, "Split it up: "+romanSplit(n)+" = <b>"+n+"</b>.", {m:{op:"rto", r:toRoman(n), ans:n}, tag:"ch1"}); };
+G.romanFrom = function(){ var n=ri(11,99); return ROM("Write <b>"+n+"</b> in Roman numerals.", toRoman(n), "Tens first, then ones: "+romanSplit(n)+" &#8594; <b>"+toRoman(n)+"</b>.", {m:{op:"rfrom", n:n, ans:toRoman(n)}, tag:"ch1"}); };
+function romanSplit(n){ var t=Math.floor(n/10)*10, o=n%10, p=[]; if(t) p.push(toRoman(t)+" = "+t); if(o) p.push(toRoman(o)+" = "+o); return p.join(", "); }
+G.romanOp = function(kind){
+  kind = kind || pick(["+","-","/","x"]);
+  var a,b,r,sym;
+  if(kind==="+"){ a=ri(11,60); b=ri(4,40); r=a+b; sym="+"; }
+  else if(kind==="-"){ a=ri(50,100); b=ri(4,45); r=a-b; sym="&minus;"; }
+  else if(kind==="/"){ b=ri(2,9); r=ri(2,11); a=b*r; sym="&divide;"; }
+  else { a=ri(3,12); b=ri(2,8); r=a*b; if(r>100) return G.romanOp("+"); sym="&times;"; }
+  return ROM("Solve and write the answer in <b>Roman numerals</b>: <b>"+toRoman(a)+" "+sym+" "+toRoman(b)+"</b>", toRoman(r),
+    "Change to numbers first: "+toRoman(a)+" = "+a+", "+toRoman(b)+" = "+b+". Then "+a+" "+sym+" "+b+" = "+r+" = <b>"+toRoman(r)+"</b>.",
+    {m:{op:"rop", a:a, b:b, k:kind, ans:toRoman(r)}, tag:"ch1"});
+};
+G.compareExpr = function(){
+  var a=ri(20000,60000), b=ri(1000,9999), c=ri(50000,90000), d, l, rr;
+  l=a+b; d=c-l+ri(-3000,3000); if(d<1000) d=ri(1000,5000); rr=c-d;
+  var sign = l>rr?">":(l<rr?"<":"=");
+  return SIGN("Put &lt;, &gt; or =<br><b>"+a+" + "+b+" &nbsp;&#9744;&nbsp; "+c+" &minus; "+d+"</b>", sign,
+    "Work out both sides first: "+a+" + "+b+" = "+l+" and "+c+" &minus; "+d+" = "+rr+". So "+l+" "+(sign===">"?"&gt;":sign==="<"?"&lt;":"=")+" "+rr+".",
+    {m:{op:"cmpexpr", l:l, r:rr, ans:sign}, tag:"ch1"});
+};
+
+/* ---------------- Chapter 2 ---------------- */
+/* column puzzle with hidden digits (at most one per column, so the answer is unique) */
+function colPuzzle(rows, op, hideCols, hideRows){
+  var w = String(rows[rows.length-1]).length;
+  rows.forEach(function(r){ w=Math.max(w,String(r).length); });
+  var grid = rows.map(function(r){ var s=String(r); return Array(w-s.length+1).join(" ")+s; });
+  var hidden = {};
+  hideCols.forEach(function(c,i){ hidden[hideRows[i]+"_"+c]=1; });
+  var slots=[], ans=[];
+  var h='<table class="col">';
+  grid.forEach(function(s, ri2){
+    var isTot = ri2===grid.length-1;
+    h+='<tr'+(isTot?' class="tot"':'')+'><td class="op">'+(ri2===grid.length-2?op:"")+'</td>';
+    for(var c=0;c<w;c++){
+      var ch=s.charAt(c);
+      if(hidden[ri2+"_"+c] && ch!==" "){ h+='<td>[['+ans.length+']]</td>'; ans.push(ch); }
+      else h+='<td>'+(ch===" "?"":ch)+'</td>';
+    }
+    h+='</tr>';
+  });
+  return {tpl:h+'</table>', ans:ans};
+}
+function pickHide(w, nrows, count, avoidLead){
+  var cols=shuffle(range(0,w-1)).slice(0,count), rowsArr=cols.map(function(){ return ri(0,nrows-1); });
+  return [cols, rowsArr];
+}
+G.missingAdd = function(){
+  var a=ri(10000,39999), b=ri(10000,29999), c=ri(10000,29999), s=a+b+c;
+  var hp=pickHide(5,4,4);
+  var P=colPuzzle([a,b,c,s],"+",hp[0],hp[1]);
+  return BL("Fill in the missing digits.", P.tpl, P.ans,
+    "Start at the ones column and carry as you go. Check: "+a+" + "+b+" + "+c+" = <b>"+s+"</b>.",
+    {m:{op:"madd", a:a, b:b, c:c, s:s}, w:P.ans.map(function(){ return 1; }), tag:"ch2"});
+};
+G.missingSub = function(){
+  var a=ri(500000,999999), b=ri(100000,a-100000), r=a-b;
+  var hp=pickHide(6,3,4);
+  var P=colPuzzle([a,b,r],"&minus;",hp[0],hp[1]);
+  return BL("Fill in the missing digits.", P.tpl, P.ans,
+    "Start at the ones column and borrow when the top digit is smaller. Check by adding back: "+r+" + "+b+" = <b>"+a+"</b>.",
+    {m:{op:"msub", a:a, b:b, r:r}, w:P.ans.map(function(){ return 1; }), tag:"ch2"});
+};
+G.colSub = function(){
+  var a = Math.random()<0.5 ? ri(2,9)*100000 : ri(300000,999999), b=ri(100000,a-10000);
+  return NUM("Subtract <b>"+fmtIN(b)+"</b> from <b>"+fmtIN(a)+"</b>.", a-b,
+    "&#34;Subtract B <b>from</b> A&#34; means A &minus; B. The big number goes on top.",
+    {m:{op:"sub", a:a, b:b, ans:a-b}, nb:true, w:[7], tag:"ch2", work:colWork([a,b],"&minus;",a-b)+"Check: "+(a-b)+" + "+b+" = "+a+" &#10004;"});
+};
+G.colAdd = function(){
+  var a=ri(100000,899999), b=ri(1000,99999);
+  return NUM("What is <b>"+fmtIN(b)+"</b> more than <b>"+fmtIN(a)+"</b>?", a+b,
+    "&#34;More than&#34; means add.", {m:{op:"add", a:a, b:b, ans:a+b}, nb:true, w:[7], tag:"ch2", work:colWork([a,b],"+",a+b)});
+};
+G.storyAS = function(kind){
+  kind = kind || pick(["dist","charity","cost","beads","library"]);
+  var nm=pick(NAMES), a, b, c, ans, q, work, unit;
+  if(kind==="dist"){ a=ri(200000,699999); b=ri(20000,99999); ans=a+b; unit=" m";
+    q=nm+" travels <b>"+fmtIN(a)+" m</b> to reach the hometown. From there, "+he(nm)+" travels <b>"+fmtIN(b)+" m</b> more to a friend&#39;s house. How far is the friend&#39;s house from the start?";
+    work="Distance to hometown = "+fmtIN(a)+" m<br>Hometown to friend = "+fmtIN(b)+" m<br>Total = "+fmtIN(a)+" + "+fmtIN(b)+" = <b>"+fmtIN(ans)+" m</b>"; }
+  else if(kind==="charity"){ a=ri(300000,999999); b=ri(100000,399999); ans=a+b; unit="";
+    q="A charity event raised <b>&#8377;"+fmtIN(a)+"</b> from a show and <b>&#8377;"+fmtIN(b)+"</b> from donations. Find the total money raised.";
+    work="From show = &#8377;"+fmtIN(a)+"<br>From donations = &#8377;"+fmtIN(b)+"<br>Total = <b>&#8377;"+fmtIN(ans)+"</b>"; }
+  else if(kind==="cost"){ b=ri(100000,399999); a=b+ri(100000,399999); ans=a-b; unit="";
+    q="A TV and a speaker together cost <b>&#8377;"+fmtIN(a)+"</b>. The speaker costs <b>&#8377;"+fmtIN(b)+"</b>. What is the cost of the TV?";
+    work="Both together = &#8377;"+fmtIN(a)+"<br>Speaker = &#8377;"+fmtIN(b)+"<br>TV = "+fmtIN(a)+" &minus; "+fmtIN(b)+" = <b>&#8377;"+fmtIN(ans)+"</b>"; }
+  else if(kind==="beads"){ a=ri(300000,699999); b=ri(100000,a-50000); ans=a-b; unit=" beads";
+    q=nm+" has <b>"+fmtIN(a)+"</b> beads. <b>"+fmtIN(b)+"</b> of them are red and the rest are blue. How many beads are blue?";
+    work="Total = "+fmtIN(a)+"<br>Red = "+fmtIN(b)+"<br>Blue = "+fmtIN(a)+" &minus; "+fmtIN(b)+" = <b>"+fmtIN(ans)+"</b>"; }
+  else { a=ri(10000,19999); b=ri(5000,12000); c=ri(1000,4999); ans=a+b-c; unit=" books";
+    q="A library had <b>"+a+"</b> books. It bought <b>"+b+"</b> new books but threw away <b>"+c+"</b> torn books. How many books does it have now?";
+    work="Step 1: "+a+" + "+b+" = "+(a+b)+"<br>Step 2: "+(a+b)+" &minus; "+c+" = <b>"+ans+"</b>"; }
+  return NUM(q, ans, "Look for the clue words. &#34;Together, total, more&#34; mean add. &#34;Rest, left, cost of one part&#34; mean subtract.",
+    {m:{op:"story", kind:kind, a:a, b:b, c:c, ans:ans}, nb:true, w:[8], tag:"ch2", work:work});
+};
+G.simplify = function(){
+  var a=ri(40000,60000), b=ri(20000,a-10000), c=ri(1000,9999), ans=a-b+c;
+  return NUM("Solve: <b>"+a+" &minus; "+b+" + "+c+"</b>", ans, "Go from left to right: subtract first, then add. Check the subtraction by adding back.",
+    {m:{op:"simp", a:a, b:b, c:c, ans:ans}, nb:true, w:[7], tag:"ch2", work:a+" &minus; "+b+" = "+(a-b)+"<br>"+(a-b)+" + "+c+" = <b>"+ans+"</b>"});
+};
+
+/* ---------------- Chapter 3 ---------------- */
+G.times10 = function(){
+  var n=ri(12,9999), p=pick([10,100,1000]);
+  return NUM("<b>"+n+" &times; "+fmtIN(p)+"</b> = ?", n*p, "&times; "+p+" &#8594; stick "+(String(p).length-1)+" zero(s) on the end: <b>"+fmtIN(n*p)+"</b>.",
+    {m:{op:"times", n:n, p:p, ans:n*p}, w:[9], tag:"ch3"});
+};
+G.div10 = function(){
+  var p=pick([10,100,1000]), n=ri(p*3, 99999);
+  var z=String(p).length-1;
+  return QR("<b>"+n+" &divide; "+fmtIN(p)+"</b>", Math.floor(n/p), n%p,
+    "Cover the last <b>"+z+"</b> digit"+(z>1?"s":"")+". Quotient = <b>"+Math.floor(n/p)+"</b>, remainder = <b>"+(n%p)+"</b>.",
+    {m:{op:"div10", n:n, p:p, ans:[Math.floor(n/p), n%p]}, tag:"ch3"});
+};
+G.breakMult = function(){
+  return until(function(){
+    var n=ri(111,999), m=ri(3,9), s=String(n);
+    if(s.indexOf("0")>=0) return null;
+    var parts=[+s[0]*100, +s[1]*10, +s[2]];
+    return BL("Break the multiplicand and find the product: <b>"+n+" &times; "+m+"</b>",
+      "("+parts.join(" + ")+") &times; "+m+"<br>= [[0]] + [[1]] + [[2]]<br>= [[3]]",
+      [parts[0]*m, parts[1]*m, parts[2]*m, n*m],
+      "Multiply each part by "+m+", then add: "+parts.map(function(p){ return p*m; }).join(" + ")+" = <b>"+(n*m)+"</b>.",
+      {m:{op:"break", n:n, k:m, ans:n*m}, tag:"ch3"});
+  });
+};
+G.product = function(){
+  var a=ri(123,899), b=pick([ri(21,99), ri(101,109), ri(111,299)]);
+  var s=String(b), rows=[], lines=[];
+  for(var i=s.length-1;i>=0;i--){ var d=+s[i], pv=pow10(s.length-1-i); rows.push(a*d*pv); lines.push(a+" &times; "+(d*pv)+" = "+(a*d*pv)); }
+  return NUM("Find the product: <b>"+a+" &times; "+b+"</b>", a*b, "Multiply by each digit of "+b+" (ones, then tens with a 0, then hundreds with 00) and add.",
+    {m:{op:"prod", a:a, b:b, ans:a*b}, nb:true, w:[7], tag:"ch3", work:lines.join("<br>")+"<br>Add: <b>"+(a*b)+"</b>"});
+};
+G.longDiv = function(two){
+  return until(function(){
+    var d = two ? ri(12,49) : ri(3,9);
+    var Q = two ? ri(101,999) : ri(1001,1999);
+    if(Math.random()<0.5){ var qs=String(Q).split(""); qs[ri(1,qs.length-2)]="0"; Q=+qs.join(""); }
+    var R = ri(0,d-1), D=d*Q+R;
+    if(D>99999) return null;
+    return QR("Divide and check: <b>"+D+" &divide; "+d+"</b>", Q, R,
+      "Dad, Mom, Sister, Brother: Divide, Multiply, Subtract, Bring down. Remember the 0 in the quotient when the divisor does not fit.",
+      {m:{op:"ldiv", D:D, d:d, ans:[Q,R]}, nb:true, tag:"ch3", work:"Quotient = "+Q+", Remainder = "+R+"<br><b>Check:</b> "+d+" &times; "+Q+" + "+R+" = "+(d*Q)+" + "+R+" = "+D+" &#10004;"});
+  });
+};
+var UNITS=[["bananas","banana"],["pencils","pencil"],["notebooks","notebook"],["mangoes","mango"],["toy cars","toy car"],["books","book"]];
+G.unitary = function(){
+  var it=pick(UNITS), m=pick([4,5,6,8,10,12]), u=ri(3,95), k=until(function(){ var x=ri(2,20); return x!==m ? x : null; });
+  var tot=m*u;
+  return NUM("The cost of <b>"+m+" "+it[0]+"</b> is <b>&#8377;"+tot+"</b>. Find the cost of <b>"+k+" "+it[0]+"</b>.", k*u,
+    "Find ONE first, then MANY.", {m:{op:"unit", m:m, tot:tot, k:k, ans:k*u}, nb:true, tag:"ch3", pre:"&#8377; ",
+     work:"1 "+it[1]+" = "+tot+" &divide; "+m+" = &#8377;"+u+"<br>"+k+" "+it[0]+" = "+u+" &times; "+k+" = <b>&#8377;"+(k*u)+"</b>"});
+};
+G.rows = function(){
+  var s=ri(20,60), full=ri(80,300), left=ri(1,s-1), P=s*full+left;
+  return BL("<b>"+P+"</b> people came to a stadium. Each row has <b>"+s+"</b> seats, filled from the first row onwards. How many rows are filled completely? How many people sit in the last row?",
+    "Rows filled completely: [[0]]<br>People in the last row: [[1]]", [full, left],
+    "Divide: "+P+" &divide; "+s+". The quotient is the number of full rows and the remainder is the last row.",
+    {m:{op:"rows", P:P, s:s, ans:[full,left]}, nb:true, tag:"ch3", work:P+" &divide; "+s+" = "+full+" remainder "+left+"<br>Check: "+s+" &times; "+full+" + "+left+" = "+P+" &#10004;"});
+};
+G.productStory = function(){
+  var kind=pick(["truck","box","week"]);
+  if(kind==="week"){ var per=ri(120,899), tot=per*7;
+    return NUM("A car covers <b>"+tot+" km</b> in a week, the same distance each day. How far does it go in one day?", per,
+      "A week has 7 days, so divide by 7.", {m:{op:"week", tot:tot, ans:per}, nb:true, tag:"ch3", post:" km", work:tot+" &divide; 7 = <b>"+per+" km</b>"}); }
+  var n=ri(21,95), w=ri(1200,8999);
+  var q = kind==="truck" ? "A truck carries <b>"+n+"</b> steel pipes. Each pipe weighs <b>"+w+" g</b>. How much weight is the truck carrying?" :
+                           "One box of mangoes weighs <b>"+w+" g</b>. What is the total weight of <b>"+n+"</b> such boxes?";
+  return NUM(q, n*w, "Many equal things: multiply.", {m:{op:"pstory", n:n, w:w, ans:n*w}, nb:true, tag:"ch3", post:" g", w:[7],
+    work:w+" &times; "+n+" = "+w+" &times; "+(n%10)+" + "+w+" &times; "+(n-n%10)+" = "+(w*(n%10))+" + "+(w*(n-n%10))+" = <b>"+(n*w)+" g</b>"});
+};
+G.table = function(){
+  var t = Math.random()<0.7 ? ri(12,15) : ri(6,11), m=ri(2,10);
+  return NUM("<b>"+t+" &times; "+m+"</b> = ?", t*m, t+" &times; "+m+" = <b>"+(t*m)+"</b>.", {m:{op:"tab", a:t, b:m, ans:t*m}, tag:"ch3"});
+};
+G.missingFactor = function(){
+  var p=pick([10,100,1000]), n=ri(12,999)*1;
+  return NUM("<b>"+(n*p)+" &divide; ___ = "+n+"</b>", p, "How many zeros came off? That tells you: <b>"+p+"</b>.", {m:{op:"mfac", n:n, p:p, ans:p}, tag:"ch3"});
+};
+
+/* ---------------- Chapter 4 ---------------- */
+var FNUMS=[24,30,32,35,36,40,42,45,48,50,54,56,60,63,64,70,72,75,80,84,90,96,100];
+G.factorsPick = function(n){
+  n = n || pick(FNUMS);
+  var f=factorsOf(n), non=[];
+  var cand=shuffle(range(2,n-1).filter(function(x){ return f.indexOf(x)<0; }));
+  non = cand.slice(0,Math.min(6,cand.length));
+  var opts=f.concat(non).sort(function(a,b){ return a-b; });
+  return PA("Tap <b>ALL</b> the factors of <b>"+n+"</b>.", opts, f,
+    "Rainbow pairs: "+rainbowPairs(n)+". Factors of "+n+": <b>"+f.join(", ")+"</b>.",
+    {m:{op:"factors", n:n, ans:f}, tag:"ch4"});
+};
+function rainbowPairs(n){ var o=[]; for(var i=1;i*i<=n;i++){ if(n%i===0) o.push(i+"&times;"+(n/i)); } return o.join(", "); }
+G.primesPick = function(){
+  var a=ri(10,80), opts=range(a,a+11), pr=opts.filter(isPrime);
+  if(!pr.length) return G.primesPick();
+  return PA("Tap <b>ALL</b> the prime numbers.", opts, pr, "A prime has exactly 2 factors. The primes here are <b>"+pr.join(", ")+"</b>. The others can be split, like "+
+    opts.filter(function(x){ return !isPrime(x); }).slice(0,2).map(function(x){ var p=primeFactors(x)[0]; return x+" = "+p+" &times; "+(x/p); }).join(", ")+".",
+    {m:{op:"primes", opts:opts, ans:pr}, tag:"ch4"});
+};
+G.primeSort = function(){
+  var pool=shuffle(range(2,60)).slice(0,7); if(Math.random()<0.6) pool[0]=1;
+  var items=pool.map(function(x){ return [String(x), x===1?2:(isPrime(x)?0:1)]; });
+  return SO("Sort each number.", ["Prime","Composite","Neither"], items, "1 is neither. Prime = exactly 2 factors. Composite = more than 2.",
+    {m:{op:"psort", nums:pool}, tag:"ch4"});
+};
+G.tree = function(){
+  return until(function(){
+    var P=[2,3,5,7], p1=pick(P), p2=pick(P), p3=pick(P), p4=pick([2,3,5]);
+    var Y=p3*p4, X=p2*Y, n=p1*X;
+    if(n>400 || n<60) return null;
+    /* the middle prime may be blanked only when that keeps the answer unique (p2 = p4) */
+    var blankP2 = p2===p4 && Math.random()<0.6;
+    var tpl='<div class="tree"><div class="lv"><span class="nd">'+n+'</span></div>'+
+      '<div class="lv"><span class="nd">'+p1+'</span><span class="ar">&times;</span><span class="nd">[[0]]</span></div>'+
+      '<div class="lv" style="padding-left:70px"><span class="nd">'+(blankP2?"[[1]]":p2)+'</span><span class="ar">&times;</span><span class="nd">[['+(blankP2?2:1)+']]</span></div>'+
+      '<div class="lv" style="padding-left:140px"><span class="nd">'+p3+'</span><span class="ar">&times;</span><span class="nd">[['+(blankP2?3:2)+']]</span></div></div>';
+    var ans = blankP2 ? [X,p2,Y,p4] : [X,Y,p4];
+    return BL("Complete the factor tree.", tpl, ans,
+      n+" = "+p1+" &times; "+X+", "+X+" = "+p2+" &times; "+Y+", "+Y+" = "+p3+" &times; "+p4+". So "+n+" = <b>"+[p1,p2,p3,p4].sort(function(a,b){return a-b;}).join(" &times; ")+"</b>.",
+      {m:{op:"tree", n:n, p:[p1,p2,p3,p4], ans:ans}, tag:"ch4"});
+  });
+};
+G.pfMCQ = function(n){
+  n = n || pick([36,40,45,50,54,60,63,72,75,84,90,98,100,108,126,150]);
+  var pf=primeFactors(n), right=pf.join(" &times; ");
+  var w1=pf.slice(); w1[w1.length-1]= w1[w1.length-1]===7?5:7;
+  var w2=pf.slice(0,-2).concat([pf[pf.length-2]*pf[pf.length-1]]);
+  var w3=pf.slice(0,-1).join(" &times; ")+" + "+pf[pf.length-1];
+  return MQ("Which is the correct <b>prime factorisation</b> of <b>"+n+"</b>?", right, [w1.join(" &times; "), w2.join(" &times; "), w3],
+    "Only primes, joined by &times;. Multiply back: "+pf.join(" &times; ")+" = "+n+" &#10004;. Watch out: "+w1.join("&times;")+" = "+w1.reduce(function(a,b){return a*b;},1)+", and "+w2[w2.length-1]+" is not prime.",
+    {m:{op:"pf", n:n, ans:right}, tag:"ch4"});
+};
+function ladder(nums){
+  var rows=[], cur=nums.slice(), divs=[];
+  while(cur.some(function(x){ return x>1; })){
+    var p=2; while(!cur.some(function(x){ return x%p===0; })) p++;
+    rows.push(p+" | "+cur.join(", "));
+    divs.push(p);
+    cur=cur.map(function(x){ return x%p===0 ? x/p : x; });
+  }
+  rows.push("&nbsp;&nbsp;&nbsp;"+cur.join(", "));
+  return {rows:rows, divs:divs};
+}
+G.lcm = function(three){
+  return until(function(){
+    var nums = three ? [ri(4,30), ri(6,40), ri(8,45)] : [ri(6,40), ri(10,90)];
+    if(uniq(nums).length!==nums.length) return null;
+    var L=nums.reduce(lcm), g=nums.reduce(gcd);
+    if(L>720 || L===Math.max.apply(null,nums) || g===1 && !three) return null;
+    var lad=ladder(nums);
+    return NUM("Find the <b>LCM</b> of <b>"+nums.join(", ")+"</b>.", L, "Division ladder: divide by primes until everything is 1, then multiply the side numbers.",
+      {m:{op:"lcm", nums:nums, ans:L}, nb:true, tag:"ch4", work:'<span style="font-family:monospace">'+lad.rows.join("<br>")+'</span><br>LCM = '+lad.divs.join(" &times; ")+" = <b>"+L+"</b>"});
+  });
+};
+G.hcf = function(three){
+  return until(function(){
+    var g=pick([2,3,4,5,6,7,8,9,12]), ms = three ? [ri(2,9),ri(2,9),ri(2,9)] : [ri(2,12),ri(2,12)];
+    if(ms.reduce(gcd)!==1 || uniq(ms).length!==ms.length) return null;
+    var nums=ms.map(function(m){ return m*g; });
+    if(Math.max.apply(null,nums)>120) return null;
+    return NUM("Find the <b>HCF</b> of <b>"+nums.join(", ")+"</b>.", g, "Write the prime factors of each and multiply the ones they all share.",
+      {m:{op:"hcf", nums:nums, ans:g}, nb:true, tag:"ch4", work:nums.map(function(x){ return x+" = "+primeFactors(x).join(" &times; "); }).join("<br>")+"<br>Common: "+primeFactors(g).join(" &times; ")+" &#8594; HCF = <b>"+g+"</b>"});
+  });
+};
+G.divisible = function(){
+  var r=pick([2,3,5,6,9,10]), n=ri(1000,999999);
+  if(Math.random()<0.5){ n = n - n%r; if(n<1000) n+=r; }
+  var yes = n%r===0, ds=digitSum(n), last=n%10, reason;
+  if(r===3||r===9) reason = "digit sum = "+String(n).split("").join("+")+" = "+ds+(ds%r===0?" is":" is not")+" divisible by "+r;
+  else if(r===6) reason = (n%2===0?"it is even":"it is odd")+" and the digit sum "+ds+(ds%3===0?" is":" is not")+" divisible by 3";
+  else reason = "the last digit is "+last;
+  return YN("Is <b>"+n+"</b> divisible by <b>"+r+"</b>?", yes, (yes?"<b>Yes</b>: ":"<b>No</b>: ")+reason+".",
+    {m:{op:"divis", n:n, r:r, ans:yes}, tag:"ch4"});
+};
+G.multiple = function(){
+  var n=ri(6,25), k=ri(3,12);
+  return NUM("The <b>"+ord(k)+"</b> multiple of <b>"+n+"</b> is ___.", n*k, n+" &times; "+k+" = <b>"+(n*k)+"</b>.", {m:{op:"mult", n:n, k:k, ans:n*k}, tag:"ch4"});
+};
+G.first3 = function(){
+  var n=ri(11,19);
+  return BL("Write the first three multiples of <b>"+n+"</b>.", "[[0]], [[1]] and [[2]]", [n, 2*n, 3*n], "The first multiple is the number itself: "+n+" &times; 1, &times; 2, &times; 3.",
+    {m:{op:"first3", n:n, ans:[n,2*n,3*n]}, tag:"ch4"});
+};
+
+/* ---------------- Chapter 5 ---------------- */
+function coprimePair(maxD, proper){
+  return until(function(){ var d=ri(2,maxD), n=proper?ri(1,d-1):ri(1,maxD*2); return gcd(n,d)===1 && n!==d ? [n,d] : null; });
+}
+G.shade = function(){
+  var shape=pick(["bar","circle","grid"]), d=pick([2,3,4,5,6,8]), n=ri(1,d-1);
+  while(gcd(n,d)!==1) n=ri(1,d-1);
+  var k = (shape==="circle" || d>4) ? 1 : pick([1,2]);
+  if(shape==="grid" && d*k<4) k=2;
+  var parts=d*k, need=n*k;
+  var q = k===1 ? "Tap the parts to shade <b>"+F(n,d)+"</b> of the shape." :
+                  "This shape has <b>"+parts+"</b> equal parts. Shade parts to show "+F(n,d)+". (Hint: "+F(n,d)+" = "+F("?",parts)+")";
+  return SH(q, shape, parts, need, k===1 ? "Shade "+n+" of the "+d+" equal parts." : F(n,d)+" = "+F(need,parts)+", so shade <b>"+need+"</b> of the "+parts+" parts.",
+    {m:{op:"shade", n:n, d:d, parts:parts, ans:need}, tag:"ch5"});
+};
+G.whatShaded = function(){
+  var shape=pick(["bar","circle","grid"]), parts=pick([3,4,5,6,8]), k=ri(1,parts-1), un=Math.random()<0.35;
+  var ans = un ? parts-k : k;
+  return MQ("What fraction of the shape is <b>"+(un?"NOT shaded":"shaded")+"</b>?<div class='pics'>"+pic(shape,parts,k,110)+"</div>",
+    F(ans,parts), [F(parts-ans,parts), F(ans,parts-ans===0?parts+1:parts-ans), F(parts,ans)],
+    "Count the equal parts: "+parts+" (the bottom). Count the "+(un?"white":"pink")+" parts: "+ans+" (the top). So "+F(ans,parts)+".",
+    {m:{op:"shaded", parts:parts, k:k, un:un}, tag:"ch5"});
+};
+G.mixToImp = function(){
+  var w=ri(1,9), d=ri(2,13), n=until(function(){ var x=ri(1,d-1); return gcd(x,d)===1 ? x : null; });
+  return FRA("Change "+MX(w,n,d)+" into an <b>improper fraction</b>.", w*d+n, d,
+    "MAD: "+w+" &times; "+d+" = "+(w*d)+", + "+n+" = "+(w*d+n)+". The denominator stays "+d+" &#8594; "+F(w*d+n,d)+".",
+    {m:{op:"m2i", w:w, n:n, d:d}, v:{type:"eqval", N:w*d+n, D:d}, tag:"ch5"});
+};
+G.impToMix = function(){
+  var d=ri(2,12), w=ri(1,9), n=until(function(){ var x=ri(1,d-1); return gcd(x,d)===1 ? x : null; }), N=w*d+n;
+  return MIXB("Change "+F(N,d)+" into a <b>mixed fraction</b>.", w, n, d,
+    N+" &divide; "+d+" = "+w+" remainder "+n+" &#8594; "+MX(w,n,d)+".",
+    {m:{op:"i2m", N:N, d:d, ans:[w,n,d]}, tag:"ch5"});
+};
+G.equivMiss = function(){
+  var p=coprimePair(12,true), k=ri(2,9), n=p[0], d=p[1], top=Math.random()<0.5;
+  var tpl = F(n,d)+" = "+(top ? F("[[0]]", d*k) : F(n*k, "[[0]]"));
+  return BL("Find the missing number.", tpl, [top ? n*k : d*k],
+    (top ? d+" &times; "+k+" = "+(d*k)+", so the top is "+n+" &times; "+k : n+" &times; "+k+" = "+(n*k)+", so the bottom is "+d+" &times; "+k)+" = <b>"+(top?n*k:d*k)+"</b>.",
+    {m:{op:"eqmiss", n:n, d:d, k:k, top:top}, tag:"ch5"});
+};
+G.simplest = function(){
+  var p=coprimePair(11,Math.random()<0.75), k=ri(2,9), n=p[0], d=p[1];
+  return FRA("Write "+F(n*k,d*k)+" in its <b>simplest form</b>.", n, d,
+    "HCF of "+(n*k)+" and "+(d*k)+" is "+k+". Divide both by "+k+" &#8594; <b>"+F(n,d)+"</b>.",
+    {m:{op:"simp5", N:n*k, D:d*k, ans:[n,d]}, tag:"ch5"});
+};
+G.equivCheck = function(){
+  var p=coprimePair(9,true), k=ri(2,6), yes=Math.random()<0.5, a=p[0], b=p[1], c=a*k, d=b*k;
+  if(!yes){ if(Math.random()<0.5) d=d+1; else c=c+1; }
+  return YN("Are "+F(a,b)+" and "+F(c,d)+" <b>equivalent</b>?", a*d===b*c,
+    "Cross-multiply: "+a+" &times; "+d+" = "+(a*d)+" and "+b+" &times; "+c+" = "+(b*c)+". "+(a*d===b*c?"Equal, so <b>yes</b>.":"Not equal, so <b>no</b>."),
+    {m:{op:"eqchk", f:[a,b,c,d]}, tag:"ch5"});
+};
+G.threeEquiv = function(){
+  var p=coprimePair(9,true);
+  return BL("Write any <b>three</b> fractions equivalent to "+F(p[0],p[1])+".", F("[[0]]","[[1]]")+" , "+F("[[2]]","[[3]]")+" , "+F("[[4]]","[[5]]"),
+    [p[0]*2,p[1]*2,p[0]*3,p[1]*3,p[0]*4,p[1]*4],
+    "Multiply top and bottom by the same number: "+F(p[0]*2,p[1]*2)+", "+F(p[0]*3,p[1]*3)+", "+F(p[0]*4,p[1]*4)+". Any three different ones are right!",
+    {m:{op:"three", n:p[0], d:p[1]}, v:{type:"equiv", n:p[0], d:p[1]}, w:[3,3,3,3,3,3], tag:"ch5"});
+};
+G.compareFr = function(kind){
+  kind = kind || pick(["like","num","cross"]);
+  var a,b,c,d;
+  if(kind==="like"){ b=d=ri(5,20); a=ri(1,b+4); c=until(function(){ var x=ri(1,b+4); return x!==a?x:null; }); }
+  else if(kind==="num"){ a=c=ri(1,9); b=ri(2,15); d=until(function(){ var x=ri(2,15); return x!==b?x:null; }); }
+  else { var p=coprimePair(9,Math.random()<0.7), q=coprimePair(9,Math.random()<0.7); a=p[0]; b=p[1]; c=q[0]; d=q[1]; if(a*d===b*c) return G.compareFr("cross"); }
+  var s = a*d>b*c ? ">" : (a*d<b*c ? "<" : "=");
+  var why = kind==="like" ? "Same bottom, so the bigger top wins." :
+            kind==="num" ? "Same top, so the <b>smaller</b> bottom wins (a bigger slice)." :
+            "Cross-multiply: "+a+"&times;"+d+" = "+(a*d)+", "+b+"&times;"+c+" = "+(b*c)+".";
+  return SIGN("Compare: "+F(a,b)+" &nbsp;&#9744;&nbsp; "+F(c,d), s, why+" So "+F(a,b)+" "+(s===">"?"&gt;":s==="<"?"&lt;":"=")+" "+F(c,d)+".",
+    {m:{op:"cmpfr", f:[a,b,c,d], ans:s}, tag:"ch5"});
+};
+G.orderFr = function(){
+  var like=Math.random()<0.5, asc=Math.random()<0.5, fr=[];
+  if(like){ var d=ri(7,15), ns=shuffle(range(1,d+5)).slice(0,5); fr=ns.map(function(n){ return [n,d]; }); }
+  else { var n=ri(1,9), ds=shuffle(range(2,13)).slice(0,5); fr=ds.map(function(dd){ return [n,dd]; }); }
+  var sorted=fr.slice().sort(function(x,y){ var v=x[0]*y[1]-y[0]*x[1]; return asc?v:-v; });
+  return ORD("Arrange in <b>"+(asc?"ascending":"descending")+"</b> order ("+(asc?"smallest first":"biggest first")+").", sorted.map(function(f){ return F(f[0],f[1]); }),
+    like ? "Same bottom: order the tops." : "Same top: the smaller the bottom, the BIGGER the fraction.",
+    {m:{op:"orderfr", fr:fr, asc:asc}, tag:"ch5"});
+};
+function answerFrac(q, N, D, why, x){
+  var g=gcd(N,D), n=N/g, d=D/g;
+  x = x || {}; x.m = x.m || {}; x.m.val=[N,D];
+  if(d===1) return NUM(q+" <span class='pill'>simplest form</span>", n, why, x);
+  if(n<d){ return FRA(q+" <span class='pill'>simplest form</span>", n, d, why, x); }
+  return MIXB(q+" <span class='pill'>as a mixed fraction</span>", Math.floor(n/d), n%d, d, why, x);
+}
+G.addLike = function(three){
+  var d=ri(3,15), a=ri(1,d+3), b=ri(1,d+3), c=three?ri(1,d):0, N=a+b+c;
+  var q="Add: "+F(a,d)+" + "+F(b,d)+(three?" + "+F(c,d):"");
+  var g=gcd(N,d);
+  return answerFrac(q, N, d, "Add the tops, keep the bottom: "+F(N,d)+(g>1?" = "+fracHtml(N,d):"")+(N/g>d/g && d/g>1?" (mixed: "+fracHtml(N,d)+")":"")+".",
+    {m:{op:"addfr", N:N, D:d}, tag:"ch5"});
+};
+G.subLike = function(){
+  var d=ri(3,15), a=ri(3,d+6), b=ri(1,a-1), N=a-b;
+  return answerFrac("Subtract: "+F(a,d)+" &minus; "+F(b,d), N, d, "Subtract the tops, keep the bottom: "+F(N,d)+(gcd(N,d)>1?" = "+fracHtml(N,d):"")+".",
+    {m:{op:"subfr", N:N, D:d}, tag:"ch5"});
+};
+G.oneMinus = function(){
+  var d=ri(3,12), n=ri(1,d-1);
+  return answerFrac("Solve: 1 &minus; "+F(n,d), d-n, d, "Write 1 as "+F(d,d)+". Then "+F(d,d)+" &minus; "+F(n,d)+" = "+F(d-n,d)+".", {m:{op:"onem", n:n, d:d}, tag:"ch5"});
+};
+var OFU=[["an hour","minutes",60],["a day","hours",24],["a week","days",7],["a year","months",12],["a kg","grams",1000],["a dozen","",12],["a metre","cm",100]];
+G.fracOf = function(unit){
+  if(unit){
+    var u=pick(OFU), ds=range(2,12).filter(function(x){ return u[2]%x===0; }), d=pick(ds), n=ri(1,d-1);
+    while(gcd(n,d)!==1) n=ri(1,d-1);
+    return NUM("Find "+F(n,d)+" of <b>"+u[0]+"</b>"+(u[1]?" (in "+u[1]+")":"")+".", u[2]/d*n,
+      u[0]+" = "+u[2]+(u[1]?" "+u[1]:"")+". "+u[2]+" &divide; "+d+" = "+(u[2]/d)+", &times; "+n+" = <b>"+(u[2]/d*n)+"</b>.", {m:{op:"ofu", n:n, d:d, tot:u[2], ans:u[2]/d*n}, tag:"ch5"});
+  }
+  var d2=ri(2,9), n2=until(function(){ var x=ri(1,d2+2); return (x!==d2 && gcd(x,d2)===1) ? x : null; }), N=d2*ri(2,12);
+  return NUM("Find "+F(n2,d2)+" of <b>"+N+"</b>.", N/d2*n2, N+" &divide; "+d2+" = "+(N/d2)+", then &times; "+n2+" = <b>"+(N/d2*n2)+"</b>.", {m:{op:"of", n:n2, d:d2, N:N, ans:N/d2*n2}, tag:"ch5"});
+};
+G.fracStory = function(){
+  var kind=pick(["read","left","eat","who"]), nm=pick(NAMES), d, a, b;
+  if(kind==="read"){ d=ri(5,12); a=ri(1,d-2); b=ri(1,d-a-1);
+    return answerFrac(nm+" read "+F(a,d)+" of a book in the morning and "+F(b,d)+" in the evening. What fraction did "+he(nm)+" read in the day?", a+b, d,
+      "&#34;In the day&#34; means both together, so add.", {m:{op:"frs", N:a+b, D:d}, nb:true, tag:"ch5", work:F(a,d)+" + "+F(b,d)+" = "+F(a+b,d)+(gcd(a+b,d)>1?" = "+fracHtml(a+b,d):"")}); }
+  if(kind==="left"){ d=ri(5,12); a=ri(2,d-1); b=ri(1,a-1);
+    return answerFrac(nm+" had "+F(a,d)+" of a chocolate bar and gave "+F(b,d)+" to a friend. How much is left?", a-b, d,
+      "&#34;Left&#34; means subtract.", {m:{op:"frs", N:a-b, D:d}, nb:true, tag:"ch5", work:F(a,d)+" &minus; "+F(b,d)+" = "+F(a-b,d)+(gcd(a-b,d)>1?" = "+fracHtml(a-b,d):"")}); }
+  if(kind==="eat"){ d=pick([2,3,4,5,6]); a=ri(1,d-1); var tot=d*ri(3,8), ate=tot/d*a;
+    return BL(nm+" had <b>"+tot+"</b> cupcakes and ate "+F(a,d)+" of them. How many did "+he(nm)+" eat, and how many are left?", "Ate: [[0]] &nbsp; Left: [[1]]", [ate, tot-ate],
+      F(a,d)+" of "+tot+" = "+tot+" &divide; "+d+" &times; "+a+" = "+ate+". Left = "+tot+" &minus; "+ate+" = "+(tot-ate)+".",
+      {m:{op:"eat", tot:tot, n:a, d:d, ans:[ate,tot-ate]}, nb:true, tag:"ch5"}); }
+  var p=coprimePair(9,true), q=coprimePair(9,true); if(p[0]*q[1]===p[1]*q[0]) return G.fracStory();
+  var n1=pick(NAMES), n2=until(function(){ var x=pick(NAMES); return x!==n1?x:null; });
+  var first = p[0]*q[1]>p[1]*q[0];
+  return MK(n1+" reads "+F(p[0],p[1])+" of a story book in a day. "+n2+" reads "+F(q[0],q[1])+" of the same book in a day. Who reads more?", [n1,n2], first?0:1,
+    "Cross-multiply: "+p[0]+"&times;"+q[1]+" = "+(p[0]*q[1])+", "+p[1]+"&times;"+q[0]+" = "+(p[1]*q[0])+". So <b>"+(first?n1:n2)+"</b> reads more.",
+    {m:{op:"who", f:[p[0],p[1],q[0],q[1]], ans:first?0:1}, two:true, tag:"ch5"});
+};
+G.typeSort = function(){
+  var items=[];
+  for(var i=0;i<6;i++){
+    var k=i%3;
+    if(k===0){ var p=coprimePair(12,true); items.push([F(p[0],p[1]),0]); }
+    else if(k===1){ var d=ri(2,9), n=ri(d,d*2); items.push([F(n,d),1]); }
+    else { var d2=ri(3,9); items.push([MX(ri(1,5),ri(1,d2-1),d2),2]); }
+  }
+  return SO("Sort each fraction.", ["Proper","Improper","Mixed"], shuffle(items),
+    "Proper: top smaller. Improper: top bigger <b>or equal</b>. Mixed: a whole number with a proper fraction.", {tag:"ch5", m:{op:"tsort"}});
+};
+G.likeSort = function(){
+  var items=[];
+  for(var i=0;i<5;i++){
+    var like=Math.random()<0.5, d=ri(3,12), e=like?d:until(function(){ var x=ri(3,12); return x!==d?x:null; });
+    items.push([F(ri(1,d-1),d)+" , "+F(ri(1,e-1),e), like?0:1]);
+  }
+  return SO("Like or unlike?", ["Like","Unlike"], items, "Like fractions have the <b>same denominator</b> (bottom).", {tag:"ch5", m:{op:"lsort"}});
+};
+G.whichOp = function(){
+  var S=[
+    ["There are 45 rows with 36 chairs in each row. How many chairs in all?","&times;","Equal groups (rows of the same size): multiply."],
+    ["A shopkeeper had 9,450 pens and sold 3,875. How many are left?","&minus;","&#34;Left&#34; means subtract."],
+    ["4,560 sweets are shared equally among 24 children. How many does each child get?","&divide;","&#34;Shared equally&#34; means divide."],
+    ["A school has 2,345 girls and 2,568 boys. How many children in all?","+","Two different amounts put together: add."],
+    ["One box holds 144 crayons. How many crayons are in 25 such boxes?","&times;","Many boxes of the same size: multiply."],
+    ["A farmer packs 1,872 mangoes into boxes of 12. How many boxes does he need?","&divide;","Making equal groups: divide."],
+    ["Rohan saved &#8377;12,500. Meera saved &#8377;3,750 more than Rohan. How much did Meera save?","+","&#34;More than&#34; means add."],
+    ["A rope is 5,000 cm long. 1,275 cm is cut off. How long is the rope now?","&minus;","&#34;Cut off&#34; means take away."]
+  ];
+  var s=pick(S);
+  return MK("Which operation solves this?<br><i>"+s[0]+"</i>", ["+","&minus;","&times;","&divide;"], ["+","&minus;","&times;","&divide;"].indexOf(s[1]), s[2], {big:true, tag:"story", m:{op:"whichop"}});
+};
+/* fixed question banks (audited for the mid-term) */
+var BK = {}; /* each bank is a function so every build gets fresh objects */
+function L(id){ return {t:"learn", id:id}; }
+function take(arr, n){ return shuffle(arr.slice()).slice(0, n); }
+var SB = {src:"Booklet"}, SM = {src:"Model paper"}, ST = {src:"Textbook"}, SW = {src:"Weekly test"};
+function S_(base, more){ var o={}; var k; for(k in base) o[k]=base[k]; for(k in more) o[k]=more[k]; return o; }
+
+/* ---------- the slips (Day 1) ---------- */
+BK.slips = function(){ return [
+  NUM("The place value of <b>6</b> in <b>8,654,291</b> is ___.", 600000,
+    "6 has <b>5 digits</b> on its right (5, 4, 2, 9, 1), so write 6 and five zeros: <b>600,000</b> (6 lakh).",
+    S_(SB, {slip:"Your booklet had an extra zero here (6,000,000). Count the digits on the right first.", w:[8], tag:"ch1"})),
+  NUM("6 &times; 1,00,000 + 7 &times; 10,000 + 3 &times; 1,000 + 2 &times; 10 = ___", 673020,
+    "Put each digit in its room: L = 6, TTh = 7, Th = 3, <b>H = 0</b>, T = 2, <b>O = 0</b> &#8594; <b>6,73,020</b>.",
+    S_(SB, {slip:"The teacher corrected this one. Empty rooms need a 0.", w:[7], tag:"ch1"})),
+  NUM("The cost of 1 dozen bananas is &#8377;48. The cost of <b>8</b> bananas is ___.", 32,
+    "1 dozen = 12 bananas. 1 banana = 48 &divide; 12 = &#8377;4. <b>8 bananas = 4 &times; 8 = &#8377;32.</b>",
+    S_(SB, {slip:"Your booklet stopped at &#8377;4, the cost of ONE banana. Always finish step 2: find MANY.", pre:"&#8377; ", tag:"ch3"})),
+  MQ("Which is the correct prime factorisation of <b>45</b>?", "3 &times; 3 &times; 5", ["3 &times; 5 &times; 7","5 &times; 9","3 &times; 15"],
+    "Multiply back: 3 &times; 3 &times; 5 = 45 &#10004;. But 3 &times; 5 &times; 7 = 105 &#10008;. 9 and 15 are not prime.",
+    S_(SB, {slip:"Your booklet wrote 45 = 3 &times; 5 &times; 7 and it still got a tick! The HCF was right by luck.", tag:"ch4"})),
+  BUILD("Build the number name of <b>4,983,016</b> (International system).", ["four","million","nine hundred eighty three","thousand","sixteen"],
+    ["five","eighty","lakh","the"],
+    "4,983,016 &#8594; <b>four</b> million | <b>nine hundred eighty three</b> thousand | <b>sixteen</b>.",
+    S_(SM, {slip:"Your model paper said &#34;Five million nine hundred eighty the thousand sixteen&#34;.", tag:"ch1"})),
+  FRA("Change "+MX(2,4,13)+" into an improper fraction.", 30, 13,
+    "MAD: 2 &times; 13 = 26, 26 + 4 = 30, and the <b>denominator stays 13</b> &#8594; "+F(30,13)+".",
+    S_(ST, {slip:"Your textbook answer was "+F(30,41)+". The bottom number never changes.", v:{type:"eqval", N:30, D:13}, tag:"ch5"})),
+  PA("Tap <b>ALL</b> the factors of <b>35</b>.", [1,2,3,4,5,6,7,8,10,14,15,35], [1,5,7,35],
+    "Rainbow pairs: 1 &times; 35 and 5 &times; 7. Factors: <b>1, 5, 7, 35</b>.",
+    S_(ST, {slip:"Your book wrote 35, 5, 1 and missed <b>7</b>, so the common factors of 28 and 35 became just 1. They are 1 and 7.", tag:"ch4"})),
+  PA("Tap <b>ALL</b> the factors of <b>32</b>.", [1,2,3,4,6,8,12,16,24,32], [1,2,4,8,16,32],
+    "Rainbow pairs: 1&times;32, 2&times;16, 4&times;8. Factors: <b>1, 2, 4, 8, 16, 32</b>.",
+    S_(ST, {slip:"Your book missed <b>16</b> (the partner of 2).", tag:"ch4"})),
+  QR("<b>49287 &divide; 1000</b>", 49, 287, "Cover the last <b>3</b> digits (287). Quotient = <b>49</b>, remainder = <b>287</b>.",
+    S_(SM, {slip:"This was left blank on your model paper.", tag:"ch3"})),
+  NUM("71892 &divide; ___ = not possible", 0, "You can never divide by <b>0</b>. Sharing among 0 friends is impossible.",
+    S_(SM, {slip:"This was left blank on your model paper.", tag:"ch3"})),
+  MK("In <b>ascending</b> order, which sign goes between the fractions?<br>"+F(2,11)+" &#9744; "+F(4,11)+" &#9744; "+F(5,11)+" &#9744; "+F(13,11), ["&lt;","&gt;","="], 0,
+    "Ascending = small to big, so use <b>&lt;</b> (less than).",
+    S_(SM, {slip:"Your paper wrote "+F(2,11)+" &gt; "+F(4,11)+". The order was right, but the sign said the opposite.", big:true, tag:"ch5"})),
+  ROM("Solve and write the answer in Roman numerals: <b>XLV &divide; IX</b>", "V",
+    "Change to numbers first: XLV = 45, IX = 9. 45 &divide; 9 = 5 = <b>V</b>.",
+    S_(SM, {slip:"Your paper tried long division with Roman letters. Change to numbers first!", tag:"ch1"})),
+  MQ("Which is the correct way to write the prime factors of <b>18</b>?", "2 &times; 3 &times; 3", ["2 &times; 3 + 3","2 + 3 + 3","6 &times; 3"],
+    "Prime factors are always joined by <b>&times;</b>. Check: 2 &times; 3 &times; 3 = 18 &#10004;. But 2 &times; 3 + 3 = 9.",
+    S_(SM, {slip:"Your paper wrote 18 = 2 &times; 3 + 3 and 32 = 2&times;2+2&times;2&times;2.", tag:"ch4"}))
+]; };
+
+/* ---------- Chapter 1 ---------- */
+BK.ch1quick = function(){ return [
+  NUM("1 million = ___ thousands.", 1000, "1 million = 1,000,000 = 1000 &times; 1000.", S_(SB,{tag:"ch1"})),
+  NUM("The Hindu-Arabic number for <b>XLIX</b> is ___.", 49, "XL = 40 (50 &minus; 10) and IX = 9 (10 &minus; 1). 40 + 9 = <b>49</b>.", S_(SB,{tag:"ch1"})),
+  NUM("The greatest 6-digit number formed using the digits <b>7, 5, 2, 1, 9</b> is ___.", 997521, "5 digits for 6 places, so repeat the biggest (9): <b>9,97,521</b>.", S_(SB,{tag:"ch1", w:[7]})),
+  NUM("The predecessor of <b>148199</b> is ___.", 148198, "Predecessor = the one just before = &minus; 1.", S_(SB,{tag:"ch1"})),
+  MK("The successor of <b>7654909</b> is ___.", ["7654908","7654910","7654911","7654907"], 1, "Successor = + 1: 7654909 + 1 = 7654910.", S_(SB,{tag:"ch1"})),
+  MK("The Roman numeral for <b>96</b> is ___.", ["CXVI","XCVI","CVI","XCIV"], 1, "96 = 90 + 6 = XC + VI = <b>XCVI</b>. (XCIV is 94.)", S_(SB,{tag:"ch1"})),
+  MK("The sum of the place value and the face value of <b>4</b> in <b>89456</b> is ___.", ["4004","4000","400","404"], 3, "Place value 400 + face value 4 = <b>404</b>.", S_(SB,{tag:"ch1"})),
+  MK("The period of <b>3</b> in <b>23,156,489</b> is ___.", ["Thousand","Lakhs","Million","Ten Lakh"], 2, "International commas: 23 | 156 | 489. The first period from the left is <b>millions</b>.", S_(SB,{tag:"ch1"})),
+  MK("In Roman numerals, <b>86</b> can be written as ___.", ["LXXVI","XLVI","XCVI","LXXXVI"], 3, "86 = 50 + 30 + 6 = L + XXX + VI = <b>LXXXVI</b>.", S_(SM,{tag:"ch1"})),
+  MK("<b>1000 less</b> than <b>89468</b> is ___.", ["89368","79468","89460","88468"], 3, "1000 less: the thousands digit goes down by 1: 89468 &#8594; <b>88468</b>.", S_(SM,{tag:"ch1"})),
+  NUM("The place value of <b>7</b> in <b>874,163,290</b> is ___.", 70000000, "7 has <b>7</b> digits on its right, so write 7 and seven zeros: 70,000,000 (70 million).", S_(SM,{tag:"ch1", w:[9]}))
+]; };
+BK.ch1more = function(){ return [
+  NUM("Find the difference of the place values of the two <b>5</b>s in <b>50,25,308</b>.", 4995000, "First 5 = 50,00,000. Second 5 = 5,000. Difference = <b>49,95,000</b>.",
+    S_(SB,{tag:"ch1", nb:true, w:[8], work:colWork([5000000,5000],"&minus;",4995000)})),
+  ROM("Solve and write in Roman numerals: <b>XXX + XIV</b>", "XLIV", "30 + 14 = 44 = XL + IV = <b>XLIV</b>.", S_(SB,{tag:"ch1"})),
+  ROM("Solve and write in Roman numerals: <b>C &minus; XVIII</b>", "LXXXII", "100 &minus; 18 = 82 = L + XXX + II = <b>LXXXII</b>.", S_(SB,{tag:"ch1"})),
+  BUILD("Build the number name of <b>8,16,452</b> (Indian system).", ["eight","lakh","sixteen","thousand","four hundred fifty two"], ["million","and","sixty"],
+    "8,16,452 &#8594; <b>eight</b> lakh | <b>sixteen</b> thousand | <b>four hundred fifty two</b>.", S_(SB,{tag:"ch1"})),
+  BUILD("Build the number name of <b>5,970,631</b> (International system).", ["five","million","nine hundred seventy","thousand","six hundred thirty one"], ["lakh","and","ninety"],
+    "5,970,631 &#8594; <b>five</b> million | <b>nine hundred seventy</b> thousand | <b>six hundred thirty one</b>.", S_(SB,{tag:"ch1"})),
+  ORD("Arrange in <b>descending</b> order (biggest first).", ["49,234","48,715","47,174","42,728","41,756"], "All start with 4, so compare the next digit: 9 &gt; 8 &gt; 7 &gt; 2 &gt; 1.", S_(SB,{tag:"ch1"})),
+  MQ("Which is the expanded form of <b>90,494</b>?", "90,000 + 0 + 400 + 90 + 4", ["9,000 + 400 + 90 + 4","9 + 0 + 4 + 9 + 4","90,000 + 4,000 + 90 + 4"],
+    "9 ten-thousands, 0 thousands, 4 hundreds, 9 tens, 4 ones.", S_(SB,{tag:"ch1"})),
+  NUM("Write the short form: <b>3 &times; 1,00,000 + 6 &times; 1,000 + 7 &times; 10 + 7</b>", 306077, "L = 3, TTh = <b>0</b>, Th = 6, H = <b>0</b>, T = 7, O = 7 &#8594; <b>3,06,077</b>.", S_(SB,{tag:"ch1", w:[7]})),
+  BL("Form the <b>greatest</b> and <b>smallest 6-digit</b> numbers using <b>7, 0, 1, 6</b>.", "Greatest: [[0]]<br>Smallest: [[1]]", [777610, 100067],
+    "Greatest: repeat the 7 &#8594; <b>7,77,610</b>. Smallest: 1 first (not 0!), then the extra zeros &#8594; <b>1,00,067</b>.", S_(SB,{tag:"ch1", w:[7,7]})),
+  BUILD("Build the number name of <b>4983016</b> (International system).", ["four","million","nine hundred eighty three","thousand","sixteen"], ["five","eighty","lakh"],
+    "4,983,016 &#8594; four million nine hundred eighty three thousand sixteen.", S_(SM,{tag:"ch1"})),
+  NUM("Write in numerals: <b>Two million seven hundred one thousand forty two</b>", 2701042, "2 | 701 | 042 &#8594; <b>2,701,042</b>. The empty hundreds place in the last period gets a 0.", S_(SM,{tag:"ch1", w:[8]})),
+  NUM("Find the sum of the place values of <b>6</b> and <b>5</b> in <b>865432</b>.", 65000, "6 &#8594; 60,000 and 5 &#8594; 5,000. Sum = <b>65,000</b>.", S_(SM,{tag:"ch1"}))
+]; };
+
+/* ---------- Chapter 2 ---------- */
+BK.ch2quick = function(){ return [
+  NUM("5128714 &minus; ___ = 0", 5128714, "a &minus; a = 0. Take away the same number and nothing is left.", S_(SB,{tag:"ch2", w:[8]})),
+  NUM("278456 + ___ = 19007 + 278456", 19007, "Order does not matter when adding.", S_(SB,{tag:"ch2"})),
+  WB("The number which is subtracted from a bigger number is called the ___.", "subtrahend", ["minuend","difference","sum"], "Minuend &minus; <b>subtrahend</b> = difference.", S_(SB,{tag:"ch2"})),
+  NUM("9,92,900 + 1 = ___", 992901, "Just add 1 to the ones place.", S_(SB,{tag:"ch2"})),
+  NUM("The number 1000 less than <b>518905</b> is ___.", 517905, "The thousands digit goes down by 1: 518905 &#8594; 517905.", S_(SB,{tag:"ch2"})),
+  NUM("(412356 + ___) + 26891 = (81905 + 26891) + 412356", 81905, "Grouping does not matter when adding. The same three numbers are on both sides.", S_(SB,{tag:"ch2"})),
+  MK("8 thousands &minus; 8 hundreds = ___", ["7272","7200","8 tens","8008"], 1, "8000 &minus; 800 = <b>7200</b>.", S_(SB,{tag:"ch2"})),
+  MK("What is 5 hundreds plus 15 tens?", ["650","550","5150","6150"], 0, "500 + 150 = <b>650</b>.", S_(SB,{tag:"ch2"})),
+  SIGN("Put &lt;, &gt; or =<br><b>41980 + 8311 &nbsp;&#9744;&nbsp; 62932 &minus; 11415</b>", "<", "41980 + 8311 = 50291 and 62932 &minus; 11415 = 51517. 50291 &lt; 51517.", S_(SB,{tag:"ch2"})),
+  MK("756328 &minus; 40000 = ___", ["716328","71000","710000","726328"], 0, "Only the ten-thousands digit changes: 5 &minus; 4 = 1 &#8594; 716328.", S_(SB,{tag:"ch2"})),
+  MK("___ &minus; 30552 = 0", ["30552","30553","1","30052"], 0, "A number minus itself is 0.", S_(SB,{tag:"ch2"}))
+]; };
+BK.missing = function(){
+  var A=colPuzzle([36459,22604,13521,72584],"+",[1,0,3,2,4],[0,1,1,2,2]);
+  var B=colPuzzle([763145,421308,341837],"&minus;",[2,4,0,3,1,5],[0,0,1,1,2,2]);
+  var C=colPuzzle([30409,15843,14566],"&minus;",[1,3,0,4],[0,1,2,2]);
+  return [
+    BL("Fill in the missing digits.", A.tpl, A.ans, "Ones: 9 + 4 + ? ends in 4 &#8594; 1. Tens: 5 + ? + 2 + 1 ends in 8 &#8594; 0. Hundreds: 4 + 6 + ? ends in 5 &#8594; 5. Check: 36459 + 22604 + 13521 = 72584.", S_(SB,{tag:"ch2", m:{op:"madd"}, w:A.ans.map(function(){return 1;})})),
+    BL("Fill in the missing digits.", B.tpl, B.ans, "Work from the ones and borrow when needed. Check: 341837 + 421308 = 763145.", S_(SB,{tag:"ch2", m:{op:"msub"}, w:B.ans.map(function(){return 1;})})),
+    BL("Fill in the boxes.", C.tpl, C.ans, "Tens: 0 &minus; ? = 6 needs a borrow: 10 &minus; 4 = 6. Check: 14566 + 15843 = 30409.", S_(SM,{tag:"ch2", m:{op:"msub"}, w:C.ans.map(function(){return 1;})}))
+  ];
+};
+BK.ch2work = function(){ return [
+  NUM("Subtract <b>3,56,255</b> from <b>6,00,000</b>.", 243745, "&#34;Subtract A <b>from</b> B&#34; means B &minus; A. Borrow across the zeros.",
+    S_(SB,{tag:"ch2", nb:true, w:[7], work:colWork([600000,356255],"&minus;",243745)+"Check: 2,43,745 + 3,56,255 = 6,00,000 &#10004;"})),
+  NUM("What is <b>5989</b> more than <b>663685</b>?", 669674, "&#34;More than&#34; means add.", S_(SB,{tag:"ch2", nb:true, w:[7], work:colWork([663685,5989],"+",669674)})),
+  NUM("Solve: <b>48359 &minus; 34066 + 2008</b>", 16301, "Subtract first, then add. Check the subtraction by adding back.",
+    S_(SM,{tag:"ch2", nb:true, w:[6], slip:"Your working showed 19293 and 14213 before you got 14293. Add back to check: 14293 + 34066 = 48359.", work:"48359 &minus; 34066 = 14293<br>14293 + 2008 = <b>16301</b>"}))
+]; };
+BK.ch2story = function(){ return [
+  NUM("Amit is travelling to his hometown, which is <b>4,78,523 m</b> away. From there he travels to his friend&#39;s place, <b>84,924 m</b> from his hometown. How far is his friend&#39;s home from his starting point?", 563447,
+    "Both distances together: add.", S_(SB,{tag:"ch2", nb:true, w:[7], post:" m", slip:"In your booklet the first line said 4,18,523. Copy numbers carefully!", work:"4,78,523 + 84,924 = <b>5,63,447 m</b>"})),
+  NUM("A 65-inch television and a home theatre together cost <b>&#8377;5,72,850</b>. The home theatre costs <b>&#8377;3,65,168</b>. What is the cost of the television?", 207682,
+    "Together minus one part = the other part.", S_(SB,{tag:"ch2", nb:true, w:[7], pre:"&#8377; ", work:"5,72,850 &minus; 3,65,168 = <b>&#8377;2,07,682</b>"})),
+  NUM("Anuj has <b>5,60,324</b> beads. <b>2,78,452</b> are red and the rest are blue. Find the blue beads.", 281872,
+    "&#34;The rest&#34; means subtract.", S_(SB,{tag:"ch2", nb:true, w:[7], work:"5,60,324 &minus; 2,78,452 = <b>2,81,872</b>"})),
+  NUM("A charity event raised <b>&#8377;9,10,387</b> from an award function and <b>&#8377;2,16,872</b> through donations. Find the total money raised.", 1127259,
+    "&#34;Total&#34; means add.", S_(SB,{tag:"ch2", nb:true, w:[8], pre:"&#8377; ", work:"9,10,387 + 2,16,872 = <b>&#8377;11,27,259</b>"})),
+  NUM("A library had <b>14520</b> books. They bought <b>10895</b> new books but discarded <b>4398</b> torn books. How many books does the library have now?", 21017,
+    "Two steps: add the new books, then subtract the torn ones.", S_(SM,{tag:"ch2", nb:true, w:[6], work:"14520 + 10895 = 25415<br>25415 &minus; 4398 = <b>21017</b>"}))
+]; };
+
+/* ---------- Chapter 3 ---------- */
+BK.ch3zero = function(){ return [
+  NUM("524 &times; 1000 = ___", 524000, "&times; 1000 &#8594; stick 3 zeros on: 5,24,000.", S_(SB,{tag:"ch3"})),
+  NUM("8163 &times; ___ = 8163000", 1000, "Three zeros appeared, so we multiplied by <b>1000</b>.", S_(SB,{tag:"ch3"})),
+  QR("<b>4156 &divide; 1000</b>", 4, 156, "Cover the last 3 digits: quotient 4, remainder 156.", S_(SB,{tag:"ch3"})),
+  NUM("256000 &divide; ___ = 1000", 256, "256 &times; 1000 = 256000, so the answer is <b>256</b>.", S_(SM,{tag:"ch3"})),
+  NUM("<b>245 &times; 4000</b> = ?", 980000, "(245 &times; 4) &times; 1000 = 980 &times; 1000 = <b>9,80,000</b>.", S_(SB,{tag:"ch3", w:[7]})),
+  NUM("12 &times; 900 = ?", 10800, "12 &times; 9 = 108, then add the two zeros.", S_(SW,{tag:"ch3"}))
+]; };
+BK.ch3words = function(){ return [
+  WB("The number left after division is called the ___.", "remainder", ["quotient","divisor","dividend"], "The leftover is the <b>remainder</b>.", S_(SB,{tag:"ch3"})),
+  WB("The number by which we divide is called the ___.", "divisor", ["dividend","quotient","remainder"], "Dividend &divide; <b>divisor</b>.", S_(SB,{tag:"ch3"})),
+  WB("The number which is to be multiplied is called the ___.", "multiplicand", ["multiplier","product","dividend"], "<b>Multiplicand</b> &times; multiplier = product.", S_(SM,{tag:"ch3"})),
+  NUM("When the greatest 4-digit number is divided by 1, the quotient is ___.", 9999, "Dividing by 1 changes nothing: 9999 &divide; 1 = 9999.", S_(SB,{tag:"ch3"})),
+  NUM("___ &divide; 149 = 1", 149, "A number divided by itself is 1.", S_(SB,{tag:"ch3"})),
+  NUM("65 &times; 0 &times; 287 = ___", 0, "Anything &times; 0 = 0.", S_(SB,{tag:"ch3"})),
+  NUM("0 &divide; 3947 = ?", 0, "Zero shared among anyone is still zero.", S_(SW,{tag:"ch3"})),
+  WB("The unitary method is also called the method of ___.", "one", ["many","zero","tens"], "You always find the value of <b>one</b> first. (Your booklet wrote &#34;ones&#34;, which the teacher accepted.)", S_(SB,{tag:"ch3"})),
+  MK("How many times does 16 make 112?", ["12","10","128","7"], 3, "112 &divide; 16 = <b>7</b>. Check: 16 &times; 7 = 112.", S_(SB,{tag:"ch3"})),
+  MK("200 &divide; ___ = 4", ["50","10","8","20"], 0, "4 &times; 50 = 200.", S_(SB,{tag:"ch3"})),
+  MK("The remainder when 400 is divided by 9 is ___.", ["5","4","3","6"], 1, "9 &times; 44 = 396. 400 &minus; 396 = <b>4</b>.", S_(SW,{tag:"ch3"}))
+]; };
+BK.ch3props = function(){ return [
+  MK("If 125 &times; 126 &times; 127 = 2000250, then 127 &times; 126 &times; 125 = ___", ["2000250","200025","20025","200250"], 0, "The same numbers in a different order give the same product.", S_(SB,{tag:"ch3"})),
+  BL("729 &times; (11 + 4) = 729 &times; [[0]] + 729 &times; [[1]]", "729 &times; (11 + 4) = 729 &times; [[0]] + 729 &times; [[1]]", [11, 4], "Spread the 729 to each number inside the bracket.", S_(SB,{tag:"ch3"})),
+  BL("62 &times; (20 + 4) = 62 &times; [[0]] + [[1]] &times; 4", "62 &times; (20 + 4) = 62 &times; [[0]] + [[1]] &times; 4", [20, 62], "62 &times; 20 + 62 &times; 4.", S_(SM,{tag:"ch3"})),
+  MK("There are 148 packets with 50 cherries each. How many cherries are there in total?", ["148 + 50","148 &minus; 50","148 &times; 50","148 &divide; 50"], 2, "Equal groups: multiply.", S_(SB,{tag:"ch3"})),
+  MK("2 &times; 716 &times; 50 = ?", ["71600","7160","716000","716"], 0, "Smart order: 2 &times; 50 = 100, and 716 &times; 100 = 71600.", S_(SW,{tag:"ch3"})),
+  BL("Break the multiplicand: <b>458 &times; 5</b>", "(400 + 50 + 8) &times; 5<br>= [[0]] + [[1]] + [[2]]<br>= [[3]]", [2000, 250, 40, 2290], "400&times;5 = 2000, 50&times;5 = 250, 8&times;5 = 40. Total 2290.", S_(SB,{tag:"ch3"})),
+  BL("Break the multiplicand: <b>5160 &times; 3</b>", "(5000 + 100 + 60) &times; 3<br>= [[0]] + [[1]] + [[2]]<br>= [[3]]", [15000, 300, 180, 15480], "15000 + 300 + 180 = 15480.", S_(SB,{tag:"ch3"})),
+  BL("Multiply using expanded notation: <b>375 &times; 8</b>", "(300 + 70 + 5) &times; 8<br>= [[0]] + [[1]] + [[2]]<br>= [[3]]", [2400, 560, 40, 3000], "2400 + 560 + 40 = 3000.", S_(SM,{tag:"ch3"}))
+]; };
+BK.ch3div = function(){ return [
+  QR("Divide and check: <b>7116 &divide; 6</b>", 1186, 0, "Divide, Multiply, Subtract, Bring down.", S_(SB,{tag:"ch3", nb:true, work:"Check: 6 &times; 1186 + 0 = 7116 &#10004;"})),
+  QR("Divide and check: <b>88524 &divide; 26</b>", 3404, 20, "Watch for the 0 in the quotient: 26 does not go into 12, so write 0.", S_(SB,{tag:"ch3", nb:true, work:"Check: 26 &times; 3404 + 20 = 88504 + 20 = 88524 &#10004;"})),
+  QR("Divide and check: <b>897521 &divide; 9</b>", 99724, 5, "Divide, Multiply, Subtract, Bring down, six times.", S_(SM,{tag:"ch3", nb:true, work:"Check: 9 &times; 99724 + 5 = 897516 + 5 = 897521 &#10004;"}))
+]; };
+BK.ch3story = function(){ return [
+  NUM("A truck is carrying <b>83</b> steel pipes. Each pipe weighs <b>3452 g</b>. How much weight is the truck carrying?", 286516, "Many equal things: multiply.", S_(SB,{tag:"ch3", nb:true, post:" g", w:[7], work:"3452 &times; 3 = 10356<br>3452 &times; 80 = 276160<br>Total = <b>286516 g</b>"})),
+  NUM("A car takes a week to cover <b>3605 km</b>, the same distance each day. How far does it go in one day?", 515, "1 week = 7 days, so divide by 7.", S_(SB,{tag:"ch3", nb:true, post:" km", work:"3605 &divide; 7 = <b>515 km</b>"})),
+  BL("<b>9528</b> people visited a stadium. There are <b>42</b> seats in each row, filled from the first row. How many rows are filled completely? How many people sit in the last row?", "Rows filled completely: [[0]]<br>People in the last row: [[1]]", [226, 36],
+    "9528 &divide; 42 = 226 remainder 36.", S_(SB,{tag:"ch3", nb:true, work:"42 &times; 226 = 9492. 9528 &minus; 9492 = 36."})),
+  NUM("A box of mangoes weighs <b>8485 g</b>. What is the total weight of <b>45</b> such boxes?", 381825, "Multiply.", S_(SB,{tag:"ch3", nb:true, post:" g", w:[7], work:"8485 &times; 5 = 42425<br>8485 &times; 40 = 339400<br>Total = <b>381825 g</b>"})),
+  NUM("8 television sets cost <b>&#8377;68,000</b>. Find the cost of <b>18</b> such televisions.", 153000, "Unitary method: find one, then many.", S_(SB,{tag:"ch3", nb:true, pre:"&#8377; ", w:[7], work:"1 TV = 68000 &divide; 8 = &#8377;8500<br>18 TVs = 8500 &times; 18 = <b>&#8377;1,53,000</b>"})),
+  MK("The cost of 10 books is &#8377;900. The cost of 18 such books will be ___.", ["&#8377;16200","&#8377;1620","&#8377;1622","&#8377;16202"], 1, "1 book = 900 &divide; 10 = &#8377;90. 18 books = 90 &times; 18 = &#8377;1620.", S_(SB,{tag:"ch3"})),
+  NUM("The product of two numbers is <b>576</b>. If one of them is <b>12</b>, find the other.", 48, "Product &divide; one number = the other.", S_(SM,{tag:"ch3", nb:true, slip:"On your paper, 576 was copied as 516. Copy slowly!", work:"576 &divide; 12 = <b>48</b>"})),
+  NUM("There are <b>226</b> pencils in a packet. How many pencils are in <b>108</b> such packets?", 24408, "Multiply.", S_(SM,{tag:"ch3", nb:true, w:[6], work:"226 &times; 8 = 1808<br>226 &times; 100 = 22600<br>Total = <b>24408</b>"}))
+]; };
+
+/* ---------- Chapter 4 ---------- */
+BK.ch4fm = function(){ return [
+  WB("Every number is a multiple of ___.", "itself", ["zero","two","ten"], "n &times; 1 = n, so every number is its own first multiple.", S_(SB,{tag:"ch4"})),
+  MK("A factor of a number is always ___ the number.", ["less than or equal to","greater than","greater than or equal to","double"], 0, "The biggest factor is the number itself.", S_(SB,{tag:"ch4"})),
+  WB("Multiples of a number are ___.", "infinite", ["finite","only ten","prime"], "The times table never ends.", S_(SB,{tag:"ch4"})),
+  MK("The 8th multiple of 16 is ___.", ["8","16","2","128"], 3, "16 &times; 8 = 128.", S_(SB,{tag:"ch4"})),
+  MK("The highest factor of 20 is ___.", ["1","2","20","100"], 2, "The highest factor is the number itself.", S_(SB,{tag:"ch4"})),
+  MK("The smallest factor of 20 is ___.", ["20","10","5","1"], 3, "1 is the smallest factor of every number.", S_(SM,{tag:"ch4"})),
+  MK("7 is a factor of ___.", ["62","61","63","80"], 2, "63 &divide; 7 = 9 exactly.", S_(SM,{tag:"ch4"})),
+  MK("The 8th multiple of 5 plus the 4th multiple of 8 is ___.", ["64","92","72","82"], 2, "40 + 32 = 72.", S_(SW,{tag:"ch4"}))
+]; };
+BK.ch4prime = function(){ return [
+  NUM("The smallest prime number is ___.", 2, "1 is not prime, so the smallest prime is 2.", S_(SB,{tag:"ch4"})),
+  NUM("___ is the only prime number between 90 and 100.", 97, "91 = 7&times;13, 93 = 3&times;31, 95, 99 are not prime. Only <b>97</b>.", S_(SB,{tag:"ch4"})),
+  WB("All even numbers except 2 are ___.", "composite", ["prime","odd","co-prime"], "Every even number greater than 2 has 2 as an extra factor.", S_(SB,{tag:"ch4"})),
+  NUM("The smallest composite number is ___.", 4, "4 has factors 1, 2 and 4.", S_(SB,{tag:"ch4"})),
+  NUM("The greatest 2-digit prime number is ___.", 97, "98 and 99 are composite.", S_(SB,{tag:"ch4"})),
+  MK("1 is a ___ number.", ["even","prime","composite","unique"], 3, "1 has only one factor, so it is neither prime nor composite. Your book calls it <b>unique</b>.", S_(SB,{tag:"ch4"})),
+  MK("Prime numbers with a difference of 2 between them are called ___.", ["odd","composite","co-prime","twin primes"], 3, "(3, 5), (11, 13), (17, 19) are twin primes.", S_(SB,{tag:"ch4"})),
+  MK("The smallest odd composite number is ___.", ["5","9","12","4"], 1, "3, 5 and 7 are prime. 9 = 3 &times; 3 is the first odd composite.", S_(SM,{tag:"ch4"})),
+  NUM("The HCF of two co-prime numbers is always ___.", 1, "Co-prime means the only common factor is 1.", S_(SW,{tag:"ch4"})),
+  NUM("There are ___ prime numbers from 1 to 20.", 8, "2, 3, 5, 7, 11, 13, 17, 19.", S_(SW,{tag:"ch4"})),
+  MK("Which pair is NOT a twin prime?", ["3 and 5","11 and 13","7 and 9","17 and 19"], 2, "9 = 3 &times; 3 is not prime.", S_(SW,{tag:"ch4"})),
+  WB("The LCM of two co-prime numbers is their ___.", "product", ["sum","difference","HCF"], "Co-primes share nothing, so LCM = one &times; the other.", S_(SM,{tag:"ch4"}))
+]; };
+BK.ch4pf = function(){ return [
+  MQ("Find the prime factors of <b>128</b>.", "2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2", ["2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2","2 &times; 64","2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2 &times; 2"],
+    "128 &#8594; 64 &#8594; 32 &#8594; 16 &#8594; 8 &#8594; 4 &#8594; 2 &#8594; 1. That is <b>seven</b> 2s.", S_(SB,{tag:"ch4"})),
+  BL("Complete the factor tree.", '<div class="tree"><div class="lv"><span class="nd">126</span></div><div class="lv"><span class="nd">2</span><span class="ar">&times;</span><span class="nd">[[0]]</span></div>'+
+    '<div class="lv" style="padding-left:70px"><span class="nd">7</span><span class="ar">&times;</span><span class="nd">[[1]]</span></div><div class="lv" style="padding-left:140px"><span class="nd">3</span><span class="ar">&times;</span><span class="nd">[[2]]</span></div></div>',
+    [63, 9, 3], "126 = 2 &times; 63, 63 = 7 &times; 9, 9 = 3 &times; 3. So 126 = 2 &times; 3 &times; 3 &times; 7.", S_(SM,{tag:"ch4"}))
+]; };
+BK.ch4hl = function(){ return [
+  NUM("Find the HCF of <b>20, 35 and 45</b>.", 5, "Only 5 is shared.", S_(SB,{tag:"ch4", nb:true, slip:"Your booklet wrote 45 = 3 &times; 5 &times; 7. It is 3 &times; 3 &times; 5.", work:"20 = 2 &times; 2 &times; 5<br>35 = 5 &times; 7<br>45 = 3 &times; 3 &times; 5<br>HCF = <b>5</b>"})),
+  NUM("Find the HCF of <b>18 and 32</b>.", 2, "Only one 2 is shared.", S_(SM,{tag:"ch4", nb:true, slip:"Your paper wrote 18 = 2 &times; 3 + 3. Use &times; between prime factors.", work:"18 = 2 &times; 3 &times; 3<br>32 = 2 &times; 2 &times; 2 &times; 2 &times; 2<br>HCF = <b>2</b>"})),
+  NUM("Find the LCM of <b>18, 24 and 30</b>.", 360, "Division ladder.", S_(SB,{tag:"ch4", nb:true, work:'<span style="font-family:monospace">2 | 18, 24, 30<br>2 | 9, 12, 15<br>2 | 9, 6, 15<br>3 | 9, 3, 15<br>3 | 3, 1, 5<br>5 | 1, 1, 5<br>&nbsp;&nbsp;&nbsp;1, 1, 1</span><br>LCM = 2&times;2&times;2&times;3&times;3&times;5 = <b>360</b>'})),
+  NUM("Find the LCM of <b>21 and 63</b>.", 63, "63 is already a multiple of 21, so the LCM is 63.", S_(SM,{tag:"ch4", nb:true, work:"3 | 21, 63<br>3 | 7, 21<br>7 | 7, 7<br>&nbsp;&nbsp;&nbsp;1, 1<br>LCM = 3 &times; 3 &times; 7 = <b>63</b>"})),
+  NUM("Find the HCF of <b>25, 45 and 50</b>.", 5, "25 = 5&times;5, 45 = 3&times;3&times;5, 50 = 2&times;5&times;5. Only 5 is common.", S_(SW,{tag:"ch4", nb:true})),
+  NUM("Find the LCM of <b>6 and 7</b>.", 42, "Co-primes: LCM = 6 &times; 7 = 42.", S_(SW,{tag:"ch4"}))
+]; };
+BK.ch4div = function(){ return [
+  YN("Is <b>69114</b> divisible by <b>3</b>?", true, "6 + 9 + 1 + 1 + 4 = 21, and 21 is divisible by 3. <b>Yes</b>.", S_(SB,{tag:"ch4"})),
+  YN("Is <b>10725</b> divisible by <b>10</b>?", false, "The ones digit is 5, not 0. <b>No</b>.", S_(SB,{tag:"ch4"})),
+  YN("Is <b>374298</b> divisible by <b>9</b>?", false, "3+7+4+2+9+8 = 33, and 33 is not divisible by 9. <b>No</b>.", S_(SM,{tag:"ch4"})),
+  MK("Which of these is divisible by 2 as well as by 3?", ["28","294","116","105"], 1, "294 is even, and 2+9+4 = 15 is divisible by 3.", S_(SB,{tag:"ch4"})),
+  YN("Is <b>1336</b> divisible by <b>3</b>?", false, "1+3+3+6 = 13. 13 is not divisible by 3.", S_(SW,{tag:"ch4"}))
+]; };
+
+/* ---------- Chapter 5 ---------- */
+BK.ch5basic = function(){ return [
+  WB("When the numerator is greater than the denominator, the fraction is called ___.", "improper", ["proper","mixed","unit"], "Top bigger than bottom = improper.", S_(SB,{tag:"ch5"})),
+  NUM("One-fourth of a day = ___ hours.", 6, "1 day = 24 hours. 24 &divide; 4 = 6.", S_(SB,{tag:"ch5"})),
+  WB(F(5,12)+" and "+F(7,12)+" are ___ fractions.", "like", ["unlike","unit","mixed"], "Same denominator = like fractions.", S_(SB,{tag:"ch5"})),
+  NUM("___ one-fourths make a whole.", 4, F(1,4)+" + "+F(1,4)+" + "+F(1,4)+" + "+F(1,4)+" = "+F(4,4)+" = 1.", S_(SB,{tag:"ch5"})),
+  MK("___ fractions have numerator as 1.", ["Like","Unlike","Unit","Whole"], 2, F(1,2)+", "+F(1,7)+", "+F(1,9)+" are unit fractions.", S_(SB,{tag:"ch5"})),
+  MK("The mixed fraction for "+F(14,9)+" is ___.", [MX(1,3,4), MX(1,5,9), MX(9,1,5), MX(5,1,9)], 1, "14 &divide; 9 = 1 remainder 5 &#8594; "+MX(1,5,9)+".", S_(SB,{tag:"ch5"})),
+  NUM("___ one-thirds make a whole.", 3, "3 thirds = 1 whole.", S_(SW,{tag:"ch5"}))
+]; };
+BK.ch5sort = function(){ return [
+  SO("Sort: proper or improper? (Colour proper yellow, improper pink.)", ["Proper","Improper"],
+    [[F(7,6),1],[F(2,3),0],[F(4,9),0],[F(5,2),1],[F(3,3),1],[F(3,7),0],[F(8,3),1],[F(8,8),1]],
+    F(3,3)+" and "+F(8,8)+" are <b>improper</b> too, because the top is equal to the bottom.", S_(ST,{tag:"ch5"})),
+  SO("Square = mixed, circle = improper, triangle = proper. Sort them!", ["Proper","Improper","Mixed"],
+    [[F(4,3),1],[MX(2,1,3),2],[F(7,2),1],[F(2,5),0],[F(6,7),0],[F(10,9),1],[MX(1,2,7),2],[F(3,4),0]],
+    "Proper: top smaller. Improper: top bigger or equal. Mixed: a whole number with a fraction.", S_(ST,{tag:"ch5"}))
+]; };
+BK.ch5conv = function(){ return [
+  MIXB("Convert "+F(29,7)+" into a mixed fraction.", 4, 1, 7, "29 &divide; 7 = 4 remainder 1.", S_(SB,{tag:"ch5"})),
+  MIXB("Convert "+F(42,5)+" into a mixed fraction.", 8, 2, 5, "42 &divide; 5 = 8 remainder 2.", S_(SB,{tag:"ch5"})),
+  FRA("The improper fraction for "+MX(4,2,8)+" is ___.", 34, 8, "MAD: 4 &times; 8 = 32, + 2 = 34, the bottom stays 8 &#8594; "+F(34,8)+".", S_(SB,{tag:"ch5", v:{type:"eqval", N:34, D:8}})),
+  MK("Convert "+MX(8,3,4)+" into an improper fraction.", [F(35,4), F(56,4), F(11,4), F(24,4)], 0, "8 &times; 4 + 3 = 32 + 3 = 35 &#8594; "+F(35,4)+". The book&#39;s &#34;learn from mistakes&#34; box shows the wrong way: 8 &times; 7 = 56.", S_(ST,{tag:"ch5"})),
+  MIXB("Convert "+F(35,8)+" into a mixed fraction.", 4, 3, 8, "35 &divide; 8 = 4 remainder 3.", S_(ST,{tag:"ch5"})),
+  FRA("Convert "+MX(11,2,3)+" into an improper fraction.", 35, 3, "11 &times; 3 + 2 = 35.", S_(ST,{tag:"ch5", v:{type:"eqval", N:35, D:3}})),
+  FRA("Convert "+MX(10,2,5)+" into an improper fraction.", 52, 5, "10 &times; 5 + 2 = 52.", S_(ST,{tag:"ch5", v:{type:"eqval", N:52, D:5}}))
+]; };
+BK.ch5equiv = function(){ return [
+  BL(F(9,12)+" = "+F("?",48)+". Find the missing number.", F(9,12)+" = "+F("[[0]]",48), [36], "12 &times; 4 = 48, so 9 &times; 4 = <b>36</b>.", S_(SB,{tag:"ch5"})),
+  MK("The fraction equivalent to "+F(9,18)+" is ___.", [F(3,7),F(3,8),F(6,3),F(1,2)], 3, "Divide top and bottom by 9: "+F(1,2)+".", S_(SB,{tag:"ch5"})),
+  YN("Are "+F(6,7)+" and "+F(15,27)+" equivalent fractions?", false, "6 &times; 27 = 162, 7 &times; 15 = 105. Not equal, so <b>no</b>.", S_(SB,{tag:"ch5"})),
+  BL("Find the first three equivalent fractions of "+F(2,7)+".", F("[[0]]","[[1]]")+" , "+F("[[2]]","[[3]]")+" , "+F("[[4]]","[[5]]"), [4,14,6,21,8,28],
+    "&times;2, &times;3, &times;4: "+F(4,14)+", "+F(6,21)+", "+F(8,28)+".", S_(SB,{tag:"ch5", v:{type:"equiv", n:2, d:7}, w:[3,3,3,3,3,3]})),
+  BL("Convert "+F(24,36)+" into an equivalent fraction with numerator 6.", F(24,36)+" = "+F(6,"[[0]]"), [9], "24 &divide; 4 = 6, so 36 &divide; 4 = <b>9</b>.", S_(ST,{tag:"ch5"})),
+  BL("Convert "+F(5,7)+" into an equivalent fraction with denominator 28.", F(5,7)+" = "+F("[[0]]",28), [20], "7 &times; 4 = 28, so 5 &times; 4 = <b>20</b>.", S_(ST,{tag:"ch5"})),
+  BL("Find the missing number.", F(7,"[[0]]")+" = "+F(91,26), [2], "91 &divide; 13 = 7, so 26 &divide; 13 = <b>2</b>.", S_(ST,{tag:"ch5"})),
+  BL("Find the missing number.", F("[[0]]",63)+" = "+F(6,9), [42], "9 &times; 7 = 63, so 6 &times; 7 = <b>42</b>.", S_(ST,{tag:"ch5"})),
+  YN("Are "+F(12,18)+" and "+F(6,9)+" equivalent?", true, "12 &times; 9 = 108 and 18 &times; 6 = 108. Equal, so <b>yes</b>.", S_(ST,{tag:"ch5"}))
+]; };
+BK.ch5simp = function(){ return [
+  MK("The simplest form of "+F(28,35)+" is ___.", [F(4,5),F(5,4),F(2,5),F(5,2)], 0, "HCF 7: 28 &divide; 7 = 4, 35 &divide; 7 = 5.", S_(SB,{tag:"ch5"})),
+  FRA("Express "+F(54,21)+" in its simplest form.", 18, 7, "HCF 3 &#8594; "+F(18,7)+" (= "+MX(2,4,7)+").", S_(SB,{tag:"ch5"})),
+  NUM("Express "+F(60,15)+" in its simplest form.", 4, "HCF 15 &#8594; "+F(4,1)+" = 4.", S_(SB,{tag:"ch5"})),
+  FRA("Reduce "+F(18,32)+" to its lowest terms.", 9, 16, "HCF 2 &#8594; "+F(9,16)+".", S_(ST,{tag:"ch5"})),
+  FRA("Reduce "+F(64,56)+" to its lowest terms.", 8, 7, "HCF 8 &#8594; "+F(8,7)+".", S_(ST,{tag:"ch5"})),
+  FRA("Reduce "+F(39,42)+" to its lowest terms.", 13, 14, "HCF 3 &#8594; "+F(13,14)+".", S_(ST,{tag:"ch5"})),
+  FRA("The simplest form of "+F(18,36)+" is ___.", 1, 2, "HCF 18 &#8594; "+F(1,2)+".", S_(SW,{tag:"ch5"}))
+]; };
+BK.ch5cmp = function(){ return [
+  SIGN(F(9,5)+" &nbsp;&#9744;&nbsp; "+F(9,2), "<", "Same top, so the smaller bottom wins: "+F(9,2)+" is bigger. So "+F(9,5)+" &lt; "+F(9,2)+".", S_(SB,{tag:"ch5"})),
+  ORD("Arrange in <b>descending</b> order: "+F(7,4)+", "+F(7,2)+", "+F(7,5)+", "+F(7,9), [F(7,2),F(7,4),F(7,5),F(7,9)], "Same top: the smallest bottom is the biggest.", S_(SB,{tag:"ch5"})),
+  ORD("Arrange in <b>descending</b> order: "+F(2,8)+", "+F(4,8)+", "+F(7,8)+", "+F(5,8), [F(7,8),F(5,8),F(4,8),F(2,8)], "Same bottom: order the tops.", S_(SB,{tag:"ch5"})),
+  ORD("Arrange in <b>ascending</b> order: "+F(4,11)+", "+F(5,11)+", "+F(13,11)+", "+F(16,11)+", "+F(2,11), [F(2,11),F(4,11),F(5,11),F(13,11),F(16,11)], "Same bottom: smallest top first.", S_(SM,{tag:"ch5"})),
+  SIGN(F(2,3)+" &nbsp;&#9744;&nbsp; "+F(4,7), ">", "2 &times; 7 = 14, 3 &times; 4 = 12. 14 &gt; 12.", S_(ST,{tag:"ch5"})),
+  SIGN(F(3,5)+" &nbsp;&#9744;&nbsp; "+F(5,7), "<", "3 &times; 7 = 21, 5 &times; 5 = 25. 21 &lt; 25.", S_(ST,{tag:"ch5"})),
+  SIGN(F(99,87)+" &nbsp;&#9744;&nbsp; "+F(1001,101), "<", "Both are improper, so the &#34;bigger than 1&#34; trick cannot decide! 99/87 is just over 1, while 1001/101 is almost 10.", S_(ST,{tag:"ch5"})),
+  MK("Ronnie reads "+F(2,3)+" of a story book in a day. Ishaan reads "+F(3,4)+" of the same book. Who reads more?", ["Ronnie","Ishaan"], 1, "2 &times; 4 = 8, 3 &times; 3 = 9. "+F(3,4)+" is bigger.", S_(ST,{tag:"ch5", two:true})),
+  MK("Sarthak completes "+F(3,7)+" of a painting in an hour. Mohit completes "+F(5,8)+" of it. Who paints more?", ["Sarthak","Mohit"], 1, "3 &times; 8 = 24, 7 &times; 5 = 35. Mohit.", S_(ST,{tag:"ch5", two:true})),
+  MQ("Worker A finished a piece of work in "+F(7,8)+" days. Worker B finished the same work in "+F(5,8)+" days. Who was faster, and by how much?",
+    "Worker B, by "+F(1,4)+" day", ["Worker A, by "+F(1,4)+" day","Worker B, by "+F(12,8)+" days","Worker A, by "+F(2,16)+" day"],
+    "Less time = faster, so B. "+F(7,8)+" &minus; "+F(5,8)+" = "+F(2,8)+" = "+F(1,4)+".", S_(SB,{tag:"ch5"})),
+  MQ("Odd one out (hint: two are like fractions): "+F(2,3)+", "+F(4,11)+", "+F(7,11), F(2,3), [F(4,11),F(7,11)], F(4,11)+" and "+F(7,11)+" share the bottom 11. "+F(2,3)+" does not.", S_(ST,{tag:"ch5"}))
+]; };
+BK.ch5add = function(){ return [
+  MIXB("Solve: "+F(7,8)+" + "+F(15,8)+" <span class='pill'>as a mixed fraction</span>", 2, 3, 4, "22/8 = 11/4 = "+MX(2,3,4)+".", S_(SB,{tag:"ch5"})),
+  FRA("Subtract "+F(4,9)+" from "+F(7,9)+". <span class='pill'>simplest form</span>", 1, 3, F(7,9)+" &minus; "+F(4,9)+" = "+F(3,9)+" = "+F(1,3)+".", S_(SB,{tag:"ch5"})),
+  FRA(F(7,13)+" + "+F(4,13)+" &minus; "+F(3,13)+" = ___", 8, 13, "7 + 4 &minus; 3 = 8, so "+F(8,13)+".", S_(SM,{tag:"ch5"})),
+  NUM("Solve: "+F(4,7)+" + "+F(5,7)+" &minus; "+F(2,7), 1, "4 + 5 &minus; 2 = 7, so "+F(7,7)+" = <b>1</b>.", S_(SM,{tag:"ch5"})),
+  MIXB("Solve: "+F(11,15)+" + "+F(13,15)+" <span class='pill'>as a mixed fraction</span>", 1, 3, 5, F(24,15)+" = "+F(8,5)+" = "+MX(1,3,5)+".", S_(SM,{tag:"ch5"})),
+  FRA("1 &minus; "+F(3,8)+" = ___", 5, 8, "1 = "+F(8,8)+". "+F(8,8)+" &minus; "+F(3,8)+" = "+F(5,8)+".", S_(ST,{tag:"ch5"})),
+  NUM("Arjun drinks "+F(27,4)+" glasses of water in a day and Amrita drinks "+F(13,4)+". How many glasses do they drink together?", 10, F(27,4)+" + "+F(13,4)+" = "+F(40,4)+" = <b>10</b>.", S_(ST,{tag:"ch5"}))
+]; };
+BK.ch5of = function(){ return [
+  NUM("Find "+F(2,5)+" of 35.", 14, "35 &divide; 5 = 7, &times; 2 = 14.", S_(ST,{tag:"ch5"})),
+  NUM("Find "+F(2,3)+" of an hour (in minutes).", 40, "60 &divide; 3 = 20, &times; 2 = 40.", S_(ST,{tag:"ch5"})),
+  NUM("Find "+F(3,7)+" of a week (in days).", 3, "7 &divide; 7 = 1, &times; 3 = 3.", S_(ST,{tag:"ch5"})),
+  NUM("Find "+F(3,8)+" of a day (in hours).", 9, "24 &divide; 8 = 3, &times; 3 = 9.", S_(ST,{tag:"ch5"})),
+  NUM("Find "+F(2,5)+" of a kg (in grams).", 400, "1000 &divide; 5 = 200, &times; 2 = 400.", S_(ST,{tag:"ch5"})),
+  NUM("Find "+F(7,4)+" of 92.", 161, "92 &divide; 4 = 23, &times; 7 = 161.", S_(ST,{tag:"ch5"})),
+  NUM("Find "+F(2,5)+" of 30.", 12, "30 &divide; 5 = 6, &times; 2 = <b>12</b> (not 300!).", S_(ST,{tag:"ch5"}))
+]; };
+BK.ch5story = function(){ return [
+  BL("Zeba had <b>20</b> cupcakes. She ate "+F(3,4)+" of them. How many did she eat and how many are left?", "Ate: [[0]] &nbsp; Left: [[1]]", [15, 5], F(3,4)+" of 20 = 20 &divide; 4 &times; 3 = 15. Left = 20 &minus; 15 = 5.", S_(SB,{tag:"ch5", nb:true})),
+  FRA("Saarth finished his maths homework in "+F(2,7)+" hour and the rest in "+F(4,7)+" hour. How much time did he take in all?", 6, 7, F(2,7)+" + "+F(4,7)+" = "+F(6,7)+" hour.", S_(SB,{tag:"ch5", nb:true})),
+  FRA("Pankaj read "+F(3,7)+" of a book in the morning and "+F(2,7)+" in the evening. What fraction did he read in the day?", 5, 7, F(3,7)+" + "+F(2,7)+" = "+F(5,7)+".", S_(SM,{tag:"ch5", nb:true})),
+  FRA("Sara had "+F(6,10)+" of a chocolate bar. She gave "+F(4,10)+" to her friend. How much is left? <span class='pill'>simplest form</span>", 1, 5, F(6,10)+" &minus; "+F(4,10)+" = "+F(2,10)+" = "+F(1,5)+".", S_(SM,{tag:"ch5", nb:true})),
+  FRA("Meera gave away "+F(3,7)+" of her toffees. What fraction is she left with?", 4, 7, "1 &minus; "+F(3,7)+" = "+F(7,7)+" &minus; "+F(3,7)+" = "+F(4,7)+".", S_(ST,{tag:"ch5", nb:true})),
+  BL("Shikha has "+F(22,3)+" m of ribbon and Priya has "+F(7,3)+" m. Who has more, and by how many metres?", "Shikha has more by [[0]] m", [5], F(22,3)+" &minus; "+F(7,3)+" = "+F(15,3)+" = 5 m.", S_(ST,{tag:"ch5", nb:true})),
+  MK("<b>Spot the silly question!</b> &#34;Roshni eats "+F(4,5)+" of the pasta and Mohit eats "+F(3,5)+" of the same pasta.&#34; What is wrong?",
+    ["Nothing is wrong","Together they ate "+F(7,5)+", which is MORE than the whole pasta","They should have eaten "+F(1,5),"Unlike fractions cannot be added"], 1,
+    F(4,5)+" + "+F(3,5)+" = "+F(7,5)+" = "+MX(1,2,5)+". That is more than one whole pasta, so the story is impossible. If it comes in the exam, write "+F(7,5)+" = "+MX(1,2,5)+".", S_(ST,{tag:"ch5"}))
+]; };
+/* ---------------- HUD + confetti ---------------- */
+function paintHud(){
+  var L = levelInfo();
+  document.getElementById("mascot").innerHTML = L.em;
+  document.getElementById("lvlName").textContent = "Level "+(L.i+1)+" · "+L.name.replace(/&amp;/g,"&");
+  document.getElementById("xpTxt").textContent = S.xp+" XP";
+  document.getElementById("xpFill").style.width = L.pct+"%";
+  document.getElementById("streak").innerHTML = "&#128293; "+S.streak;
+}
+var cvs=document.getElementById("confetti"), ctx=cvs.getContext?cvs.getContext("2d"):null, parts=[], raf=null;
+function sizeCanvas(){ cvs.width=innerWidth; cvs.height=innerHeight; }
+sizeCanvas(); addEventListener("resize", sizeCanvas);
+function confetti(n){
+  if(!ctx) return;
+  var cols=["#ff7eb6","#ffd166","#4de0b5","#b18cff","#5ec8ff"];
+  for(var i=0;i<(n||70);i++) parts.push({x:Math.random()*cvs.width, y:-20-Math.random()*cvs.height*0.4, vx:(Math.random()-0.5)*3, vy:2+Math.random()*4, s:5+Math.random()*7, c:cols[(Math.random()*cols.length)|0], r:Math.random()*6, vr:(Math.random()-0.5)*0.3});
+  if(!raf && typeof requestAnimationFrame!=="undefined") raf=requestAnimationFrame(tick);
+}
+function tick(){
+  if(!ctx){ parts=[]; raf=null; return; }
+  ctx.clearRect(0,0,cvs.width,cvs.height);
+  for(var i=parts.length-1;i>=0;i--){ var p=parts[i]; p.x+=p.vx; p.y+=p.vy; p.vy+=0.06; p.r+=p.vr;
+    ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6); ctx.restore();
+    if(p.y>cvs.height+30) parts.splice(i,1); }
+  if(parts.length) raf=requestAnimationFrame(tick); else { raf=null; ctx.clearRect(0,0,cvs.width,cvs.height); }
+}
+/* ---------------- session runner (shared) ---------------- */
+var R=null, timerId=null;
+function clearTimer(){ if(timerId){ clearInterval(timerId); timerId=null; } }
+function fmtT(t){ if(t<0)t=0; var m=Math.floor(t/60), s=t%60; return m+":"+(s<10?"0":"")+s; }
+function runItems(s, list){
+  R = {s:s, items:list, i:0, score:0, max:0, results:[], left:s.timed||0, el:0, ended:false, lock:false};
+  clearTimer();
+  if(s.timed || s.up){
+    timerId=setInterval(function(){
+      if(s.timed){ R.left--; if(R.left<=0){ clearTimer(); finish(true); return; } }
+      else R.el++;
+      var el=document.getElementById("timer"); if(el) el.textContent = s.timed ? fmtT(R.left) : fmtT(R.el);
+    },1000);
+  }
+  renderQ();
+}
+function qHeader(){
+  var dots = R.items.map(function(it,k){
+    var c = k<R.i ? (R.results[k]==="L" ? "lrn" : (R.results[k] ? "ok":"no")) : (k===R.i ? "cur":"");
+    return '<span class="dt '+c+'"></span>';
+  }).join("");
+  var tm = R.s.timed ? '<div class="timer" id="timer">'+fmtT(R.left)+'</div>' : (R.s.up ? '<div class="timer" id="timer">'+fmtT(R.el)+'</div>' : '<div class="timer">'+(R.i+1)+'/'+R.items.length+'</div>');
+  return '<div class="qtop"><button class="back" onclick="confirmQuit()">&#8592;</button><div class="dots">'+dots+'</div>'+tm+'</div>';
+}
+function confirmQuit(){
+  var el=document.getElementById("quitZone"); if(!el) return;
+  el.innerHTML='<div class="card"><p class="sub" style="margin:0 0 10px">Leave now? Answers you already gave are saved, but today only counts when you finish.</p>'+
+    '<div class="row"><button class="btn warm" onclick="clearTimer();home()">Leave</button><button class="btn ghost" onclick="document.getElementById(\'quitZone\').innerHTML=\'\'">Stay</button></div></div>';
+}
+var TYPELABEL={mcq:"Choose one", blanks:"Fill in", order:"Put in order", match:"Match", sort:"Sort them", pickall:"Tap all that are right", shade:"Shade it", task:"Notebook task", learn:"Learn"};
+function renderQ(){
+  if(!R || R.ended) return;
+  if(R.i >= R.items.length){ finish(false); return; }
+  R.lock=false;
+  var it=R.items[R.i], h=qHeader()+'<div id="quitZone"></div>';
+  if(it.t==="learn"){
+    var l=LS[it.id];
+    h+='<div class="card learn"><div class="qtype" style="color:var(--sky)">Learn &middot; '+l.ch+'</div><h3>'+l.title+'</h3>'+l.html+'</div>'+
+       '<button class="btn mint" id="gotIt" onclick="gotIt()">Got it! &#10003;</button>';
+    app.innerHTML=h; window.scrollTo(0,0); return;
+  }
+  var lbl = it.build ? "Build it" : (it.t==="mcq" && it.big ? "Pick the sign" : TYPELABEL[it.t]);
+  h+='<div class="card'+(it.t==="task"?" task":"")+'"><div class="qtype">'+lbl+(it.src?'<span class="src">'+it.src.toUpperCase()+'</span>':'')+'</div>'+
+     '<div class="qtext">'+it.q+'</div><div id="body"></div></div><div id="fb"></div><div id="nextZone"></div>';
+  app.innerHTML=h; window.scrollTo(0,0);
+  ({mcq:rMcq, blanks:rBlanks, order:rOrder, match:rMatch, sort:rSort, pickall:rPick, shade:rShade, task:rTask})[it.t](it);
+}
+function gotIt(){ if(!R || R.lock) return; R.lock=true; R.results[R.i]="L"; addXP(3); goNext(); }
+function nextBtn(){ document.getElementById("nextZone").innerHTML='<button class="btn" id="nextBtn" onclick="goNext()">'+(R.i===R.items.length-1?"See results":"Next")+' &#8594;</button>'; }
+function goNext(){ if(!R || R.ended) return; R.i++; renderQ(); }
+
+function rMcq(it){
+  var keys="ABCD", body=document.getElementById("body");
+  if(it.chips){
+    body.innerHTML='<div class="pool">'+it.o.map(function(o,k){ return '<button class="chip" id="o'+k+'" onclick="pickMcq('+k+')">'+o+'</button>'; }).join("")+'</div>';
+    return;
+  }
+  var style = it.big ? 'grid-template-columns:repeat('+it.o.length+',1fr)' : (it.two ? 'grid-template-columns:1fr 1fr' : '');
+  body.innerHTML='<div class="opts" style="'+style+'">'+it.o.map(function(o,k){
+    return '<button class="opt'+(it.big?' big':'')+'" id="o'+k+'" onclick="pickMcq('+k+')">'+(it.big||it.two?'':'<span class="k">'+keys[k]+'</span>')+o+'</button>';
+  }).join("")+'</div>';
+}
+function pickMcq(k){
+  var it=R.items[R.i]; if(R.lock) return;
+  for(var j=0;j<it.o.length;j++){
+    var el=document.getElementById("o"+j); el.disabled=true;
+    if(j===it.a) el.classList.add(it.chips?"sel":"good");
+    else if(j===k){ el.classList.add("bad"); if(it.chips) el.style.opacity=".5"; }
+    else if(it.chips) el.classList.add("used");
+  }
+  if(it.chips){ var g=document.getElementById("o"+it.a); g.style.background="#134b39"; g.style.borderColor="#3ddc97"; }
+  feedback(k===it.a, it, k===it.a?"":"The answer is: <b>"+it.o[it.a]+"</b>");
+}
+
+/* ---------------- BLANKS + KEYPAD ---------------- */
+var BST=null;
+function rBlanks(it){
+  var tpl = it.tpl.replace(/\[\[(\d+)\]\]/g, function(_,k){
+    var w1 = it.w && it.w[k]===1;
+    return '<button class="slot'+(w1?' w1':'')+'" id="SL'+k+'" onclick="selSlot('+k+')"></button>';
+  });
+  var nb = it.nb ? '<div class="nb">&#9999;&#65039; <b>Notebook first!</b> Solve it in your notebook with all the steps. Then tap in only the final answer.</div>' : '';
+  document.getElementById("body").innerHTML = nb+'<div class="tplbox">'+tpl+'</div>'+padHtml(it.pad)+
+    '<button class="btn" id="chkB" disabled onclick="gradeBlanks()">Check</button><div id="corrZone"></div>';
+  BST={v:it.ans.map(function(){ return ""; }), cur:0, done:false};
+  selSlot(0);
+}
+function padHtml(kind){
+  var keys = kind==="roman" ? ["I","V","X","L","C"] : ["1","2","3","4","5","6","7","8","9","0"];
+  var h='<div class="pad">'+keys.map(function(k){ return '<button onclick="padKey(\''+k+'\')">'+k+'</button>'; }).join("");
+  h+='<button class="fn" onclick="padKey(\'DEL\')">&#9003;</button><button class="fn" onclick="padKey(\'CLR\')">clear</button>'+
+     '<button class="nx" style="grid-column:span 3" onclick="padKey(\'NEXT\')">next box &#9654;</button></div>';
+  return h;
+}
+function maxLen(it,k){ return (it.w && it.w[k]) ? it.w[k] : (it.pad==="roman" ? 10 : 9); }
+function selSlot(k){
+  if(!BST || BST.done) return;
+  BST.cur=k;
+  for(var j=0;j<BST.v.length;j++){ var el=document.getElementById("SL"+j); if(el) el.className="slot"+(el.className.indexOf("w1")>=0?" w1":"")+(j===k?" cur":""); }
+}
+function padKey(key){
+  var it=R.items[R.i]; if(!BST || BST.done || R.lock) return;
+  var k=BST.cur, v=BST.v[k];
+  if(key==="DEL") v=v.slice(0,-1);
+  else if(key==="CLR") v="";
+  else if(key==="NEXT"){ selSlot((k+1)%BST.v.length); return; }
+  else if(v.length < maxLen(it,k)) v+=key;
+  BST.v[k]=v;
+  document.getElementById("SL"+k).textContent=v;
+  if(maxLen(it,k)===1 && v.length===1 && key!=="DEL" && key!=="CLR"){
+    for(var j=1;j<=BST.v.length;j++){ var n=(k+j)%BST.v.length; if(!BST.v[n]){ selSlot(n); break; } }
+  }
+  document.getElementById("chkB").disabled = BST.v.some(function(x){ return x===""; });
+}
+function normV(s, roman){ s=String(s).trim(); if(roman) return s.toUpperCase(); s=s.replace(/^0+(?=\d)/,""); return s; }
+function blankOk(it, vals){
+  var v=it.v, i, res=[];
+  if(v && v.type==="equiv"){
+    var seen={};
+    for(i=0;i<vals.length;i+=2){
+      var a=+vals[i], b=+vals[i+1], good = b>0 && a>0 && a*v.d===b*v.n && !(a===v.n && b===v.d) && !seen[a+"/"+b];
+      seen[a+"/"+b]=1; res.push(good); res.push(good);
+    }
+    return res;
+  }
+  if(v && v.type==="eqval"){
+    var n=+vals[0], d=+vals[1], g = d>0 && n*v.D===d*v.N;
+    return [g,g];
+  }
+  for(i=0;i<vals.length;i++){
+    var acc=it.ans[i].map(function(a){ return normV(a, it.pad==="roman"); });
+    res.push(acc.indexOf(normV(vals[i], it.pad==="roman"))>=0);
+  }
+  return res;
+}
+function fillTpl(it){ return it.tpl.replace(/\[\[(\d+)\]\]/g, function(_,k){ return '<span class="slot good">'+it.ans[k][0]+'</span>'; }); }
+function gradeBlanks(){
+  var it=R.items[R.i]; if(!BST || BST.done || R.lock) return;
+  if(BST.v.some(function(x){ return x===""; })) return;
+  BST.done=true;
+  var res=blankOk(it, BST.v), ok=res.every(function(x){ return x; });
+  res.forEach(function(g,k){ var el=document.getElementById("SL"+k); if(el) el.className="slot"+(el.className.indexOf("w1")>=0?" w1":"")+(g?" good":" bad"); });
+  var b=document.getElementById("chkB"); if(b) b.classList.add("hide");
+  var pads=document.querySelectorAll(".pad"); for(var i=0;i<pads.length;i++) pads[i].classList.add("hide");
+  if(!ok) document.getElementById("corrZone").innerHTML='<div class="corr">Correct answer'+(it.v&&it.v.type==="equiv"?" (one example)":"")+':</div><div class="tplbox">'+fillTpl(it)+'</div>';
+  feedback(ok, it);
+}
+
+/* ---------------- ORDER / BUILD ---------------- */
+var OST=null;
+function rOrder(it){
+  var pool=it.items.map(function(t){ return t; }).concat(it.extra||[]);
+  OST={pool:shuffle(pool.map(function(t,i){ return {t:t, i:i}; })), picked:[], done:false};
+  drawOrder(it);
+}
+function drawOrder(it){
+  var h='';
+  if(it.build){
+    h+='<div class="bline" id="bline">'+(OST.picked.length? OST.picked.map(function(p,k){ return '<button class="chip" onclick="undoOrder('+k+')">'+OST.pool[p].t+'</button>'; }).join("") : '<span style="color:#7486c0;font-size:14px">tap chips below</span>')+'</div>';
+  } else {
+    h+='<div class="slots">'+it.items.map(function(_,k){ var p=OST.picked[k];
+      return '<div class="oslot'+(p!==undefined?" filled":"")+'" id="OS'+k+'" onclick="undoOrder('+k+')"><span class="n">'+(k+1)+'</span>'+(p!==undefined?OST.pool[p].t:"")+'</div>'; }).join("")+'</div>';
+  }
+  h+='<div class="pool">'+OST.pool.map(function(o,p){ var used=OST.picked.indexOf(p)>=0;
+    return '<button class="chip'+(used?" used":"")+'" onclick="pickOrder('+p+')">'+o.t+'</button>'; }).join("")+'</div>'+
+    '<p class="smallnote">'+(it.build?"Tap a chip in the answer line to take it back.":"Tap a filled row to take it back.")+'</p>'+
+    '<button class="btn" id="ordChk" '+(OST.picked.length===it.items.length?"":"disabled")+' onclick="gradeOrder()">Check</button>';
+  document.getElementById("body").innerHTML=h;
+}
+function pickOrder(p){
+  var it=R.items[R.i]; if(R.lock || OST.done) return;
+  if(OST.picked.indexOf(p)>=0 || OST.picked.length>=it.items.length) return;
+  OST.picked.push(p); drawOrder(it);
+}
+function undoOrder(k){
+  var it=R.items[R.i]; if(R.lock || OST.done || OST.picked[k]===undefined) return;
+  OST.picked.splice(k,1); drawOrder(it);
+}
+function gradeOrder(){
+  var it=R.items[R.i]; if(R.lock || OST.done || OST.picked.length!==it.items.length) return;
+  OST.done=true;
+  var right=0;
+  it.items.forEach(function(t,k){ if(OST.pool[OST.picked[k]].t===t) right++; });
+  var ok=right===it.items.length;
+  if(it.build){ var bl=document.getElementById("bline"); if(bl) bl.className="bline "+(ok?"good":"bad"); }
+  else it.items.forEach(function(t,k){ var el=document.getElementById("OS"+k); if(el) el.className="oslot filled "+(OST.pool[OST.picked[k]].t===t?"good":"bad"); });
+  var c=document.getElementById("ordChk"); if(c) c.classList.add("hide");
+  feedback(ok, it, ok?"":"Correct: <b>"+it.items.join(it.build?" ":" , ")+"</b>");
+}
+
+/* ---------------- MATCH ---------------- */
+var MST=null;
+function rMatch(it){
+  var left=it.pairs.map(function(p,k){ return {t:p[0],k:k}; }), right=shuffle(it.pairs.map(function(p,k){ return {t:p[1],k:k}; }));
+  MST={left:left, right:right, sel:null, made:{}, n:it.pairs.length, done:0};
+  document.getElementById("body").innerHTML='<div class="mgrid"><div class="mcol">'+left.map(function(l,i){ return '<button class="mi" id="L'+i+'" onclick="mTapL('+i+')">'+l.t+'<span class="tag hide" id="LT'+i+'"></span></button>'; }).join("")+
+    '</div><div class="mcol">'+right.map(function(r,i){ return '<button class="mi" id="R'+i+'" onclick="mTapR('+i+')">'+r.t+'<span class="tag hide" id="RT'+i+'"></span></button>'; }).join("")+
+    '</div></div><p class="smallnote">Tap a box on the left, then its partner on the right.</p>';
+}
+function mTapL(i){ if(R.lock || MST.made["L"+i]!==undefined) return; if(MST.sel!==null) document.getElementById("L"+MST.sel).classList.remove("active"); MST.sel=i; document.getElementById("L"+i).classList.add("active"); }
+function mTapR(j){
+  if(R.lock || MST.sel===null || MST.made["R"+j]!==undefined) return;
+  var i=MST.sel; MST.made["L"+i]=j; MST.made["R"+j]=i; MST.sel=null; MST.done++;
+  var Le=document.getElementById("L"+i), Re=document.getElementById("R"+j);
+  Le.classList.remove("active"); Le.classList.add("paired"); Re.classList.add("paired");
+  ["LT"+i,"RT"+j].forEach(function(id){ var t=document.getElementById(id); t.classList.remove("hide"); t.textContent=MST.done; });
+  if(MST.done===MST.n) gradeMatch();
+}
+function gradeMatch(){
+  var it=R.items[R.i], right=0;
+  for(var i=0;i<MST.n;i++){ var j=MST.made["L"+i], good=MST.left[i].k===MST.right[j].k; if(good) right++;
+    document.getElementById("L"+i).className="mi "+(good?"good":"bad"); document.getElementById("R"+j).className="mi "+(good?"good":"bad"); }
+  feedback(right===MST.n, it, right===MST.n?"":it.pairs.map(function(p){ return p[0]+" = "+p[1]; }).join("<br>"));
+}
+
+/* ---------------- SORT ---------------- */
+var SST=null;
+function rSort(it){
+  SST={pick:{}, n:it.items.length};
+  document.getElementById("body").innerHTML=it.items.map(function(w,i){
+    return '<div class="srow" id="SR'+i+'"><div class="w">'+w[0]+'</div><div class="bks">'+
+      it.buckets.map(function(b,j){ return '<button class="bk" id="B'+i+'_'+j+'" onclick="pickSort('+i+','+j+')">'+b+'</button>'; }).join("")+'</div></div>';
+  }).join("")+'<button class="btn" id="sortChk" disabled onclick="gradeSort()">Check</button>';
+}
+function pickSort(i,j){
+  var it=R.items[R.i]; if(R.lock) return;
+  SST.pick[i]=j;
+  for(var k=0;k<it.buckets.length;k++) document.getElementById("B"+i+"_"+k).className="bk"+(k===j?" sel":"");
+  document.getElementById("sortChk").disabled = Object.keys(SST.pick).length<SST.n;
+}
+function gradeSort(){
+  var it=R.items[R.i]; if(R.lock || Object.keys(SST.pick).length<SST.n) return;
+  var right=0, fix=[];
+  it.items.forEach(function(w,i){ var good=SST.pick[i]===w[1]; if(good) right++; else fix.push(w[0]+" &#8594; <b>"+it.buckets[w[1]]+"</b>");
+    document.getElementById("SR"+i).className="srow "+(good?"good":"bad"); });
+  document.getElementById("sortChk").classList.add("hide");
+  feedback(right===SST.n, it, right===SST.n?"":"You got "+right+" of "+SST.n+".<br>"+fix.join("<br>"));
+}
+
+/* ---------------- PICK ALL ---------------- */
+var PST=null;
+function rPick(it){
+  PST={on:{}};
+  document.getElementById("body").innerHTML='<div class="pgrid">'+it.o.map(function(o,k){ return '<button class="pk" id="PK'+k+'" onclick="pickTog('+k+')">'+o+'</button>'; }).join("")+'</div>'+
+    '<button class="btn" id="pkChk" disabled onclick="gradePick()">Check</button>';
+}
+function pickTog(k){
+  if(R.lock) return;
+  PST.on[k]=!PST.on[k];
+  document.getElementById("PK"+k).className="pk"+(PST.on[k]?" on":"");
+  var any=false; for(var x in PST.on){ if(PST.on[x]) any=true; }
+  document.getElementById("pkChk").disabled=!any;
+}
+function gradePick(){
+  var it=R.items[R.i]; if(R.lock) return;
+  var ok=true;
+  it.o.forEach(function(o,k){
+    var want=it.a.indexOf(k)>=0, got=!!PST.on[k], el=document.getElementById("PK"+k);
+    if(want && got) el.className="pk good"; else if(!want && got){ el.className="pk bad"; ok=false; } else if(want && !got){ el.className="pk miss"; ok=false; } else el.className="pk";
+    el.disabled=true;
+  });
+  document.getElementById("pkChk").classList.add("hide");
+  feedback(ok, it, ok?"":"Dashed green = the ones you missed. Red = not right.");
+}
+
+/* ---------------- SHADE ---------------- */
+var HST=null;
+function rShade(it){
+  HST={on:{}};
+  drawShade(it);
+}
+function drawShade(it){
+  var n=0; for(var k in HST.on){ if(HST.on[k]) n++; }
+  document.getElementById("body").innerHTML='<div class="shadebox">'+svgShape(it.shape, it.parts, HST.on, 170, !R.lock, "SP")+'</div>'+
+    '<p class="center sub" id="shCount">Shaded: <b>'+n+'</b> of '+it.parts+'</p>'+
+    (R.lock?'':'<button class="btn" id="shChk" '+(n?"":"disabled")+' onclick="gradeShade()">Check</button>');
+}
+function shadeTap(k){ if(R.lock) return; HST.on[k]=!HST.on[k]; drawShade(R.items[R.i]); }
+function gradeShade(){
+  var it=R.items[R.i]; if(R.lock) return;
+  var n=0; for(var k in HST.on){ if(HST.on[k]) n++; }
+  var ok = n===it.need;
+  feedback(ok, it, ok?"":"You shaded "+n+". You needed <b>"+it.need+"</b> of the "+it.parts+" parts.");
+  drawShade(it);
+}
+
+/* ---------------- TASK ---------------- */
+function rTask(it){
+  R.tick={}; R.tstate=0;
+  var h='<div class="steps">'+it.steps.map(function(st,k){ return '<button class="step" id="ST'+k+'" onclick="tickStep('+k+')"><span class="bx" id="SX'+k+'"></span><span>'+st+'</span></button>'; }).join("")+'</div>'+
+    '<button class="btn" style="margin-top:12px" id="taskDone" disabled onclick="taskDone()">Done &#8212; show me the model</button>'+
+    (S.tasks[it.id]?'<p class="smallnote">&#9989; You finished this before. Doing it again is great practice.</p>':'')+'<div id="taskZone"></div>';
+  document.getElementById("body").innerHTML=h;
+}
+function tickStep(k){
+  var it=R.items[R.i]; if(R.tstate) return;
+  R.tick[k]=!R.tick[k];
+  document.getElementById("ST"+k).className="step"+(R.tick[k]?" on":"");
+  document.getElementById("SX"+k).innerHTML=R.tick[k]?"&#10003;":"";
+  var n=0; for(var j=0;j<it.steps.length;j++){ if(R.tick[j]) n++; }
+  document.getElementById("taskDone").disabled = n<it.steps.length;
+}
+function taskDone(){
+  var it=R.items[R.i]; if(R.tstate) return;
+  var n=0; for(var j=0;j<it.steps.length;j++){ if(R.tick[j]) n++; }
+  if(n<it.steps.length) return;
+  R.tstate=1; R.results[R.i]="L";
+  var first=!S.tasks[it.id]; S.tasks[it.id]=true; addXP(first?20:5);
+  document.getElementById("taskDone").classList.add("hide");
+  document.getElementById("taskZone").innerHTML='<div class="model"><b>Model answer. Compare it with yours:</b><br>'+it.model+'</div>'+
+    (it.check.length?'<p class="sub" style="margin:12px 0 6px"><b>Tick what you did:</b></p><div class="steps">'+it.check.map(function(c,k){ return '<button class="step" id="CK'+k+'" onclick="tickCheck('+k+')"><span class="bx" id="CX'+k+'"></span><span>'+c+'</span></button>'; }).join("")+'</div>':'')+
+    '<div class="fb good" style="margin-top:10px"><b class="h">&#127881; Task done! +'+(first?20:5)+' XP</b>Anything not ticked? Fix it in your notebook with a pencil.</div>';
+  nextBtn();
+}
+function tickCheck(k){ var el=document.getElementById("CK"+k); if(!el) return; var on=el.className.indexOf(" on")<0; el.className="step"+(on?" on":""); document.getElementById("CX"+k).innerHTML=on?"&#10003;":""; }
+function ansText(it){
+  if(it.t==="mcq") return it.o[it.a];
+  if(it.t==="blanks") return '<div class="tplbox" style="font-size:17px">'+fillTpl(it)+'</div>';
+  if(it.t==="order") return it.items.join(it.build?" ":" , ");
+  if(it.t==="sort") return it.items.map(function(w){ return w[0]+" = "+it.buckets[w[1]]; }).join("; ");
+  if(it.t==="pickall") return it.a.map(function(k){ return it.o[k]; }).join(", ");
+  if(it.t==="shade") return "Shade "+it.need+" of the "+it.parts+" parts";
+  if(it.t==="match") return it.pairs.map(function(p){ return p[0]+" = "+p[1]; }).join("; ");
+  return "";
+}
+/* =======================================================================
+   NEW LEARN CARDS (the rest are shared with the mid-term quest)
+   ======================================================================= */
+LS.tables = {ch:"Tables", title:"&#129518; Tables 2 to 15: dodging tricks", html:
+  '<p><b>Dodging tables</b> means the questions come <b>out of order</b>. So learn each fact, not just the song.</p>'+
+  '<ul><li><b>Turn it around:</b> 7 &times; 13 is the same as 13 &times; 7.</li>'+
+  '<li><b>Split the big one:</b> 14 &times; 6 = 10 &times; 6 + 4 &times; 6 = 60 + 24 = 84.</li>'+
+  '<li><b>Double trick:</b> 12 &times; 7 is double 6 &times; 7. Double 42 = 84.</li>'+
+  '<li><b>Division is a table backwards:</b> 91 &divide; 13 &#8594; which 13 fact makes 91? 13 &times; 7 = 91, so the answer is 7.</li></ul>'+
+  '<div class="ex">15 &times; 8 = 10 &times; 8 + 5 &times; 8 = 80 + 40 = <b>120</b></div>'};
+
+LS.bodmas = {ch:"Special class", title:"&#127919; BODMAS: which part first?", html:
+  '<p><b>B</b>rackets &#8594; <b>O</b>f &#8594; <b>&divide;</b> and <b>&times;</b> &#8594; <b>+</b> and <b>&minus;</b></p>'+
+  '<p>Brackets go from the <b>inside out</b>: round <b>( )</b> first, then curly <b>{ }</b>, then square <b>[ ]</b>.</p>'+
+  '<div class="ex">25 + 6 &times; 4 &#8594; multiply first: 6 &times; 4 = 24 &#8594; 25 + 24 = <b>49</b></div>'+
+  '<div class="ex">{40 &minus; (8 + 5)} &times; 3 &#8594; (8 + 5) = 13 &#8594; {40 &minus; 13} = 27 &#8594; 27 &times; 3 = <b>81</b></div>'+
+  '<div class="oops">The trap: going left to right without looking. 25 + 6 = 31, then 31 &times; 4 = 124. Wrong! Multiply before you add.</div>'};
+
+LS.round = {ch:"Special class", title:"&#127919; Rounding off", html:
+  '<p>Look at the digit <b>just to the right</b> of the place you are rounding to.</p>'+
+  '<ul><li><b>0, 1, 2, 3 or 4:</b> round <b>down</b>. Keep the place, and every digit after it becomes 0.</li>'+
+  '<li><b>5, 6, 7, 8 or 9:</b> round <b>up</b>. Add 1 to the place, and every digit after it becomes 0.</li></ul>'+
+  '<div class="ex">4,768 to the nearest 100: the tens digit is <b>6</b> &#8594; round up &#8594; <b>4,800</b></div>'+
+  '<div class="ex">23,412 to the nearest 1,000: the hundreds digit is <b>4</b> &#8594; round down &#8594; <b>23,000</b></div>'+
+  '<div class="oops">Careful when a 9 rounds up: 3,962 to the nearest 100 &#8594; 39 hundreds + 1 = 40 hundreds = <b>4,000</b>.</div>'};
+
+/* =======================================================================
+   NEW GENERATORS (each carries m:{op,...} for the independent QA solver)
+   ======================================================================= */
+function tabT(){ return Math.random()<0.6 ? ri(12,15) : ri(2,11); }
+G.tabMul = function(){
+  var t=tabT(), m=ri(2,10);
+  if(Math.random()<0.5){ var x=t; t=m; m=x; }
+  return NUM("<b>"+t+" &times; "+m+"</b> = ?", t*m, t+" &times; "+m+" = <b>"+(t*m)+"</b>.", {m:{op:"tab", a:t, b:m, ans:t*m}, tag:"tab"});
+};
+G.tabMiss = function(){
+  var t=tabT(), m=ri(2,10), p=t*m;
+  return NUM("<b>"+t+" &times; ___ = "+p+"</b>", m, "Say the "+t+" table until you reach "+p+": "+t+" &times; "+m+" = "+p+". So the missing number is <b>"+m+"</b>.",
+    {m:{op:"tabmiss", a:t, p:p, ans:m}, tag:"tab"});
+};
+G.tabDiv = function(){
+  var t=tabT(), m=ri(2,10), p=t*m;
+  return NUM("<b>"+p+" &divide; "+t+"</b> = ?", m, "Division is a table backwards: "+t+" &times; "+m+" = "+p+", so "+p+" &divide; "+t+" = <b>"+m+"</b>.",
+    {m:{op:"tabdiv", p:p, a:t, ans:m}, tag:"tab"});
+};
+
+var OPSHOW = {"+":" + ", "-":" &minus; ", "*":" &times; ", "/":" &divide; ", "(":"(", ")":")", "{":"{", "}":"}", "[":"[", "]":"]"};
+function showExpr(e){ return e.replace(/[+\-*\/(){}\[\]]/g, function(c){ return OPSHOW[c]; }); }
+G.bodmas = function(kind){
+  kind = kind || pick(["am","sd","pb","cr","sq","ms"]);
+  var e, ans, w;
+  if(kind==="am"){
+    var a=ri(10,60), b=ri(3,12), c=ri(2,9);
+    e=a+"+"+b+"*"+c; ans=a+b*c;
+    w=b+" &times; "+c+" = "+(b*c)+"<br>"+a+" + "+(b*c)+" = <b>"+ans+"</b>";
+  } else if(kind==="sd"){
+    var c2=ri(2,9), q=ri(2,12), b2=c2*q, a2=ri(q+5,q+80);
+    e=a2+"-"+b2+"/"+c2; ans=a2-q;
+    w=b2+" &divide; "+c2+" = "+q+"<br>"+a2+" &minus; "+q+" = <b>"+ans+"</b>";
+  } else if(kind==="pb"){
+    var a3=ri(5,30), b3=ri(5,30), c3=ri(2,9);
+    e="("+a3+"+"+b3+")*"+c3; ans=(a3+b3)*c3;
+    w="("+a3+" + "+b3+") = "+(a3+b3)+"<br>"+(a3+b3)+" &times; "+c3+" = <b>"+ans+"</b>";
+  } else if(kind==="cr"){
+    var b4=ri(2,15), c4=ri(2,15), a4=b4+c4+ri(1,20), d4=ri(2,9), in4=a4-(b4+c4);
+    e="{"+a4+"-("+b4+"+"+c4+")}*"+d4; ans=in4*d4;
+    w="Round: ("+b4+" + "+c4+") = "+(b4+c4)+"<br>Curly: {"+a4+" &minus; "+(b4+c4)+"} = "+in4+"<br>"+in4+" &times; "+d4+" = <b>"+ans+"</b>";
+  } else if(kind==="sq"){
+    var c5=ri(2,9), k5=ri(2,9), b5=c5*k5, d5=ri(1,9), e5=ri(2,6), a5=ri(1,30);
+    e=a5+"+[{("+b5+"/"+c5+")+"+d5+"}*"+e5+"]"; ans=a5+(k5+d5)*e5;
+    w="Round: ("+b5+" &divide; "+c5+") = "+k5+"<br>Curly: {"+k5+" + "+d5+"} = "+(k5+d5)+"<br>Square: ["+(k5+d5)+" &times; "+e5+"] = "+((k5+d5)*e5)+"<br>"+a5+" + "+((k5+d5)*e5)+" = <b>"+ans+"</b>";
+  } else {
+    var a6=ri(3,12), b6=ri(3,9), d6=ri(2,9), q6=ri(2,Math.min(12, a6*b6-1)), c6=d6*q6;
+    e=a6+"*"+b6+"-"+c6+"/"+d6; ans=a6*b6-q6;
+    w=a6+" &times; "+b6+" = "+(a6*b6)+" and "+c6+" &divide; "+d6+" = "+q6+"<br>"+(a6*b6)+" &minus; "+q6+" = <b>"+ans+"</b>";
+  }
+  return NUM("Simplify using <b>BODMAS</b>: <b>"+showExpr(e)+"</b>", ans,
+    "Brackets first (round, then curly, then square). Then &divide; and &times;. Then + and &minus;.",
+    {m:{op:"bodmas", e:e, ans:ans}, nb:true, w:[5], tag:"sp", work:w});
+};
+function placeName(p){ return p===10 ? "tens" : (p===100 ? "hundreds" : "thousands"); }
+function rightName(p){ return p===10 ? "ones" : (p===100 ? "tens" : "hundreds"); }
+G.roundOff = function(){
+  var p=pick([10,100,1000]), top = p===1000 ? 99999 : (p===100 ? 9999 : 999);
+  var n=until(function(){ var x=ri(p*3, top); return x%p===0 ? null : x; });
+  var look=Math.floor(n/(p/10))%10, down=Math.floor(n/p)*p, ans = look>=5 ? down+p : down;
+  return NUM("Round off <b>"+fmtIN(n)+"</b> to the nearest <b>"+fmtIN(p)+"</b>.", ans,
+    "Look at the "+rightName(p)+" digit (just right of the "+placeName(p)+"): it is <b>"+look+"</b>. "+(look>=5?"5 or more, so round <b>up</b>":"Less than 5, so round <b>down</b>")+": <b>"+fmtIN(ans)+"</b>.",
+    {m:{op:"round", n:n, p:p, ans:ans}, w:[6], tag:"sp"});
+};
+G.coprime = function(){
+  var a, b;
+  if(Math.random()<0.5){
+    var pr=until(function(){ var x=ri(4,30), y=ri(4,30); return (x!==y && gcd(x,y)===1) ? [x,y] : null; }); a=pr[0]; b=pr[1];
+  } else {
+    var g=pick([2,3,5]), pr2=until(function(){ var x=ri(2,12)*g, y=ri(2,12)*g; return (x!==y && x<=40 && y<=40) ? [x,y] : null; }); a=pr2[0]; b=pr2[1];
+  }
+  var c=gcd(a,b);
+  return YN("Are <b>"+a+"</b> and <b>"+b+"</b> <b>co-prime</b>?", c===1,
+    c===1 ? "Their only common factor is 1, so <b>yes</b>." : "Both can be divided by "+c+", so <b>no</b>. Co-primes share only the factor 1.",
+    {m:{op:"copr", a:a, b:b, ans:c===1}, tag:"sp"});
+};
+var TWINS=[[3,5],[5,7],[11,13],[17,19],[29,31],[41,43],[59,61],[71,73]];
+var NOTWINS=[[7,9],[13,15],[19,21],[23,25],[31,33],[37,39],[47,49],[25,27],[33,35],[7,11],[13,17],[19,23],[37,41]];
+G.twin = function(){
+  var t=pick(TWINS), fakes=shuffle(NOTWINS.slice()).slice(0,3);
+  var lab=function(p){ return "("+p[0]+", "+p[1]+")"; };
+  var opts=shuffle([t].concat(fakes)).map(lab), ans=lab(t);
+  return MK("Which pair is a pair of <b>twin primes</b>?", opts, opts.indexOf(ans),
+    "Twin primes are two primes with a difference of 2. "+ans+" are both prime and 2 apart. Check the others: one of the numbers can be split, or they are 4 apart.",
+    {m:{op:"twin", ans:ans}, tag:"sp"});
+};
+
+/* =======================================================================
+   EDIT ZONE: CHAPTERS and SKILLS
+   To add a lesson: add its learn card to LS, its generators to G, a chapter
+   row below if it is a new chapter, then one SKILLS row per skill with
+   added:"YYYY-MM-DD". New skills are introduced 2 a day with the card first.
+   ======================================================================= */
+var CHAPTERS = [
+  {id:"tab", name:"Tables 2 to 15", icon:"&#129518;"},
+  {id:"ch1", name:"Large Numbers", icon:"&#127968;"},
+  {id:"ch2", name:"Addition &amp; Subtraction", icon:"&#10133;"},
+  {id:"ch3", name:"Multiplication &amp; Division", icon:"&#10006;&#65039;"},
+  {id:"ch4", name:"Factors &amp; Multiples", icon:"&#129513;"},
+  {id:"ch5", name:"Fractions", icon:"&#127829;"},
+  {id:"sp",  name:"Special class extras", icon:"&#127979;"}
+];
+function mix(){ var f=[].slice.call(arguments); return function(){ return pick(f)(); }; }
+function one(bank){ return function(){ return pick(bank()); }; }
+var SKILLS = [
+  {id:"tab",      ch:"tab", name:"Dodging tables", learn:"tables", gen:mix(G.tabMul, G.tabMiss, G.tabDiv), daily:true},
+
+  {id:"pv",       ch:"ch1", name:"Place value", learn:"pvfv", gen:function(){ return G.placeValue(); }},
+  {id:"pvsum",    ch:"ch1", name:"Place value sums", learn:"pvfv", gen:mix(G.pvSum, G.pvDiff)},
+  {id:"period",   ch:"ch1", name:"Periods and commas", learn:"house", gen:function(){ return G.period(); }},
+  {id:"names",    ch:"ch1", name:"Number names", learn:"names", gen:function(){ return G.nameBuild(); }},
+  {id:"figures",  ch:"ch1", name:"Words to figures", learn:"names", gen:function(){ return G.figures(); }},
+  {id:"expand",   ch:"ch1", name:"Expanded and short form", learn:"zero", gen:mix(G.expand, G.shortForm)},
+  {id:"make",     ch:"ch1", name:"Greatest and smallest numbers", learn:"make", gen:G.makeNum},
+  {id:"succ",     ch:"ch1", name:"Successor and predecessor", learn:"succ", gen:G.succPred},
+  {id:"order",    ch:"ch1", name:"Ordering numbers", learn:"house", gen:G.orderNums},
+  {id:"roman",    ch:"ch1", name:"Roman numerals", learn:"roman", gen:mix(G.romanTo, G.romanFrom)},
+  {id:"romanop",  ch:"ch1", name:"Roman sums", learn:"roman", gen:function(){ return G.romanOp(); }},
+  {id:"ch1facts", ch:"ch1", name:"Big numbers quick facts", learn:"house", gen:one(BK.ch1quick)},
+
+  {id:"add",      ch:"ch2", name:"Big additions", learn:"addwords", gen:G.colAdd},
+  {id:"sub",      ch:"ch2", name:"Big subtractions", learn:"check", gen:G.colSub},
+  {id:"missing",  ch:"ch2", name:"Missing digits", learn:"missing", gen:mix(G.missingAdd, G.missingSub)},
+  {id:"story2",   ch:"ch2", name:"Add and subtract stories", learn:"story", gen:function(){ return G.storyAS(); }},
+  {id:"simp",     ch:"ch2", name:"Left to right: minus then plus", learn:"check", gen:G.simplify},
+  {id:"cmpexpr",  ch:"ch2", name:"Compare two sums", learn:"check", gen:G.compareExpr},
+  {id:"ch2facts", ch:"ch2", name:"Add and subtract facts", learn:"addwords", gen:one(BK.ch2quick)},
+
+  {id:"times10",  ch:"ch3", name:"&times; by 10, 100, 1000", learn:"zeros", gen:mix(G.times10, G.missingFactor)},
+  {id:"div10",    ch:"ch3", name:"&divide; by 10, 100, 1000", learn:"zeros", gen:G.div10},
+  {id:"break",    ch:"ch3", name:"Break the multiplicand", learn:"props", gen:G.breakMult},
+  {id:"product",  ch:"ch3", name:"Long multiplication", learn:"props", gen:G.product},
+  {id:"ldiv1",    ch:"ch3", name:"Long division (1-digit)", learn:"longdiv", gen:function(){ return G.longDiv(false); }},
+  {id:"ldiv2",    ch:"ch3", name:"Long division (2-digit)", learn:"longdiv", gen:function(){ return G.longDiv(true); }},
+  {id:"unitary",  ch:"ch3", name:"Unitary method", learn:"unitary", gen:G.unitary},
+  {id:"rows",     ch:"ch3", name:"Rows and leftovers", learn:"rows", gen:G.rows},
+  {id:"pstory",   ch:"ch3", name:"Multiply and divide stories", learn:"story", gen:G.productStory},
+  {id:"whichop",  ch:"ch3", name:"Which operation?", learn:"story", gen:G.whichOp},
+  {id:"ch3facts", ch:"ch3", name:"Multiply and divide facts", learn:"divwords", gen:mix(one(BK.ch3words), one(BK.ch3zero))},
+
+  {id:"factors",  ch:"ch4", name:"Finding all factors", learn:"rainbow", gen:function(){ return G.factorsPick(); }},
+  {id:"multiple", ch:"ch4", name:"Multiples", learn:"fm", gen:mix(G.multiple, G.first3)},
+  {id:"primes",   ch:"ch4", name:"Prime or composite", learn:"prime", gen:mix(G.primesPick, G.primeSort)},
+  {id:"tree",     ch:"ch4", name:"Factor trees", learn:"pf", gen:G.tree},
+  {id:"pf",       ch:"ch4", name:"Prime factorisation", learn:"pf", gen:function(){ return G.pfMCQ(); }},
+  {id:"hcf",      ch:"ch4", name:"HCF", learn:"hcflcm", gen:function(){ return G.hcf(Math.random()<0.4); }},
+  {id:"lcm",      ch:"ch4", name:"LCM", learn:"hcflcm", gen:function(){ return G.lcm(Math.random()<0.4); }},
+  {id:"divis",    ch:"ch4", name:"Divisibility rules", learn:"div", gen:G.divisible},
+  {id:"ch4facts", ch:"ch4", name:"Factor and prime facts", learn:"prime", gen:mix(one(BK.ch4fm), one(BK.ch4prime))},
+
+  {id:"shade",    ch:"ch5", name:"Fraction pictures", learn:"frac", gen:mix(G.shade, G.whatShaded)},
+  {id:"ftypes",   ch:"ch5", name:"Kinds of fractions", learn:"frac", gen:mix(G.typeSort, G.likeSort)},
+  {id:"m2i",      ch:"ch5", name:"Mixed to improper", learn:"mad", gen:G.mixToImp},
+  {id:"i2m",      ch:"ch5", name:"Improper to mixed", learn:"mad", gen:G.impToMix},
+  {id:"equiv",    ch:"ch5", name:"Equivalent fractions", learn:"equiv", gen:mix(G.equivMiss, G.equivCheck, G.threeEquiv)},
+  {id:"simplest", ch:"ch5", name:"Simplest form", learn:"simplest", gen:G.simplest},
+  {id:"cmpfr",    ch:"ch5", name:"Comparing fractions", learn:"compare", gen:function(){ return G.compareFr(); }},
+  {id:"orderfr",  ch:"ch5", name:"Ordering fractions", learn:"compare", gen:G.orderFr},
+  {id:"addfr",    ch:"ch5", name:"Adding and subtracting fractions", learn:"addsub", gen:mix(function(){ return G.addLike(Math.random()<0.3); }, G.subLike, G.oneMinus)},
+  {id:"fracof",   ch:"ch5", name:"Fraction of a number", learn:"of", gen:mix(function(){ return G.fracOf(true); }, function(){ return G.fracOf(false); })},
+  {id:"fstory",   ch:"ch5", name:"Fraction stories", learn:"of", gen:G.fracStory},
+  {id:"ch5facts", ch:"ch5", name:"Fraction facts", learn:"frac", gen:one(BK.ch5basic)},
+
+  {id:"bodmas",   ch:"sp", name:"BODMAS", learn:"bodmas", gen:function(){ return G.bodmas(); }},
+  {id:"round",    ch:"sp", name:"Rounding off", learn:"round", gen:G.roundOff},
+  {id:"copr",     ch:"sp", name:"Co-primes and twin primes", learn:"prime", gen:mix(G.coprime, G.twin)}
+];
+/* ======================= end of edit zone ======================= */
+
+var SK = {}; SKILLS.forEach(function(s, i){ s.ix=i; SK[s.id]=s; });
+var CH = {}; CHAPTERS.forEach(function(c){ CH[c.id]=c; });
+
+/* =======================================================================
+   STATE
+   ======================================================================= */
+var KEY = "diksha_maths_daily_v1";
+var MIDTERM_KEY = "diksha_maths_midterm_v1";
+function blank(){
+  return {v:1, xp:0, streak:0, best:0, lastDay:"", days:{}, sk:{}, wrong:{}, fixed:0, badges:[], log:[],
+          off:{}, n:12, done:{}, reads:0, perfect:0, tasks:{}, imp:0, updatedAt:0};
+}
+function load(){
+  var d=blank();
+  try{
+    var raw=localStorage.getItem(KEY);
+    if(raw){ var p=JSON.parse(raw); for(var k in d){ if(p[k]!==undefined) d[k]=p[k]; } }
+  }catch(e){}
+  return d;
+}
+var S = load();
+function save(){
+  S.updatedAt = Date.now();
+  try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+  /* sync must never break the app: Firestore throws synchronously on bad data */
+  if(typeof DikshaSync!=="undefined"){ try{ DikshaSync.push(KEY, S); }catch(e){} }
+}
+var DATE_FMT = "en-CA"; /* gives yyyy-mm-dd */
+function iso(d){ return d.toLocaleDateString(DATE_FMT); }
+function todayISO(){ return iso(new Date()); }
+function addDays(isoStr, k){ var d=new Date(isoStr+"T00:00:00"); d.setDate(d.getDate()+k); return iso(d); }
+function daysBetween(a, b){ return Math.round((new Date(b+"T00:00:00")-new Date(a+"T00:00:00"))/86400000); }
+function touchStreak(){
+  var t=todayISO();
+  if(S.lastDay===t) return;
+  S.streak = (S.lastDay===addDays(t,-1)) ? S.streak+1 : 1;
+  if(S.streak>S.best) S.best=S.streak;
+  S.lastDay=t;
+}
+
+/* one-time: carry over the mid-term quest's unfixed mistakes from this device */
+function importMidterm(){
+  if(S.imp) return;
+  S.imp=1;
+  try{
+    var raw=localStorage.getItem(MIDTERM_KEY); if(!raw) return;
+    var m=JSON.parse(raw), w=m && m.wrong; if(!w) return;
+    Object.keys(w).sort(function(a,b){ return (w[b].n||0)-(w[a].n||0); }).slice(0,15).forEach(function(k){
+      var e=w[k]; if(!e || typeof e.j!=="string" || S.wrong[k]) return;
+      var it; try{ it=JSON.parse(e.j); }catch(x){ return; }
+      if(!it || !RENDER[it.t]) return;
+      S.wrong[k]={j:e.j, n:e.n||1, at:e.at||Date.now()};
+    });
+  }catch(e){}
+}
+
+/* ---------------- spaced review ---------------- */
+var GAPS=[0,1,2,4,7,14,30];        /* days until the next review for box 0..6 */
+var STRONG=4;                      /* box 4 = a 7-day gap = "strong" */
+function skState(id){ return S.sk[id] || {b:0, due:"", n:0, r:0, w:0, last:"", lw:false}; }
+/* mode "daily": a right answer moves the skill up one box, but only on the
+   first try of the day. Any wrong answer, in any mode, drops it two boxes
+   (never below 1) and brings it back tomorrow. Returns +1, -1 or 0. */
+function gradeSkill(id, ok, mode){
+  if(!SK[id]) return 0;
+  var st=skState(id), t=todayISO(), move=0;
+  var firstToday = st.last!==t;
+  st.n++; if(ok) st.r++; else st.w++;
+  if(SK[id].daily){ /* tables are drilled every day; keep stats only */ }
+  else if(!ok){ var nb=Math.max(1, st.b-2); if(nb!==st.b) move=-1; st.b=nb; st.due=addDays(t,1); }
+  else if(mode==="daily" && firstToday){ st.b = st.b===0 ? 3 : Math.min(6, st.b+1); st.due=addDays(t, GAPS[st.b]); move=1; }
+  else if(st.b===0){ st.b=1; st.due=addDays(t,1); }
+  st.last=t; st.lw=!ok;
+  S.sk[id]=st;
+  return move;
+}
+function enabled(s){ return !S.off[s.ch]; }
+
+/* Builds the plan for a session: which skills, which mistakes, which cards. */
+function plan(total, extra){
+  var t=todayISO(), units=[], usedSk={};
+  var tab=SK.tab;
+  if(!extra && tab && enabled(tab)){ units.push({sk:"tab"}); units.push({sk:"tab"}); }
+  var wk=Object.keys(S.wrong).sort(function(a,b){ return (S.wrong[b].n-S.wrong[a].n) || (S.wrong[a].at-S.wrong[b].at); });
+  var mist = extra ? [] : wk.slice(0,2);
+  var slots=Math.max(0, total-units.length-mist.length);
+  var pool=SKILLS.filter(function(s){ return !s.daily && enabled(s) && (!extra || skState(s.id).last!==t); });
+  var due=pool.filter(function(s){ var st=skState(s.id); return st.b>0 && st.due<=t; });
+  due.sort(function(a,b){ var x=skState(a.id), y=skState(b.id); return (x.due<y.due?-1:(x.due>y.due?1:0)) || (x.b-y.b) || (a.ix-b.ix); });
+  var fresh=pool.filter(function(s){ return skState(s.id).b===0; });
+  var newLessons=fresh.filter(function(s){ return !!s.added; }).sort(function(a,b){ return a.added<b.added?-1:(a.added>b.added?1:a.ix-b.ix); });
+  var oldFresh=spread(fresh.filter(function(s){ return !s.added; }));
+  var chosen=[];
+  var add=function(s, why){ if(chosen.length<slots && !usedSk[s.id]){ usedSk[s.id]=1; chosen.push({sk:s.id, why:why}); } };
+  /* 2 seats are kept for skills not tried yet (new lessons first), so a big
+     review pile can never stop the first pass through every skill */
+  newLessons.slice(0,2).forEach(function(s){ add(s,"new"); });
+  oldFresh.slice(0, Math.max(0, 2-Math.min(2,newLessons.length))).forEach(function(s){ add(s,"first"); });
+  due.forEach(function(s){ add(s,"review"); });
+  oldFresh.forEach(function(s){ add(s,"first"); });
+  var stretch=pool.filter(function(s){ return !usedSk[s.id] && skState(s.id).b>0; });
+  stretch.sort(function(a,b){ var x=skState(a.id), y=skState(b.id); return (x.due<y.due?-1:(x.due>y.due?1:0)) || (x.b-y.b); });
+  stretch.forEach(function(s){ add(s,"stretch"); });
+  newLessons.slice(2).forEach(function(s){ add(s,"new"); });
+  return {units:units, chosen:chosen, mist:mist};
+}
+/* round-robin over chapters so the first pass mixes topics */
+function spread(list){
+  var by={}, order=[]; list.forEach(function(s){ if(!by[s.ch]){ by[s.ch]=[]; order.push(s.ch); } by[s.ch].push(s); });
+  var out=[], more=true;
+  while(more){ more=false; order.forEach(function(c){ if(by[c].length){ out.push(by[c].shift()); more=true; } }); }
+  return out;
+}
+function makeItem(id){
+  var s=SK[id], it;
+  for(var tries=0; tries<20; tries++){
+    it=s.gen();
+    if(it) break;
+  }
+  it=JSON.parse(JSON.stringify(it));
+  it.sk=id; it.ch=s.ch;
+  return it;
+}
+function needsCard(id){ var st=skState(id), s=SK[id]; return (st.lw && st.n>0) || (!!s.added && st.n===0); }
+function buildSession(total, extra){
+  var p=plan(total, extra), groups=[];
+  p.units.forEach(function(u){ groups.push({ch:"tab", items:[makeItem(u.sk)], warm:true}); });
+  p.chosen.forEach(function(c){
+    var g={ch:SK[c.sk].ch, items:[]};
+    if(needsCard(c.sk) && SK[c.sk].learn && LS[SK[c.sk].learn]) g.items.push({t:"learn", id:SK[c.sk].learn, sk:c.sk});
+    g.items.push(makeItem(c.sk));
+    groups.push(g);
+  });
+  var mist=p.mist.map(function(k){ try{ var it=JSON.parse(S.wrong[k].j); it.fromBank=1; return {ch:it.ch||it.tag||"mist", items:[it], mist:true}; }catch(e){ return null; } }).filter(Boolean);
+  var warm=groups.filter(function(g){ return g.warm; }), main=interleave(groups.filter(function(g){ return !g.warm; }));
+  /* mistakes go in the middle, never first */
+  mist.forEach(function(m, k){ var at=Math.min(main.length, 2+k*4); main.splice(at, 0, m); });
+  var list=[]; warm.concat(main).forEach(function(g){ list=list.concat(g.items); });
+  return list;
+}
+function interleave(groups){
+  var out=[], rest=groups.slice();
+  while(rest.length){
+    var prev=out.length ? out[out.length-1].ch : null, k=0;
+    if(prev){ for(var i=0;i<rest.length;i++){ if(rest[i].ch!==prev){ k=i; break; } } }
+    out.push(rest.splice(k,1)[0]);
+  }
+  return out;
+}
+
+/* ---------------- mistakes bank ---------------- */
+function hash(s){ var h=5381; for(var i=0;i<s.length;i++){ h=((h<<5)+h+s.charCodeAt(i))|0; } return (h>>>0).toString(36); }
+function itemKey(it){ return hash(it.t+"|"+(it.q||"")+"|"+(it.tpl||"")+"|"+JSON.stringify(it.ans||it.a||it.items||it.pairs||it.need||"")); }
+var BANK_MAX=30;
+function noteWrong(it){
+  if(it.t==="learn" || it.t==="task") return;
+  var k=itemKey(it), e=S.wrong[k];
+  if(e){ e.n++; e.at=Date.now(); }
+  else {
+    var copy={}; for(var f in it){ if(f!=="fromBank") copy[f]=it[f]; }
+    /* stored as a JSON string: Firestore (sync) rejects nested arrays */
+    S.wrong[k]={j:JSON.stringify(copy), n:1, at:Date.now()};
+  }
+  var keys=Object.keys(S.wrong);
+  while(keys.length>BANK_MAX){ keys.sort(function(a,b){ return S.wrong[a].at-S.wrong[b].at; }); delete S.wrong[keys.shift()]; }
+}
+function noteRight(it){
+  var k=itemKey(it);
+  if(S.wrong[k] && it.fromBank){ delete S.wrong[k]; S.fixed++; return true; }
+  return false;
+}
+function wrongCount(){ return Object.keys(S.wrong).length; }
+
+/* ---------------- levels + badges ---------------- */
+var LEVELS = [
+  [0,"Seedling","&#127793;"],[200,"Sprout","&#127807;"],[500,"Sapling","&#129716;"],[900,"Young Tree","&#127795;"],
+  [1400,"Blossom Tree","&#127800;"],[2000,"Fruit Tree","&#127822;"],[2800,"Mighty Banyan","&#127796;"],
+  [3800,"Forest Keeper","&#127966;&#65039;"],[5000,"Maths Rainforest","&#128081;"]
+];
+function levelInfo(){
+  var i=0; for(var j=0;j<LEVELS.length;j++){ if(S.xp>=LEVELS[j][0]) i=j; }
+  var next = LEVELS[i+1] ? LEVELS[i+1][0] : LEVELS[i][0]+1500, base=LEVELS[i][0];
+  return {i:i, name:LEVELS[i][1], em:LEVELS[i][2], pct:Math.max(4, Math.min(100, Math.round((S.xp-base)/(next-base)*100)))};
+}
+function addXP(n){ S.xp += n; paintHud(); }
+var BADGES = {
+  first:["&#127793;","First Day","Finished a daily practice"],
+  s3:["&#128293;","3 Days","A 3-day streak"], s7:["&#128293;","1 Week","A 7-day streak"],
+  s14:["&#127941;","2 Weeks","A 14-day streak"], s30:["&#127942;","30 Days","A 30-day streak"],
+  perfect:["&#127919;","Bullseye","A perfect daily practice"], buster:["&#128170;","Mistake Buster","Fixed 10 mistakes"],
+  explorer:["&#129517;","Explorer","Tried every skill once"], bloom:["&#127800;","First Bloom","One whole chapter strong"],
+  garden:["&#127966;&#65039;","Full Garden","Every chapter strong"], reader:["&#128218;","Rule Reader","Opened 10 rule cards"]
+};
+function grant(id){ if(BADGES[id] && S.badges.indexOf(id)<0){ S.badges.push(id); return true; } return false; }
+function chapterSkills(ch){ return SKILLS.filter(function(s){ return s.ch===ch && !s.daily; }); }
+function chapterStrong(ch){ var l=chapterSkills(ch); return l.length>0 && l.every(function(s){ return skState(s.id).b>=STRONG; }); }
+function checkBadges(out){
+  var g=function(id){ if(grant(id)) out.push(id); };
+  if(S.streak>=3) g("s3"); if(S.streak>=7) g("s7"); if(S.streak>=14) g("s14"); if(S.streak>=30) g("s30");
+  if(S.fixed>=10) g("buster");
+  if(S.reads>=10) g("reader");
+  var act=SKILLS.filter(enabled);
+  if(act.length && act.every(function(s){ return skState(s.id).n>0; })) g("explorer");
+  var chs=CHAPTERS.filter(function(c){ return !S.off[c.id] && chapterSkills(c.id).length; });
+  if(chs.some(function(c){ return chapterStrong(c.id); })) g("bloom");
+  if(chs.length && chs.every(function(c){ return chapterStrong(c.id); })) g("garden");
+}
+
+/* garden: one plant per chapter, grown by the average box of its skills */
+function plantOf(ch){
+  var l=chapterSkills(ch); if(!l.length) return {em:"&#127793;", strong:0, total:0, seen:0, avg:0};
+  var sum=0, strong=0, seen=0;
+  l.forEach(function(s){ var st=skState(s.id); sum+=st.b; if(st.b>=STRONG) strong++; if(st.n>0) seen++; });
+  var avg=sum/l.length, em;
+  if(strong===l.length) em="&#127800;";
+  else if(avg>=4) em="&#127795;";
+  else if(avg>=2.5) em="&#129716;";
+  else if(avg>=1) em="&#127807;";
+  else if(seen>0) em="&#127793;";
+  else em="&#127792;";
+  return {em:em, strong:strong, total:l.length, seen:seen, avg:avg};
+}
+
+/* =======================================================================
+   HOME
+   ======================================================================= */
+var app=document.getElementById("app");
+function greet(){ var h=new Date().getHours(); return h<12 ? "Good morning" : (h<17 ? "Good afternoon" : "Good evening"); }
+function doneToday(){ return S.done && S.done.d===todayISO(); }
+function weekStrip(){
+  var t=todayISO(), h='<div class="week">';
+  for(var k=6;k>=0;k--){
+    var d=addDays(t,-k), on=(S.log||[]).some(function(e){ return e.d===d; });
+    var lab=new Date(d+"T00:00:00").toLocaleDateString("en-IN", WEEKDAY_FMT).charAt(0);
+    h+='<div class="wd'+(on?" on":"")+(k===0?" now":"")+'"><span>'+(on?"&#10003;":"")+'</span><b>'+lab+'</b></div>';
+  }
+  return h+'</div>';
+}
+var WEEKDAY_FMT = {weekday:"short"};
+function home(){
+  clearTimer(); R=null;
+  var p=plan(S.n, false), t=todayISO();
+  var rev=p.chosen.filter(function(c){ return c.why==="review"; }).length, nw=p.chosen.filter(function(c){ return c.why==="first" || c.why==="new"; }).length;
+  var tot=p.units.length+p.chosen.length+p.mist.length;
+  var mins=Math.max(5, Math.round((tot*55 + p.chosen.filter(function(c){ return needsCard(c.sk); }).length*45)/60));
+  var h='<h1>Daily Maths Garden &#127793;</h1><p class="sub">'+greet()+', Diksha! A little maths every day keeps it all strong.</p>';
+  if(!doneToday()){
+    h+='<div class="card today"><div class="qtype">Today&#39;s practice</div>'+
+       '<div class="tbig">'+tot+' questions &middot; about '+mins+' min</div>'+
+       '<div class="mixline">'+(p.units.length?'<span class="pill">&#129518; 2 tables</span>':'')+(rev?'<span class="pill">&#128257; '+rev+' review'+(rev>1?'s':'')+'</span>':'')+
+       (nw?'<span class="pill">&#10024; '+nw+' to try</span>':'')+(p.mist.length?'<span class="pill">&#128170; '+p.mist.length+' to fix</span>':'')+'</div>'+
+       '<button class="btn" id="startBtn" onclick="startDaily()">Start today&#39;s practice &#9654;</button>'+
+       '<p class="smallnote" style="margin-top:8px">&#9999;&#65039; Keep your rough notebook and a pencil next to you.</p></div>';
+  } else {
+    h+='<div class="card today done"><div class="qtype">Today&#39;s practice</div><div class="tbig">&#9989; Done for today! '+S.done.score+'/'+S.done.max+'</div>'+
+       '<p class="sub" style="margin:4px 0 10px">Come back tomorrow to keep your streak. Want a few more now?</p>'+
+       '<button class="btn ghost" onclick="startExtra()">Extra round (6 more)</button></div>';
+  }
+  h+=weekStrip();
+  h+='<div class="tools">'+
+     '<button class="tool" onclick="startFix()"><div class="t">&#128170; Fix My Mistakes</div><div class="d">'+(wrongCount()?wrongCount()+' waiting':'Nothing waiting. Great!')+'</div></button>'+
+     '<button class="tool" onclick="library()"><div class="t">&#128218; Rule Book</div><div class="d">Every rule, with practice</div></button></div>';
+  h+='<h2>My garden</h2><p class="sub" style="margin-top:-4px">Each chapter is a plant. Answer its questions right on different days and it grows into a flower.</p><div class="garden">';
+  CHAPTERS.forEach(function(c){
+    if(S.off[c.id] || !chapterSkills(c.id).length) return;
+    var pl=plantOf(c.id);
+    h+='<div class="plant"><div class="pe">'+pl.em+'</div><div class="pn">'+c.name+'</div><div class="ps">'+pl.strong+'/'+pl.total+' strong</div>'+
+       '<div class="pbar"><i style="width:'+Math.round(pl.avg/6*100)+'%"></i></div></div>';
+  });
+  h+='</div>';
+  h+='<h2>Badges ('+S.badges.length+'/'+Object.keys(BADGES).length+')</h2><div>';
+  Object.keys(BADGES).forEach(function(k){ var b=BADGES[k], got=S.badges.indexOf(k)>=0; h+='<span class="badge" style="'+(got?"":"opacity:.35")+'">'+b[0]+' '+b[1]+'</span>'; });
+  h+='</div>';
+  h+='<details class="papa" id="papa"><summary>For Papa / Mummy</summary>'+papaHtml()+'</details>';
+  h+='<p class="smallnote">'+S.xp+' XP &middot; best streak '+S.best+' day'+(S.best===1?'':'s')+'. Progress saves on this device and syncs if sync is on.</p>';
+  app.innerHTML=h; paintHud(); window.scrollTo(0,0);
+}
+function papaHtml(){
+  var t=todayISO(), h='';
+  var last7=(S.log||[]).filter(function(e){ return daysBetween(e.d,t)<7; });
+  var sc=0, mx=0; last7.forEach(function(e){ sc+=e.s; mx+=e.m; });
+  h+='<p class="sub" style="margin-top:10px"><b>Last 7 days:</b> '+last7.length+' of 7 days practised'+(mx?' &middot; '+Math.round(sc/mx*100)+'% right':'')+
+     ' &middot; '+wrongCount()+' mistakes waiting.</p>';
+  h+='<p class="sub"><b>How it works:</b> each skill sits in a box from 0 to 6. A right answer moves it up one box and pushes the next review further away (1, 2, 4, 7, 14, then 30 days). A skill she gets right the very first time starts at the 4-day gap, because she has already learnt it in class. A wrong answer drops it two boxes and brings it back tomorrow with its rule card first. Green = strong (7+ days).</p>';
+  h+='<div class="sktable">';
+  CHAPTERS.forEach(function(c){
+    var l=SKILLS.filter(function(s){ return s.ch===c.id; }); if(!l.length) return;
+    h+='<div class="skh"><span>'+c.icon+' '+c.name+'</span><button class="tog'+(S.off[c.id]?'':' on')+'" onclick="toggleCh(\''+c.id+'\')">'+(S.off[c.id]?'Paused':'On')+'</button></div>';
+    l.forEach(function(s){
+      var st=skState(s.id), acc=st.n?Math.round(st.r/st.n*100)+'%':'&ndash;';
+      var nxt = s.daily ? 'every day' : (st.b===0 ? 'not yet' : (st.due<=t ? 'due now' : 'in '+daysBetween(t,st.due)+' d'));
+      var cls = s.daily ? 'dl' : (st.b===0 ? 'b0' : (st.b>=STRONG ? 'bg' : (st.b>=2 ? 'ba' : 'br')));
+      h+='<div class="skr"><span class="nm">'+s.name+'</span><span class="bx6 '+cls+'">'+(s.daily?'&#9679;':st.b)+'</span><span class="ac">'+acc+'</span><span class="nx">'+nxt+'</span></div>';
+    });
+  });
+  h+='</div>';
+  h+='<p class="sub" style="margin-top:12px"><b>Questions per day</b> (2 tables, up to 2 mistakes, the rest from the schedule):</p><div class="row">'+
+     [8,12,16].map(function(n){ return '<button class="btn '+(S.n===n?'warm':'ghost')+'" onclick="setN('+n+')">'+n+'</button>'; }).join("")+'</div>';
+  h+='<p class="sub" style="margin-top:12px"><b>Adding a lesson:</b> when a new chapter starts in class, share its worksheets with Claude in the Diksha study project and ask to add it to Daily Maths. New skills enter 2 a day, each with its rule card first, and join the schedule.</p>';
+  h+='<div class="card"><button class="btn ghost" onclick="resetAsk()">Reset all progress</button><div id="resetZone"></div></div>';
+  return h;
+}
+function toggleCh(id){ if(S.off[id]) delete S.off[id]; else S.off[id]=true; save(); home(); var p=document.getElementById("papa"); if(p){ p.open=true; if(p.scrollIntoView) p.scrollIntoView(); } }
+function setN(n){ S.n=n; save(); home(); var p=document.getElementById("papa"); if(p){ p.open=true; if(p.scrollIntoView) p.scrollIntoView(); } }
+function resetAsk(){
+  document.getElementById("resetZone").innerHTML='<p class="sub" style="margin-top:12px">Sure? This clears the garden, streak, XP, badges and mistakes.</p>'+
+    '<div class="row"><button class="btn warm" onclick="doReset()">Yes, reset</button><button class="btn ghost" onclick="home()">Cancel</button></div>';
+}
+function doReset(){ try{ localStorage.removeItem(KEY); }catch(e){} S=blank(); S.imp=1; save(); home(); }
+
+/* =======================================================================
+   RULE BOOK (concept library)
+   ======================================================================= */
+function cardsByChapter(){
+  var out=[];
+  CHAPTERS.forEach(function(c){
+    var ids=[]; SKILLS.forEach(function(s){ if(s.ch===c.id && s.learn && LS[s.learn] && ids.indexOf(s.learn)<0) ids.push(s.learn); });
+    if(ids.length) out.push({c:c, ids:ids});
+  });
+  return out;
+}
+function library(){
+  clearTimer(); R=null;
+  var h='<div class="qtop"><button class="back" onclick="home()">&#8592;</button><div class="dots"></div></div>'+
+    '<h1>&#128218; Rule Book</h1><p class="sub">Forgot how something works? Open its card, read it, then practise 5 fresh questions.</p>';
+  cardsByChapter().forEach(function(g){
+    if(S.off[g.c.id]) return;
+    h+='<h2>'+g.c.icon+' '+g.c.name+'</h2><div class="slist">';
+    g.ids.forEach(function(id){
+      h+='<button class="scard" onclick="openCard(\''+id+'\')"><div style="flex:1;min-width:0"><div class="t">'+LS[id].title+'</div></div><div class="r">&#9654;</div></button>';
+    });
+    h+='</div>';
+  });
+  h+='<button class="btn ghost" style="margin-top:16px" onclick="home()">Back home</button>';
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+function openCard(id){
+  var l=LS[id]; if(!l) return library();
+  S.reads=(S.reads||0)+1; var nb=[]; checkBadges(nb); save();
+  var sks=SKILLS.filter(function(s){ return s.learn===id; });
+  var h='<div class="qtop"><button class="back" onclick="library()">&#8592;</button><div class="dots"></div></div>'+
+    '<div class="card learn"><div class="qtype" style="color:var(--sky)">'+l.ch+'</div><h3>'+l.title+'</h3>'+l.html+'</div>'+
+    (sks.length?'<button class="btn mint" onclick="startPractice(\''+id+'\')">Practise 5 questions &#9654;</button>':'')+
+    '<button class="btn ghost" style="margin-top:10px" onclick="library()">Back to the Rule Book</button>';
+  app.innerHTML=h; window.scrollTo(0,0);
+}
+
+/* =======================================================================
+   STARTING SESSIONS
+   ======================================================================= */
+function startDaily(){
+  var list=buildSession(S.n, false);
+  runItems({id:"daily", mode:"daily", title:"Today's practice"}, list);
+}
+function startExtra(){
+  var list=buildSession(6, true);
+  if(!list.length){ home(); return; }
+  runItems({id:"extra", mode:"daily", extra:true, title:"Extra round"}, list);
+}
+function startPractice(cardId){
+  var sks=shuffle(SKILLS.filter(function(s){ return s.learn===cardId; }).map(function(s){ return s.id; }));
+  if(!sks.length){ library(); return; }
+  var list=[]; for(var i=0;i<5;i++) list.push(makeItem(sks[i%sks.length]));
+  runItems({id:"practice", mode:"practice", card:cardId, title:"Practice"}, list);
+}
+function startFix(){
+  var keys=Object.keys(S.wrong);
+  if(!keys.length){
+    app.innerHTML='<div class="card center" style="margin-top:30px"><div style="font-size:44px">&#127881;</div><h2>No mistakes waiting!</h2>'+
+      '<p class="sub">Every question you get wrong lands here, so you can beat it later.</p><button class="btn" onclick="home()">Back</button></div>';
+    return;
+  }
+  keys.sort(function(a,b){ return S.wrong[b].n-S.wrong[a].n; });
+  var list=shuffle(keys.slice(0,10).map(function(k){ try{ var it=JSON.parse(S.wrong[k].j); it.fromBank=1; return it; }catch(e){ return null; } }).filter(Boolean));
+  runItems({id:"fix", mode:"practice", fixmode:true, title:"Fix My Mistakes"}, list);
+}
+
+/* =======================================================================
+   GRADING HOOK (shared by every question type)
+   ======================================================================= */
+function feedback(ok, it, extra){
+  if(R.lock) return; R.lock=true;
+  R.results[R.i]=ok; R.max+=1;
+  var fixedNow=false, t=todayISO();
+  if(ok){ R.score+=1; addXP(10); fixedNow=noteRight(it); }
+  else { addXP(2); noteWrong(it); }
+  if(it.sk){
+    var mv=gradeSkill(it.sk, ok, it.fromBank ? "practice" : R.s.mode);
+    if(mv>0) R.up=(R.up||0)+1;
+    if(mv<0) R.down=(R.down||0)+1;
+  }
+  S.days[t]=(S.days[t]||0)+1;
+  save();
+  var h='<div class="fb '+(ok?"good":"bad")+'"><b class="h">'+(ok?"&#9989; Correct!":"&#10060; Not quite")+(fixedNow?" &#128170; Mistake fixed!":"")+'</b>'+
+    (extra?extra+"<br>":"")+(it.why||"")+'</div>';
+  if(it.slip) h+='<div class="fb bad" style="background:#3b1d2e;border-color:#8a3a62"><b class="h">&#128269; An old slip</b>'+it.slip+'</div>';
+  if(it.work) h+='<div class="work"><div class="wt">&#9999;&#65039; Model working</div>'+it.work+'</div>';
+  var s=SK[it.sk];
+  if(!ok && s && s.learn && LS[s.learn]) h+='<button class="btn ghost" style="margin-top:10px" id="ruleBtn" onclick="toggleRule()">&#128216; Show me the rule</button><div id="ruleZone"></div>';
+  document.getElementById("fb").innerHTML=h;
+  nextBtn();
+}
+function toggleRule(){
+  var z=document.getElementById("ruleZone"); if(!z || !R) return;
+  if(z.innerHTML){ z.innerHTML=""; return; }
+  var s=SK[R.items[R.i].sk], l=s && LS[s.learn]; if(!l) return;
+  z.innerHTML='<div class="card learn"><h3>'+l.title+'</h3>'+l.html+'</div>';
+}
+
+/* =======================================================================
+   RESULTS
+   ======================================================================= */
+function finish(){
+  clearTimer();
+  if(!R || R.ended) return; R.ended=true;
+  var s=R.s, t=todayISO(), pct=R.max?Math.round(R.score/R.max*100):100, newB=[], bonus=0;
+  if(s.id==="daily" && !doneToday()){
+    S.done={d:t, score:R.score, max:R.max};
+    touchStreak();
+    S.log.push({d:t, s:R.score, m:R.max}); if(S.log.length>60) S.log.shift();
+    bonus=30; addXP(30);
+    if(R.max && R.score===R.max){ S.perfect=(S.perfect||0)+1; addXP(20); bonus+=20; if(grant("perfect")) newB.push("perfect"); }
+    if(grant("first")) newB.push("first");
+  }
+  checkBadges(newB);
+  save();
+  if(pct>=70 && R.max) confetti(pct>=90?140:80);
+  var tomorrow=SKILLS.filter(function(x){ var st=skState(x.id); return !x.daily && enabled(x) && st.b>0 && st.due<=addDays(t,1); }).length;
+  var msg = !R.max ? "All read. Nice!" : pct>=90 ? "Brilliant. Your garden loves this." : pct>=70 ? "Strong work. The misses will come back tomorrow so you can beat them." :
+            pct>=50 ? "Good effort. Read the rule cards for the red ones." : "Tricky day. That is how brains grow. These come back tomorrow with their rules first.";
+  var wrong=R.items.map(function(it,k){
+    if(R.results[k]!==false) return "";
+    return '<div class="card" style="padding:11px"><div style="font-size:14.5px;font-weight:600">'+it.q+'</div>'+
+      '<div style="font-size:14.5px;color:#7ee0b5;margin-top:6px">&#10141; '+ansText(it)+'</div></div>';
+  }).join("");
+  var h='<h1>'+(s.id==="daily"?"Today&#39;s practice done!":(s.extra?"Extra round done":"Round done"))+'</h1>'+
+    '<div class="card center"><div class="big" style="color:'+(pct>=70?"#3ddc97":"#ffd166")+'">'+R.score+'/'+R.max+'</div>'+
+    '<p class="sub" style="margin:8px 0 0">'+msg+'</p>'+
+    (bonus?'<p class="sub" style="margin:6px 0 0">+'+bonus+' XP bonus &middot; &#128293; '+S.streak+'-day streak</p>':'')+'</div>';
+  if(R.up || R.down) h+='<div class="card"><b>&#127793; Garden update</b><p class="sub" style="margin:6px 0 0">'+
+    (R.up?R.up+' skill'+(R.up>1?'s':'')+' grew':'')+(R.up&&R.down?' &middot; ':'')+(R.down?R.down+' will come back tomorrow':'')+'.'+
+    (tomorrow?' Tomorrow: '+tomorrow+' review'+(tomorrow>1?'s':'')+' waiting.':'')+'</p></div>';
+  if(newB.length) h+='<div class="card"><b>New badges!</b><div style="margin-top:8px">'+newB.map(function(b){ return '<span class="badge new">'+BADGES[b][0]+' '+BADGES[b][1]+'</span>'; }).join("")+'</div></div>';
+  if(wrong) h+='<h2>Look at these once more</h2><p class="sub">They are saved in <b>Fix My Mistakes</b>.</p>'+wrong;
+  else if(R.max) h+='<div class="card center"><div style="font-size:34px">&#11088;</div><b>Nothing wrong. Clean sweep!</b></div>';
+  h+='<div class="row" style="margin-top:14px">';
+  if(s.mode==="practice" && s.card) h+='<button class="btn" onclick="startPractice(\''+s.card+'\')">5 more</button>';
+  else if(s.fixmode) h+='<button class="btn" onclick="startFix()">Again</button>';
+  else if(doneToday()) h+='<button class="btn" onclick="startExtra()">Extra round</button>';
+  h+='<button class="btn ghost" onclick="home()">Home</button></div>';
+  app.innerHTML=h; window.scrollTo(0,0); paintHud();
+}
+
+/* =======================================================================
+   BOOT
+   ======================================================================= */
+var RENDER={mcq:1, blanks:1, order:1, match:1, sort:1, pickall:1, shade:1, task:1};
+/* BOOT_STAMP is taken before anything touches S, so a newer cloud copy always wins. */
+var BOOT_STAMP = S.updatedAt || 0;
+/* The import is written locally only (no updatedAt bump, no push), so it can never
+   look newer than real progress from another device. */
+importMidterm();
+try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+home();
+if(typeof DikshaSync!=="undefined" && DikshaSync.init()){
+  try{ DikshaSync.attachUI(); }catch(e){}
+  DikshaSync.pull(KEY).then(function(remote){
+    if(remote && (remote.updatedAt||0) > BOOT_STAMP){
+      for(var k in remote){ if(Object.prototype.hasOwnProperty.call(remote,k)) S[k]=remote[k]; }
+      try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){}
+      if(!R || R.ended) home();
+    }
+    DikshaSync.arm();
+    try{ DikshaSync.push(KEY, S); }catch(e){}
+  });
+}
+
+</script>
+</body>
+</html>

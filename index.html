@@ -35,6 +35,7 @@ a.subject.soon{border-left-color:#C9C2DB;opacity:.6;pointer-events:none}
 /* ---- Class 4 Learning Hub: collapsible sub-sections ---- */
 details.grp{background:#fff;border-radius:18px;box-shadow:var(--shadow);margin-bottom:12px;overflow:hidden;
  border-left:8px solid var(--teal)}
+details.grp[data-g="daily"]{border-left-color:#2EAD6B}
 details.grp[data-g="wt1"]{border-left-color:var(--lilac)}
 details.grp[data-g="wt2"]{border-left-color:var(--teal)}
 details.grp[data-g="mid"]{border-left-color:var(--orange)}
@@ -98,6 +99,9 @@ footer{text-align:center;font-size:11px;font-weight:700;color:#A79FB8;margin-top
       highlighted, and its `group` is the sub-section that opens on load.
 ===================================================================== */
 const GROUPS = [
+  { id:"daily", icon:"🌱", name:"Every Day", note:"10-15 minutes of maths a day, so nothing is forgotten", always:true, items:[
+    { icon:"🌱", name:"Daily Maths Garden", desc:"Every Class 4 maths skill on a review schedule: tables, Ch 1-5 and special-class extras, plus your old mistakes", href:"maths-daily.html", cls:"maths" }
+  ]},
   { id:"wt1", icon:"1️⃣", name:"Weekly Test 1", note:"Unit 1 modules", items:[
     { icon:"💻", name:"Computer Science", desc:"Unit 1: Computer System + Scratch", href:"computer-science.html", cls:"" },
     { icon:"🔢", name:"Mathematics", desc:"Addition, subtraction, multiplication, division, place value & word problems", href:"mathsquest.html", cls:"maths" },
@@ -171,7 +175,7 @@ const cardHTML = s => {
 
 document.getElementById("hub").innerHTML = GROUPS.map(g=>{
   const n=g.items.length;
-  return '<details class="grp" data-g="'+esc(g.id)+'"'+(g.id===openGroup?" open":"")+'>'+
+  return '<details class="grp" data-g="'+esc(g.id)+'"'+((g.id===openGroup||g.always)?" open":"")+'>'+
     '<summary><span class="chev">&#9654;</span><span class="gico">'+g.icon+'</span>'+
     '<span class="gname">'+esc(g.name)+'<span class="gnote">'+esc(g.note)+'</span></span>'+
     '<span class="gcount">'+n+(n===1?" module":" modules")+'</span></summary>'+
