@@ -1,0 +1,1858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<title>Safety Street</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Baloo+2:wght@600;700;800&family=Patrick+Hand&display=swap">
+<style>
+/* Safety Street - W.T.-III Science, Ch 7 Safety First.
+   One column. The 3-day plan is a street with a zebra crossing; sessions are road-sign discs. Daylight palette for a tablet. */
+:root{
+  --pond:#EEF3F8; --pond2:#DCE6F0; --ink:#1E2A3A; --muted:#566578; --card:#FFFFFF; --line:#D3DEEA;
+  --leaf:#1E9A56; --leaf-deep:#14713E; --leaf-soft:#DDF3E5;
+  --sun:#FFB627; --sun-deep:#C98800; --sun-soft:#FFF2D2;
+  --red:#D8414D; --road:#3B4452; --road2:#4A5464;
+  --ok:#1A9A5E; --ok-bg:#DFF5E9; --bad:#D8414D; --bad-bg:#FDE6E8; --sel:#2D6CDF; --sel-bg:#E3ECFD;
+  --f-display:"Baloo 2","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible","Segoe UI",system-ui,-apple-system,sans-serif;
+  --f-hand:"Patrick Hand","Comic Sans MS","Chalkboard SE",cursive;
+  --r:18px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--pond);color:var(--ink)}
+body{font-family:var(--f-body);font-size:18px;line-height:1.45;margin:0;min-height:100%;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(circle at 6% 0%,#FFF4D8 0,transparent 30%),radial-gradient(circle at 100% 30%,#E2EEFB 0,transparent 32%),var(--pond)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;text-align:inherit}
+button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+button[disabled]{cursor:default}
+h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:28px 0 10px;text-wrap:balance;line-height:1.15}
+h3{font-family:var(--f-display);font-weight:700;line-height:1.2;margin:0 0 8px;text-wrap:balance}
+b{font-weight:700}
+mark{background:var(--sun-soft);color:inherit;border-radius:4px;padding:0 2px}
+
+/* top bar */
+#top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(238,243,248,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topin{max-width:780px;margin:0 auto;padding:6px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ava{width:42px;height:40px;flex:none}
+.lvl{display:flex;flex-direction:column;flex:1;min-width:110px}
+.lvl b{font-family:var(--f-display);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.1}
+.xpbar{height:9px;background:var(--pond2);border-radius:9px;overflow:hidden;margin-top:3px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),#FFD36B);border-radius:9px;transition:width .5s}
+.chip{display:inline-flex;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.exam{background:var(--sun-soft);border-color:#F4CF7E;color:#6E4A00}
+.streak{display:inline-flex;gap:4px}
+.streak i{width:10px;height:10px;border-radius:50%;background:var(--pond2);border:1px solid var(--line)}
+.streak i.on{background:var(--leaf);border-color:var(--leaf-deep)}
+
+main{max-width:780px;margin:0 auto;padding:14px 16px 70px}
+
+/* hero */
+.hero{display:flex;gap:10px;align-items:flex-end}
+.bigfrog{width:96px;height:104px;flex:none;animation:bob 3.2s ease-in-out infinite}
+.bigfrog.sm{width:84px;height:90px;margin:0 auto}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--ink);border-radius:22px 22px 22px 6px;padding:12px 14px;box-shadow:4px 4px 0 var(--ink);font-family:var(--f-hand);font-size:21px;line-height:1.3}
+.bubble b{font-family:var(--f-body);font-size:18px}
+.bubble .btnrow{margin-top:10px;font-family:var(--f-body)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:50px;padding:10px 18px;border-radius:14px;font-family:var(--f-display);font-weight:700;font-size:19px;background:var(--leaf);color:#fff;box-shadow:0 4px 0 var(--leaf-deep);transition:transform .08s;text-align:center}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--leaf-deep)}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);border:1px solid var(--line)}
+.btn.ink{background:var(--ink);box-shadow:0 4px 0 #0B141F}
+.btn.sm{min-height:44px;font-size:16px;padding:8px 12px}
+.btn.danger{background:var(--bad);color:#fff;border-color:var(--bad);box-shadow:0 4px 0 #9E2B35}
+.btn[disabled]{opacity:.4}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btnrow.center{justify-content:center}
+.btnrow.spread{justify-content:space-between}
+.link{color:var(--leaf-deep);text-decoration:underline;font-weight:700;padding:8px}
+.skip{text-align:center;margin:4px 0 0}
+
+/* my mistakes */
+.mist{margin-top:18px;background:#FFF8EC;border:2px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--ink);padding:14px}
+.misth{display:flex;gap:12px;align-items:center}
+.mic{font-size:40px;line-height:1}
+.mtx h2{margin:0}
+.mtx p{margin:2px 0 0;font-size:16px;color:var(--muted)}
+.mgrp{margin-top:10px}
+.mgrp small{font-size:14px;font-weight:700;color:var(--muted)}
+.mgrp ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mgrp li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:16px;line-height:1.3;display:flex;gap:8px;align-items:baseline}
+.mgrp li.more{background:none;border:0;padding:0 4px;color:var(--muted);font-weight:700}
+.mchip{flex:none;font-size:12px;font-weight:700;background:var(--pond2);border-radius:999px;padding:1px 7px}
+.btn.mbtn{background:var(--sun);color:var(--ink);box-shadow:0 4px 0 var(--sun-deep)}
+.fixline{font-weight:700;font-size:17px;margin:4px 0}
+
+/* street trail */
+.pond{display:flex;flex-direction:column;gap:10px;border-radius:26px;padding:14px 14px 14px 30px;position:relative;
+  background:repeating-linear-gradient(180deg,#fff 0 16px,transparent 16px 30px) 8px 0/10px 100% no-repeat,var(--road)}
+.dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 4px 0;font-family:var(--f-display);color:#fff}
+.dayhead b{font-size:20px}
+.dayhead span{font-size:15px;color:#C9D3E0;font-weight:600}
+.pad{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:6px 10px 6px 6px;border-radius:999px 22px 22px 999px;background:rgba(255,255,255,.9);border:2px solid transparent;transition:transform .1s}
+.pad.alt{margin-left:clamp(0px,5vw,40px);width:calc(100% - clamp(0px,5vw,40px))}
+.pad:active{transform:scale(.98)}
+.pad.next{background:#fff;border-color:var(--sun);box-shadow:0 4px 0 var(--sun-deep)}
+.pad.done{background:rgba(255,255,255,.72)}
+.lily{position:relative;width:60px;height:60px;flex:none;border-radius:50%;background:#fff;border:6px solid var(--red);display:grid;place-items:center}
+.pad.done .lily{border-color:var(--leaf)}
+.lic{font-size:26px;line-height:1}
+.tick{position:absolute;right:-6px;bottom:-6px;background:var(--ok);color:#fff;border-radius:50%;width:22px;height:22px;font-size:14px;display:grid;place-items:center;font-weight:700}
+.hopper{position:absolute;left:34px;top:-18px;width:34px;height:38px;animation:bob 1.6s ease-in-out infinite;pointer-events:none}
+.pt{display:flex;flex-direction:column;min-width:0;flex:1}
+.pt small{font-size:14px;color:var(--muted);font-weight:700}
+.pt b{font-family:var(--f-display);font-size:19px;line-height:1.15}
+.pt .sub{font-size:15px;color:var(--muted)}
+.stars{color:var(--sun-deep);letter-spacing:2px;font-size:17px}
+.mini{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* parts */
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.cht{background:var(--card);border-radius:var(--r);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px;display:flex;flex-direction:column;gap:8px;border-top:8px solid var(--hue)}
+.chh{display:flex;gap:10px;align-items:center}
+.ci{font-size:34px;line-height:1}
+.chh small{display:block;font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.chh b{font-family:var(--f-display);font-size:19px;line-height:1.15}
+.chs{font-size:15px;color:var(--muted)}
+.chb{display:flex;gap:6px;flex-wrap:wrap}
+.chb .btn{flex:1;padding:8px 4px;font-size:15px;white-space:nowrap}
+.extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:2px;min-height:110px;box-shadow:0 4px 0 var(--line)}
+.ex span{font-size:30px;line-height:1.1}
+.ex b{font-family:var(--f-display);font-size:18px;line-height:1.15}
+.ex small{font-size:14px;color:var(--muted)}
+.foot{margin-top:30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+
+/* learn */
+.qhead{display:flex;align-items:center;gap:10px}
+.qx{min-width:46px;min-height:46px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:18px;text-align:center}
+.qx.armed{background:var(--bad);color:#fff;border-color:var(--bad);padding:0 10px;font-size:15px}
+.ltitle{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.2}
+.lc{background:var(--card);border-radius:var(--r);padding:16px;border:1px solid var(--line);margin-top:12px;border-left:8px solid var(--hue,var(--leaf))}
+.lch{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.lch h3{font-size:24px;margin:0;flex:1}
+.le{font-size:36px;line-height:1}
+.lnum{font-size:14px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.lc p{margin:8px 0}
+.lc ul{margin:6px 0;padding-left:22px}
+.lc li{margin:3px 0}
+.note{background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin-top:10px}
+.note.red{background:var(--bad-bg)}
+.note.real{background:#E4F0FD}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:17px;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+table.t th{background:var(--pond);font-size:15px}
+.dia{max-width:420px;margin:8px auto}
+.signgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px;margin-top:10px}
+figure{margin:0;text-align:center}
+figcaption{font-size:14px;font-weight:700;line-height:1.2}
+.emo{font-size:40px;line-height:1}
+.emo.big{font-size:84px}
+.dots{display:flex;gap:6px;justify-content:center;margin:12px 0 0}
+.dots i{width:9px;height:9px;border-radius:9px;background:var(--line)}
+.dots i.on{background:var(--ink)}
+
+/* quiz */
+.pbar{flex:1;height:12px;background:var(--pond2);border-radius:12px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--leaf);transition:width .3s}
+.combo{font-weight:800;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.qn{font-size:15px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.sec{margin:16px 0 6px;font-size:15px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;gap:10px;letter-spacing:.02em}
+.mk{background:var(--sun-soft);color:#6E4A00;border-radius:999px;padding:1px 9px;white-space:nowrap;align-self:flex-start}
+.qc{background:var(--card);border-radius:22px;padding:16px;border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.prompt{font-size:21px;font-weight:700;margin:0 0 10px;line-height:1.35}
+.prompt.sm{font-size:18px}
+.prompt.stmt{font-family:var(--f-hand);font-size:25px;font-weight:400}
+.ar{background:var(--pond);border-radius:14px;padding:10px 12px;margin:0 0 12px;font-size:18px;line-height:1.4}
+.ar p{margin:4px 0}
+.passage{background:#FFFBEF;border:1px dashed #E2C77A;border-radius:14px;padding:10px 12px;margin:0 0 12px;font-size:17px;line-height:1.5}
+.sentence{line-height:2.1}
+.hint{font-size:15px;color:var(--muted);margin:-4px 0 10px}
+.pic{text-align:center;margin:4px 0 12px}
+.cap{font-weight:700;font-size:18px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts.one{grid-template-columns:1fr}
+.opt{min-height:58px;border-radius:16px;background:var(--pond);border:2px solid var(--line);font-size:19px;font-weight:700;padding:8px 12px;text-align:left;transition:transform .08s;line-height:1.25}
+.opt:active{transform:scale(.97)}
+.opt.spell{font-size:22px;letter-spacing:.02em;text-align:center}
+.opt.sent{font-weight:400;font-size:18px}
+.ol{color:var(--muted);font-weight:700}
+.opt.pick{background:var(--sel-bg);border-color:var(--sel)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad);color:#8A1F29}
+.opt.also{border-color:var(--ok);border-style:dashed}
+.opt.dim{opacity:.5}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tfb{text-align:center;font-size:22px}
+.fixbox{margin-top:14px;border-top:2px dashed var(--line);padding-top:10px}
+.glabel{font-size:15px;font-weight:700;color:var(--muted);margin:10px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chp{min-height:50px;padding:8px 14px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:19px;font-weight:700}
+.chp.gone{visibility:hidden}
+.chp.bad{background:var(--bad-bg);border-color:var(--bad)}
+.slot{display:inline-flex;align-items:center;justify-content:center;min-width:96px;min-height:44px;padding:2px 12px;margin:0 4px;border-radius:12px;border:2px dashed #9FB5CC;background:var(--pond);font-weight:700;vertical-align:middle;line-height:1.2}
+.slot.filled{border-style:solid;border-color:var(--sel);background:var(--sel-bg)}
+.slot.sel{border-color:var(--sun-deep);background:var(--sun-soft)}
+.slot.ok{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.slot.bad{border-style:solid;border-color:var(--bad);background:var(--bad-bg)}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mi{min-height:58px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:17px;font-weight:700;padding:6px 10px;text-align:center;line-height:1.2}
+.mi.r{background:#fff}
+.mi.sel{background:var(--sel-bg);border-color:var(--sel)}
+.mi.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.mi.bad{background:var(--bad-bg);border-color:var(--bad)}
+.tray{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--sun-soft);border-radius:16px;padding:12px;margin-bottom:12px;text-align:center}
+.tray small{font-size:14px;color:var(--muted);font-weight:700}
+.tray b{font-size:22px;font-family:var(--f-display);line-height:1.2}
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.bk{border-radius:16px;border:2px solid var(--ink);background:#fff;padding:10px;min-height:92px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.bk b{font-family:var(--f-display);font-size:18px}
+.bk .in{display:flex;flex-wrap:wrap;gap:5px}
+.bk .in span{background:var(--ok-bg);border-radius:9px;padding:1px 8px;font-size:15px;font-weight:700}
+.bk .in span.miss{background:var(--bad-bg);outline:1px dashed var(--bad)}
+.bk.bad{border-color:var(--bad);background:var(--bad-bg)}
+.seq{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.seq li{display:flex;align-items:center;gap:8px;border:2px dashed #9FB5CC;border-radius:14px;padding:8px 10px;min-height:52px;background:var(--pond)}
+.seq li.f{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.seq li.cur{border-color:var(--sun-deep);background:var(--sun-soft)}
+.seq .n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none}
+.seq .st{font-weight:700}
+.stepdone{border-radius:12px;padding:8px 10px;margin-bottom:8px;background:var(--ok-bg)}
+.stepdone.bad{background:var(--bad-bg)}
+.stepdone small{display:block;font-size:14px;color:var(--muted)}
+.nb{display:flex;gap:12px;align-items:center;background:repeating-linear-gradient(#fff 0 30px,#D6E4F0 30px 31px);border:1px solid var(--line);border-left:4px solid #E8A0A8;border-radius:12px;padding:12px 14px;font-family:var(--f-hand);font-size:21px}
+.pen{font-size:40px}
+.model{background:var(--leaf-soft);border-radius:12px;padding:10px 12px;margin:6px 0 0;line-height:1.5}
+.kw{font-size:16px;margin-top:10px}
+table.diff td{width:50%}
+
+/* feedback */
+.fb{margin-top:14px;border-radius:18px;padding:14px;border:2px solid var(--ok);background:var(--ok-bg)}
+.fb.bad{border-color:var(--bad);background:var(--bad-bg)}
+.fb .ft{font-family:var(--f-display);font-size:23px;font-weight:800;margin:0 0 4px}
+.fb .fa{font-size:18px;margin:6px 0}
+.fb .tip{font-size:17px;margin:6px 0}
+.bonus{font-size:15px;background:var(--sun);border-radius:999px;padding:2px 8px;vertical-align:middle}
+.slipnote{background:#fff;border:2px dashed var(--bad);border-radius:12px;padding:8px 10px;margin-top:8px;font-size:16px}
+.realnote{background:#fff;border:2px solid #9CC2EC;border-radius:12px;padding:8px 10px;margin-top:8px;font-size:16px}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pop{animation:pp .3s}
+@keyframes pp{50%{transform:scale(1.08)}}
+
+/* results */
+.res{text-align:center}
+.rt{font-family:var(--f-display);font-size:22px;font-weight:700;margin:6px 0 0}
+.score{font-family:var(--f-display);font-size:58px;font-weight:800;line-height:1.05;margin:4px 0;font-variant-numeric:tabular-nums}
+.stars.big{font-size:44px;letter-spacing:6px;margin:0}
+.sub{color:var(--muted);margin:2px 0}
+.perfect{font-size:20px;font-weight:700}
+.wrongs{margin-top:16px;text-align:left}
+.wrongs h3{font-size:22px}
+.wr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:16px}
+.wr b{font-size:17px}
+.small .model{font-size:16px}
+.shaky{padding-left:20px;font-size:16px}
+.shaky li{margin:4px 0}
+
+.sync-row{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 24px;font-size:14px}
+.sync-row span{background:var(--card);color:var(--leaf-deep);font-weight:700;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.sync-row button{color:var(--muted);font-weight:700;font-size:14px;text-decoration:underline}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20;width:100%;height:100%}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;font-weight:700;z-index:30;max-width:90%;text-align:center}
+@media (max-width:440px){
+  body{font-size:17px}
+  .opts{grid-template-columns:1fr}
+  .prompt{font-size:19px}
+  .emo.big{font-size:70px}
+  .chip.xp{display:none}
+  .mi{font-size:15px}
+  .pond{padding-left:26px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="top"><div class="topin" id="topin"></div></div>
+<main id="app"></main>
+<div class="sync-row" id="syncRow"><span id="syncCodeLabel"></span><button id="syncChangeBtn">Use a different code</button></div>
+<canvas id="fx"></canvas>
+<div class="toast" id="toast" hidden></div>
+<script>
+/* ================= CONTENT BANK =================
+   Source: MDIS Class IV General Science, Ch 7 Safety First (textbook pp 3-18), Unit III worksheet
+   pp 66-70 (teacher-marked 15/10/26) and her notebook (marked 13/10/26). Audited 26 Oct 2026.
+   Ids are stable (mistake bank keys).
+   slip = her real mistake (shown after she answers). real = what grown-up first aid says, shown
+   under the school answer where the book's advice is not the full story. */
+
+var CH = [
+  {id:'t1', n:1, name:'Safe at Home', short:'Home', icon:'\u{1F3E0}', hue:'#E0702A'},
+  {id:'t2', n:2, name:'Safe Outside', short:'School, play, swim, road', icon:'\u{1F6B8}', hue:'#2C8FD0'},
+  {id:'t3', n:3, name:'Good Touch & First Aid Basics', short:'Touch, rules, first aid box', icon:'\u{1F91D}', hue:'#7A5AD6'},
+  {id:'t4', n:4, name:'Ways of Giving First Aid', short:'Cuts, burns, fainting, bites, nose, shock', icon:'\u{1FA79}', hue:'#D63F5E'}
+];
+
+/* ---------- learn cards (HTML) ---------- */
+var LEARN = {
+t1: [
+  {h:'Why do accidents happen?', b:'<p>Accidents cause <b>injuries</b>, <b>monetary loss</b> and sometimes <b>loss of life</b>.</p><p>Accidents happen mostly because of <b>carelessness</b>, <b>ignorance</b> or <b>overconfidence</b>.</p><p><b>Safety rules</b> are rules which help us to avoid accidents. Accidents can happen <b>at home</b> too!</p>', e:'⚠️'},
+  {h:'Slipping and falling', b:'<ul><li>Keep floors <b>dry</b>. The kitchen and washroom should never be slippery.</li><li>Put toys in a <b>cupboard or box</b> after playing. Never scatter them on the staircase.</li><li>Never try to reach something beyond your reach. Use a <b>stool</b> or a <b>ladder</b>.</li><li>Use the staircase carefully. The handrail at the side of a staircase is called a <b>banister</b>.</li></ul>', e:'\u{1FA9C}'},
+  {h:'Electric shock', b:'<ul><li>Never touch a switch or gadget with <b>wet hands</b> or when you are <b>barefoot</b>.</li><li>Do not go too close to a table fan or heater when it is working.</li><li>Never use <b>broken plug points</b>.</li><li>Damaged wire, a spark, or someone getting a shock? <b>Turn off the main switch</b> immediately and <b>call an adult</b>.</li></ul><div class="note">The <b>third pin</b> of a plug is for <b>earthing</b>. It keeps us safe from electric shock.</div>', e:'⚡'},
+  {h:'Burns and gas', b:'<ul><li>Avoid <b>synthetic</b> clothes in the kitchen. They <b>catch fire easily</b>. Wear <b>cotton</b>.</li><li>Children must stay away from a burning gas stove.</li><li>Use sharp objects like a <b>knife</b> only when an adult is with you.</li><li>Change the gas <b>pipe</b> regularly.</li></ul><div class="note red"><b>Smell gas?</b> Open the <b>doors and windows</b>. Shut down the <b>regulator</b>. Do <b>not</b> switch on any switch, not even a fan. A small <b>spark</b> can cause a huge fire.</div>', e:'\u{1F525}'},
+  {h:'Poisoning', b:'<p><b>Accidental consumption of chemicals and medicines</b> leads to poisoning.</p><ul><li>Keep poisonous chemicals like <b>phenyl</b> out of reach of children.</li><li>Do not even touch containers with a <b>danger sign</b>.</li><li>Never take a medicine without consulting an adult or a doctor.</li><li>Check the <b>date of expiry</b> on medicines, cosmetics and eatables.</li></ul><p><b>Antacids</b> are tablets that control the <b>acidity</b> in the stomach.</p>', e:'☠️'},
+  {h:'Unknown calls and visitors', b:'<ul><li><b>Avoid</b> unknown calls, even if they say they are from the police, a hospital or a friend of your parents.</li><li>Rude (offensive) language on the phone? Give the phone to an <b>adult</b> at once.</li><li>Open the door only to a known, trustworthy person. Check visitors with the <b>safety chain</b> in place or through the netted door.</li><li>When parents are out, do not let anyone in, even <b>service providers</b>. Do not accept anything from them.</li><li>Never reveal details about yourself to a stranger. They may have <b>bad intentions</b>.</li></ul>', e:'\u{1F6AA}'}
+],
+t2: [
+  {h:'Safety at school', b:'<ul><li>Do not <b>rush</b> up or down the stairs.</li><li>Never <b>climb</b> a desk or run around it.</li><li>Do not <b>push</b> your friend. He may fall and get badly hurt.</li><li>Never put your hand or foot <b>between the doors</b>.</li></ul>', e:'\u{1F3EB}'},
+  {h:'On the playground', b:'<ul><li>Play in the playground.</li><li>Wear the correct dress, <b>safety gear</b> and shoes.</li><li>Do not fight if someone’s opinion is different from yours.</li><li>Follow the <b>rules of the game</b>.</li><li><b>Wait for your turn</b> at rides.</li><li>Never tease <b>stray animals</b>.</li></ul>', e:'\u{1F6DD}'},
+  {h:'While swimming', b:'<ul><li>Never swim <b>alone</b>, even if you are a good swimmer.</li><li>Swim under the <b>supervision</b> of a <b>coach</b> or an adult.</li><li>Use a <b>swimming tube</b> while learning.</li><li>Never swim in a river or sea alone. There may be a <b>strong water current</b>.</li></ul>', e:'\u{1F3CA}'},
+  {h:'On the road', b:'<p>Road accidents happen because of <b>rash driving</b> or not following <b>traffic rules</b>.</p><ul><li>Follow the <b>traffic lights</b>. Cross at the <b>zebra crossing</b> (black and white stripes), when the traffic stops.</li><li>Look <b>right</b>, then <b>left</b>, then <b>right</b> again.</li><li>Walk on the <b>footpath</b> or on the left side of the road.</li><li>No <b>earphones</b> on the road. Be careful at street <b>corners</b>. Never rush – leave home early.</li><li>Wear a <b>helmet</b> on a bicycle. Never talk on a mobile phone while driving. Do not throw things out of a moving car.</li></ul><p><b>Subway</b> = a tunnel under the road. <b>Foot overbridge</b> = a bridge over the road. A <b>footpath</b> is for walking – it cannot be used to cross the road.</p><div class="note real">\u{1F9E0} In real life: if there is no footpath, grown-ups walk on the side where they can see cars coming towards them. In the test, write the book’s answer.</div>', e:'\u{1F6A6}'},
+  {h:'Road signs', b:'<p>Learn these signs from your worksheet:</p>', e:'\u{1F6A7}', dia:'signs'}
+],
+t3: [
+  {h:'Good touch and bad touch', b:'<p>A <b>good touch</b> makes you feel <b>comfortable and happy</b> – a hug from your parents, grandparents ruffling your hair, a teacher patting your back or holding your hand to teach you.</p><p>Any touch that makes you feel <b>uncomfortable</b> or leaves a <b>bad feeling</b> is a <b>bad touch</b>. You want it to stop right away.</p><div class="note">Tell your <b>parents</b> or a <b>person you trust</b> about a bad touch. You can also tell your <b>school counsellor</b>. They will help you.</div>', e:'\u{1F917}'},
+  {h:'What is first aid?', b:'<p><b>First aid</b> is the first help given to an injured or sick person <b>before medical aid arrives</b>.</p><p>Notebook definition: the <b>immediate</b> medical treatment given to an injured person <b>before the arrival of the doctor</b>.</p><p>Keep <b>calm</b>, do not <b>panic</b>, and make the patient <b>comfortable</b>. Then call a doctor or take the patient to a hospital.</p><p>Stories of the <b>Good Samaritan</b> and <b>Mother Teresa</b> teach us to help people in need.</p>', e:'⛑️'},
+  {h:'First aid rules', b:'<ul><li>If you have not learnt first aid, do not try it. <b>Call an adult</b> immediately.</li><li>Never <b>crowd</b> around the patient. This <b>suffocates</b> the patient.</li><li>Be careful while moving an injured person. He may have <b>broken bones</b> that could get worse.</li></ul><p>In an emergency: <b>stay calm and seek help</b>.</p>', e:'\u{1F4CB}'},
+  {h:'The first aid box', b:'<p>Keep a first aid box in <b>cars, homes and schools</b>. Carry it on picnics and trips.</p><p>It has: <b>band-aid</b>, <b>bandage</b>, <b>cotton roll</b>, <b>antiseptic cream</b>, <b>scissors</b> and <b>medicines</b>.</p><p>An <b>antiseptic</b> is a cream or lotion that <b>kills germs</b> and stops them from growing.</p><div class="note red">A <b>matchbox</b> does NOT go in a first aid box!</div>', e:'\u{1F9F0}'}
+],
+t4: [
+  {h:'Cuts and wounds', b:'<ol><li><b>Wash your hands</b> first.</li><li>Wash the cut with water and dry it gently with <b>cotton</b>.</li><li>Apply an <b>antiseptic</b> cream or lotion.</li><li>Deep wound: stop the bleeding by tying a tight bandage above the cut, cover the cut with a bandage, and take the patient to the doctor.</li></ol><div class="note real">\u{1F9E0} In real life: grown-ups stop bleeding by pressing firmly on the wound with a clean cloth.</div>', e:'\u{1FA79}', dia:'inj:cut'},
+  {h:'Burns', b:'<ul><li>Minor burn: wash with <b>cold running water</b> or put an <b>ice pack</b> on it.</li><li>Apply an <b>antiseptic</b> cream or lotion.</li><li>Serious burn: take the person to a <b>hospital</b> immediately.</li></ul><div class="note real">\u{1F9E0} In real life: keep a burn under cool running water for a long time. Do not put ice straight on the skin, and never burst a blister.</div>', e:'\u{1F525}', dia:'inj:burn'},
+  {h:'Fainting', b:'<ul><li>Make the person <b>lie down</b> with the <b>head lower than the body</b>. This speeds up the blood flow to the <b>brain</b> and helps the person wake up (regain consciousness).</li><li>Let <b>fresh air</b> flow. Do not crowd around – it blocks the air and suffocates.</li><li><b>Loosen</b> the clothing.</li><li>Sprinkle <b>cold water</b> on the face.</li></ul>', e:'\u{1F635}', dia:'inj:faint'},
+  {h:'Insect bites', b:'<ul><li>Put <b>ice</b> to reduce burning and pain.</li><li>Apply <b>antiseptic</b> or <b>calamine</b> lotion.</li><li><b>Bee</b> sting → paste of <b>baking soda</b>. <b>Wasp</b> sting → <b>vinegar</b>.</li><li>A sting that looks like a <b>black dot</b>? Ask an adult to pull it out.</li><li>Itching all over and difficulty in breathing? <b>Rush to the doctor.</b></li></ul><div class="note">Trick: <b>B</b>ee = <b>B</b>aking soda. Wasp = vinegar.</div>', e:'\u{1F41D}', dia:'inj:bite'},
+  {h:'Nose bleeding', b:'<ul><li>Make the person <b>sit on a chair</b> holding the <b>head forward</b>.</li><li>Put a wet cloth or an <b>ice pack</b> on the <b>bridge of the nose</b>.</li><li>Bleeding does not stop? <b>Rush to the doctor.</b></li></ul><div class="note real">\u{1F9E0} In real life: grown-ups also pinch the soft part of the nose for about 10 minutes.</div>', e:'\u{1F443}', dia:'inj:nose'},
+  {h:'Electric shock', b:'<ol><li><b>FIRST: switch off the electrical connection</b> immediately.</li><li>Wrap a <b>blanket</b> around the person to keep him warm.</li><li>Give him something <b>warm to drink</b>.</li></ol><div class="note red">Switching off always comes FIRST.</div><div class="note real">\u{1F9E0} In real life: never touch the person until the power is off, and give a drink only if he is fully awake.</div>', e:'⚡', dia:'inj:shock'}
+]
+};
+
+/* ---------- MCQ ----------
+   fx:1 keep option order, show a) b) c) d) ; one:1 give one word ; oo:1 odd one out (options are the four words) */
+var MCQ = {
+t1: [
+  {id:'t1m1', q:'Floors must be kept dry to prevent _____.', o:['playing','skipping','slipping','dancing'], a:'slipping', fx:1, tip:'A wet floor makes us slip.'},
+  {id:'t1m2', q:'Avoid wearing _____ clothes in the kitchen.', o:['woollen','cotton','synthetic','both (a) and (b)'], a:'synthetic', fx:1, tip:'Synthetic clothes catch fire easily. Wear cotton in the kitchen.'},
+  {id:'t1m3', q:'All _____ products should be kept out of the reach of children.', o:['food','milk','chemical','sweet'], a:'chemical', fx:1, tip:'Chemicals like phenyl are poisonous.'},
+  {id:'t1m4', q:'To reach for something placed high, we should use a _____.', o:['stone','ladder','stick','rope'], a:'ladder', fx:1, tip:'Use a stool or a ladder. Never stretch beyond your reach.'},
+  {id:'t1m5', q:'Do not _____ in case you smell gas in the kitchen.', o:['open doors','open windows','switch on fan','shut down gas regulator'], a:'switch on fan', fx:1, tip:'A small spark from a switch can cause a huge fire. Opening doors and windows is the RIGHT thing to do.'},
+  {id:'t1m6', q:'Synthetic clothes are not safe in the kitchen because they _____.', o:['catch fire easily','are too tight','get dirty fast','are costly'], a:'catch fire easily', tip:'Wear cotton clothes in the kitchen.'},
+  {id:'t1m7', q:'If you see a damaged wire or an electric spark, you should _____.', o:['turn off the main switch and call an adult','touch it to check','pour water on it','hide under the bed'], a:'turn off the main switch and call an adult', tip:'Main switch off, then call an adult.'},
+  {id:'t1m8', q:'Phenyl is a _____.', o:['poisonous chemical','medicine','drink','food'], a:'poisonous chemical', tip:'Keep phenyl out of reach of children.'},
+  {id:'t1m9', q:'Before buying medicines, we should check the _____.', o:['date of expiry','colour of the box','name of the shop','size of the box'], a:'date of expiry', tip:'Expired medicines can harm us.'},
+  {id:'t1m10', q:'The third pin of a plug is for _____.', o:['earthing','decoration','lighting','charging'], a:'earthing', tip:'Earthing protects us from electric shock.'},
+  {id:'t1m11', q:'An unknown caller says he is from the police and asks for your address. You should _____.', o:['avoid the call and tell an adult','tell him your address','tell him your school name','invite him home'], a:'avoid the call and tell an adult', tip:'Avoid such calls, even if they say police, hospital or a friend of your parents.'},
+  {id:'t1m12', q:'Before opening the door to a visitor, check them with the door _____ in place.', o:['safety chain','curtain','bell','mat'], a:'safety chain', tip:'Open the door with the safety chain in place or look through the netted door.'},
+  {id:'t1m13', q:'Accidents occur mostly due to carelessness, ignorance or _____.', o:['overconfidence','safety rules','first aid','good habits'], a:'overconfidence', tip:'Carelessness, ignorance, overconfidence.'},
+  {id:'t1m14', q:'If you get a call with offensive (rude) language, you should _____.', o:['give the phone to an adult','shout back','keep talking','tell your name'], a:'give the phone to an adult', tip:'Transfer the call to an adult immediately.'},
+  {id:'t1o1', one:1, q:'Tablets that control the acidity in the stomach', o:['Antacid','Antiseptic','Calamine','Vinegar'], a:'Antacid', tip:'ANT-ACID fights ACIDity. ANTI-SEPTIC fights germs.'},
+  {id:'t1o2', one:1, q:'Handrail at the side of a staircase', o:['Banister','Footpath','Subway','Ladder'], a:'Banister', slip:'In your worksheet you wrote "railing" and the teacher corrected it to BANISTER.', tip:'Spell it: B-A-N-I-S-T-E-R.'},
+  {id:'t1o3', one:1, q:'Rules that help us to avoid accidents', o:['Safety rules','First aid','Traffic lights','Games'], a:'Safety rules', tip:'Safety rules help us to avoid accidents.'},
+  {id:'t1o4', one:1, q:'A sign on containers of poisonous chemicals', o:['Danger sign','Stop sign','School sign','Plus sign'], a:'Danger sign', tip:'Do not even touch a container with a danger sign.'},
+  {id:'t1d1', oo:1, q:'Burns, Electric shock, Poisoning, Playing', o:['Burns','Electric shock','Poisoning','Playing'], a:'Playing', tip:'Burns, electric shock and poisoning are accidents. Playing is not.'},
+  {id:'t1d2', oo:1, q:'Phenyl, Chemicals, Expired medicines, Fresh fruit', o:['Phenyl','Chemicals','Expired medicines','Fresh fruit'], a:'Fresh fruit', tip:'The others can cause poisoning.'}
+],
+t2: [
+  {id:'t2m1', q:'Which of the following cannot be used while crossing a road?', o:['Footpath','Zebra crossing','Foot overbridge','Subway'], a:'Footpath', fx:1, tip:'A footpath is for walking along the road, not for crossing it.'},
+  {id:'t2m2', q:'We should always wear a _____ while riding a bicycle.', o:['cap','helmet','scarf','belt'], a:'helmet', fx:1, tip:'A helmet protects your head.'},
+  {id:'t2m3', q:'Use swimming _____ while playing in the swimming pool.', o:['shoes','belt','tube','socks'], a:'tube', fx:1, tip:'Use a swimming tube while learning.'},
+  {id:'t2m4', q:'Before crossing the road, look _____.', o:['right, then left, then right again','left only','right only','at your phone'], a:'right, then left, then right again', tip:'Right – left – right.'},
+  {id:'t2m5', q:'We should always cross the road at the _____.', o:['zebra crossing','street corner','middle of the road','bus stop'], a:'zebra crossing', tip:'Black and white stripes = zebra crossing.'},
+  {id:'t2m6', q:'Never swim in a river or sea alone because there may be _____.', o:['a strong water current','too many fish','cold sand','big boats only'], a:'a strong water current', tip:'A strong current can pull a swimmer away.'},
+  {id:'t2m7', q:'At the rides in the playground, we should _____.', o:['wait for our turn','push others','jump the queue','fight'], a:'wait for our turn', tip:'Wait for your turn.'},
+  {id:'t2m8', q:'Which of these is safe to do on the road?', o:['Walk on the footpath','Use earphones','Run across the road','Play on the road'], a:'Walk on the footpath', tip:'Walk on the footpath. No earphones on the road.'},
+  {id:'t2m9', q:'Accidents on the road often happen due to _____.', o:['rash driving','zebra crossings','traffic lights','footpaths'], a:'rash driving', tip:'Rash driving and not following traffic rules.'},
+  {id:'t2m10', q:'In school, we should not _____.', o:['rush up or down the stairs','wait in a line','walk slowly','hold the handrail'], a:'rush up or down the stairs', tip:'You or your friend may get hurt.'},
+  {id:'t2m11', q:'Why should we never put a hand or foot between the doors?', o:['We may hurt ourselves','It is fun','The door opens faster','It keeps the door clean'], a:'We may hurt ourselves', tip:'A closing door can crush fingers.'},
+  {id:'t2m12', q:'Your friend’s opinion is different from yours during a game. You should _____.', o:['not fight','push your friend','stop playing forever','shout loudly'], a:'not fight', tip:'Do not fight with others if their opinion is different.'},
+  {id:'t2m13', q:'Why should we start our journey with enough time at hand?', o:['So that we do not rush on the road','So that we can run on the road','So that we can play on the road','So that we can use earphones'], a:'So that we do not rush on the road', tip:'Never rush on the road.'},
+  {id:'t2o1', one:1, q:'Black and white stripes on the road', o:['Zebra crossing','Footpath','Subway','Banister'], a:'Zebra crossing', tip:'Zebras have black and white stripes!'},
+  {id:'t2o2', one:1, q:'A tunnel under a road used by pedestrians', o:['Subway','Foot overbridge','Zebra crossing','Footpath'], a:'Subway', tip:'SUB = under. Subway goes under the road.'},
+  {id:'t2o3', one:1, q:'A bridge over the road used by pedestrians', o:['Foot overbridge','Subway','Zebra crossing','Footpath'], a:'Foot overbridge', tip:'OVER-bridge goes over the road.'},
+  {id:'t2o4', one:1, q:'People who walk on the road', o:['Pedestrians','Drivers','Passengers','Riders'], a:'Pedestrians', tip:'Pedestrians are people on foot.'},
+  {id:'t2d1', oo:1, q:'Footpath, Traffic lights, Zebra crossing, Playground', o:['Footpath','Traffic lights','Zebra crossing','Playground'], a:'Playground', tip:'The others are found on a road.'},
+  {id:'t2d2', oo:1, q:'Subway, Foot overbridge, Zebra crossing, Earphones', o:['Subway','Foot overbridge','Zebra crossing','Earphones'], a:'Earphones', tip:'The others help us cross the road. Earphones are unsafe on the road.'}
+],
+t3: [
+  {id:'t3m1', q:'The best rule to follow in an emergency is to _____.', o:['panic','stay calm and seek help','hide','ignore the situation'], a:'stay calm and seek help', fx:1, tip:'Keep calm. Do not panic.'},
+  {id:'t3m2', q:'First aid is the first help given to an injured or sick person _____.', o:['before medical aid arrives','after the doctor leaves','only in hospitals','only at night'], a:'before medical aid arrives', tip:'First aid comes before the doctor arrives.'},
+  {id:'t3m3', q:'If you have not learnt to give first aid, you should _____.', o:['call an adult immediately','try it anyway','run away','crowd around the patient'], a:'call an adult immediately', tip:'First aid rule 1.'},
+  {id:'t3m4', q:'We should never crowd around a patient because it _____.', o:['suffocates the patient','helps the patient','keeps the patient warm','stops the bleeding'], a:'suffocates the patient', tip:'A crowd blocks fresh air.'},
+  {id:'t3m5', q:'We must be careful while moving an injured person because he may have _____.', o:['broken bones','a cold','a fever','a toy'], a:'broken bones', tip:'Broken bones could get worse on moving.'},
+  {id:'t3m6', q:'A touch that makes you feel uncomfortable is a _____.', o:['bad touch','good touch','soft touch','funny touch'], a:'bad touch', tip:'You want a bad touch to stop right away.'},
+  {id:'t3m7', q:'If someone gives you a bad touch, you must tell _____.', o:['your parents or a person you trust','nobody','only your friends','a stranger'], a:'your parents or a person you trust', tip:'They will help you. You can also tell your school counsellor.'},
+  {id:'t3m8', q:'Which of these is a good touch?', o:['A hug from your mother','A touch that makes you uncomfortable','A touch you want to stop','A touch that leaves a bad feeling'], a:'A hug from your mother', tip:'A good touch makes you feel comfortable and happy.'},
+  {id:'t3m9', q:'An antiseptic cream _____.', o:['kills germs and stops them from growing','controls acidity','makes us sleep','is a kind of food'], a:'kills germs and stops them from growing', tip:'Antiseptic = kills germs.'},
+  {id:'t3m10', q:'Where should we keep a first aid box?', o:['In homes, cars and schools','Only in hospitals','Only in shops','Nowhere'], a:'In homes, cars and schools', tip:'And carry it on picnics and trips.'},
+  {id:'t3m11', q:'While giving first aid, keep calm and make the patient _____.', o:['comfortable','scared','stand up','run'], a:'comfortable', tip:'Keep calm, make the patient comfortable, do not panic.'},
+  {id:'t3m12', q:'You can also talk to your school _____ about a bad touch.', o:['counsellor','bus driver','guard','canteen'], a:'counsellor', tip:'The school counsellor will help you.'},
+  {id:'t3o1', one:1, q:'A box having things needed to give immediate medical help', o:['First aid box','Lunch box','Tool box','Pencil box'], a:'First aid box', slip:'In your worksheet you wrote just "First-aid". The answer is FIRST AID BOX – the box!', tip:'Write all three words: First aid box.'},
+  {id:'t3o2', one:1, q:'A cream or lotion that kills germs', o:['Antiseptic','Antacid','Vinegar','Baking soda'], a:'Antiseptic', tip:'ANTI-SEPTIC fights germs.'},
+  {id:'t3o3', one:1, q:'A touch that makes you feel comfortable and happy', o:['Good touch','Bad touch','Hard touch','Push'], a:'Good touch', tip:'Like a hug from your parents.'},
+  {id:'t3d1', oo:1, q:'Cotton roll, Antiseptic cream, Matchbox, Band-aid', o:['Cotton roll','Antiseptic cream','Matchbox','Band-aid'], a:'Matchbox', tip:'The others go in a first aid box.'},
+  {id:'t3d2', oo:1, q:'Scissors, Bandage, Cotton, Toy car', o:['Scissors','Bandage','Cotton','Toy car'], a:'Toy car', tip:'The others go in a first aid box.'}
+],
+t4: [
+  {id:'t4m1', q:'What can we apply in case of a minor cut?', o:['Antiseptic lotion','Baking soda solution','Glucose solution','Calamine lotion'], a:'Antiseptic lotion', fx:1, tip:'Antiseptic kills germs in the cut.'},
+  {id:'t4m2', q:'To treat a bee sting, we can use a paste of _____ and an ice pack.', o:['custard powder','flour','mud','baking soda'], a:'baking soda', fx:1, tip:'Bee = Baking soda.'},
+  {id:'t4m3', q:'Wrap a blanket around the person who _____.', o:['has fainted','is insect bitten','got electric shock','got cuts and wounds'], a:'got electric shock', fx:1, tip:'Electric shock: switch off, blanket, warm drink.'},
+  {id:'t4m4', q:'Apply _____ on the burnt area.', o:['salt','calamine lotion','soap','antibiotics'], a:'calamine lotion', fx:1, tip:'This one is from your textbook test. The chapter says antiseptic cream or lotion for burns, but antiseptic is not in this list. Of these four, calamine lotion is the soothing lotion, so pick it.'},
+  {id:'t4m5', q:'For a wasp sting, apply _____.', o:['vinegar','baking soda','salt','sugar'], a:'vinegar', tip:'Wasp = vinegar. Bee = baking soda.'},
+  {id:'t4m6', q:'If a person faints, make him lie down with his head _____.', o:['lower than the body','higher than the body','on a high pillow','sitting up'], a:'lower than the body', tip:'Blood flows to the brain faster.'},
+  {id:'t4m7', q:'In case of nose bleeding, make the person sit with the head _____.', o:['forward','backward','down on the floor','to the side'], a:'forward', tip:'Sit on a chair, head forward.'},
+  {id:'t4m8', q:'In case of nose bleeding, put an ice pack on the _____.', o:['bridge of the nose','back of the head','feet','stomach'], a:'bridge of the nose', tip:'The bridge is the hard top part of the nose.'},
+  {id:'t4m9', q:'What is the FIRST thing to do when someone gets an electric shock?', o:['Switch off the electrical connection','Give a warm drink','Wrap a blanket','Pull the person with your hands'], a:'Switch off the electrical connection', slip:'In your worksheet you wrote only the blanket and the warm drink. Switching off the power always comes FIRST.', tip:'Switch off first, or you can get a shock too.'},
+  {id:'t4m10', q:'For minor burns, wash the burnt area with _____.', o:['cold running water','hot water','oil','salt water'], a:'cold running water', tip:'Cold running water takes the heat out.', real:'Keep it under cool running water for a long time. Never burst a blister.'},
+  {id:'t4m11', q:'Before giving any kind of first aid, you should _____.', o:['wash your hands','eat something','close your eyes','run'], a:'wash your hands', tip:'Clean hands stop germs.'},
+  {id:'t4m12', q:'If a wound is deep, first try to _____.', o:['stop the bleeding','leave it open','put salt on it','rub it with mud'], a:'stop the bleeding', tip:'Then take the patient to the doctor.', real:'Grown-ups press firmly on the wound with a clean cloth.'},
+  {id:'t4m13', q:'If a sting is visible like a black dot, you should _____.', o:['ask an adult to pull it out','leave it forever','scratch it hard','put salt on it'], a:'ask an adult to pull it out', tip:'An adult should pull it out.'},
+  {id:'t4m14', q:'After an insect bite there is itching all over the body and difficulty in breathing. You should _____.', o:['rush to the doctor','go to sleep','eat sweets','do nothing'], a:'rush to the doctor', tip:'This is serious – rush to the doctor.'},
+  {id:'t4m15', q:'For an insect bite, put _____ on the affected area to reduce burning and pain.', o:['ice','salt','hot water','sugar'], a:'ice', tip:'Ice reduces burning and pain.'},
+  {id:'t4m16', q:'A person who has fainted needs _____.', o:['fresh air','a crowd around him','a heavy blanket over his face','tight clothes'], a:'fresh air', tip:'Fresh air, loose clothes, cold water on the face.'},
+  {id:'t4m17', q:'In case of a serious burn, _____.', o:['take the person to a hospital immediately','apply salt','wait for a day','cover it with oil'], a:'take the person to a hospital immediately', tip:'Serious burn = hospital.'},
+  {id:'t4d1', oo:1, q:'Apply baking soda, Apply antiseptic cream, Apply calamine lotion, Apply salt', o:['Apply baking soda','Apply antiseptic cream','Apply calamine lotion','Apply salt'], a:'Apply salt', tip:'The others are first aid. Salt is not.'},
+  {id:'t4d2', oo:1, q:'Fainting, Nose bleeding, Insect bite, Band-aid', o:['Fainting','Nose bleeding','Insect bite','Band-aid'], a:'Band-aid', tip:'The others are injuries. A band-aid is first aid.'}
+]
+};
+
+/* ---------- road signs (worksheet Q5) and injury pictures (worksheet Q6) ---------- */
+var SIGN_NAMES = ['No parking','School ahead','Guarded railway crossing','One way','Men at work','Narrow road ahead','Stop','Pedestrian crossing'];
+var SIGNS = [
+  {id:'t2g1', k:'noparking', a:'No parking', tip:'A red circle with a line through it means NO. "P" is for parking.'},
+  {id:'t2g2', k:'school', a:'School ahead', tip:'Two children walking = school ahead. Drivers must slow down.'},
+  {id:'t2g3', k:'railgate', a:'Guarded railway crossing', tip:'The gate (fence) shows the crossing has a gate.'},
+  {id:'t2g4', k:'oneway', a:'One way', tip:'Your worksheet answer: One way.'},
+  {id:'t2g5', k:'work', a:'Men at work', tip:'A man digging = men at work on the road.'},
+  {id:'t2g6', k:'narrow', a:'Narrow road ahead', tip:'The road gets narrow from both sides.'},
+  {id:'t2g7', k:'stop', a:'Stop', tip:'The STOP sign has eight sides, so it can be recognised even from behind.'},
+  {id:'t2g8', k:'zebra', a:'Pedestrian crossing', tip:'A person on zebra stripes = pedestrian crossing.'}
+];
+var INJ_NAMES = ['Fainting','Cuts and wounds','Insect bite','Burns','Nose bleeding','Electric shock'];
+var INJ = [
+  {id:'t4p1', k:'faint', a:'Fainting', tip:'Lying down with the legs up = fainting.'},
+  {id:'t4p2', k:'cut', a:'Cuts and wounds', tip:'A bleeding knee = cuts and wounds.'},
+  {id:'t4p3', k:'bite', a:'Insect bite', tip:'A bee and a red bump = insect bite.'},
+  {id:'t4p4', k:'burn', a:'Burns', tip:'A hot pot and a red hand = burns.'},
+  {id:'t4p5', k:'nose', a:'Nose bleeding', tip:'Blood from the nose = nose bleeding.'},
+  {id:'t4p6', k:'shock', a:'Electric shock', tip:'A hand at a plug point with sparks = electric shock.'}
+];
+
+/* ---------- Assertion and Reason ---------- */
+var AR_O = ['Both A and R are true and R is the correct explanation of A.','Both A and R are true but R is not the correct explanation of A.','A is true but R is false.','A is false but R is true.'];
+var AR = [
+  {id:'t2a1', ch:'t2', A:'Pedestrians should cross the road when the signal is green for vehicles.', R:'Green signal means vehicles can move.', a:3, slip:'In your textbook you ticked (c). But A is FALSE – when it is green for vehicles, cars are moving! R is TRUE. So the answer is (d).', tip:'Check each sentence on its own first: Is A true? Is R true? Then ask: does R explain A?'},
+  {id:'t1a1', ch:'t1', A:'We should not touch switches with wet hands.', R:'Wet hands can give us an electric shock.', a:0, tip:'Both true, and the shock is WHY we should not touch.'},
+  {id:'t1a2', ch:'t1', A:'We should wear synthetic clothes in the kitchen.', R:'Synthetic clothes catch fire easily.', a:3, tip:'A is false (wear cotton). R is true.'},
+  {id:'t1a3', ch:'t1', A:'If we smell gas, we should open the doors and windows.', R:'Opening them lets the gas out.', a:0, tip:'Both true, and R explains A.'},
+  {id:'t3a1', ch:'t3', A:'We should crowd around a person who has fainted.', R:'A person who has fainted needs fresh air.', a:3, tip:'A is false – crowding blocks the air. R is true.'},
+  {id:'t3a2', ch:'t3', A:'Children should not take medicines on their own.', R:'All medicines are sweet.', a:2, tip:'A is true. R is false – medicines are not all sweet, and that is not the reason anyway.'},
+  {id:'t2a2', ch:'t2', A:'We should always swim under the supervision of an adult.', R:'Swimming is a good exercise.', a:1, tip:'Both are true, but "good exercise" does not explain why an adult must watch us.'},
+  {id:'t4a1', ch:'t4', A:'For an electric shock, we should switch off the electrical connection first.', R:'If the current is on, the helper can also get a shock.', a:0, tip:'Both true, and R explains A.'}
+];
+
+/* ---------- Case based (multi-part) ---------- */
+var CASES = [
+  {id:'t1c1', ch:'t1', title:'Kavya at home', passage:'One afternoon, Kavya was at home alone doing her homework. Someone knocked on the door and said they were from a delivery service. The person asked Kavya to open the door. Kavya remembered what her parents had told her about not opening the door to strangers when she is alone at home. She did not open the door and instead called her mother.', parts:[
+    {q:'Who came to Kavya’s door?', o:['Her friend','A delivery person','Her teacher','Her neighbour'], a:'A delivery person'},
+    {q:'What safety rule is shown here?', o:['Open doors quickly','Trust strangers','Do not open doors to unknown people','Talk loudly'], a:'Do not open doors to unknown people'},
+    {q:'Children should not open the door for _____ when alone.', o:['strangers','parents','grandparents','family'], a:'strangers'},
+    {q:'Kavya did the right thing by not opening the door.', o:['True','False'], a:'True'},
+    {q:'Whom did Kavya call for help?', o:['Her mother','The delivery person','Her friend','Nobody'], a:'Her mother'}
+  ]},
+  {id:'t1c2', ch:'t1', title:'Aarav smells gas', passage:'Aarav came home from school and smelled gas in the kitchen. His grandmother was in the next room. Aarav did not switch on the light or the fan. He opened all the doors and windows and called his grandmother.', parts:[
+    {q:'What did Aarav smell in the kitchen?', o:['Gas','Flowers','Food','Paint'], a:'Gas'},
+    {q:'Why did Aarav NOT switch on the light?', o:['A small spark can cause a huge fire','The bulb was broken','He likes the dark','It was daytime'], a:'A small spark can cause a huge fire'},
+    {q:'Why did he open the doors and windows?', o:['To let the gas out','To let the cat in','To feel cold','To call his friends'], a:'To let the gas out'},
+    {q:'What should his grandmother shut down next?', o:['The regulator of the gas cylinder','The television','The fridge','The water tap'], a:'The regulator of the gas cylinder'},
+    {q:'Aarav did the right thing.', o:['True','False'], a:'True'}
+  ]},
+  {id:'t2c1', ch:'t2', title:'Riya crosses the road', passage:'Riya and her brother were walking to the park. They had to cross a busy road. Riya wanted to run across quickly, but her brother took her to the zebra crossing and waited for the traffic to stop.', parts:[
+    {q:'Where should we cross the road?', o:['At the zebra crossing','Anywhere','At a street corner','In the middle'], a:'At the zebra crossing'},
+    {q:'When should we cross the road?', o:['When the traffic stops','When cars are moving fast','When the signal is green for vehicles','While using earphones'], a:'When the traffic stops'},
+    {q:'Before crossing, which way do we look?', o:['Right, then left, then right again','Only left','Only up','We do not need to look'], a:'Right, then left, then right again'},
+    {q:'Riya’s idea of running across the road was safe.', o:['True','False'], a:'False'},
+    {q:'Never _____ on the road.', o:['rush','walk','look','stop'], a:'rush'}
+  ]},
+  {id:'t4c1', ch:'t4', title:'Meera faints', passage:'Meera was very excited about the school trip and skipped her breakfast. During the morning assembly she suddenly fainted. Many children ran and crowded around her. The teacher asked them to move back.', parts:[
+    {q:'What happened to Meera?', o:['She fainted','She got a cut','She got an insect bite','She got burnt'], a:'She fainted'},
+    {q:'Why did the teacher ask the children to move back?', o:['Crowding blocks fresh air and suffocates the patient','So that they could see better','To start a game','To clean the floor'], a:'Crowding blocks fresh air and suffocates the patient'},
+    {q:'How should Meera be made to lie down?', o:['With her head lower than her body','Sitting up straight','Standing up','With her head on a high pillow'], a:'With her head lower than her body'},
+    {q:'Which of these will help Meera?', o:['Sprinkling cold water on her face','Giving her a tight belt','Shouting at her','Making her run'], a:'Sprinkling cold water on her face'},
+    {q:'Skipping breakfast is a good habit.', o:['True','False'], a:'False'}
+  ]}
+];
+
+/* ---------- Fill in the blanks ----------
+   a: one array per blank, first item is what the chip shows; any:1 = blanks in any order */
+var FILL = {
+t1: [
+  {id:'t1f1', q:'Never wear ___ clothes near a flame.', a:[['synthetic']], bank:['cotton','woollen','clean']},
+  {id:'t1f2', q:'Do not run in the house when the floor is ___.', a:[['wet']], bank:['dry','clean','big']},
+  {id:'t1f3', q:'Never consume a ___ without consulting an adult.', a:[['medicine']], bank:['glass of milk','roti','meal']},
+  {id:'t1f4', q:'If you smell gas, open the ___ and ___ to let the gas out.', a:[['doors'],['windows']], any:1, bank:['cupboards','fridge']},
+  {id:'t1f5', q:'A small ___ in a room filled with cooking gas will cause a huge fire.', a:[['spark']], bank:['drop of water','breeze','sound']},
+  {id:'t1f6', q:'Accidental consumption of chemicals and ___ leads to poisoning.', a:[['medicines']], bank:['water','fruits','vegetables'], slip:'In your notebook you wrote "consumption of chemical and leads to poisoning" – you left out MEDICINES.'},
+  {id:'t1f7', q:'Never touch a switch with ___ hands.', a:[['wet']], bank:['dry','clean','small']},
+  {id:'t1f8', q:'Put your toys in a cupboard or ___ after playing.', a:[['box']], bank:['staircase','floor','road']},
+  {id:'t1f9', q:'Do not even touch containers which have a ___ sign on them.', a:[['danger']], bank:['plus','school','smiley']},
+  {id:'t1f10', q:'Use sharp objects like a ___ only when an adult is with you.', a:[['knife']], bank:['ball','book','pillow']},
+  {id:'t1f11', q:'Make sure the ___ of your gas connection is changed regularly.', a:[['pipe']], bank:['stove','flame','lid']}
+],
+t2: [
+  {id:'t2f1', q:'Always follow the traffic ___ while crossing the road.', a:[['lights']], bank:['horns','buses','shops']},
+  {id:'t2f2', q:'Never use ___ for listening to music while walking on the road.', a:[['earphones']], bank:['shoes','umbrellas','helmets']},
+  {id:'t2f3', q:'Never go for a swim ___, even if you are a good swimmer.', a:[['alone']], bank:['early','fast','daily']},
+  {id:'t2f4', q:'Always swim under the supervision of the ___ or an adult.', a:[['coach']], bank:['friend','baby','pet']},
+  {id:'t2f5', q:'Be careful at street ___ as a vehicle may make a sudden turn.', a:[['corners']], bank:['lights','shops','signs']},
+  {id:'t2f6', q:'Always walk on the ___ or on the left side of the road.', a:[['footpath']], bank:['middle','zebra crossing','grass']},
+  {id:'t2f7', q:'Never ___ a desk or run around it.', a:[['climb']], bank:['clean','open','paint']},
+  {id:'t2f8', q:'Do not ___ your friend. He may fall and get badly hurt.', a:[['push']], bank:['help','call','thank']},
+  {id:'t2f9', q:'Never tease ___ animals.', a:[['stray']], bank:['toy','paper','cartoon']},
+  {id:'t2f10', q:'Wear the correct dress, safety ___ and shoes while playing.', a:[['gear']], bank:['toys','books','bags']}
+],
+t3: [
+  {id:'t3f1', q:'While giving first aid you should not ___.', a:[['panic']], bank:['smile','help','breathe']},
+  {id:'t3f2', q:'Good touches make you feel ___ and ___.', a:[['comfortable'],['happy']], any:1, bank:['scared','sad'], slip:'You spelt it "comfortoble". It is C-O-M-F-O-R-T-A-B-L-E.'},
+  {id:'t3f3', q:'Any touch that makes you feel uncomfortable is a ___ touch.', a:[['bad']], bank:['good','soft','kind']},
+  {id:'t3f4', q:'First aid is the first help given to an injured or a ___ person.', a:[['sick']], bank:['happy','sleeping','rich']},
+  {id:'t3f5', q:'We must have a first aid box in our cars, homes and ___.', a:[['schools']], bank:['rivers','pockets','shoes']},
+  {id:'t3f6', q:'___ cream kills germs and stops them from growing.', a:[['Antiseptic']], bank:['Face','Ice','Shaving']},
+  {id:'t3f7', q:'Never ___ around the patient. This suffocates the patient.', a:[['crowd']], bank:['sit','talk','smile']}
+],
+t4: [
+  {id:'t4f1', q:'If a wasp stings, apply ___ on the affected area.', a:[['vinegar']], bank:['baking soda','salt','sugar']},
+  {id:'t4f2', q:'Allow fresh air to flow over a person who has ___.', a:[['fainted']], bank:['eaten','slept','laughed'], slip:'You wrote "faint". Here it must be FAINTED.'},
+  {id:'t4f3', q:'In case of nose bleeding, put an ice pack on the ___ of the nose.', a:[['bridge']], bank:['tip','hole','side']},
+  {id:'t4f4', q:'For a bee sting, apply a paste of ___.', a:[['baking soda']], bank:['vinegar','salt','sugar']},
+  {id:'t4f5', q:'Apply antiseptic or ___ lotion over an insect bite.', a:[['calamine']], bank:['salt','glue','hair']},
+  {id:'t4f6', q:'Wash the cut with water and dry it gently with ___.', a:[['cotton']], bank:['paper','sand','leaves']},
+  {id:'t4f7', q:'Loosen the ___ of a person who has fainted.', a:[['clothing']], bank:['bag','book','hair']},
+  {id:'t4f8', q:'Give a person who got an electric shock something ___ to drink.', a:[['warm']], bank:['cold','fizzy','salty'], real:'Only if the person is fully awake.'},
+  {id:'t4f9', q:'Apply an ___ cream or lotion on the burnt area.', a:[['antiseptic']], bank:['face','hair','shaving']}
+]
+};
+
+/* ---------- True / False (fix = make the false one true) ---------- */
+var TF = {
+t1: [
+  {id:'t1t1', q:'Accidents do not happen at home.', a:false, fix:{q:'Correct it: Accidents ___ happen at home too.', o:['can','never','do not'], a:'can'}},
+  {id:'t1t2', q:'We should never touch naked electric wires.', a:true},
+  {id:'t1t3', q:'We should never consume any medicine on our own.', a:true},
+  {id:'t1t4', q:'We should not touch any container which has a danger sign on it.', a:true},
+  {id:'t1t5', q:'Never use broken plug points.', a:true},
+  {id:'t1t6', q:'We should talk to strangers if they approach us.', a:false, fix:{q:'Correct it: We should ___ talk to strangers.', o:['not','always','loudly'], a:'not'}},
+  {id:'t1t7', q:'We should not give details about ourselves to a stranger.', a:true},
+  {id:'t1t8', q:'Synthetic clothes are safe to wear in the kitchen.', a:false, fix:{q:'Correct it: In the kitchen we should wear ___ clothes.', o:['cotton','synthetic','nylon'], a:'cotton'}},
+  {id:'t1t9', q:'If you smell gas, switch on the fan to blow it away.', a:false, fix:{q:'Correct it: If you smell gas, …', o:['do not switch on anything – open the doors and windows','switch on the light','light a match'], a:'do not switch on anything – open the doors and windows'}},
+  {id:'t1t10', q:'Children must stay away from a burning gas stove.', a:true},
+  {id:'t1t11', q:'When parents are out, we can let anyone in who says they are a service provider.', a:false, fix:{q:'Correct it: When parents are out, we should ___ let anyone in.', o:['not','always','quickly'], a:'not'}}
+],
+t2: [
+  {id:'t2t1', q:'We should always rush on road when in hurry.', a:false, fix:{q:'Correct it: We should ___ rush on the road.', o:['never','always','sometimes'], a:'never'}},
+  {id:'t2t2', q:'It is safe to talk on mobile phone while driving.', a:false, fix:{q:'Correct it: It is ___ to talk on a mobile phone while driving.', o:['not safe','safe','fun'], a:'not safe'}},
+  {id:'t2t3', q:'Do not throw things out of a moving car.', a:true},
+  {id:'t2t4', q:'We should cross the road at the zebra crossing.', a:true},
+  {id:'t2t5', q:'A good swimmer can swim alone in a river.', a:false, fix:{q:'Correct it: Never swim ___ in a river or sea.', o:['alone','with an adult','with a coach'], a:'alone'}},
+  {id:'t2t6', q:'We should follow the rules of the game.', a:true},
+  {id:'t2t7', q:'We can push our friends on the stairs.', a:false, fix:{q:'Correct it: We should ___ push our friends.', o:['not','always','gently'], a:'not'}},
+  {id:'t2t8', q:'We should walk on the footpath.', a:true},
+  {id:'t2t9', q:'A footpath is used to cross the road.', a:false, fix:{q:'Correct it: We cross the road at a …', o:['zebra crossing','footpath','street corner'], a:'zebra crossing'}}
+],
+t3: [
+  {id:'t3t1', q:'We should panic in an emergency.', a:false, fix:{q:'Correct it: In an emergency we should …', o:['stay calm and seek help','panic','hide'], a:'stay calm and seek help'}},
+  {id:'t3t2', q:'A hug from your parents is a good touch.', a:true},
+  {id:'t3t3', q:'We should keep a bad touch a secret.', a:false, fix:{q:'Correct it: We must …', o:['tell our parents or a person we trust','keep quiet','forget about it'], a:'tell our parents or a person we trust'}},
+  {id:'t3t4', q:'Crowding around a patient helps him breathe.', a:false, fix:{q:'Correct it: Crowding around a patient ___ him.', o:['suffocates','helps','warms'], a:'suffocates'}},
+  {id:'t3t5', q:'If you have not learnt first aid, you should call an adult immediately.', a:true},
+  {id:'t3t6', q:'A matchbox should be kept in a first aid box.', a:false, fix:{q:'Correct it: A ___ should be kept in a first aid box.', o:['band-aid','matchbox','toy'], a:'band-aid'}},
+  {id:'t3t7', q:'We should carry a first aid box on picnics and trips.', a:true},
+  {id:'t3t8', q:'We must be careful while moving an injured person.', a:true},
+  {id:'t3t9', q:'First aid is given after the doctor arrives.', a:false, fix:{q:'Correct it: First aid is given ___ the doctor arrives.', o:['before','after','without'], a:'before'}}
+],
+t4: [
+  {id:'t4t1', q:'On minor burns, we should put an ice pack.', a:true, note:'This is TRUE in your book and worksheet.', real:'Doctors say cool running water is even better. Do not put ice straight on the skin.'},
+  {id:'t4t2', q:'If a person faints, make him lie down with the head higher than the body.', a:false, fix:{q:'Correct it: Keep the head ___ the body.', o:['lower than','higher than','far from'], a:'lower than'}},
+  {id:'t4t3', q:'In case of nose bleeding, make the person lie down flat.', a:false, fix:{q:'Correct it: Make the person ___ holding the head forward.', o:['sit on a chair','lie down flat','stand on one leg'], a:'sit on a chair'}},
+  {id:'t4t4', q:'For an electric shock, switch off the electrical connection immediately.', a:true},
+  {id:'t4t5', q:'Wash your hands before giving any kind of first aid.', a:true},
+  {id:'t4t6', q:'For a bee sting, apply vinegar.', a:false, fix:{q:'Correct it: For a bee sting, apply a paste of …', o:['baking soda','vinegar','salt'], a:'baking soda'}},
+  {id:'t4t7', q:'In case of a serious burn, take the person to a hospital immediately.', a:true}
+]
+};
+
+/* ---------- Give two examples (pick 2 correct) ---------- */
+var TWO = {
+t1: [
+  {id:'t1w1', q:'Causes of accidents', ok:['Carelessness','Ignorance','Overconfidence'], no:['Safety rules','Patience','Good habits','Care']},
+  {id:'t1w2', q:'Rules for using electricity', ok:['Never touch a switch with wet hands','Never use broken plug points','Do not go too close to a heater'], no:['Play with plug points','Touch wires barefoot','Poke wires with a stick']},
+  {id:'t1w3', q:'Things that can cause poisoning', ok:['Phenyl','Expired medicines','Chemicals'], no:['Fresh fruit','Clean water','Milk','Roti']},
+  {id:'t1w4', q:'Rules for unknown visitors', ok:['Open the door with the safety chain in place','Do not accept anything from them','Do not let them in when parents are out'], no:['Open the door wide','Take the sweets they give','Tell them your phone number']}
+],
+t2: [
+  {id:'t2w1', q:'Rules while swimming', ok:['Swim under the supervision of an adult','Use a swimming tube while learning','Never swim alone'], no:['Swim alone in the sea','Jump in without looking','Push others into the pool']},
+  {id:'t2w2', q:'Rules on the playground', ok:['Wait for your turn','Follow the rules of the game','Wear safety gear and shoes'], no:['Fight with others','Push at the slide','Tease stray animals']},
+  {id:'t2w3', q:'Safe ways to cross a road', ok:['Zebra crossing','Subway','Foot overbridge'], no:['Footpath','Middle of the road','Street corner']},
+  {id:'t2w4', q:'Rules at school', ok:['Do not rush on the stairs','Never climb a desk','Do not push your friend'], no:['Run around desks','Put your hand between doors','Slide down the handrail']}
+],
+t3: [
+  {id:'t3w1', q:'Things kept in a first aid box', ok:['Band-aid','Scissors','Antiseptic cream','Cotton roll','Bandage'], no:['Matchbox','Toys','Chocolates','Salt']},
+  {id:'t3w2', q:'First aid rules', ok:['Do not crowd around the patient','Call an adult if you have not learnt first aid','Be careful while moving the injured person'], no:['Panic and shout','Move the patient roughly','Give medicine on your own']},
+  {id:'t3w3', q:'Good touches', ok:['Parents hugging you','Grandparents ruffling your hair','Teacher patting your back'], no:['A touch that makes you uncomfortable','A touch you want to stop','A touch that leaves a bad feeling']}
+],
+t4: [
+  {id:'t4w1', q:'First aid for a minor cut', ok:['Wash the cut with water','Dry it gently with cotton','Apply antiseptic cream'], no:['Put salt on it','Apply vinegar','Rub mud on it']},
+  {id:'t4w2', q:'First aid for a fainted person', ok:['Lie down with head lower than body','Loosen the clothing','Sprinkle cold water on the face','Let fresh air flow'], no:['Crowd around him','Make him stand up','Give him a tight belt']},
+  {id:'t4w3', q:'First aid for nose bleeding', ok:['Sit with the head forward','Ice pack on the bridge of the nose','Go to the doctor if it does not stop'], no:['Lie down flat','Tilt the head back','Blow the nose hard']},
+  {id:'t4w4', q:'First aid for electric shock', ok:['Switch off the electrical connection','Wrap a blanket around the person','Give something warm to drink'], no:['Touch the person while the current is on','Pour water on the person','Give an ice-cold drink']},
+  {id:'t4w5', q:'First aid for an insect bite', ok:['Put ice on it','Apply calamine lotion','Ask an adult to pull out the sting'], no:['Scratch it hard','Apply salt','Pour hot water on it']}
+]
+};
+
+/* ---------- Spell it right (the test is written) ---------- */
+var SPELL = {
+t1: [
+  {id:'t1s1', q:'Clothes that catch fire easily', a:'synthetic', w:['synthatic','sinthetic','syntetic']},
+  {id:'t1s2', q:'Handrail at the side of a staircase', a:'banister', w:['banistar','banester','benister'], slip:'You wrote "railing". The word is BANISTER.'},
+  {id:'t1s3', q:'Tablets that control acidity', a:'antacid', w:['antiacid','antasid','antacide']},
+  {id:'t1s4', q:'Eating or drinking chemicals by mistake leads to …', a:'poisoning', w:['poisioning','posioning','poisening']},
+  {id:'t1s5', q:'Things that happen by mistake and hurt us', a:'accidents', w:['acidents','accidants','accedents']},
+  {id:'t1s6', q:'Thinking you can do anything without care', a:'overconfidence', w:['overconfidance','overconfedence','overconfidense']}
+],
+t2: [
+  {id:'t2s1', q:'People who walk on the road', a:'pedestrians', w:['pedestrains','pedistrians','pedestreans']},
+  {id:'t2s2', q:'Swim under the ___ of an adult', a:'supervision', w:['supervison','suparvision','supervisson']},
+  {id:'t2s3', q:'Lights that tell us when to stop and go', a:'traffic', w:['trafic','traffik','traffick']},
+  {id:'t2s4', q:'A bridge over the road for people on foot', a:'foot overbridge', w:['foot overbrige','foot ovarbridge','fut overbridge']},
+  {id:'t2s5', q:'A tunnel under the road', a:'subway', w:['subwey','sabway','subwhay']},
+  {id:'t2s6', q:'Water sport that needs an adult watching', a:'swimming', w:['swiming','swimmimg','swimmng']}
+],
+t3: [
+  {id:'t3s1', q:'A cream that kills germs', a:'antiseptic', w:['antiseptik','antisceptic','antiseptec']},
+  {id:'t3s2', q:'Crowding ___ the patient', a:'suffocates', w:['sufocates','suffokates','suffocats']},
+  {id:'t3s3', q:'The person at school who helps with a bad touch', a:'counsellor', w:['councellor','counsellar','cownsellor']},
+  {id:'t3s4', q:'A sudden, serious problem', a:'emergency', w:['emergancy','emergensy','emergincy']},
+  {id:'t3s5', q:'A good touch makes you feel …', a:'comfortable', w:['comfortoble','comfertable','comftable'], slip:'You spelt it "comfortoble". It is C-O-M-F-O-R-T-A-B-L-E.'},
+  {id:'t3s6', q:'A long strip of cloth to cover a wound', a:'bandage', w:['bandaj','bandege','bandadge']}
+],
+t4: [
+  {id:'t4s1', q:'A pink lotion for insect bites', a:'calamine', w:['calamin','callamine','kalamine']},
+  {id:'t4s2', q:'Apply this on a wasp sting', a:'vinegar', w:['vinigar','vineger','vinagar']},
+  {id:'t4s3', q:'When a person falls down and is not awake', a:'fainting', w:['fanting','feinting','faintting']},
+  {id:'t4s4', q:'Blood coming out of the nose', a:'nose bleeding', w:['nose bleding','nose bleeeding','nose bliding']},
+  {id:'t4s5', q:'Cuts and …', a:'wounds', w:['woundes','wunds','wondes']},
+  {id:'t4s6', q:'Wrap this around a person after an electric shock', a:'blanket', w:['blankit','blankett','blancket']}
+]
+};
+
+/* ---------- Match the following (3rd item = group; never two of the same group together) ---------- */
+var MATCH = {
+t1: {id:'t1x', pairs:[['Wet floor','slipping'],['Synthetic clothes','catch fire easily'],['Phenyl','poisonous chemical'],['Antacid','controls acidity'],['Safety chain','check visitors'],['Banister','handrail of a staircase'],['Third pin of a plug','earthing'],['Ladder','reach high shelves'],['Smell of gas','open doors and windows'],['Danger sign','do not touch'],['Doors','keep it latched']]},
+t2: {id:'t2x', pairs:[['Stairs','do not run on it'],['At play','wait for your turn'],['While swimming','use a swimming tube'],['Zebra crossing','cross the road here'],['Subway','tunnel under the road'],['Foot overbridge','bridge over the road'],['Bicycle','wear a helmet'],['Traffic lights','tell us when to stop and go'],['Earphones','never on the road'],['River or sea','strong water current']]},
+t3: {id:'t3x', pairs:[['First aid','help before the doctor comes'],['Antiseptic','kills germs'],['Band-aid','covers a small cut'],['Good touch','makes you happy'],['Bad touch','tell a person you trust'],['Crowding','suffocates the patient'],['Emergency','stay calm and seek help'],['Scissors','cut the bandage'],['Matchbox','not in a first aid box']]},
+t4: {id:'t4x', pairs:[['For a small cut','clean it and apply medicine'],['Bee sting','paste of baking soda'],['Wasp sting','vinegar'],['Nose bleeding','ice pack on bridge of nose'],['Electric shock','switch off, then a blanket'],['Fainting','head lower than the body'],['Minor burn','cold running water'],['Insect bite','calamine lotion'],['Deep wound','stop the bleeding'],['Serious burn','go to the hospital']]}
+};
+/* Worksheet / textbook Practice Test 1 match (mixed) */
+var BOSS_MATCH = {id:'bx', pairs:[['Doors','keep it latched'],['Stairs','do not run on it'],['At play','wait for your turn'],['For a small cut','clean it and apply medicine'],['While swimming','use a swimming tube'],['Bee sting','paste of baking soda'],['Wasp sting','vinegar'],['Smell of gas','open doors and windows'],['Synthetic clothes','catch fire easily'],['Zebra crossing','cross the road here']]};
+
+/* ---------- Sort it out (n per bucket) ---------- */
+var SORT = {
+t1: [{id:'t1k1', q:'Safe or unsafe?', buckets:['Safe','Unsafe'], per:4, items:[['Keep floors dry',0],['Wear cotton clothes in the kitchen',0],['Use a ladder to reach high',0],['Keep phenyl out of reach of children',0],['Check visitors with the safety chain',0],['Touch a switch with wet hands',1],['Scatter toys on the stairs',1],['Take medicine without asking an adult',1],['Switch on a fan when you smell gas',1],['Open the door to strangers',1]]}],
+t2: [{id:'t2k1', q:'Where does this safety rule belong?', buckets:['School','Playground','Swimming','Road'], per:2, items:[['Never climb a desk',0],['Do not rush up the stairs',0],['Never put your hand between doors',0],['Wait for your turn at rides',1],['Follow the rules of the game',1],['Do not fight with others',1],['Use a swimming tube',2],['Swim with an adult',2],['Never swim in a river alone',2],['Cross at the zebra crossing',3],['No earphones while walking',3],['Wear a helmet on a bicycle',3]]}],
+t3: [
+  {id:'t3k1', q:'Good touch or bad touch?', buckets:['Good touch','Bad touch'], per:3, items:[['Mother gives you a hug',0],['Grandmother ruffles your hair',0],['Teacher pats your back',0],['Father holds your hand to cross the road',0],['A touch that makes you uncomfortable',1],['A touch that leaves a bad feeling',1],['A touch you want to stop right away',1]]},
+  {id:'t3k2', q:'Does it go in a first aid box?', buckets:['First aid box','Not in it'], per:3, items:[['Band-aid',0],['Cotton roll',0],['Antiseptic cream',0],['Scissors',0],['Bandage',0],['Matchbox',1],['Toys',1],['Salt',1],['Chocolates',1]]}
+],
+t4: [{id:'t4k1', q:'Which injury needs this first aid?', buckets:['Fainting','Insect bite','Nose bleeding','Electric shock'], per:2, items:[['Head lower than the body',0],['Loosen the clothing',0],['Sprinkle cold water on the face',0],['Paste of baking soda',1],['Calamine lotion',1],['Pull out the sting',1],['Sit with the head forward',2],['Ice pack on the bridge of the nose',2],['Switch off the connection',3],['Wrap a blanket',3],['Give a warm drink',3]]}]
+};
+
+/* ---------- Put in order ---------- */
+var SEQ = {
+road: {id:'t2q1', ch:'t2', q:'How do we cross the road safely? Put the steps in order.', steps:['Reach the zebra crossing','Wait for the traffic to stop','Look to your right','Look to your left','Look to your right again','Cross the road']},
+cut: {id:'t4q1', ch:'t4', q:'First aid for a small cut. Put the steps in order.', steps:['Wash your hands','Wash the cut with water','Dry it gently with cotton','Apply antiseptic cream']},
+shock: {id:'t4q2', ch:'t4', q:'First aid for an electric shock. Put the steps in order.', steps:['Switch off the electrical connection','Wrap a blanket around the person','Give something warm to drink'], slip:'In your worksheet you missed step 1. Switching off ALWAYS comes first.'}
+};
+
+/* ---------- Written answers (Answer Builder + Notebook) ----------
+   k: answer | reason | explain | hots | diff ; m = marks ; pts = model points ; bad = wrong sentences for the builder */
+var WRITTEN = [
+  /* t1 */
+  {id:'t1r1', ch:'t1', k:'answer', m:1, q:'What are safety rules?', pts:['Safety rules are rules which help us to avoid accidents.','We must follow them at home, at school, on the playground and on the road.'], bad:['Safety rules are the rules of a game.','Safety rules tell us to rush.'], kw:['avoid accidents']},
+  {id:'t1r2', ch:'t1', k:'answer', m:1, q:'What are the main causes of accidents? List any two.', pts:['Accidents occur mostly due to carelessness.','Ignorance and overconfidence also cause accidents.'], bad:['Following safety rules causes accidents.','Wearing a helmet causes accidents.'], kw:['carelessness','ignorance','overconfidence']},
+  {id:'t1r3', ch:'t1', k:'answer', m:1, q:'What would you do if you see an electric spark at your home?', pts:['I would turn off the main switch immediately.','Then I would call an adult.'], bad:['I would touch the spark to stop it.','I would pour water on it.'], kw:['main switch','call an adult']},
+  {id:'t1r4', ch:'t1', k:'answer', m:1, q:'How does poisoning happen?', pts:['Accidental consumption of chemicals and medicines leads to poisoning.','For example, drinking phenyl by mistake, or taking a medicine without asking an adult.'], bad:['Poisoning happens when we eat fresh fruit.','Poisoning happens when we wash our hands.'], kw:['chemicals','medicines'], slip:'In your notebook you wrote "consumption of chemical and leads to poisoning". Write it in full: chemicals AND MEDICINES.'},
+  {id:'t1r5', ch:'t1', k:'answer', m:1, q:'Why should we not reveal details about ourselves to strangers?', pts:['A stranger may have bad intentions.','He may use our details to harm us or our family.'], bad:['Strangers are always our friends.','Our details make strangers happy.'], kw:['bad intentions']},
+  {id:'t1r6', ch:'t1', k:'answer', m:2, q:'If you smell gas, what will you do?', pts:['Open the doors and windows to let the gas out.','Shut down the regulator of the gas cylinder.','Do not switch on any electrical switch, not even a fan.','A small spark can cause a huge fire.'], bad:['Switch on the fan to blow the gas away.','Light a match to find the leak.'], kw:['doors and windows','regulator','spark']},
+  {id:'t1r7', ch:'t1', k:'answer', m:2, q:'How do accidents happen at home?', pts:['Anyone can slip on a wet floor.','We may trip over toys scattered on the floor.','We may fall while trying to reach a high shelf.','We may get an electric shock by playing with switches or appliances.','We may get poisoning by consuming medicines or chemicals without asking an adult.'], bad:['Accidents happen when we follow safety rules.','Accidents happen when floors are dry.'], kw:['wet floor','scattered','electric shock','poisoning']},
+  {id:'t1r8', ch:'t1', k:'reason', m:1, q:'We should not touch electrical switches with wet hands.', pts:['Wet hands can give us an electric shock.','Water helps electricity to pass into our body.'], bad:['Wet hands make the switch dirty.','The switch will break.'], kw:['electric shock']},
+  {id:'t1r9', ch:'t1', k:'reason', m:1, q:'We should avoid wearing synthetic clothes in the kitchen.', pts:['Synthetic clothes catch fire easily.','Cotton clothes are safer in the kitchen.'], bad:['Synthetic clothes are too costly.','Synthetic clothes are too colourful.'], kw:['catch fire easily']},
+  {id:'t1r10', ch:'t1', k:'hots', m:1, q:'Before buying any medicines, cosmetics or eatables, we should know the date of manufacturing and date of expiry.', pts:['Expired medicines, cosmetics and eatables can harm us.','They may cause poisoning if consumed or used.'], bad:['Old things are always tastier.','The date tells us the price.'], kw:['expired','poisoning']},
+  {id:'t1r11', ch:'t1', k:'hots', m:1, q:'We should never use a hair dryer with wet hands.', pts:['A hair dryer works on electricity.','Wet hands can give us an electric shock.'], bad:['Wet hands make the hair dryer too hot.','The hair will not dry.'], kw:['electric shock']},
+  {id:'t1r12', ch:'t1', k:'answer', m:1, q:'Write two safety rules for unknown visitors.', pts:['Open the door only to a known and trustworthy person.','Check visitors with the safety chain in place or through the netted door.','When parents are not at home, do not let anyone in, even service providers.','Do not accept anything from unknown visitors.'], bad:['Open the door to everyone.','Take sweets from unknown visitors.'], kw:['safety chain','unknown']},
+  {id:'t1r13', ch:'t1', k:'answer', m:1, q:'What should you do if you get an unknown telephone call?', pts:['Avoid such calls, even if they say they are from the police, a hospital or a friend of your parents.','If the caller uses offensive language, give the phone to an adult immediately.'], bad:['Tell the caller your address.','Tell the caller when your parents are out.'], kw:['avoid','adult']},
+  /* t2 */
+  {id:'t2r1', ch:'t2', k:'answer', m:2, q:'What precautions can you take to avoid accidents at school?', pts:['We should not push our friends. They may fall and get hurt.','We should never put our hand or foot between the doors.','We should not rush up or down the stairs.','We should not climb on a desk or run around it.'], bad:['We should run on the stairs to save time.','We should climb desks to reach the board.'], kw:['push','doors','stairs','desk']},
+  {id:'t2r2', ch:'t2', k:'answer', m:1, q:'Write two safety rules to be followed while swimming.', pts:['Always swim under the supervision of a coach or an adult.','Use a swimming tube while learning.','Never swim in a river or sea alone.'], bad:['Swim alone if you are a good swimmer.','Jump into deep water without looking.'], kw:['supervision','swimming tube']},
+  {id:'t2r3', ch:'t2', k:'answer', m:1, q:'Write two safety rules to be followed on the playground.', pts:['Wait for your turn at rides.','Follow the rules of the game.','Wear the correct dress, safety gear and shoes.','Do not fight with others if their opinion is different.'], bad:['Push others to get on the slide first.','Play on the road instead.'], kw:['turn','rules of the game']},
+  {id:'t2r4', ch:'t2', k:'answer', m:2, q:'Write four safety rules on the road.', pts:['Always follow the traffic lights.','Always cross the road at the zebra crossing.','Before crossing, look right, then left and then right again.','Never use earphones while walking on the road.','Walk on the footpath.'], bad:['Run across the road when in a hurry.','Play games on the road.'], kw:['traffic lights','zebra crossing','earphones']},
+  {id:'t2r5', ch:'t2', k:'answer', m:2, q:'Imagine there are no traffic lights, no traffic police and no one follows traffic rules. What could happen? List the problems.', pts:['There would be many road accidents.','People could get badly hurt or even lose their lives.','There would be traffic jams.','Pedestrians would not be able to cross the road safely.'], bad:['Everyone would reach on time.','The roads would become safer.'], kw:['accidents','traffic jams']},
+  {id:'t2r6', ch:'t2', k:'answer', m:2, q:'Children of class 1 and 2 also travel in your school bus. How will you ensure their safety?', pts:['Help them get on and off the bus one by one, without pushing.','Make sure they stay seated while the bus is moving.','Tell them not to put their hands or heads out of the window.','Hold their hands while they cross the road near the bus.'], bad:['Let them stand on the seats.','Push them in to get in quickly.'], kw:['one by one','seated','window']},
+  /* t3 */
+  {id:'t3r1', ch:'t3', k:'answer', m:1, q:'What is a bad touch?', pts:['Any touch that makes you feel uncomfortable or leaves a bad feeling is a bad touch.','We must tell our parents or a person we trust about it.'], bad:['A bad touch is a hug from parents.','We should keep a bad touch a secret.'], kw:['uncomfortable','bad feeling']},
+  {id:'t3r2', ch:'t3', k:'answer', m:2, q:'What is first aid? What are first aid rules? Mention any two rules.', pts:['First aid is the first help given to an injured or sick person before medical aid arrives.','If you have not learnt first aid, do not try to give it. Call an adult immediately.','Never crowd around the patient. This suffocates the patient.','Be careful while moving the injured person. He may have broken bones.'], bad:['First aid is given only by doctors in hospitals.','Crowd around the patient to help him.'], kw:['first help','before','crowd']},
+  {id:'t3r3', ch:'t3', k:'diff', m:2, q:'Differentiate between Good touch and Bad touch.', A:'Good touch', B:'Bad touch', rows:[['Makes you feel comfortable and happy.','Makes you feel uncomfortable or leaves a bad feeling.'],['Shows love and care, e.g. a hug from parents, a teacher patting your back.','You want it to stop right away. Tell your parents or a person you trust.']], pts:['A good touch makes you feel comfortable and happy.','Example: parents hugging you, a teacher patting your back.','A bad touch makes you feel uncomfortable or leaves a bad feeling.','You must tell your parents, a person you trust or the school counsellor.'], bad:['A good touch makes you feel scared.','A bad touch should be kept a secret.'], kw:['comfortable','uncomfortable','trust']},
+  {id:'t3r4', ch:'t3', k:'explain', m:1, q:'First aid', pts:['First aid is the immediate medical treatment given to an injured person before the arrival of the doctor.'], bad:['First aid is a kind of game.','First aid is given after the doctor leaves.'], kw:['immediate','before the arrival of the doctor']},
+  {id:'t3r5', ch:'t3', k:'explain', m:1, q:'Antiseptic', pts:['An antiseptic is a cream or lotion that kills germs and prevents their growth.','We apply it on cuts, wounds and burns.'], bad:['An antiseptic controls acidity in the stomach.','An antiseptic is a sweet medicine.'], kw:['kills germs']},
+  {id:'t3r6', ch:'t3', k:'explain', m:1, q:'Antacid', pts:['Antacids are tablets that control the acidity in the stomach.'], bad:['An antacid kills germs in a cut.','An antacid is applied on burns.'], kw:['acidity']},
+  {id:'t3r7', ch:'t3', k:'answer', m:1, q:'Name four things that should be kept in a first aid box.', pts:['Band-aid and bandage','Cotton roll','Antiseptic cream','Scissors'], bad:['Matchbox','Toys and chocolates'], kw:['band-aid','antiseptic']},
+  {id:'t3r8', ch:'t3', k:'answer', m:1, q:'What should we do while giving first aid?', pts:['Keep calm and do not panic.','Make the patient comfortable.','Call a doctor or take the patient to a hospital.'], bad:['Shout and panic.','Let a crowd gather around the patient.'], kw:['calm','comfortable','doctor']},
+  /* t4 */
+  {id:'t4r1', ch:'t4', k:'answer', m:2, q:'How will you give first aid to a person who has fainted?', pts:['Make him lie down with the head lower than the body. This speeds up the blood flow to the brain and helps him regain consciousness.','Allow fresh air to flow over the person. Do not crowd around him.','Loosen the clothing of the person.','Sprinkle cold water on the face of the person.'], bad:['Make him stand up quickly.','Crowd around him to keep him warm.'], kw:['head lower','fresh air','loosen','cold water']},
+  {id:'t4r2', ch:'t4', k:'answer', m:2, q:'What first aid will you give to a person bitten by an insect?', pts:['Put ice on the affected area to reduce burning and pain.','Apply antiseptic or calamine lotion over the affected area.','For a bee sting, apply a paste of baking soda; for a wasp sting, apply vinegar.','If there is itching all over the body and difficulty in breathing, rush to the doctor.'], bad:['Scratch the bite hard.','Apply salt on the bite.'], kw:['ice','calamine','baking soda','vinegar']},
+  {id:'t4r3', ch:'t4', k:'answer', m:2, q:'What is the first aid to be given in case of nose bleeding?', pts:['Make the person sit on a chair holding his head forward.','Put a wet cloth or an ice pack on the bridge of the nose.','If the bleeding does not stop, rush to the doctor.'], bad:['Make the person lie down flat.','Tilt the head backwards.'], kw:['head forward','bridge of the nose'], real:'Grown-ups also pinch the soft part of the nose. You wrote "pinch the nose tip" – a good idea, but in the test write the three book points.'},
+  {id:'t4r4', ch:'t4', k:'answer', m:2, q:'What is the first aid to be given in case of electric shock?', pts:['First, switch off the electrical connection immediately.','Wrap a blanket around the person to keep him warm.','Give him something warm to drink.'], bad:['Pull the person away with bare hands while the current is on.','Pour water on the person.'], kw:['switch off','blanket','warm'], slip:'In your worksheet you wrote only the blanket and the warm drink. Start with: "First, switch off the electrical connection."', real:'Never touch the person until the power is off. Give a drink only if he is fully awake.'},
+  {id:'t4r5', ch:'t4', k:'answer', m:2, q:'How will you give first aid for cuts and wounds?', pts:['Wash your hands before giving first aid.','Wash the cut with water and dry it gently with cotton.','Apply an antiseptic cream or lotion on it.','If the wound is deep, stop the bleeding and take the patient to the doctor.'], bad:['Put salt on the cut.','Rub mud on the wound.'], kw:['wash','cotton','antiseptic'], real:'Grown-ups stop bleeding by pressing firmly on the wound with a clean cloth.'},
+  {id:'t4r6', ch:'t4', k:'answer', m:2, q:'What first aid will you give for burns?', pts:['For a minor burn, wash the burnt area with cold running water or put an ice pack on it.','Apply an antiseptic cream or lotion on the burnt area.','In case of a serious burn, take the person to a hospital immediately.'], bad:['Put butter or oil on the burn.','Burst the blisters.'], kw:['cold running water','antiseptic','hospital'], real:'Cool running water for a long time is best. No ice straight on the skin, and never burst a blister.'},
+  {id:'t4r7', ch:'t4', k:'reason', m:1, q:'We should not crowd around a fainted person.', pts:['Crowding blocks the flow of fresh air.','It suffocates the person.'], bad:['The person may wake up and get angry.','Crowding keeps the person warm.'], kw:['suffocates']},
+  {id:'t4r8', ch:'t4', k:'reason', m:1, q:'A person who faints is made to lie down with the head lower than the body.', pts:['It speeds up the blood flow to the brain.','This helps the person regain consciousness.'], bad:['It helps the person sleep better.','It stops the person from sneezing.'], kw:['blood flow','brain']},
+  {id:'t4r9', ch:'t4', k:'reason', m:1, q:'We must switch off the electrical connection before helping a person who got an electric shock.', pts:['The current may still be passing through the person.','If we touch him, we can get a shock too.'], bad:['Switching off saves electricity bills.','The fan makes too much noise.'], kw:['current','shock too']}
+];
+
+/* ---------- Slip Doctor: her real worksheet / textbook / notebook mistakes ---------- */
+var SLIP_IDS = ['t2a1','t4m9','t4r4','t4q2','t1f6','t1r4','t3o1','t1o2','t1s2','t4f2','t3f2','t3s5','t2m3','t1m4'];
+
+/* ---------- Plan: Mon 26 - Wed 28 Oct 2026 ---------- */
+var PLAN = [
+  {id:'S1', day:26, when:'Mon evening', kind:'ch', ch:'t1', title:'Safe at Home', mins:25},
+  {id:'S2', day:26, when:'Mon evening', kind:'ch', ch:'t2', title:'Safe Outside', mins:25, sub:'School, playground, swimming, road + road signs'},
+  {id:'S3', day:26, when:'Mon bedtime', kind:'slip', title:'Slip Doctor', mins:10, sub:'Your worksheet and notebook mistakes'},
+  {id:'S4', day:27, when:'Tue after school', kind:'ch', ch:'t3', title:'Good Touch & First Aid Basics', mins:20},
+  {id:'S5', day:27, when:'Tue after school', kind:'ch', ch:'t4', title:'Ways of Giving First Aid', mins:25},
+  {id:'S6', day:27, when:'Tue evening', kind:'lab', title:'Notebook Answer Lab', mins:25, sub:'Write 6 answers in your notebook'},
+  {id:'S7', day:27, when:'Tue evening', kind:'boss', title:'Boss: Test Paper', mins:40, sub:'Section A in the app, Section B in your notebook'},
+  {id:'S8', day:27, when:'Tue bedtime', kind:'fix', title:'Fix my mistakes', mins:10, sub:'Everything you got wrong so far'},
+  {id:'S9', day:28, when:'Wed morning', kind:'flash', title:'Flash Round', mins:10, sub:'Quick warm-up. Nothing new!'}
+];
+
+/* ================= DRAWINGS (inline SVG, generic subjects) ================= */
+var ART = (function(){
+  var INK = '#1E2A3A', RED = '#D8414D', SKIN = '#F2C9A0', SKIN_D = '#B07A52';
+
+  /* ---- mascot: "Blinky" the traffic light. Lights come on as she levels up ---- */
+  function mascot(level){
+    var on = [level>=1, level>=2, level>=3];
+    var cols = [['#5A2B30','#FF4F5E'],['#5A4A22','#FFC23D'],['#1F4A33','#2FD27A']];
+    var s = '<rect x="54" y="98" width="12" height="14" rx="3" fill="#7A8899"/>';
+    if(level>=4) s += '<path d="M30 52 Q14 40 12 24" stroke="'+INK+'" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="12" cy="22" r="6" fill="#FFD9B8" stroke="'+INK+'" stroke-width="2.5"/>'+
+      '<path d="M90 52 Q106 44 110 30" stroke="'+INK+'" stroke-width="6" fill="none" stroke-linecap="round"/><circle cx="110" cy="28" r="6" fill="#FFD9B8" stroke="'+INK+'" stroke-width="2.5"/>';
+    else s += '<path d="M30 60 Q18 66 16 78" stroke="'+INK+'" stroke-width="6" fill="none" stroke-linecap="round"/><path d="M90 60 Q102 66 104 78" stroke="'+INK+'" stroke-width="6" fill="none" stroke-linecap="round"/>';
+    s += '<rect x="30" y="14" width="60" height="88" rx="18" fill="#2E3B4E" stroke="'+INK+'" stroke-width="3"/>';
+    [26,46,66].forEach(function(cy,i){ s += '<circle cx="48" cy="'+cy+'" r="8" fill="'+(on[i]?cols[i][1]:cols[i][0])+'"/>'+(on[i]?'<circle cx="45.5" cy="'+(cy-2.5)+'" r="2.2" fill="#fff" opacity=".7"/>':''); });
+    /* face on the right column */
+    s += '<circle cx="70" cy="38" r="5.5" fill="#fff"/><circle cx="71" cy="39" r="2.8" fill="'+INK+'"/>';
+    s += '<circle cx="80" cy="38" r="5.5" fill="#fff"/><circle cx="81" cy="39" r="2.8" fill="'+INK+'"/>';
+    s += '<path d="M68 52 Q75 '+(level>=3?60:56)+' 82 52" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    s += '<circle cx="66" cy="50" r="3" fill="#FF9AA2" opacity=".6"/><circle cx="85" cy="50" r="3" fill="#FF9AA2" opacity=".6"/>';
+    if(level>=5) s += '<path d="M28 18 Q60 -8 92 18 Z" fill="#FFB627" stroke="'+INK+'" stroke-width="3" stroke-linejoin="round"/><rect x="26" y="15" width="68" height="7" rx="3" fill="#E59A00" stroke="'+INK+'" stroke-width="2.5"/>';
+    if(level>=6) s += '<path d="M75 76 l3 7 7 .5 -5.5 4.5 2 7 -6.5-4 -6.5 4 2-7 -5.5-4.5 7-.5z" fill="#FFD23F" stroke="'+INK+'" stroke-width="1.8" stroke-linejoin="round"/>';
+    return '<svg viewBox="0 0 120 114" width="100%" height="100%" aria-hidden="true">'+s+'</svg>';
+  }
+
+  /* ---- road signs ---- */
+  var TRI = '<path d="M50 8 L93 86 L7 86 Z" fill="#fff" stroke="'+RED+'" stroke-width="8" stroke-linejoin="round"/>';
+  var CIR = '<circle cx="50" cy="50" r="41" fill="#fff" stroke="'+RED+'" stroke-width="8"/>';
+  var SLASH = '<path d="M22 22 L78 78" stroke="'+RED+'" stroke-width="8"/>';
+  function stick(x, y, sc, extra){ /* simple walking figure: head at (x,y) */
+    var k = sc||1;
+    return '<g stroke="'+INK+'" stroke-width="'+(3.4*k)+'" stroke-linecap="round" fill="none">'+
+      '<path d="M'+x+' '+(y+6*k)+' L'+(x+1*k)+' '+(y+20*k)+'"/>'+
+      '<path d="M'+(x+1*k)+' '+(y+20*k)+' L'+(x-5*k)+' '+(y+31*k)+'"/><path d="M'+(x+1*k)+' '+(y+20*k)+' L'+(x+7*k)+' '+(y+31*k)+'"/>'+
+      (extra||'<path d="M'+x+' '+(y+10*k)+' L'+(x-7*k)+' '+(y+16*k)+'"/><path d="M'+x+' '+(y+10*k)+' L'+(x+7*k)+' '+(y+15*k)+'"/>')+
+      '</g><circle cx="'+x+'" cy="'+y+'" r="'+(4.6*k)+'" fill="'+INK+'"/>';
+  }
+  var SIGN = {
+    noparking: function(){ return CIR+'<text x="50" y="68" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="52" fill="'+INK+'">P</text>'+SLASH; },
+    school: function(){ return TRI+stick(41,44,1)+stick(59,53,.75); },
+    railgate: function(){ var s=TRI+'<g stroke="'+INK+'" stroke-width="3.6" stroke-linecap="round">'; [32,41,50,59,68].forEach(function(x){ s+='<path d="M'+x+' 52 L'+x+' 76"/>'; }); return s+'<path d="M28 58 L72 58"/><path d="M28 69 L72 69"/></g>'; },
+    oneway: function(){ return CIR+'<g stroke="'+INK+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M39 72 L39 30"/><path d="M31 39 L39 29 L47 39"/><path d="M61 28 L61 70"/><path d="M53 61 L61 71 L69 61"/></g>'+SLASH; },
+    work: function(){ return TRI+'<path d="M56 80 Q67 60 80 80 Z" fill="'+INK+'"/>'+stick(40,44,1,'<path d="M40 54 L54 60"/><path d="M40 54 L50 52"/>')+'<path d="M48 48 L60 72" stroke="'+INK+'" stroke-width="3" stroke-linecap="round"/><path d="M57 70 L65 76 L60 79 Z" fill="'+INK+'"/>'; },
+    narrow: function(){ return TRI+'<g stroke="'+INK+'" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"><path d="M36 80 L36 64 L44 54 L44 38"/><path d="M64 80 L64 64 L56 54 L56 38"/></g>'; },
+    stop: function(){ return '<path d="M32 6 L68 6 L94 32 L94 68 L68 94 L32 94 L6 68 L6 32 Z" fill="'+RED+'" stroke="#fff" stroke-width="3"/><path d="M33 11 L67 11 L89 33 L89 67 L67 89 L33 89 L11 67 L11 33 Z" fill="none" stroke="#fff" stroke-width="2.5"/><text x="50" y="60" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="25" fill="#fff">STOP</text>'; },
+    zebra: function(){ var s=TRI; [28,38,48,58,68].forEach(function(x){ s+='<rect x="'+x+'" y="74" width="6" height="7" fill="'+INK+'"/>'; }); return s+stick(48,40,.95); }
+  };
+  function sign(k, w){
+    if(!SIGN[k]) return '';
+    return '<svg viewBox="0 0 100 100" width="'+(w||100)+'" role="img" aria-label="A road sign">'+SIGN[k]()+'</svg>';
+  }
+
+  /* ---- injury pictures (worksheet Q6 style) ---- */
+  function face(cx, cy, r, mood){
+    var s = '<circle cx="'+cx+'" cy="'+cy+'" r="'+r+'" fill="'+SKIN+'" stroke="'+SKIN_D+'" stroke-width="2.5"/>'+
+      '<path d="M'+(cx-r)+' '+(cy-r*.2)+' Q'+cx+' '+(cy-r*1.6)+' '+(cx+r)+' '+(cy-r*.2)+'" fill="#3A2A20"/>';
+    if(mood==='shut') s += '<path d="M'+(cx-r*.5)+' '+(cy+r*.05)+' l'+(r*.28)+' 0 M'+(cx+r*.22)+' '+(cy+r*.05)+' l'+(r*.28)+' 0" stroke="'+INK+'" stroke-width="2.2" stroke-linecap="round"/>';
+    else s += '<circle cx="'+(cx-r*.35)+'" cy="'+(cy+r*.05)+'" r="'+(r*.11)+'" fill="'+INK+'"/><circle cx="'+(cx+r*.35)+'" cy="'+(cy+r*.05)+'" r="'+(r*.11)+'" fill="'+INK+'"/>';
+    if(mood==='sad') s += '<path d="M'+(cx-r*.3)+' '+(cy+r*.62)+' Q'+cx+' '+(cy+r*.4)+' '+(cx+r*.3)+' '+(cy+r*.62)+'" stroke="'+INK+'" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
+    if(mood==='ouch') s += '<ellipse cx="'+cx+'" cy="'+(cy+r*.55)+'" rx="'+(r*.16)+'" ry="'+(r*.2)+'" fill="'+INK+'"/>';
+    return s;
+  }
+  var INJ = {
+    faint: function(){ return '<rect x="4" y="80" width="112" height="6" rx="3" fill="#C9D3E0"/>'+
+      '<rect x="80" y="62" width="30" height="16" rx="5" fill="#9CC2EC" stroke="'+INK+'" stroke-width="2"/>'+
+      '<path d="M34 72 L76 72" stroke="#5B7FB8" stroke-width="13" stroke-linecap="round"/>'+
+      '<path d="M76 70 L100 58" stroke="#3E4D63" stroke-width="9" stroke-linecap="round"/>'+
+      face(22, 70, 11, 'shut')+
+      '<path d="M14 50 q4 -6 8 0 q4 6 8 0" stroke="#E0A400" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M30 42 l2 4 4 1 -3 3 1 4 -4-2 -4 2 1-4 -3-3 4-1z" fill="#FFC23D"/>'; },
+    cut: function(){ return '<path d="M20 30 L56 60 L96 40" stroke="'+SKIN+'" stroke-width="22" fill="none" stroke-linecap="round" stroke-linejoin="round"/>'+
+      '<path d="M20 30 L56 60 L96 40" stroke="'+SKIN_D+'" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity=".5"/>'+
+      '<path d="M48 56 l6 -4 M52 60 l7 -5 M57 63 l6 -4" stroke="#C0182A" stroke-width="3.2" stroke-linecap="round"/>'+
+      '<path d="M57 70 q-4 7 0 10 q4 -3 0 -10z" fill="#C0182A"/><path d="M50 74 q-3 5 0 7 q3 -2 0 -7z" fill="#C0182A"/>'+
+      '<path d="M90 22 l6 -6 M96 30 l8 -3 M84 16 l1 -8" stroke="#E0A400" stroke-width="2.5" stroke-linecap="round"/>'; },
+    bite: function(){ return '<path d="M6 66 L98 66" stroke="'+SKIN+'" stroke-width="24" stroke-linecap="round"/>'+
+      '<circle cx="54" cy="62" r="8" fill="#F28B8B"/><circle cx="54" cy="62" r="3" fill="#C0182A"/>'+
+      '<path d="M46 52 l-3 -5 M62 52 l3 -5 M54 50 l0 -6" stroke="#E0A400" stroke-width="2.2" stroke-linecap="round"/>'+
+      '<ellipse cx="84" cy="26" rx="13" ry="9" fill="#FFC23D" stroke="'+INK+'" stroke-width="2"/><path d="M80 18 L80 34 M87 18 L87 34" stroke="'+INK+'" stroke-width="3"/>'+
+      '<ellipse cx="80" cy="14" rx="7" ry="5" fill="#E4F0FD" stroke="'+INK+'" stroke-width="1.5"/><ellipse cx="90" cy="14" rx="7" ry="5" fill="#E4F0FD" stroke="'+INK+'" stroke-width="1.5"/>'+
+      '<circle cx="95" cy="26" r="2" fill="'+INK+'"/><path d="M71 28 L65 34" stroke="'+INK+'" stroke-width="2"/>'; },
+    burn: function(){ return '<rect x="8" y="70" width="62" height="14" rx="3" fill="#7A8899"/><path d="M22 70 q4 -10 8 0 M36 70 q4 -12 8 0 M50 70 q4 -10 8 0" fill="#FF7A1A" stroke="#FF7A1A" stroke-width="2"/>'+
+      '<rect x="14" y="40" width="46" height="24" rx="5" fill="#5E6C80" stroke="'+INK+'" stroke-width="2"/><rect x="58" y="44" width="18" height="5" rx="2" fill="#5E6C80"/>'+
+      '<path d="M26 34 q-4 -6 0 -12 q4 -6 0 -12 M38 34 q-4 -6 0 -12 q4 -6 0 -12" stroke="#B8C4D4" stroke-width="2.5" fill="none" stroke-linecap="round"/>'+
+      '<path d="M112 52 L84 46" stroke="'+SKIN+'" stroke-width="16" stroke-linecap="round"/><ellipse cx="82" cy="46" rx="9" ry="8" fill="#E2504F" opacity=".85"/>'+
+      '<path d="M80 30 l-2 -6 M88 32 l3 -6" stroke="#E0A400" stroke-width="2.4" stroke-linecap="round"/>'; },
+    nose: function(){ return '<circle cx="60" cy="48" r="34" fill="'+SKIN+'" stroke="'+SKIN_D+'" stroke-width="2.5"/><path d="M26 44 Q60 -4 94 44" fill="#3A2A20"/>'+
+      '<circle cx="47" cy="44" r="3.6" fill="'+INK+'"/><circle cx="73" cy="44" r="3.6" fill="'+INK+'"/>'+
+      '<path d="M60 44 Q52 58 56 62 Q60 64 64 62" stroke="'+SKIN_D+'" stroke-width="2.6" fill="none" stroke-linecap="round"/>'+
+      '<path d="M55 63 q-3 6 0 11 q3 -5 0 -11z" fill="#C0182A"/><path d="M55 78 q-2 4 0 6 q2 -2 0 -6z" fill="#C0182A"/><path d="M55 88 q-2 4 0 6 q2 -2 0 -6z" fill="#C0182A"/>'+
+      '<path d="M66 72 Q72 68 78 72" stroke="'+INK+'" stroke-width="2.4" fill="none" stroke-linecap="round"/>'; },
+    shock: function(){ return '<rect x="16" y="22" width="44" height="58" rx="8" fill="#F3F5F8" stroke="'+INK+'" stroke-width="2.5"/><circle cx="31" cy="44" r="4" fill="'+INK+'"/><circle cx="45" cy="44" r="4" fill="'+INK+'"/><circle cx="38" cy="60" r="4" fill="'+INK+'"/>'+
+      '<path d="M112 70 L60 52" stroke="'+SKIN+'" stroke-width="16" stroke-linecap="round"/>'+
+      '<path d="M66 20 L58 36 L68 36 L58 54" stroke="#FFC23D" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M86 30 L80 42 L88 42 L80 56" stroke="#FFC23D" stroke-width="4" fill="none" stroke-linejoin="round" stroke-linecap="round"/><path d="M70 78 L64 88 L72 88 L66 98" stroke="#FFC23D" stroke-width="3.5" fill="none" stroke-linejoin="round" stroke-linecap="round"/>'; }
+  };
+  function injury(k, w){
+    if(!INJ[k]) return '';
+    return '<svg viewBox="0 0 120 100" width="'+(w||150)+'" role="img" aria-label="A picture of an injury">'+INJ[k]()+'</svg>';
+  }
+  return {mascot:mascot, sign:sign, injury:injury, SIGN_KEYS:Object.keys(SIGN), INJ_KEYS:Object.keys(INJ)};
+})();
+
+(function(){
+'use strict';
+
+/* ---------------- config ---------------- */
+var STORE_KEY = 'diksha_science_wt3_v1';
+var DB_PATH = 'progress/diksha_wt3';
+var LEVEL_XP = 150;
+var TITLES = ['Safety Starter','Red-Light Ready','Amber Alert','Green Go-Getter','Road Ranger','First-Aid Hero','Safety Captain'];
+var KID = 'Diksha';
+var EXAM_Y = 2026, EXAM_M = 9, EXAM_D = 28;          /* Wednesday 28 Oct 2026 (month is 0-based) */
+var DAYS = [26,27,28];
+var LBL = ['a','b','c','d','e','f','g','h','i','j'];
+var PRAISE = ['Brilliant!','Super, Diksha!','Spot on!','You got it!','Green light – go!','Safety star!'];
+var OOPS = ['Nearly! Now you know.','Oops – let’s remember this one.','Good try! Look at the answer.'];
+
+/* ---------------- rng ---------------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+var rnd = (typeof window.__SCI_SEED === 'number') ? mulberry(window.__SCI_SEED) : Math.random;
+function ri(n){return Math.floor(rnd()*n);}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=ri(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function sample(a,n){return shuffle(a).slice(0,n);}
+function pick(a){return a[ri(a.length)];}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function nowMs(){ return (typeof window.__SCI_NOW==='number') ? window.__SCI_NOW : Date.now(); }
+function dayKey(ms){ var d=new Date(ms); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+
+/* ---------------- template index ---------------- */
+var TPL = {};
+function reg(t, ch, d){ if(TPL[d.id]) throw new Error('duplicate id '+d.id); TPL[d.id] = {t:t, ch:ch, d:d}; }
+CH.forEach(function(c){
+  (MCQ[c.id]||[]).forEach(function(d){ reg('mcq', c.id, d); });
+  (FILL[c.id]||[]).forEach(function(d){ reg('fill', c.id, d); });
+  (TF[c.id]||[]).forEach(function(d){ reg('tf', c.id, d); });
+  (TWO[c.id]||[]).forEach(function(d){ reg('two', c.id, d); });
+  (SPELL[c.id]||[]).forEach(function(d){ reg('spell', c.id, d); });
+  (SORT[c.id]||[]).forEach(function(d){ reg('sort', c.id, d); });
+  if(MATCH[c.id]) reg('match', c.id, MATCH[c.id]);
+});
+SIGNS.forEach(function(d){ reg('sign', 't2', d); });
+INJ.forEach(function(d){ reg('inj', 't4', d); });
+AR.forEach(function(d){ reg('ar', d.ch, d); });
+CASES.forEach(function(d){ reg('case', d.ch, d); });
+Object.keys(SEQ).forEach(function(k){ reg('seq', SEQ[k].ch, SEQ[k]); });
+WRITTEN.forEach(function(d){ reg('w', d.ch, d); });
+reg('match', 'mix', BOSS_MATCH);
+
+function idsOf(type, ch, filter){
+  return Object.keys(TPL).filter(function(id){ var T=TPL[id]; return T.t===type && (!ch || T.ch===ch) && (!filter || filter(T.d)); });
+}
+function fillBlanks(d){ return d.q.split('___').length-1; }
+var KIND_LABEL = {reason:'Give reason', answer:'Answer this', explain:'Explain', hots:'Think and answer (HOTS)', diff:'Differentiate'};
+function wPrompt(d){ return d.k==='reason' ? 'Give reason: '+d.q : d.k==='explain' ? 'Explain: '+d.q : d.k==='hots' ? d.q+' Explain why.' : d.q; }
+function plainMcq(d){ return !d.one && !d.oo; }
+
+/* ---------------- build a runtime question from a template ---------------- */
+function make(id, o){
+  o = o||{};
+  var T = TPL[id]; if(!T) throw new Error('no template '+id);
+  var d = T.d;
+  var q = {key:id, ch:T.ch, marks:o.marks||1, sec:o.sec||'', part:o.part||'', real:d.real||''};
+  if(T.t==='mcq'){
+    var refOpts = d.o.some(function(x){ return /^(both|all of these|none of these)/i.test(x); });
+    var keep = (d.fx && (refOpts || !o.reshuffle)) || !!d.oo;
+    q.type='mcq'; q.prompt = d.oo ? 'Circle the odd one out:' : d.q; q.fx=keep; q.opts=keep?d.o.slice():shuffle(d.o); q.ans=d.a;
+    q.tip=d.tip||''; q.slip=d.slip||''; q.oo=!!d.oo;
+    q.label = d.one ? 'Give one word' : d.oo ? 'Circle the odd one out' : 'Tick the correct answer';
+  } else if(T.t==='sign'){
+    q.type='mcq'; q.prompt='Identify this road sign.'; q.sign=d.k; q.fx=false; q.ans=d.a;
+    q.opts=shuffle([d.a].concat(sample(SIGN_NAMES.filter(function(n){ return n!==d.a; }),3)));
+    q.tip=d.tip||''; q.label='Identify the road sign';
+  } else if(T.t==='inj'){
+    q.type='mcq'; q.prompt='Identify the type of injury.'; q.inj=d.k; q.fx=false; q.ans=d.a;
+    q.opts=shuffle([d.a].concat(sample(INJ_NAMES.filter(function(n){ return n!==d.a; }),3)));
+    q.tip=d.tip||''; q.label='Identify the injury';
+  } else if(T.t==='ar'){
+    q.type='mcq'; q.ar={A:d.A, R:d.R}; q.prompt='Assertion (A): '+d.A+' Reason (R): '+d.R; q.fx=true; q.opts=AR_O.slice(); q.ans=AR_O[d.a];
+    q.tip=d.tip||''; q.slip=d.slip||''; q.label='Assertion and Reason';
+  } else if(T.t==='spell'){
+    q.type='mcq'; q.spell=true; q.prompt=d.q; q.opts=shuffle([d.a].concat(d.w)); q.ans=d.a; q.slip=d.slip||'';
+    q.tip=(d.tip?d.tip+' ':'')+'Spell it: '+d.a.toUpperCase().split('').join('-').replace(/- -/g,'  '); q.label='Spell it right';
+  } else if(T.t==='tf'){
+    q.type='tf'; q.prompt=d.q; q.ans=d.a; q.tip=d.tip||''; q.slip=d.slip||''; q.note=d.note||''; q.label='True or False';
+    q.fix = d.fix ? {prompt:d.fix.q, opts:shuffle(d.fix.o), ans:d.fix.a} : null;
+  } else if(T.t==='fill'){
+    q.type='fill'; q.parts=d.q.split('___'); q.ans=d.a; q.any=!!d.any; q.slip=d.slip||''; q.tip=d.tip||'';
+    q.chips=shuffle(d.a.map(function(x){return x[0];}).concat(d.bank)); q.label='Fill in the blanks';
+  } else if(T.t==='two'){
+    var nOk = Math.min(3, d.ok.length), okC = sample(d.ok, nOk), noC = sample(d.no, Math.min(d.no.length, 6-nOk));
+    q.type='two'; q.prompt=d.q; q.ok=okC; q.chips=shuffle(okC.concat(noC)); q.need=2; q.tip=d.tip||''; q.label='Give two examples';
+  } else if(T.t==='match'){
+    var n = o.n||4, chosen=[], used={};
+    var av = o.avoid||{}, avk = Object.keys(av);
+    function pairClash(p){ var t=' '+norm(p[0]+' '+p[1])+' '; return avk.some(function(f){ return t.indexOf(' '+f+' ')>=0; }); }
+    var clean = shuffle(d.pairs.filter(function(p){ return !pairClash(p); })), dirty = shuffle(d.pairs.filter(pairClash));
+    clean.concat(dirty).forEach(function(p){ if(chosen.length<n && !(p[2] && used[p[2]])){ chosen.push(p); if(p[2]) used[p[2]]=1; } });
+    var right = shuffle(chosen.map(function(p){return p[1];}));
+    q.type='match'; q.prompt='Match the following'; q.left=chosen.map(function(p){return p[0];}); q.right=right;
+    q.pair=chosen.map(function(p){return right.indexOf(p[1]);}); q.label='Match the following';
+  } else if(T.t==='sort'){
+    var items=[];
+    d.buckets.forEach(function(b,bi){ sample(d.items.filter(function(it){return it[1]===bi;}), d.per).forEach(function(it){ items.push({t:it[0], b:bi}); }); });
+    q.type='sort'; q.prompt=d.q; q.buckets=d.buckets.slice(); q.items=shuffle(items); q.label='Sort it out';
+  } else if(T.t==='seq'){
+    var rest = d.steps.slice(), ch2 = shuffle(rest), guard=0;
+    while(rest.length>1 && ch2.join('|')===rest.join('|') && guard++<20) ch2 = shuffle(rest);
+    q.type='seq'; q.prompt=d.q; q.steps=d.steps.slice(); q.chips=ch2; q.slip=d.slip||''; q.label='Put in order';
+  } else if(T.t==='case'){
+    q.type='steps'; q.passage=d.passage; q.title=d.title; q.prompt='Read the case and answer.';
+    q.parts=d.parts.map(function(p){ return {prompt:p.q, opts:(p.o.length===2 ? p.o.slice() : shuffle(p.o)), ans:p.a}; }); q.label='Case based question';
+  } else if(T.t==='w'){
+    q.kind=d.k; q.wm=d.m; q.prompt=wPrompt(d); q.kw=d.kw||[]; q.pts=d.pts.slice(); q.slip=d.slip||''; q.diff=d.k==='diff'?d:null;
+    if(o.mode==='note'){
+      q.type='note'; q.label='Write in your notebook'; q.marks=o.marks||d.m;
+    } else {
+      var good = d.pts.length>3 ? sample(d.pts,3) : d.pts.slice();
+      q.type='build'; q.good=good; q.chips=shuffle(good.concat(d.bad)); q.label='Answer builder – '+KIND_LABEL[d.k];
+    }
+  }
+  return q;
+}
+
+/* ---------------- no repeats: one fact per quest, rotate through the bank across replays ---------------- */
+function norm(x){ return String(x).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9]+/g,' ').trim(); }
+var ANSWERS = null;
+var COMMON = {'first aid':1, 'an adult':1, 'adult':1, 'water':1, 'true':1, 'false':1, 'doctor':1, 'not':1, 'never':1, 'right':1};
+function ownAnswers(T){
+  var d=T.d, out=[];
+  if(T.t==='mcq'||T.t==='sign'||T.t==='inj'||T.t==='spell') out.push(d.a);
+  else if(T.t==='fill') d.a.forEach(function(a){ out = out.concat(a); });
+  else if(T.t==='tf' && d.fix) out.push(d.fix.a);
+  return out.map(norm).filter(function(x){ return x.length>0; });
+}
+function promptText(T){
+  var d=T.d, t=[];
+  if(T.t==='ar') t=[d.A, d.R];
+  else if(!d.oo) t=[d.q||''];
+  if(T.t==='two') t = t.concat(d.ok);
+  return ' '+norm(t.join(' '))+' ';
+}
+function factsOf(id){
+  if(!ANSWERS){ ANSWERS={}; Object.keys(TPL).forEach(function(k){ ownAnswers(TPL[k]).forEach(function(a){ if(a.length>=5 && !COMMON[a]) ANSWERS[a]=1; }); }); }
+  var T=TPL[id], out=[];
+  if(T.t!=='w' && T.t!=='match' && T.t!=='sort' && T.t!=='case' && T.t!=='seq'){
+    var pt = promptText(T);
+    Object.keys(ANSWERS).forEach(function(a){ if(pt.indexOf(' '+a+' ')>=0) out.push(a); });
+  }
+  out = out.concat(ownAnswers(T));
+  return out.filter(function(x){ return !COMMON[x]; });
+}
+function clash(id, used){ return factsOf(id).some(function(f){ return used[f]; }); }
+function useFacts(id, used){ factsOf(id).forEach(function(f){ used[f]=1; }); }
+function rotate(ids, n, used){
+  var seen = S.seen||{};
+  var sf = S.seenF||{};
+  var ordered = ids.filter(function(id){ return !clash(id, used); }).map(function(id){ var k = seen[id]||0; ownAnswers(TPL[id]).forEach(function(f){ if((sf[f]||0)>k) k=sf[f]; }); return {id:id, k:k + rnd()*1000}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.id; });
+  var out=[];
+  ordered.forEach(function(id){ if(out.length<n && !clash(id, used)){ out.push(id); useFacts(id, used); } });
+  return out;
+}
+
+/* ---------------- sets ---------------- */
+function mcqIds(ch){ return idsOf('mcq', ch, plainMcq); }
+function specials(ch, used){
+  var out = [];
+  out = out.concat(rotate(idsOf('mcq', ch, function(d){ return d.one; }), 1, used));
+  out = out.concat(rotate(idsOf('mcq', ch, function(d){ return d.oo; }), 1, used));
+  out = out.concat(rotate(idsOf('ar', ch), 1, used));
+  if(ch==='t2'){ out = out.concat(rotate(idsOf('sign'), 2, used)); out.push('t2q1'); }
+  if(ch==='t4'){ out = out.concat(rotate(idsOf('inj'), 2, used)); out = out.concat(rotate(['t4q1','t4q2'], 1, {})); }
+  var cs = idsOf('case', ch); if(cs.length) out = out.concat(rotate(cs, 1, {}));
+  return out;
+}
+function chapterSet(ch){
+  var used = {};
+  var sx = specials(ch, used);
+  var m = rotate(mcqIds(ch),3,used), f = rotate(idsOf('fill',ch),2,used), t = rotate(idsOf('tf',ch),2,used);
+  var sp = rotate(idsOf('spell',ch),1,used)[0], tw = rotate(idsOf('two',ch),1,used)[0];
+  var ms = idsOf('match',ch).concat(idsOf('sort',ch));
+  var msPick = rotate(ms, 1, {});
+  var w = rotate(idsOf('w',ch,function(d){return d.k!=='diff';}),2,{});
+  var core = [m[0], t[0], f[0], m[1], t[1], sp, f[1], tw, m[2], msPick[0]].filter(Boolean);
+  /* weave the specials in: one after every second core question */
+  /* long items (case, sequence) show a lot of text, so they go last, after the questions they could give away */
+  var early = sx.filter(function(id){ var t=TPL[id].t; return t!=='case' && t!=='seq'; }), late = sx.filter(function(id){ var t=TPL[id].t; return t==='case' || t==='seq'; });
+  var order = [], si = 0;
+  core.forEach(function(id, k){ order.push(id); if(k%2===1 && si<early.length) order.push(early[si++]); });
+  while(si<early.length) order.push(early[si++]);
+  order = order.concat(late);
+  var Q = order.map(function(id){ return TPL[id].t==='match' ? make(id,{avoid:used}) : make(id); });
+  w.forEach(function(id){ Q.push(make(id,{mode:'build'})); });
+  return Q;
+}
+function labSet(chs){
+  var Q=[];
+  if(!chs || chs.length>1){
+    /* mixed Answer Lab: her two slip answers + one per part, 6 in all */
+    var ids = ['t1r4','t4r4'];
+    CH.forEach(function(c){ var pool = idsOf('w', c.id, function(d){ return d.k!=='diff' && ids.indexOf(d.id)<0; }); var p = rotate(pool,1,{})[0]; if(p) ids.push(p); });
+    ids.forEach(function(id){ Q.push(make(id,{mode:'note'})); });
+    return Q;
+  }
+  var ch = chs[0], all = idsOf('w', ch);
+  var slips = all.filter(function(id){ return TPL[id].d.slip; });
+  var rest = shuffle(all.filter(function(id){ return !TPL[id].d.slip; }));
+  shuffle(slips).concat(rest).slice(0, 5).forEach(function(id){ Q.push(make(id,{mode:'note'})); });
+  return Q;
+}
+/* Section A follows the Unit III worksheet (pp 67-70) plus the textbook test types */
+function bossA(){
+  var Q=[], used={}, s;
+  s='Q.1 Multiple Choice Questions';
+  shuffle(CH).forEach(function(c,k){ var id=rotate(mcqIds(c.id),1,used)[0]; if(id) Q.push(make(id,{marks:1, sec:s, part:LBL[k]})); });
+  s='Q.2 Fill in the blanks';
+  var total=0, k2=0;
+  shuffle(idsOf('fill')).forEach(function(id){ var n=fillBlanks(TPL[id].d); if(total+n<=4 && !clash(id,used)){ Q.push(make(id,{marks:n, sec:s, part:LBL[k2++]})); total+=n; useFacts(id,used); } });
+  s='Q.3 Give one word';
+  rotate(idsOf('mcq',null,function(d){return d.one;}),3,used).forEach(function(id,k){ Q.push(make(id,{marks:1, sec:s, part:LBL[k]})); });
+  s='Q.4 State True or False';
+  shuffle(CH).forEach(function(c,k){ var id=rotate(idsOf('tf',c.id),1,used)[0]; if(id) Q.push(make(id,{marks:1, sec:s, part:LBL[k]})); });
+  s='Q.5 Identify the road signs';
+  rotate(idsOf('sign'),3,used).forEach(function(id,k){ Q.push(make(id,{marks:1, sec:s, part:LBL[k]})); });
+  s='Q.6 Identify the type of injury';
+  rotate(idsOf('inj'),2,used).forEach(function(id,k){ Q.push(make(id,{marks:1, sec:s, part:LBL[k]})); });
+  s='Q.7 Circle the odd one out';
+  rotate(idsOf('mcq',null,function(d){return d.oo;}),2,used).forEach(function(id,k){ Q.push(make(id,{marks:1, sec:s, part:LBL[k]})); });
+  Q.push(make('bx',{marks:2, sec:'Q.8 Match the following', n:4, avoid:used}));
+  Q.push(make(rotate(idsOf('ar'),1,used)[0],{marks:1, sec:'Q.9 Assertion and Reason'}));
+  Q.push(make(pick(idsOf('case')),{marks:2, sec:'Q.10 Case based question'}));
+  return Q;
+}
+function bossB(){
+  var Q=[];
+  function wp(filter, n, sec, marks){
+    var used={}, out=[];
+    shuffle(idsOf('w', null, filter)).forEach(function(id){ var ch=TPL[id].ch; if(out.length<n && !used[ch]){ out.push(id); used[ch]=1; } });
+    out.forEach(function(id,k){ Q.push(make(id,{mode:'note', marks:marks||TPL[id].d.m, sec:sec, part:(n>1?LBL[k]:'')})); });
+  }
+  wp(function(d){ return d.k==='reason'; }, 2, 'Q.11 Give reason', 1);
+  Q.push(make(pick(['t2r2','t2r3']),{mode:'note', marks:1, sec:'Q.12 Write two safety rules'}));
+  Q.push(make(pick(['t4r3','t4r4']),{mode:'note', marks:2, sec:'Q.13 What is the first aid to be given?', part:'a'}));
+  Q.push(make(pick(['t4r1','t4r2','t4r5','t4r6']),{mode:'note', marks:2, sec:'Q.13 What is the first aid to be given?', part:'b'}));
+  wp(function(d){ return d.k==='hots'; }, 1, 'Q.14 Higher Order Thinking Skills', 1);
+  Q.push(make(pick(['t3r1','t3r4','t3r5','t3r6']),{mode:'note', marks:1, sec:'Q.15 Very short answer'}));
+  return Q;
+}
+function asTappable(id, o){ o=o||{}; return TPL[id].t==='w' ? make(id,{mode:'build'}) : make(id,{reshuffle:!!o.reshuffle}); }
+function practiceIds(){ return Object.keys(S.mist).filter(function(id){return TPL[id];}).sort(function(a,b){ return (S.mist[b].n-S.mist[a].n) || (S.mist[a].t-S.mist[b].t); }); }
+function bookletIds(){ var wk=S.mist; return SLIP_IDS.filter(function(id){ return !S.cured[id] && !wk[id]; }); }
+function fixSet(ids){ return (ids || practiceIds().concat(bookletIds())).slice(0,15).map(function(id){ return asTappable(id,{reshuffle:true}); }); }
+function shortQ(id){
+  var T=TPL[id], d=T.d, t;
+  if(T.t==='spell') t='Spell: '+d.q;
+  else if(T.t==='w') t=wPrompt(d);
+  else if(T.t==='two') t='Two examples: '+d.q;
+  else if(T.t==='match') t='Match the following';
+  else if(T.t==='sign') t='Road sign: '+d.a;
+  else if(T.t==='inj') t='Injury picture: '+d.a;
+  else if(T.t==='ar') t='A–R: '+d.A;
+  else if(T.t==='case') t='Case: '+d.title;
+  else if(T.t==='mcq' && d.oo) t='Odd one out: '+d.q;
+  else t=d.q||id;
+  t=t.replace(/_+/g,'___');
+  return t.length>72 ? t.slice(0,70)+'…' : t;
+}
+function slipSet(){ return shuffle(SLIP_IDS).map(asTappable); }
+function flashSet(){
+  var ids = practiceIds().slice(0,10);
+  shuffle(SLIP_IDS.filter(function(id){ return !S.cured[id] && ids.indexOf(id)<0; })).forEach(function(id){ if(ids.length<12) ids.push(id); });
+  shuffle(idsOf('mcq',null,plainMcq).concat(idsOf('tf'), idsOf('sign'))).forEach(function(id){ if(ids.length<15 && ids.indexOf(id)<0) ids.push(id); });
+  return ids.map(asTappable);
+}
+function spellSet(){ return rotate(idsOf('spell'),12,{}).map(function(id){ return make(id); }); }
+function signSet(){ return shuffle(idsOf('sign').concat(idsOf('inj'))).map(function(id){ return make(id); }); }
+
+/* ---------------- state ---------------- */
+function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, seen:{}, seenF:{}, sound:true, t:0}; }
+function normalize(o){
+  var f = fresh(); if(!o || typeof o!=='object') return f;
+  Object.keys(f).forEach(function(k){ if(o[k]===undefined || o[k]===null || typeof o[k]!==typeof f[k]) o[k]=f[k]; });
+  return o;
+}
+var lsOK = false;
+function loadLocal(){
+  try{ var raw = window.localStorage.getItem(STORE_KEY); lsOK = true; return raw ? normalize(JSON.parse(raw)) : fresh(); }
+  catch(e){ lsOK = false; return fresh(); }
+}
+function saveLocal(){ try{ window.localStorage.setItem(STORE_KEY, JSON.stringify(S)); lsOK = true; }catch(e){ lsOK = false; } }
+var S = loadLocal();
+
+/* optional cloud copy through the artifact runtime (absent on GitHub Pages) */
+var SYNC = {ref:null, status: lsOK ? 'device' : 'memory', writing:false, pending:false, timer:null};
+function better(a,b){ return (a.xp||0)>(b.xp||0) || ((a.xp||0)===(b.xp||0) && (a.t||0)>(b.t||0)); }
+function summary(){
+  var o = {xp:S.xp, level:lvl(S.xp)};
+  CH.forEach(function(c){ var r=S.ch[c.id]; o[c.id+'_best'] = r ? Math.round(r.best*100) : -1; });
+  o.mistakes = Object.keys(S.mist).join(',');
+  o.bossA = S.boss.a ? S.boss.a.got+'/'+S.boss.a.max : '';
+  o.bossB = S.boss.b ? S.boss.b.got+'/'+S.boss.b.max : '';
+  return o;
+}
+function flush(){
+  if(!SYNC.ref) return;
+  if(SYNC.writing){ SYNC.pending=true; return; }
+  SYNC.writing = true;
+  SYNC.ref.set({s:JSON.stringify(S), t:S.t, summary:summary()}).then(function(){ SYNC.status='cloud'; }, function(e){
+    if(e && (e.code==='invalid_argument' || e.code==='revoked' || e.code==='not_granted')){ SYNC.ref=null; SYNC.status = lsOK?'device':'memory'; }
+  }).then(function(){ SYNC.writing=false; paintSync(); if(SYNC.pending){ SYNC.pending=false; flush(); } });
+}
+function save(){ S.t = nowMs(); saveLocal(); if(typeof DikshaSync!=='undefined'){ try{ DikshaSync.push(STORE_KEY, S); }catch(e){} } if(!SYNC.ref && SYNC.status!=='cloud') SYNC.status = lsOK?'device':'memory'; if(SYNC.ref){ clearTimeout(SYNC.timer); SYNC.timer=setTimeout(flush, 1500); } }
+function initCloud(){
+  var c = window.claude;
+  if(!c || typeof c.use!=='function') return;
+  var p; try{ p = c.use('db'); }catch(e){ return; }
+  Promise.resolve(p).then(function(db){
+    if(!db) return;
+    var ref = db.doc(DB_PATH);
+    return ref.get().then(function(snap){
+      SYNC.ref = ref; SYNC.status='cloud';
+      var remote = null;
+      if(snap && snap.exists){ try{ remote = normalize(JSON.parse(snap.data().s)); }catch(e){ remote=null; } }
+      if(remote && better(remote, S)){ S = remote; saveLocal(); render(); }
+      else if(!remote || better(S, remote)){ flush(); }
+      paintSync();
+    });
+  }).catch(function(){ SYNC.ref=null; paintSync(); });
+}
+function paintSync(){
+  var el = document.getElementById('syncnote'); if(!el) return;
+  el.textContent = SYNC.status==='cloud' ? 'Progress is saved to your Claude account.' : SYNC.status==='device' ? 'Progress is saved on this device.' : 'Progress will reset if this page is closed.';
+}
+
+function lvl(xp){ return Math.min(TITLES.length-1, Math.floor(xp/LEVEL_XP)); }
+function addXP(n){
+  if(n<=0) return;
+  var before = lvl(S.xp);
+  S.xp += n; var k = dayKey(nowMs()); S.days[k] = (S.days[k]||0)+n;
+  if(lvl(S.xp)>before){ toast('Level up! You are now a '+TITLES[lvl(S.xp)]+'!'); confetti(80); }
+}
+function markMistake(id){ var m = S.mist[id] || {n:0,t:0}; m.n++; m.t = nowMs(); S.mist[id]=m; }
+function clearMistake(id){ if(S.mist[id]){ S.mist[id].n--; if(S.mist[id].n<=0) delete S.mist[id]; } }
+
+/* ---------------- dates / plan ---------------- */
+function planDay(){
+  var d = new Date(nowMs());
+  if(d.getFullYear()!==EXAM_Y || d.getMonth()!==EXAM_M) return (d.getTime() > new Date(EXAM_Y, EXAM_M, EXAM_D).getTime()) ? 99 : 0;
+  return d.getDate();
+}
+function examChip(){
+  var d = new Date(nowMs()); var t0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  var ex = new Date(EXAM_Y, EXAM_M, EXAM_D).getTime();
+  var days = Math.round((ex - t0)/86400000);
+  if(days>1) return 'Test in '+days+' days';
+  if(days===1) return 'Test tomorrow';
+  if(days===0) return 'Test today!';
+  return 'Test done';
+}
+function planDone(p){
+  if(p.kind==='ch') return !!(S.ch[p.ch] && S.ch[p.ch].plays>0);
+  if(p.kind==='boss') return !!(S.boss.a && S.boss.b);
+  return !!S.done[p.id];
+}
+function nextPlan(){ for(var i=0;i<PLAN.length;i++){ if(!planDone(PLAN[i])) return PLAN[i]; } return null; }
+
+/* ---------------- sound / fx ---------------- */
+var AC = null;
+function beep(ok){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    var notes = ok ? [660, 880] : [240, 190];
+    notes.forEach(function(f,i){
+      var o = AC.createOscillator(), g = AC.createGain(); o.type = ok?'triangle':'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, AC.currentTime+i*0.11); g.gain.exponentialRampToValueAtTime(0.18, AC.currentTime+i*0.11+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime+i*0.11+0.16);
+      o.connect(g); g.connect(AC.destination); o.start(AC.currentTime+i*0.11); o.stop(AC.currentTime+i*0.11+0.18);
+    });
+  }catch(e){}
+}
+var reduceMotion = false;
+try{ reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+function confetti(n){
+  if(reduceMotion) return;
+  var cv = document.getElementById('fx'); if(!cv || !cv.getContext) return;
+  var ctx; try{ ctx = cv.getContext('2d'); }catch(e){ return; } if(!ctx) return;
+  var W = cv.width = window.innerWidth, H = cv.height = window.innerHeight, P=[], cols=['#D8414D','#FFB627','#1E9A56','#2C8FD0','#7A5AD6','#E0702A'];
+  for(var i=0;i<n;i++) P.push({x:W/2+(rnd()-.5)*W*.4, y:H*.35, vx:(rnd()-.5)*9, vy:-rnd()*9-3, s:5+rnd()*6, c:pick(cols), r:rnd()*6});
+  var t=0;
+  (function step(){
+    ctx.clearRect(0,0,W,H); t++;
+    P.forEach(function(p){ p.vy+=0.28; p.x+=p.vx; p.y+=p.vy; p.r+=0.1; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); ctx.restore(); });
+    if(t<110) requestAnimationFrame(step); else ctx.clearRect(0,0,W,H);
+  })();
+}
+var toastTimer=null;
+function toast(msg){
+  var el = document.getElementById('toast'); if(!el) return;
+  el.textContent = msg; el.hidden = false; clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.hidden = true; }, 2600);
+}
+
+/* ---------------- view state ---------------- */
+var V = {name:'home'};
+var QZ = null;
+var armed = {};
+
+function startQuiz(mode, list, meta){
+  QZ = {mode:mode, list:list, i:0, ui:newUI(list[0]), res:[], xp:0, combo:0, best:0, meta:meta||{}, started:nowMs()};
+  V = {name:'quiz'}; render(); scrollTop();
+}
+function newUI(q){
+  if(!q) return {};
+  switch(q.type){
+    case 'mcq': return {picked:null, done:false};
+    case 'tf': return {picked:null, fixPicked:null, done:false};
+    case 'fill': return {slots:q.ans.map(function(){return null;}), sel:0, done:false};
+    case 'two': return {sel:[], done:false};
+    case 'match': return {L:null, R:null, got:q.left.map(function(){return false;}), miss:q.left.map(function(){return false;}), flash:null, done:false};
+    case 'sort': return {i:0, placed:[], miss:0, flash:null, done:false};
+    case 'seq': return {filled:[], used:{}, miss:{}, flash:null, done:false};
+    case 'steps': return {k:0, picks:[], done:false};
+    case 'build': return {sel:[], done:false};
+    case 'note': return {phase:'write', ticks:q.pts.map(function(){return false;}), done:false};
+  }
+  return {};
+}
+function scrollTop(){ try{ window.scrollTo(0,0); }catch(e){} }
+
+/* ---------------- grading ---------------- */
+function grade(q, u){
+  switch(q.type){
+    case 'mcq': return u.picked===q.ans ? 1 : 0;
+    case 'tf': return u.picked===q.ans ? 1 : 0;
+    case 'fill': return fillScore(q,u.slots).score;
+    case 'two': var c=u.sel.filter(function(x){return q.ok.indexOf(x)>=0;}).length; return c/q.need;
+    case 'match': return u.miss.filter(function(m){return !m;}).length/q.left.length;
+    case 'sort': return u.placed.filter(function(p){return p.ok;}).length/q.items.length;
+    case 'seq': var slots=q.steps.length, miss=Object.keys(u.miss).length; return (slots-miss)/slots;
+    case 'steps': return u.picks.filter(function(p,k){return p===q.parts[k].ans;}).length/q.parts.length;
+    case 'build':
+      var g=u.sel.filter(function(x){return q.good.indexOf(x)>=0;}).length, b=u.sel.length-g;
+      if(g===q.good.length && b===0) return 1;
+      return Math.max(0, (g-b)/q.good.length);
+    case 'note': return u.ticks.filter(Boolean).length/q.pts.length;
+  }
+  return 0;
+}
+function fillScore(q, slots){
+  var res = slots.map(function(){return false;});
+  if(q.any){
+    var usedA = {};
+    slots.forEach(function(v,i){
+      for(var j=0;j<q.ans.length;j++){ if(!usedA[j] && v!==null && q.ans[j].indexOf(v)>=0){ usedA[j]=1; res[i]=true; break; } }
+    });
+  } else {
+    slots.forEach(function(v,i){ res[i] = v!==null && q.ans[i].indexOf(v)>=0; });
+  }
+  var ok = res.filter(Boolean).length;
+  return {res:res, score: ok/slots.length};
+}
+
+function finishQ(){
+  var q = QZ.list[QZ.i], u = QZ.ui;
+  if(u.done) return;
+  u.done = true;
+  var sc = grade(q, u);
+  var ok = sc>=0.999;
+  QZ.res[QZ.i] = {score:sc, ok:ok};
+  S.seen = S.seen||{}; S.seen[q.key] = nowMs(); S.seenF = S.seenF||{}; if(TPL[q.key]) ownAnswers(TPL[q.key]).forEach(function(f){ S.seenF[f] = nowMs(); });
+  var xp = q.type==='note' ? u.ticks.filter(Boolean).length*4 : Math.round(10*sc);
+  if(ok){ QZ.combo++; if(QZ.combo>=3) xp += Math.min(QZ.combo-2,5)*2; } else QZ.combo = 0;
+  QZ.best = Math.max(QZ.best, QZ.combo);
+  QZ.xp += xp; addXP(xp);
+  if(ok){ if(QZ.mode==='fix'){ delete S.mist[q.key]; if(SLIP_IDS.indexOf(q.key)>=0) S.cured[q.key]=true; QZ.fixed=(QZ.fixed||0)+1; } else clearMistake(q.key); if(QZ.mode==='slip') S.cured[q.key]=true; }
+  else markMistake(q.key);
+  if(q.type!=='note') beep(ok);
+  save();
+}
+
+/* ---------------- actions ---------------- */
+var ACT = {};
+ACT.home = function(){ V={name:'home'}; QZ=null; render(); scrollTop(); };
+ACT.parent = function(){ V={name:'parent'}; render(); scrollTop(); };
+ACT.sound = function(){ S.sound=!S.sound; save(); render(); };
+ACT.reset = function(){
+  if(!armed.reset){ armed.reset=true; render(); setTimeout(function(){ armed.reset=false; }, 4000); return; }
+  armed.reset=false; S = fresh(); save(); toast('Progress cleared.'); V={name:'home'}; render();
+};
+ACT.learn = function(el){ V={name:'learn', ch:el.getAttribute('data-ch'), i:0}; render(); scrollTop(); };
+ACT.lnext = function(){ var n=LEARN[V.ch].length; if(V.i<n-1){ V.i++; render(); scrollTop(); } };
+ACT.lprev = function(){ if(V.i>0){ V.i--; render(); scrollTop(); } };
+ACT.quest = function(el){
+  var ch = el.getAttribute('data-ch');
+  S.learned[ch] = true; save();
+  startQuiz('ch', chapterSet(ch), {ch:ch, title:CHMAP[ch].name});
+};
+ACT.plan = function(el){
+  var p = PLAN.filter(function(x){return x.id===el.getAttribute('data-id');})[0]; if(!p) return;
+  if(p.kind==='ch'){ V={name:'learn', ch:p.ch, i:0}; render(); scrollTop(); return; }
+  if(p.kind==='lab') return startQuiz('lab', labSet(null), {title:p.title, sid:p.id});
+  if(p.kind==='boss') return S.boss.a && !S.boss.b ? ACT.bossB() : ACT.bossA();
+  if(p.kind==='slip') return startQuiz('slip', slipSet(), {title:'Slip Doctor', sid:p.id});
+  if(p.kind==='fix') return ACT.fixmine();
+  if(p.kind==='flash') return startQuiz('flash', flashSet(), {title:'Flash Round', sid:p.id});
+};
+ACT.lab = function(el){ var ch=el.getAttribute('data-ch'); startQuiz('lab', labSet([ch]), {title:CHMAP[ch].name+' – Notebook'}); };
+ACT.bossA = function(){ startQuiz('bossA', bossA(), {title:'Boss – Section A'}); };
+ACT.bossB = function(){ startQuiz('bossB', bossB(), {title:'Boss – Section B'}); };
+ACT.fixmine = function(){
+  var L=fixSet();
+  if(!L.length){ S.done.S8 = {pct:1, t:nowMs()}; save(); render(); toast('Nothing to fix right now!'); return; }
+  startQuiz('fix', L, {title:'Fix my mistakes', sid:'S8'});
+};
+ACT.fixthese = function(){ var ids=[]; QZ.list.forEach(function(q,i){ var r=QZ.res[i]; if(r && !r.ok && ids.indexOf(q.key)<0) ids.push(q.key); }); if(!ids.length) return; startQuiz('fix', fixSet(ids), {title:'Fix my mistakes'}); };
+ACT.slip = function(){ startQuiz('slip', slipSet(), {title:'Slip Doctor', sid:'S3'}); };
+ACT.flash = function(){ startQuiz('flash', flashSet(), {title:'Flash Round', sid:'S9'}); };
+ACT.mixnote = function(){ startQuiz('lab', labSet(null), {title:'Notebook Answer Lab', sid:'S6'}); };
+ACT.spell = function(){ startQuiz('spell', spellSet(), {title:'Spelling Bee'}); };
+ACT.signs = function(){ startQuiz('signs', signSet(), {title:'Signs & Injuries'}); };
+ACT.quit = function(){
+  if(!armed.quit){ armed.quit=true; render(); setTimeout(function(){ armed.quit=false; var b=document.querySelector('[data-act="quit"]'); if(b){ b.classList.remove('armed'); b.textContent='✕'; } }, 3000); return; }
+  armed.quit=false; ACT.home();
+};
+ACT.next = function(){
+  if(!QZ) return;
+  if(QZ.i < QZ.list.length-1){ QZ.i++; QZ.ui = newUI(QZ.list[QZ.i]); render(); scrollTop(); }
+  else endQuiz();
+};
+ACT.again = function(){
+  var m = QZ && QZ.mode, meta = QZ && QZ.meta;
+  if(m==='ch') return startQuiz('ch', chapterSet(meta.ch), meta);
+  if(m==='bossA') return ACT.bossA();
+  if(m==='bossB') return ACT.bossB();
+  if(m==='slip') return ACT.slip();
+  if(m==='fix') return ACT.fixmine();
+  if(m==='flash') return ACT.flash();
+  if(m==='spell') return ACT.spell();
+  if(m==='signs') return ACT.signs();
+  if(m==='lab') return startQuiz('lab', labSet(meta.ch ? [meta.ch] : null), meta);
+  ACT.home();
+};
+/* question interactions */
+ACT.opt = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  u.picked = q.opts[+el.getAttribute('data-i')]; finishQ(); render();
+};
+ACT.tf = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.picked!==null) return;
+  u.picked = el.getAttribute('data-v')==='1';
+  if(!q.fix){ finishQ(); render(); return; }
+  beep(u.picked===q.ans);
+  render();
+};
+ACT.fix = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done || u.picked===null) return;
+  u.fixPicked = q.fix.opts[+el.getAttribute('data-i')];
+  var sv = S.sound; S.sound = false; finishQ(); S.sound = sv;
+  if(u.fixPicked===q.fix.ans){ QZ.xp += 5; addXP(5); save(); }
+  render();
+};
+ACT.slot = function(el){
+  var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i');
+  if(u.slots[i]!==null){ u.slots[i]=null; }
+  u.sel = i; render();
+};
+ACT.chip = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')];
+  if(u.slots.indexOf(c)>=0) return;
+  var tgt = (u.sel!==null && u.slots[u.sel]===null) ? u.sel : u.slots.indexOf(null);
+  if(tgt<0) return;
+  u.slots[tgt]=c;
+  var nx = u.slots.indexOf(null); u.sel = nx>=0 ? nx : null;
+  render();
+};
+ACT.check = function(){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  if(q.type==='fill' && u.slots.indexOf(null)>=0) return;
+  if(q.type==='two' && u.sel.length<q.need) return;
+  if(q.type==='build' && u.sel.length<1) return;
+  finishQ(); render();
+};
+ACT.tog = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')], k = u.sel.indexOf(c);
+  if(k>=0) u.sel.splice(k,1);
+  else { if(q.type==='two' && u.sel.length>=q.need) u.sel.shift(); u.sel.push(c); }
+  render();
+};
+ACT.ml = function(el){ var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i'); if(u.got[i]) return; u.L=i; u.flash=null; tryPair(); };
+ACT.mr = function(el){ var u=QZ.ui; if(u.done) return; var j=+el.getAttribute('data-i'), q=QZ.list[QZ.i]; if(q.pair.indexOf(j)>=0 && u.got[q.pair.indexOf(j)]) return; u.R=j; u.flash=null; tryPair(); };
+function tryPair(){
+  var q=QZ.list[QZ.i], u=QZ.ui;
+  if(u.L===null || u.R===null){ render(); return; }
+  if(q.pair[u.L]===u.R){ u.got[u.L]=true; beep(true); }
+  else { u.miss[u.L]=true; u.flash={L:u.L, R:u.R}; beep(false); }
+  u.L=null; u.R=null;
+  if(u.got.every(Boolean)){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+}
+ACT.bucket = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var b=+el.getAttribute('data-i'), it=q.items[u.i], ok = it.b===b;
+  u.placed.push({t:it.t, b:it.b, ok:ok}); u.flash = ok ? null : b; if(!ok) u.miss++;
+  beep(ok); u.i++;
+  if(u.i>=q.items.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.seq = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')]; if(u.used[c]) return;
+  var slot = u.filled.length, want = q.steps[slot];
+  if(c===want){ u.filled.push(c); u.used[c]=1; u.flash=null; beep(true); }
+  else { u.miss[slot]=1; u.flash=c; beep(false); }
+  if(u.filled.length===q.steps.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.step = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var p = q.parts[u.k], c = p.opts[+el.getAttribute('data-i')];
+  u.picks.push(c); beep(c===p.ans); u.k++;
+  if(u.k>=q.parts.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.nbshow = function(){ var u=QZ.ui; if(u.phase==='write'){ u.phase='check'; render(); } };
+ACT.nbpt = function(el){ var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i'); u.ticks[i]=!u.ticks[i]; render(); };
+ACT.nbdone = function(){ var u=QZ.ui; if(u.done || u.phase!=='check') return; finishQ(); render(); };
+
+function endQuiz(){
+  var tot=0, got=0, marks=0, maxM=0;
+  QZ.list.forEach(function(q,i){ var r=QZ.res[i]||{score:0}; tot++; got+=r.score; maxM+=q.marks; marks += Math.round(r.score*q.marks*2)/2; });
+  var pct = tot ? got/tot : 0;
+  var stars = pct>=0.9 ? 3 : pct>=0.7 ? 2 : 1;
+  QZ.pct = pct; QZ.stars = stars; QZ.marks = marks; QZ.maxM = maxM;
+  var m = QZ.mode;
+  if(m==='ch'){ var r = S.ch[QZ.meta.ch] || {best:0, stars:0, plays:0}; r.best=Math.max(r.best,pct); r.stars=Math.max(r.stars,stars); r.plays++; S.ch[QZ.meta.ch]=r; }
+  if(m==='lab'){ QZ.list.forEach(function(q,i){ if(q.type==='note'){ S.lab[q.key]={got:QZ.res[i]?Math.round(QZ.res[i].score*q.pts.length):0, of:q.pts.length, t:nowMs()}; } }); }
+  if(m==='bossA') S.boss.a = {got:marks, max:maxM, t:nowMs()};
+  if(m==='bossB') S.boss.b = {got:marks, max:maxM, t:nowMs()};
+  if(QZ.meta.sid && (m==='lab'||m==='slip'||m==='fix'||m==='flash')) S.done[QZ.meta.sid] = {pct:pct, t:nowMs()};
+  save();
+  V = {name:'result'}; render(); scrollTop();
+  if(stars>=2) confetti(stars===3?140:70);
+}
+
+/* ---------------- rendering ---------------- */
+var CHMAP = {}; CH.forEach(function(c){ CHMAP[c.id]=c; });
+function starStr(n, of){ var s=''; for(var i=0;i<(of||3);i++) s += i<n ? '★' : '☆'; return s; }
+function hl(text, kw){
+  var t = esc(text);
+  (kw||[]).forEach(function(k){
+    var re = new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','i');
+    t = t.replace(re,'<mark>$1</mark>');
+  });
+  return t;
+}
+function partChip(ch){ var c=CHMAP[ch]; return c ? 'Part '+c.n : 'Mix'; }
+
+function renderTop(){
+  var L = lvl(S.xp), into = S.xp - L*LEVEL_XP, pct = L>=TITLES.length-1 ? 100 : Math.round(into/LEVEL_XP*100);
+  var dots = DAYS.map(function(d,i){ var k='2026-10-'+d; return '<i class="'+(S.days[k]?'on':'')+'" title="'+['Mon','Tue','Wed'][i]+'"></i>'; }).join('');
+  return '<div class="topin">'+
+    '<div class="ava">'+ART.mascot(L)+'</div>'+
+    '<div class="lvl"><b>'+esc(TITLES[L])+'</b><div class="xpbar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<span class="chip xp">'+S.xp+' XP</span>'+
+    '<span class="chip exam">'+examChip()+'</span>'+
+    '<span class="streak" aria-label="Days practised">'+dots+'</span>'+
+  '</div>';
+}
+
+function heroMsg(){
+  var d = planDay(), nx = nextPlan();
+  if(d===26) return '<b>Hi '+KID+'!</b> Today is <b>Home and Outside</b> day \u{1F3E0}\u{1F6B8}'+(nx?' Next up: <b>'+esc(nx.title)+'</b>.':'');
+  if(d===27) return '<b>Tuesday, '+KID+'!</b> First aid today, then the Boss test paper.'+(nx?' Next up: <b>'+esc(nx.title)+'</b>.':'');
+  if(d===28) return '<b>Test day!</b> Only the Flash Round today – nothing new. You have practised well. Green light – go! \u{1F7E2}';
+  if(d>28) return '<b>Test done, '+KID+'!</b> Come back any time to practise.';
+  return '<b>Hi '+KID+'!</b> Walk down Safety Street, one sign at a time.';
+}
+
+function mistakeSection(){
+  var wk = practiceIds(), bk = bookletIds(), n = wk.length + bk.length;
+  var h = '<section class="mist" id="mistakes"><div class="misth"><span class="mic">\u{1F4D2}</span><div class="mtx"><h2>My Mistakes</h2><p>'+
+    (n ? '<b>'+n+'</b> to fix. Get one right here and it comes off the list.' : 'Nothing to fix right now. Brilliant! \u{1F31F}')+'</p></div></div>';
+  function grp(title, ids){
+    if(!ids.length) return '';
+    return '<div class="mgrp"><small>'+title+' ('+ids.length+')</small><ul>'+ids.slice(0,4).map(function(id){ return '<li><span class="mchip">'+partChip(TPL[id].ch)+'</span>'+esc(shortQ(id))+'</li>'; }).join('')+
+      (ids.length>4?'<li class="more">+ '+(ids.length-4)+' more</li>':'')+'</ul></div>';
+  }
+  if(n){
+    h += grp('From practice', wk) + grp('From my worksheet and notebook', bk);
+    h += '<div class="btnrow"><button class="btn mbtn" data-act="fixmine">\u{1F527} Fix my mistakes ('+Math.min(n,15)+')</button></div>';
+  }
+  return h + '</section>';
+}
+function planIcon(p){ return p.kind==='ch' ? CHMAP[p.ch].icon : p.kind==='lab' ? '✍️' : p.kind==='boss' ? '\u{1F451}' : p.kind==='slip' ? '\u{1FA7A}' : p.kind==='fix' ? '\u{1F527}' : '⚡'; }
+function renderHome(){
+  var nx = nextPlan(), h = '';
+  h += '<section class="hero"><div class="bigfrog">'+ART.mascot(Math.max(3,lvl(S.xp)))+'</div><div class="bubble">'+heroMsg()+
+    (nx ? '<div class="btnrow"><button class="btn" data-act="plan" data-id="'+nx.id+'">▶ Start '+esc(nx.title)+'</button></div>' : '<p>All sessions done! \u{1F389}</p>')+'</div></section>';
+  h += mistakeSection();
+  var days = [{d:26, t:'Monday 26 Oct', s:'Home and Outside'},{d:27, t:'Tuesday 27 Oct', s:'First Aid and the Boss'},{d:28, t:'Wednesday 28 Oct', s:'Test Day'}];
+  h += '<h2>Safety Street</h2><div class="pond">';
+  days.forEach(function(D){
+    h += '<div class="dayhead"><b>'+D.t+'</b><span>'+D.s+'</span></div>';
+    PLAN.filter(function(p){return p.day===D.d;}).forEach(function(p, k){
+      var done = planDone(p), isNext = nx && nx.id===p.id;
+      var st = '';
+      if(p.kind==='ch' && S.ch[p.ch]) st = '<span class="stars">'+starStr(S.ch[p.ch].stars)+'</span>';
+      if(p.kind==='boss') st = '<span class="mini">'+(S.boss.a?'A: '+S.boss.a.got+'/'+S.boss.a.max:'A: –')+' · '+(S.boss.b?'B: '+S.boss.b.got+'/'+S.boss.b.max:'B: –')+'</span>';
+      h += '<button class="pad'+(done?' done':'')+(isNext?' next':'')+(k%2?' alt':'')+'" data-act="plan" data-id="'+p.id+'">'+
+        '<span class="lily"><span class="lic">'+planIcon(p)+'</span>'+(done?'<span class="tick">✓</span>':'')+'</span>'+(isNext?'<span class="hopper">'+ART.mascot(4)+'</span>':'')+
+        '<span class="pt"><small>'+esc(p.when)+' · '+p.mins+' min</small><b>'+esc(p.id.replace('S','Session '))+': '+esc(p.title)+'</b>'+(p.sub?'<span class="sub">'+esc(p.sub)+'</span>':'')+st+'</span>'+
+      '</button>';
+    });
+  });
+  h += '</div>';
+  h += '<h2>Practise any part</h2><div class="chgrid">';
+  CH.forEach(function(c){
+    var r = S.ch[c.id];
+    h += '<div class="cht" style="--hue:'+c.hue+'"><div class="chh"><span class="ci">'+c.icon+'</span><span><small>Part '+c.n+'</small><b>'+esc(c.name)+'</b></span></div>'+
+      '<div class="chs">'+esc(c.short)+'<br>'+(r?'<span class="stars">'+starStr(r.stars)+'</span> best '+Math.round(r.best*100)+'%':'Not started yet')+'</div>'+
+      '<div class="chb"><button class="btn ghost sm" data-act="learn" data-ch="'+c.id+'">\u{1F4D6} Learn</button><button class="btn sm" data-act="quest" data-ch="'+c.id+'">\u{1F3AF} Quest</button><button class="btn ghost sm" data-act="lab" data-ch="'+c.id+'">✍️ Notebook</button></div></div>';
+  });
+  h += '</div>';
+  var mcount = Object.keys(S.mist).length;
+  h += '<h2>Special rounds</h2><div class="extras">'+
+    '<button class="ex" data-act="signs"><span>\u{1F6A7}</span><b>Signs & Injuries</b><small>All 8 road signs + 6 injury pictures</small></button>'+
+    '<button class="ex" data-act="spell"><span>\u{1F41D}</span><b>Spelling Bee</b><small>12 safety words to spell</small></button>'+
+    '<button class="ex" data-act="bossA"><span>\u{1F451}</span><b>Boss: Section A</b><small>Worksheet-style test in the app</small></button>'+
+    '<button class="ex" data-act="bossB"><span>\u{1F4DD}</span><b>Boss: Section B</b><small>Notebook answers</small></button>'+
+    '<button class="ex" data-act="mixnote"><span>✍️</span><b>Answer Lab</b><small>6 written answers</small></button>'+
+    '<button class="ex" data-act="flash"><span>⚡</span><b>Flash Round</b><small>'+(mcount?mcount+' to fix':'Quick warm-up')+'</small></button>'+
+  '</div>';
+  h += '<div class="foot"><button class="btn ghost sm" data-act="parent">For grown-ups</button><button class="btn ghost sm" data-act="sound">'+(S.sound?'\u{1F50A} Sound on':'\u{1F507} Sound off')+'</button><span id="syncnote"></span></div>';
+  return h;
+}
+
+function learnDia(c){
+  if(c.dia==='signs') return '<div class="signgrid">'+SIGNS.map(function(s){ return '<figure>'+ART.sign(s.k,76)+'<figcaption>'+esc(s.a)+'</figcaption></figure>'; }).join('')+'</div>';
+  if(c.dia && c.dia.indexOf('inj:')===0) return '<div class="pic">'+ART.injury(c.dia.slice(4),150)+'</div>';
+  return '';
+}
+function renderLearn(){
+  var ch = CHMAP[V.ch], cards = LEARN[V.ch], c = cards[V.i];
+  var h = '<div class="qhead"><button class="qx" data-act="home" aria-label="Back home">←</button><div class="ltitle">'+ch.icon+' Part '+ch.n+': '+esc(ch.name)+'</div></div>';
+  h += '<article class="lc" style="--hue:'+ch.hue+'"><div class="lch"><span class="le">'+c.e+'</span><h3>'+esc(c.h)+'</h3><span class="lnum">'+(V.i+1)+' / '+cards.length+'</span></div>'+c.b+learnDia(c)+'</article>';
+  h += '<div class="dots">'+cards.map(function(x,i){return '<i class="'+(i===V.i?'on':'')+'"></i>';}).join('')+'</div>';
+  h += '<div class="btnrow spread">'+(V.i>0?'<button class="btn ghost" data-act="lprev">← Back</button>':'<span></span>')+
+    (V.i<cards.length-1 ? '<button class="btn" data-act="lnext">Next →</button>' : '<button class="btn" data-act="quest" data-ch="'+ch.id+'">\u{1F3AF} Start the quest</button>')+'</div>';
+  if(V.i<cards.length-1) h += '<p class="skip"><button class="link" data-act="quest" data-ch="'+ch.id+'">Skip to the quest</button></p>';
+  return h;
+}
+
+/* ----- question bodies ----- */
+function optBtn(q, u, o, i, act, picked, ans, done){
+  var cls='opt'+(q.spell?' spell':'');
+  if(done){ if(o===ans) cls+=' ok'; else if(o===picked) cls+=' bad'; else cls+=' dim'; }
+  return '<button class="'+cls+'" data-act="'+act+'" data-i="'+i+'"'+(done?' disabled':'')+'>'+(q.fx?'<span class="ol">'+LBL[i]+')</span> ':'')+esc(o)+'</button>';
+}
+function longOpts(opts){ return opts.some(function(o){ return o.length>24; }); }
+function bodyMCQ(q,u){
+  var h;
+  if(q.ar) h = '<div class="ar"><p><b>Assertion (A):</b> '+esc(q.ar.A)+'</p><p><b>Reason (R):</b> '+esc(q.ar.R)+'</p></div>';
+  else h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(q.sign) h += '<div class="pic">'+ART.sign(q.sign,130)+'</div>';
+  if(q.inj) h += '<div class="pic">'+ART.injury(q.inj,190)+'</div>';
+  return h+'<div class="opts'+(q.ar||longOpts(q.opts)?' one':'')+'">'+q.opts.map(function(o,i){ return optBtn(q,u,o,i,'opt',u.picked,q.ans,u.done); }).join('')+'</div>';
+}
+function bodyTF(q,u){
+  var h = '<p class="prompt stmt">“'+esc(q.prompt)+'”</p><div class="tfrow">';
+  [[true,'✔ True'],[false,'✘ False']].forEach(function(v){
+    var cls='opt tfb';
+    if(u.picked!==null){ if(v[0]===q.ans) cls+=' ok'; else if(v[0]===u.picked) cls+=' bad'; else cls+=' dim'; }
+    h += '<button class="'+cls+'" data-act="tf" data-v="'+(v[0]?1:0)+'"'+(u.picked!==null?' disabled':'')+'>'+v[1]+'</button>';
+  });
+  h += '</div>';
+  if(u.picked!==null && q.fix){
+    h += '<div class="fixbox"><p class="glabel">'+(u.picked===q.ans?'Yes, it is FALSE! Now fix it for a bonus:':'It is FALSE. Can you fix it?')+'</p><p class="prompt sm">'+esc(q.fix.prompt)+'</p><div class="opts one">'+
+      q.fix.opts.map(function(o,i){ return optBtn({fx:false},u,o,i,'fix',u.fixPicked,q.fix.ans,u.done); }).join('')+'</div></div>';
+  }
+  return h;
+}
+function bodyFill(q,u){
+  var res = u.done ? fillScore(q,u.slots).res : null;
+  function slot(i){
+    var v=u.slots[i], cls='slot'+(v!==null?' filled':'')+(!u.done && u.sel===i?' sel':'');
+    if(res) cls += res[i] ? ' ok' : ' bad';
+    return '<button class="'+cls+'" data-act="slot" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+(v!==null?esc(v):' ? ')+'</button>';
+  }
+  var h = '<p class="prompt sentence">';
+  q.parts.forEach(function(p,i){ h += esc(p); if(i<q.parts.length-1) h += slot(i); });
+  h += '</p>';
+  h += '<div class="chips">'+q.chips.map(function(c,i){ var used=u.slots.indexOf(c)>=0; return '<button class="chp'+(used?' gone':'')+'" data-act="chip" data-i="'+i+'"'+(u.done||used?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.slots.indexOf(null)>=0?' disabled':'')+'>Check</button></div>';
+  return h;
+}
+function bodyTwo(q,u){
+  var h = '<p class="prompt">Give two examples: <b>'+esc(q.prompt)+'</b></p><p class="hint">Tap the 2 that fit.</p><div class="opts'+(longOpts(q.chips)?' one':'')+'">';
+  q.chips.forEach(function(c,i){
+    var sel = u.sel.indexOf(c)>=0, cls='opt';
+    if(u.done){ var good=q.ok.indexOf(c)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':' dim'); }
+    else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="tog" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(c)+'</button>';
+  });
+  h += '</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<q.need?' disabled':'')+'>Check</button></div>';
+  return h;
+}
+function bodyMatch(q,u){
+  var h = '<p class="prompt">Tap one on the left, then its partner on the right.</p><div class="mrow"><div class="mcol">';
+  q.left.forEach(function(l,i){
+    var cls='mi'+(u.got[i]?' ok':'')+(u.L===i?' sel':'')+(u.flash&&u.flash.L===i?' bad shake':'');
+    h += '<button class="'+cls+'" data-act="ml" data-i="'+i+'"'+(u.got[i]||u.done?' disabled':'')+'>'+esc(l)+'</button>';
+  });
+  h += '</div><div class="mcol">';
+  q.right.forEach(function(r,j){
+    var li = q.pair.indexOf(j), cls='mi r'+(u.got[li]?' ok':'')+(u.R===j?' sel':'')+(u.flash&&u.flash.R===j?' bad shake':'');
+    h += '<button class="'+cls+'" data-act="mr" data-i="'+j+'"'+(u.got[li]||u.done?' disabled':'')+'>'+esc(r)+'</button>';
+  });
+  return h + '</div></div>';
+}
+function bodySort(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(!u.done){ var it=q.items[u.i]; h += '<div class="tray"><small>'+(u.i+1)+' of '+q.items.length+' · Where does this go?</small><b class="pop">'+esc(it.t)+'</b></div>'; }
+  h += '<div class="buckets">';
+  q.buckets.forEach(function(b,bi){
+    var inB = u.placed.filter(function(p){return p.b===bi;});
+    h += '<button class="bk'+(u.flash===bi?' bad shake':'')+'" data-act="bucket" data-i="'+bi+'"'+(u.done?' disabled':'')+'><b>'+esc(b)+'</b><span class="in">'+
+      inB.map(function(p){ return '<span class="'+(p.ok?'':'miss')+'">'+esc(p.t)+'</span>'; }).join('')+'</span></button>';
+  });
+  return h + '</div>';
+}
+function bodySeq(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><p class="hint">Tap the steps in the right order.</p><ol class="seq">';
+  q.steps.forEach(function(st,i){
+    var f = u.filled[i];
+    h += '<li class="'+(f?'f':'')+(i===u.filled.length&&!u.done?' cur':'')+'"><span class="n">'+(i+1)+'</span><span class="st">'+(f?esc(f):'?')+'</span></li>';
+  });
+  h += '</ol>';
+  h += '<div class="chips">'+q.chips.map(function(c,i){ return '<button class="chp'+(u.used[c]?' gone':'')+(u.flash===c?' bad shake':'')+'" data-act="seq" data-i="'+i+'"'+(u.used[c]||u.done?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  return h;
+}
+function bodySteps(q,u){
+  var h = '<div class="passage"><b>'+esc(q.title)+'</b><br>'+esc(q.passage)+'</div>';
+  q.parts.forEach(function(p,k){
+    if(k<u.k){ var ok=u.picks[k]===p.ans; h += '<div class="stepdone '+(ok?'ok':'bad')+'"><small>'+(k+1)+'. '+esc(p.prompt)+'</small><b>'+(ok?'✓ ':'✗ '+esc(u.picks[k])+' → ')+esc(p.ans)+'</b></div>'; }
+  });
+  if(!u.done){ var p=q.parts[u.k]; h += '<p class="prompt sm">'+(u.k+1)+'. '+esc(p.prompt)+'</p><div class="opts'+(longOpts(p.opts)?' one':'')+'">'+p.opts.map(function(o,i){ return '<button class="opt" data-act="step" data-i="'+i+'">'+esc(o)+'</button>'; }).join('')+'</div>'; }
+  return h;
+}
+function bodyBuild(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><p class="hint">Tap all the sentences that belong in a good answer. There '+(q.good.length===1?'is <b>1</b>':'are <b>'+q.good.length+'</b>')+'.</p><div class="opts one">';
+  q.chips.forEach(function(c,i){
+    var sel=u.sel.indexOf(c)>=0, cls='opt sent';
+    if(u.done){ var good=q.good.indexOf(c)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':' dim'); } else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="tog" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(c)+'</button>';
+  });
+  h += '</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<1?' disabled':'')+'>Check</button></div>';
+  return h;
+}
+function modelHTML(q){
+  if(q.diff){
+    var d=q.diff;
+    return '<div class="tw"><table class="t diff"><tr><th>'+esc(d.A)+'</th><th>'+esc(d.B)+'</th></tr>'+d.rows.map(function(r){ return '<tr><td>'+esc(r[0])+'</td><td>'+esc(r[1])+'</td></tr>'; }).join('')+'</table></div>';
+  }
+  return '<p class="model">'+q.pts.map(function(p){ return hl(p,q.kw); }).join(' ')+'</p>';
+}
+function bodyNote(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(u.phase==='write'){
+    h += '<div class="nb"><span class="pen">✍️</span><p>Write your answer in your <b>notebook</b>. It is worth <b>'+q.marks+' mark'+(q.marks>1?'s':'')+'</b>, so write '+(q.marks>1?'3 or 4 full sentences':'1 or 2 full sentences')+'.</p></div>';
+    h += '<div class="btnrow"><button class="btn" data-act="nbshow">I’ve written it – check</button></div>';
+    return h;
+  }
+  h += '<p class="glabel">Tick each idea you wrote:</p><div class="opts one">';
+  q.pts.forEach(function(p,i){ var on=u.ticks[i]; h += '<button class="opt sent'+(on?' ok':'')+'" data-act="nbpt" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+(on?'☑ ':'☐ ')+hl(p,q.kw)+'</button>'; });
+  h += '</div>';
+  if(q.diff) h += '<p class="glabel">Draw it as a table:</p>'+modelHTML(q);
+  if(q.kw && q.kw.length) h += '<p class="kw">Key words to spell right: '+q.kw.map(function(k){return '<b>'+esc(k)+'</b>';}).join(', ')+'</p>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="nbdone">Done</button></div>';
+  return h;
+}
+function fixSentence(fix){
+  var p = fix.prompt.replace(/^Correct it: ?/,'');
+  if(p.indexOf('___')>=0) return p.replace('___', fix.ans);
+  if(p.indexOf('…')>=0) return p.replace('…', fix.ans);
+  return (p ? p+' ' : '')+fix.ans;
+}
+function answerLine(q){
+  switch(q.type){
+    case 'mcq': var ix = q.opts.indexOf(q.ans); return 'Answer: <b>'+(q.fx && ix>=0 ? '('+LBL[ix]+') ' : '')+esc(q.ans)+'</b>';
+    case 'tf': return 'Answer: <b>'+(q.ans?'True':'False')+'</b>'+(q.fix?'<br>Correct version: <b>'+esc(fixSentence(q.fix))+'</b>':'');
+    case 'fill': return q.parts.map(function(p,k){ return esc(p)+(k<q.parts.length-1?'<b>'+esc(q.ans[k][0])+'</b>':''); }).join('');
+    case 'two': return 'Right answers: <b>'+q.ok.map(esc).join(', ')+'</b>';
+    case 'match': return q.left.map(function(l,i){ return esc(l)+' → <b>'+esc(q.right[q.pair[i]])+'</b>'; }).join('<br>');
+    case 'seq': return '<b>'+q.steps.map(esc).join(' → ')+'</b>';
+    case 'steps': return q.parts.map(function(p,k){ return (k+1)+'. '+esc(p.prompt)+' <b>'+esc(p.ans)+'</b>'; }).join('<br>');
+    case 'build': return '<span class="glabel">Write it like this:</span>'+modelHTML(q);
+  }
+  return '';
+}
+function fbHTML(q,u,r){
+  var ok = r.ok, h = '<div class="fb'+(ok?'':' bad')+'">';
+  if(q.type==='note'){
+    var n=u.ticks.filter(Boolean).length;
+    h += '<p class="ft">'+(n===q.pts.length?'Full marks! '+PRAISE[0]:n?'You got '+n+' of '+q.pts.length+' ideas.':'Let’s learn this one.')+'</p>';
+    if(n<q.pts.length) h += '<p class="tip">Add the missing ideas in your notebook in a different colour.</p>';
+  } else {
+    var tfFix = q.type==='tf' && q.fix && u.fixPicked!==null;
+    h += '<p class="ft">'+(ok?pick(PRAISE):pick(OOPS))+(tfFix && u.fixPicked===q.fix.ans ? ' <span class="bonus">+5 fix bonus</span>':'')+'</p>';
+    var al = (q.type==='steps') ? '' : answerLine(q); if(al && (!ok || q.type==='build' || q.type==='tf')) h += '<div class="fa">'+al+'</div>';
+  }
+  if(QZ.mode==='fix') h += '<p class="fixline">'+(ok?'✅ Fixed! It is off your list.':'\u{1F4D2} Still on your list. You will see it again.')+'</p>';
+  if(q.tip) h += '<p class="tip">'+esc(q.tip)+'</p>';
+  if(q.note) h += '<p class="tip">'+esc(q.note)+'</p>';
+  if(q.slip) h += '<div class="slipnote">\u{1FA7A} '+esc(q.slip)+'</div>';
+  if(q.real) h += '<div class="realnote">\u{1F9E0} <b>In real life:</b> '+esc(q.real)+'</div>';
+  h += '<div class="btnrow"><button class="btn" data-act="next">'+(QZ.i<QZ.list.length-1?'Next →':'See my score')+'</button></div></div>';
+  return h;
+}
+function renderQuiz(){
+  var q = QZ.list[QZ.i], u = QZ.ui, n = QZ.list.length;
+  var h = '<div class="qhead"><button class="qx'+(armed.quit?' armed':'')+'" data-act="quit" aria-label="Quit">'+(armed.quit?'Tap again to quit':'✕')+'</button>'+
+    '<div class="pbar"><i style="width:'+Math.round(QZ.i/n*100)+'%"></i></div><span class="combo">'+(QZ.combo>=2?'\u{1F525}'+QZ.combo:'')+'</span><span class="qn">'+(QZ.i+1)+'/'+n+'</span></div>';
+  var marks = (QZ.mode==='bossA'||QZ.mode==='bossB') ? '<span class="mk">'+q.marks+' mark'+(q.marks===1?'':'s')+'</span>' : '';
+  h += '<div class="sec"><span>'+esc(q.sec || q.label)+(q.part?' · '+q.part+')':'')+'</span>'+marks+'</div>';
+  var body = '';
+  switch(q.type){
+    case 'mcq': body=bodyMCQ(q,u); break; case 'tf': body=bodyTF(q,u); break; case 'fill': body=bodyFill(q,u); break;
+    case 'two': body=bodyTwo(q,u); break; case 'match': body=bodyMatch(q,u); break; case 'sort': body=bodySort(q,u); break;
+    case 'seq': body=bodySeq(q,u); break; case 'steps': body=bodySteps(q,u); break;
+    case 'build': body=bodyBuild(q,u); break; case 'note': body=bodyNote(q,u); break;
+  }
+  h += '<div class="qc" data-type="'+q.type+'">'+body+'</div>';
+  if(u.done) h += fbHTML(q,u,QZ.res[QZ.i]);
+  return h;
+}
+function renderResult(){
+  var boss = QZ.mode==='bossA'||QZ.mode==='bossB';
+  var h = '<div class="res"><div class="bigfrog sm">'+ART.mascot(lvl(S.xp))+'</div><p class="rt">'+esc(QZ.meta.title||'Done')+'</p>';
+  if(boss) h += '<p class="score">'+QZ.marks+' / '+QZ.maxM+'</p><p class="sub">marks'+(QZ.mode==='bossB'?' (notebook answers are self-checked)':'')+'</p>';
+  else h += '<p class="score">'+Math.round(QZ.pct*100)+'%</p>';
+  h += '<p class="stars big">'+starStr(QZ.stars)+'</p><p class="sub">+'+QZ.xp+' XP'+(QZ.best>=3?' · best streak \u{1F525}'+QZ.best:'')+'</p>';
+  var wrong = QZ.list.map(function(q,i){return {q:q, r:QZ.res[i]};}).filter(function(x){ return x.r && !x.r.ok; });
+  if(QZ.mode!=='fix' && wrong.length) h += '<div class="btnrow center"><button class="btn mbtn" data-act="fixthese">\u{1F527} Fix these now ('+wrong.length+')</button></div>';
+  if(wrong.length){
+    h += '<div class="wrongs"><h3>Remember these</h3>'+wrong.map(function(x){
+      var q=x.q, line = q.type==='note' || q.type==='build' ? '<div class="small">'+modelHTML(q)+'</div>' : answerLine(q);
+      var title = q.type==='steps' ? q.title : q.ar ? 'A: '+q.ar.A : (q.sign||q.inj) ? q.label : q.oo ? 'Odd one out: '+q.opts.join(', ') : (q.prompt||q.label);
+      return '<div class="wr"><b>'+esc(title)+'</b><div>'+line+'</div></div>';
+    }).join('')+'</div>';
+  } else h += '<p class="perfect">Every single one right! \u{1F31F}</p>';
+  if(QZ.mode==='fix'){ var left = practiceIds().length + bookletIds().length; h += '<p class="perfect">Fixed '+(QZ.fixed||0)+' of '+QZ.list.length+'. '+(left?left+' still on your list.':'Your list is empty! \u{1F389}')+'</p>'; }
+  if(QZ.mode==='bossA' && !S.boss.b) h += '<div class="btnrow center"><button class="btn" data-act="bossB">Go to Section B →</button></div>';
+  h += '<div class="btnrow center"><button class="btn ghost" data-act="again">Play again</button><button class="btn" data-act="home">Back to the street</button></div></div>';
+  return h;
+}
+function renderParent(){
+  var h = '<div class="qhead"><button class="qx" data-act="home" aria-label="Back home">←</button><div class="ltitle">For grown-ups</div></div>';
+  h += '<div class="lc"><h3>Plan</h3><div class="tw"><table class="t"><tr><th>Session</th><th>When</th><th>Status</th></tr>'+
+    PLAN.map(function(p){ return '<tr><td>'+esc(p.id+' '+p.title)+'</td><td>'+esc(p.when)+'</td><td>'+(planDone(p)?'✅ done':'–')+'</td></tr>'; }).join('')+'</table></div></div>';
+  h += '<div class="lc"><h3>Parts</h3><div class="tw"><table class="t"><tr><th>Part</th><th>Best</th><th>Plays</th></tr>'+
+    CH.map(function(c){ var r=S.ch[c.id]; return '<tr><td>'+esc(c.n+'. '+c.name)+'</td><td>'+(r?Math.round(r.best*100)+'%':'–')+'</td><td>'+(r?r.plays:0)+'</td></tr>'; }).join('')+'</table></div>'+
+    '<p>Boss A: <b>'+(S.boss.a?S.boss.a.got+' / '+S.boss.a.max:'not yet')+'</b> · Boss B: <b>'+(S.boss.b?S.boss.b.got+' / '+S.boss.b.max:'not yet')+'</b> (Section B is self-checked – worth a look at her notebook).</p></div>';
+  var mk = practiceIds();
+  h += '<div class="lc"><h3>Still shaky ('+mk.length+')</h3>'+(mk.length? '<ul class="shaky">'+mk.slice(0,25).map(function(id){ return '<li><b>'+esc(partChip(TPL[id].ch))+'</b> '+esc(shortQ(id))+' <span class="mini">×'+S.mist[id].n+'</span></li>'; }).join('')+'</ul>' : '<p>Nothing yet.</p>')+'</div>';
+  h += '<div class="lc"><h3>About the answers</h3><p>The app drills the school book’s answers. Where the book’s first aid is not what doctors advise today (ice on burns, a tight bandage above a deep cut, a warm drink after electric shock, which side of the road to walk on, pinching a nose bleed), she sees the book answer plus a short “In real life” line. The book’s “Wisdom Tree” tip about waiting for a blister is left out on purpose – it is not safe advice.</p></div>';
+  h += '<div class="lc"><h3>Settings</h3><p id="syncnote"></p><div class="btnrow"><button class="btn ghost'+(armed.reset?' danger':'')+'" data-act="reset">'+(armed.reset?'Tap again to clear all progress':'Clear progress')+'</button></div></div>';
+  return h;
+}
+function render(){
+  var top = document.getElementById('topin'); if(top) top.innerHTML = renderTop();
+  var app = document.getElementById('app'); if(!app) return;
+  var h = '';
+  if(V.name==='home') h = renderHome();
+  else if(V.name==='learn') h = renderLearn();
+  else if(V.name==='quiz') h = renderQuiz();
+  else if(V.name==='result') h = renderResult();
+  else if(V.name==='parent') h = renderParent();
+  app.innerHTML = h;
+  paintSync();
+}
+
+document.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if(!el || el.disabled) return;
+  var a = el.getAttribute('data-act');
+  if(a!=='quit' && armed.quit){ armed.quit=false; }
+  if(a!=='reset' && armed.reset){ armed.reset=false; }
+  if(ACT[a]) ACT[a](el);
+});
+
+render();
+setTimeout(initCloud, 0);
+
+/* Study Hub cross-device sync (GitHub Pages build loads firebase + sync.js; absent elsewhere = no-op) */
+if(typeof DikshaSync!=='undefined' && DikshaSync.init()){
+  try{ DikshaSync.attachUI(); }catch(e){}
+  DikshaSync.pull(STORE_KEY).then(function(remote){
+    if(remote && typeof remote==='object' && (remote.t||0) > (S.t||0)){ S = normalize(remote); saveLocal(); if(V.name!=='quiz') render(); }
+    DikshaSync.arm();
+    try{ DikshaSync.push(STORE_KEY, S); }catch(e){}
+  });
+}
+
+/* QA hooks */
+window.__SCI = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, signSet:signSet, factsOf:factsOf, norm:norm, practiceIds:practiceIds, bookletIds:bookletIds, fixSet:fixSet,
+  grade:grade, fillScore:fillScore, start:startQuiz, state:function(){return S;}, quiz:function(){return QZ;}, view:function(){return V;}, act:ACT, render:render, idsOf:idsOf, planDone:planDone, nextPlan:nextPlan, sync:function(){return SYNC;}};
+})();
+
+</script>
+</body>
+</html>
