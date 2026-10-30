@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<title>शब्दों का शतक · Hindi W.T.-III</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Hind:wght@400;600;700&family=Kalam:wght@400;700&display=swap">
+<style>
+/* शब्दों का शतक - Hindi W.T.-III (Unit III): विशेषण, वचन, अनेक शब्दों के लिए एक शब्द, पाठ क्रिकेट, अनुच्छेद लेखन, अपठित गद्यांश.
+   One column. The 3-day plan is a cricket pitch; sessions are overs. Daylight palette for a tablet. */
+:root{
+  --pond:#EEF4EC; --pond2:#DCE8D8; --ink:#1E2A3A; --muted:#566578; --card:#FFFFFF; --line:#D3DECF;
+  --leaf:#1E8A4C; --leaf-deep:#136237; --leaf-soft:#DDF3E5;
+  --sun:#FFB627; --sun-deep:#C98800; --sun-soft:#FFF2D2;
+  --red:#C8323C; --grass:#2F8F4E; --grass2:#37A05A;
+  --ok:#1A9A5E; --ok-bg:#DFF5E9; --bad:#D8414D; --bad-bg:#FDE6E8; --sel:#2D6CDF; --sel-bg:#E3ECFD;
+  --f-display:"Baloo 2","Noto Sans Devanagari","Nirmala UI","Mangal",system-ui,sans-serif;
+  --f-body:"Hind","Noto Sans Devanagari","Nirmala UI","Mangal",system-ui,-apple-system,sans-serif;
+  --f-hand:"Kalam","Hind","Noto Sans Devanagari","Nirmala UI",cursive;
+  --r:18px;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{background:var(--pond);color:var(--ink)}
+body{font-family:var(--f-body);font-size:18px;line-height:1.55;margin:0;min-height:100%;-webkit-tap-highlight-color:transparent;
+  background:radial-gradient(circle at 6% 0%,#FFF4D8 0,transparent 30%),radial-gradient(circle at 100% 30%,#E2F2E4 0,transparent 32%),var(--pond)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation;text-align:inherit}
+button:focus-visible{outline:3px solid var(--sel);outline-offset:2px}
+button[disabled]{cursor:default}
+h2{font-family:var(--f-display);font-weight:800;font-size:24px;margin:28px 0 10px;text-wrap:balance;line-height:1.25}
+h3{font-family:var(--f-display);font-weight:700;line-height:1.3;margin:0 0 8px;text-wrap:balance}
+b{font-weight:700}
+mark{background:var(--sun-soft);color:inherit;border-radius:4px;padding:0 2px}
+u.ul{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:.42em;text-decoration-color:var(--red);background:var(--sun-soft);border-radius:6px;padding:0 4px}
+
+/* top bar */
+#top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:rgba(238,244,236,.94);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.topin{max-width:780px;margin:0 auto;padding:6px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ava{width:42px;height:42px;flex:none}
+.lvl{display:flex;flex-direction:column;flex:1;min-width:110px}
+.lvl b{font-family:var(--f-display);font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2}
+.xpbar{height:9px;background:var(--pond2);border-radius:9px;overflow:hidden;margin-top:3px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),#FFD36B);border-radius:9px;transition:width .5s}
+.chip{display:inline-flex;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:999px;padding:3px 10px;font-weight:700;font-size:14px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip.exam{background:var(--sun-soft);border-color:#F4CF7E;color:#6E4A00}
+.streak{display:inline-flex;gap:4px}
+.streak i{width:10px;height:10px;border-radius:50%;background:var(--pond2);border:1px solid var(--line)}
+.streak i.on{background:var(--leaf);border-color:var(--leaf-deep)}
+
+main{max-width:780px;margin:0 auto;padding:14px 16px 70px}
+
+/* hero */
+.hero{display:flex;gap:10px;align-items:flex-end}
+.bigfrog{width:96px;height:104px;flex:none;animation:bob 3.2s ease-in-out infinite}
+.bigfrog.sm{width:84px;height:90px;margin:0 auto}
+@keyframes bob{50%{transform:translateY(-6px)}}
+.bubble{flex:1;min-width:0;background:var(--card);border:2px solid var(--ink);border-radius:22px 22px 22px 6px;padding:12px 14px;box-shadow:4px 4px 0 var(--ink);font-family:var(--f-hand);font-size:21px;line-height:1.45}
+.bubble b{font-family:var(--f-body);font-size:18px}
+.bubble .btnrow{margin-top:10px;font-family:var(--f-body)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:50px;padding:10px 18px;border-radius:14px;font-family:var(--f-display);font-weight:700;font-size:19px;background:var(--leaf);color:#fff;box-shadow:0 4px 0 var(--leaf-deep);transition:transform .08s;text-align:center;line-height:1.25}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 var(--leaf-deep)}
+.btn.ghost{background:var(--card);color:var(--ink);box-shadow:0 4px 0 var(--line);border:1px solid var(--line)}
+.btn.ink{background:var(--ink);box-shadow:0 4px 0 #0B141F}
+.btn.sm{min-height:44px;font-size:16px;padding:8px 12px}
+.btn.danger{background:var(--bad);color:#fff;border-color:var(--bad);box-shadow:0 4px 0 #9E2B35}
+.btn[disabled]{opacity:.4}
+.btnrow{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+.btnrow.center{justify-content:center}
+.btnrow.spread{justify-content:space-between}
+.link{color:var(--leaf-deep);text-decoration:underline;font-weight:700;padding:8px}
+.skip{text-align:center;margin:4px 0 0}
+
+/* my mistakes */
+.mist{margin-top:18px;background:#FFF8EC;border:2px solid var(--ink);border-radius:22px;box-shadow:4px 4px 0 var(--ink);padding:14px}
+.misth{display:flex;gap:12px;align-items:center}
+.mic{font-size:40px;line-height:1}
+.mtx h2{margin:0}
+.mtx p{margin:2px 0 0;font-size:16px;color:var(--muted)}
+.mgrp{margin-top:10px}
+.mgrp small{font-size:14px;font-weight:700;color:var(--muted)}
+.mgrp ul{list-style:none;margin:4px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.mgrp li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:7px 10px;font-size:16px;line-height:1.4;display:flex;gap:8px;align-items:baseline}
+.mgrp li.more{background:none;border:0;padding:0 4px;color:var(--muted);font-weight:700}
+.mchip{flex:none;font-size:12px;font-weight:700;background:var(--pond2);border-radius:999px;padding:1px 7px}
+.btn.mbtn{background:var(--sun);color:var(--ink);box-shadow:0 4px 0 var(--sun-deep)}
+.fixline{font-weight:700;font-size:17px;margin:4px 0}
+
+/* pitch trail */
+.pond{display:flex;flex-direction:column;gap:10px;border-radius:26px;padding:14px 14px 14px 32px;position:relative;
+  background:repeating-linear-gradient(180deg,rgba(255,255,255,.08) 0 46px,transparent 46px 92px),linear-gradient(90deg,var(--grass),var(--grass2))}
+.pond::before{content:"";position:absolute;left:14px;top:16px;bottom:16px;width:4px;border-radius:4px;background:#fff;opacity:.85}
+.dayhead{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:6px 4px 0;font-family:var(--f-display);color:#fff}
+.dayhead b{font-size:20px}
+.dayhead span{font-size:15px;color:#D9F0DF;font-weight:600}
+.pad{position:relative;display:flex;align-items:center;gap:12px;width:100%;padding:6px 10px 6px 6px;border-radius:999px 22px 22px 999px;background:rgba(255,255,255,.9);border:2px solid transparent;transition:transform .1s}
+.pad.alt{margin-left:clamp(0px,5vw,40px);width:calc(100% - clamp(0px,5vw,40px))}
+.pad:active{transform:scale(.98)}
+.pad.next{background:#fff;border-color:var(--sun);box-shadow:0 4px 0 var(--sun-deep)}
+.pad.done{background:rgba(255,255,255,.72)}
+.lily{position:relative;width:60px;height:60px;flex:none;border-radius:50%;background:#fff;border:6px solid var(--red);display:grid;place-items:center}
+.pad.done .lily{border-color:var(--leaf)}
+.lic{font-size:26px;line-height:1}
+.tick{position:absolute;right:-6px;bottom:-6px;background:var(--ok);color:#fff;border-radius:50%;width:22px;height:22px;font-size:14px;display:grid;place-items:center;font-weight:700}
+.hopper{position:absolute;left:34px;top:-18px;width:34px;height:36px;animation:bob 1.6s ease-in-out infinite;pointer-events:none}
+.pt{display:flex;flex-direction:column;min-width:0;flex:1}
+.pt small{font-size:14px;color:var(--muted);font-weight:700}
+.pt b{font-family:var(--f-display);font-size:19px;line-height:1.25}
+.pt .sub{font-size:15px;color:var(--muted);line-height:1.35}
+.stars{color:var(--sun-deep);letter-spacing:2px;font-size:17px}
+.mini{font-size:14px;color:var(--muted);font-variant-numeric:tabular-nums}
+
+/* parts */
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.cht{background:var(--card);border-radius:var(--r);border:2px solid var(--ink);box-shadow:4px 4px 0 var(--ink);padding:12px;display:flex;flex-direction:column;gap:8px;border-top:8px solid var(--hue)}
+.chh{display:flex;gap:10px;align-items:center}
+.ci{font-size:34px;line-height:1}
+.chh small{display:block;font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.02em}
+.chh b{font-family:var(--f-display);font-size:19px;line-height:1.25}
+.chs{font-size:15px;color:var(--muted);line-height:1.4}
+.chb{display:flex;gap:6px;flex-wrap:wrap}
+.chb .btn{flex:1;padding:8px 4px;font-size:15px;white-space:nowrap}
+.extras{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ex{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:flex;flex-direction:column;gap:2px;min-height:110px;box-shadow:0 4px 0 var(--line)}
+.ex span{font-size:30px;line-height:1.1}
+.ex b{font-family:var(--f-display);font-size:18px;line-height:1.25}
+.ex small{font-size:14px;color:var(--muted);line-height:1.35}
+.foot{margin-top:30px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px;color:var(--muted)}
+
+/* learn */
+.qhead{display:flex;align-items:center;gap:10px}
+.qx{min-width:46px;min-height:46px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:800;font-size:18px;text-align:center}
+.qx.armed{background:var(--bad);color:#fff;border-color:var(--bad);padding:0 10px;font-size:15px}
+.ltitle{font-family:var(--f-display);font-weight:700;font-size:19px;line-height:1.3}
+.lc{background:var(--card);border-radius:var(--r);padding:16px;border:1px solid var(--line);margin-top:12px;border-left:8px solid var(--hue,var(--leaf))}
+.lch{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.lch h3{font-size:24px;margin:0;flex:1}
+.le{font-size:36px;line-height:1}
+.lnum{font-size:14px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.lc p{margin:8px 0}
+.lc ul,.lc ol{margin:6px 0;padding-left:24px}
+.lc li{margin:4px 0}
+.note{background:var(--sun-soft);border-radius:12px;padding:10px 12px;margin-top:10px}
+.note.red{background:var(--bad-bg)}
+.tw{overflow-x:auto}
+table.t{border-collapse:collapse;width:100%;font-size:17px;margin:8px 0}
+table.t th,table.t td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+table.t th{background:var(--pond);font-size:15px}
+.dots{display:flex;gap:6px;justify-content:center;margin:12px 0 0}
+.dots i{width:9px;height:9px;border-radius:9px;background:var(--line)}
+.dots i.on{background:var(--ink)}
+
+/* quiz */
+.pbar{flex:1;height:12px;background:var(--pond2);border-radius:12px;overflow:hidden}
+.pbar i{display:block;height:100%;background:var(--leaf);transition:width .3s}
+.combo{font-weight:800;min-width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.qn{font-size:15px;color:var(--muted);font-weight:700;font-variant-numeric:tabular-nums}
+.sec{margin:16px 0 6px;font-size:15px;font-weight:700;color:var(--muted);display:flex;justify-content:space-between;gap:10px}
+.mk{background:var(--sun-soft);color:#6E4A00;border-radius:999px;padding:1px 9px;white-space:nowrap;align-self:flex-start}
+.qc{background:var(--card);border-radius:22px;padding:16px;border:2px solid var(--ink);box-shadow:5px 5px 0 var(--ink)}
+.prompt{font-size:21px;font-weight:700;margin:0 0 10px;line-height:1.55}
+.prompt.sm{font-size:18px}
+.prompt.stmt{font-family:var(--f-hand);font-size:24px;font-weight:400}
+.bigword{font-family:var(--f-display);font-size:40px;font-weight:800;text-align:center;line-height:1.3;margin:2px 0 12px}
+.emo{font-size:64px;line-height:1.2;text-align:center;margin:0 0 12px;letter-spacing:4px}
+.passage{background:#FFFBEF;border:1px dashed #E2C77A;border-radius:14px;padding:10px 12px;margin:0 0 12px;font-size:18px;line-height:1.75}
+.sentence{line-height:2.3}
+.hint{font-size:15px;color:var(--muted);margin:-4px 0 10px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts.one{grid-template-columns:1fr}
+.opt{min-height:58px;border-radius:16px;background:var(--pond);border:2px solid var(--line);font-size:19px;font-weight:700;padding:8px 12px;text-align:left;transition:transform .08s;line-height:1.4}
+.opt:active{transform:scale(.97)}
+.opt.spell{font-size:24px;text-align:center}
+.opt.sent{font-weight:400;font-size:18px}
+.ol{color:var(--muted);font-weight:700}
+.opt.pick{background:var(--sel-bg);border-color:var(--sel)}
+.opt.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.opt.bad{background:var(--bad-bg);border-color:var(--bad);color:#8A1F29}
+.opt.also{border-color:var(--ok);border-style:dashed}
+.opt.dim{opacity:.5}
+.tfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tfb{text-align:center;font-size:22px}
+.fixbox{margin-top:14px;border-top:2px dashed var(--line);padding-top:10px}
+.glabel{font-size:15px;font-weight:700;color:var(--muted);margin:10px 0 6px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.chp{min-height:50px;padding:6px 14px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:19px;font-weight:700;line-height:1.4}
+.chp.gone{visibility:hidden}
+.chp.bad{background:var(--bad-bg);border-color:var(--bad)}
+.slot{display:inline-flex;align-items:center;justify-content:center;min-width:96px;min-height:46px;padding:2px 12px;margin:0 4px;border-radius:12px;border:2px dashed #9FB59A;background:var(--pond);font-weight:700;vertical-align:middle;line-height:1.4}
+.slot.filled{border-style:solid;border-color:var(--sel);background:var(--sel-bg)}
+.slot.sel{border-color:var(--sun-deep);background:var(--sun-soft)}
+.slot.ok{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.slot.bad{border-style:solid;border-color:var(--bad);background:var(--bad-bg)}
+.words{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 6px}
+.wd{min-height:52px;padding:4px 14px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:22px;font-weight:700;line-height:1.4}
+.wd.pick{background:var(--sel-bg);border-color:var(--sel)}
+.wd.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.wd.bad{background:var(--bad-bg);border-color:var(--bad);color:#8A1F29}
+.wd.also{border-color:var(--ok);border-style:dashed}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mcol{display:flex;flex-direction:column;gap:8px;min-width:0}
+.mi{min-height:58px;border-radius:14px;background:var(--pond);border:2px solid var(--line);font-size:17px;font-weight:700;padding:6px 10px;text-align:center;line-height:1.35}
+.mi.r{background:#fff}
+.mi.sel{background:var(--sel-bg);border-color:var(--sel)}
+.mi.ok{background:var(--ok-bg);border-color:var(--ok);color:#0D5A37}
+.mi.bad{background:var(--bad-bg);border-color:var(--bad)}
+.tray{display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--sun-soft);border-radius:16px;padding:12px;margin-bottom:12px;text-align:center}
+.tray small{font-size:14px;color:var(--muted);font-weight:700}
+.tray b{font-size:22px;font-family:var(--f-display);line-height:1.3}
+.buckets{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.bk{border-radius:16px;border:2px solid var(--ink);background:#fff;padding:10px;min-height:92px;display:flex;flex-direction:column;gap:6px;text-align:left}
+.bk b{font-family:var(--f-display);font-size:18px;line-height:1.3}
+.bk .in{display:flex;flex-wrap:wrap;gap:5px}
+.bk .in span{background:var(--ok-bg);border-radius:9px;padding:1px 8px;font-size:15px;font-weight:700}
+.bk .in span.miss{background:var(--bad-bg);outline:1px dashed var(--bad)}
+.bk.bad{border-color:var(--bad);background:var(--bad-bg)}
+.seq{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:8px}
+.seq li{display:flex;align-items:center;gap:8px;border:2px dashed #9FB59A;border-radius:14px;padding:8px 10px;min-height:52px;background:var(--pond)}
+.seq li.f{border-style:solid;border-color:var(--ok);background:var(--ok-bg)}
+.seq li.cur{border-color:var(--sun-deep);background:var(--sun-soft)}
+.seq .n{width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700;flex:none}
+.seq .st{font-weight:700}
+.stepdone{border-radius:12px;padding:8px 10px;margin-bottom:8px;background:var(--ok-bg)}
+.stepdone.bad{background:var(--bad-bg)}
+.stepdone small{display:block;font-size:14px;color:var(--muted)}
+.nb{display:flex;gap:12px;align-items:center;background:repeating-linear-gradient(#fff 0 34px,#D6E4F0 34px 35px);border:1px solid var(--line);border-left:4px solid #E8A0A8;border-radius:12px;padding:12px 14px;font-family:var(--f-hand);font-size:21px;line-height:1.6}
+.pen{font-size:40px}
+.model{background:var(--leaf-soft);border-radius:12px;padding:10px 12px;margin:6px 0 0;line-height:1.75}
+details.modelbox{margin-top:12px;border:2px solid var(--leaf);border-radius:14px;padding:6px 10px;background:#fff}
+details.modelbox summary{font-family:var(--f-display);font-weight:700;font-size:18px;min-height:44px;display:flex;align-items:center;cursor:pointer}
+.kw{font-size:16px;margin-top:10px}
+table.diff td{width:50%}
+
+/* feedback */
+.fb{margin-top:14px;border-radius:18px;padding:14px;border:2px solid var(--ok);background:var(--ok-bg)}
+.fb.bad{border-color:var(--bad);background:var(--bad-bg)}
+.fb .ft{font-family:var(--f-display);font-size:23px;font-weight:800;margin:0 0 4px;line-height:1.3}
+.fb .fa{font-size:18px;margin:6px 0}
+.fb .tip{font-size:17px;margin:6px 0}
+.bonus{font-size:15px;background:var(--sun);border-radius:999px;padding:2px 8px;vertical-align:middle}
+.slipnote{background:#fff;border:2px dashed var(--bad);border-radius:12px;padding:8px 10px;margin-top:8px;font-size:16px}
+.shake{animation:sh .35s}
+@keyframes sh{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.pop{animation:pp .3s}
+@keyframes pp{50%{transform:scale(1.08)}}
+
+/* results */
+.res{text-align:center}
+.rt{font-family:var(--f-display);font-size:22px;font-weight:700;margin:6px 0 0}
+.score{font-family:var(--f-display);font-size:58px;font-weight:800;line-height:1.05;margin:4px 0;font-variant-numeric:tabular-nums}
+.stars.big{font-size:44px;letter-spacing:6px;margin:0}
+.sub{color:var(--muted);margin:2px 0}
+.perfect{font-size:20px;font-weight:700}
+.wrongs{margin-top:16px;text-align:left}
+.wrongs h3{font-size:22px}
+.wr{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px;font-size:16px}
+.wr b{font-size:17px}
+.small .model{font-size:16px}
+.shaky{padding-left:20px;font-size:16px}
+.shaky li{margin:4px 0}
+.en{font-family:"Hind",system-ui,sans-serif}
+
+.sync-row{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 16px 24px;font-size:14px}
+.sync-row span{background:var(--card);color:var(--leaf-deep);font-weight:700;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.sync-row button{color:var(--muted);font-weight:700;font-size:14px;text-decoration:underline}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:20;width:100%;height:100%}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:14px;font-weight:700;z-index:30;max-width:90%;text-align:center}
+@media (max-width:440px){
+  body{font-size:17px}
+  .opts{grid-template-columns:1fr}
+  .prompt{font-size:19px}
+  .chip.xp{display:none}
+  .mi{font-size:15px}
+  .pond{padding-left:28px}
+  .bigword{font-size:34px}
+  .wd{font-size:20px;padding:4px 11px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="top"><div class="topin" id="topin"></div></div>
+<main id="app"></main>
+<div class="sync-row" id="syncRow"><span id="syncCodeLabel"></span><button id="syncChangeBtn">Use a different code</button></div>
+<canvas id="fx"></canvas>
+<div class="toast" id="toast" hidden></div>
+<script>
+/* ================= CONTENT BANK =================
+   Source: MDIS Class IV Hindi, Unit III (2026-27) booklet pp 99-105 and her notebook (7-27 Oct 2026),
+   audited 30 Oct 2026. Booklet p 98 (khand ka, pra.1) and the Cricket lesson pages were not in the scan:
+   the unseen passages (p6) are original practice passages and the lesson drills use only booklet + notebook facts.
+   Ids are stable (mistake bank keys). slip = her real mistake (shown after she answers).
+   f = fact tags: two templates sharing a tag never appear in the same set (no giveaways).
+   Never add her wrong spelling of god-of-cricket (chandrabindu form) anywhere: it spells a rude word. qa.js bans it. */
+
+var CH = [
+  {id:'p1', n:1, name:'विशेषण', short:'गुणवाचक और संख्यावाचक', icon:'🎨', hue:'#E0702A'},
+  {id:'p2', n:2, name:'वचन', short:'एकवचन और बहुवचन', icon:'👥', hue:'#2C8FD0'},
+  {id:'p3', n:3, name:'अनेक शब्दों के लिए एक शब्द', short:'केवल चयनित शब्द', icon:'🧩', hue:'#7A5AD6'},
+  {id:'p4', n:4, name:'पाठ: क्रिकेट', short:'शब्दार्थ, प्रश्न-उत्तर, सही-गलत', icon:'🏏', hue:'#1E8A4C'},
+  {id:'p5', n:5, name:'अनुच्छेद लेखन', short:'प्रारूप, संकेत बिंदु, भूमिका', icon:'✍️', hue:'#D63F5E'},
+  {id:'p6', n:6, name:'अपठित गद्यांश', short:'पढ़ो, सोचो, उत्तर दो', icon:'📖', hue:'#B07A1E'}
+];
+
+/* ---------- learn cards (HTML) ---------- */
+var LEARN = {
+p1: [
+  {h:'विशेषण क्या है?', e:'🎨', b:'<p>जो शब्द <b>संज्ञा</b> या <b>सर्वनाम</b> शब्दों की <b>विशेषता</b> बताते हैं, उन्हें <b>विशेषण</b> कहते हैं।</p><p>जैसे — <b>नीला</b> आसमान, <b>खट्टा</b> नींबू, <b>दो</b> पुस्तकें, <b>अनेक</b> लोग।</p>'},
+  {h:'विशेष्य क्या है?', e:'🔍', b:'<p>जिन संज्ञा या सर्वनाम शब्दों की विशेषता बताई जाती है, उन्हें <b>विशेष्य</b> कहते हैं।</p><div class="tw"><table class="t"><tr><th>शब्द</th><th>विशेषण</th><th>विशेष्य</th></tr><tr><td>गरम जलेबी</td><td><b>गरम</b></td><td>जलेबी</td></tr><tr><td>वीर सैनिक</td><td><b>वीर</b></td><td>सैनिक</td></tr><tr><td>गुलाबी कमल</td><td><b>गुलाबी</b></td><td>कमल</td></tr></table></div><div class="note">याद रखो: <b>विशेषण</b> विशेषता बताता है। <b>विशेष्य</b> वह है जिसकी विशेषता बताई जाती है।</div>'},
+  {h:'विशेषण के भेद', e:'🗂️', b:'<p>विशेषण के <b>चार</b> भेद होते हैं। इनमें से दो भेद हम पढ़ रहे हैं:</p><ul><li>(क) <b>गुणवाचक विशेषण</b></li><li>(ख) <b>संख्यावाचक विशेषण</b></li></ul>'},
+  {h:'गुणवाचक विशेषण', e:'🌈', b:'<p>जो विशेषण संज्ञा या सर्वनाम के <b>गुण, रंग, आकार, स्वाद या दशा</b> बताए, वह <b>गुणवाचक विशेषण</b> है।</p><ul><li>रंग — <b>लाल</b> गेंद, <b>गुलाबी</b> कमल</li><li>स्वाद — <b>खट्टे</b> फल, <b>मीठी</b> चॉकलेट</li><li>आकार — <b>ऊँची</b> इमारत, <b>छोटी</b> बिल्ली</li><li>गुण — <b>बहादुर</b> बच्चा, <b>परिश्रमी</b> व्यक्ति, <b>आलसी</b> भाई</li><li>दशा — <b>पुराने</b> कपड़े, <b>नई</b> घड़ी</li></ul><div class="note">पूछो: <b>कैसा? कैसी? कैसे?</b> — जो उत्तर मिले, वह गुणवाचक विशेषण है।</div>'},
+  {h:'संख्यावाचक विशेषण', e:'🔢', b:'<p>जो विशेषण संज्ञा या सर्वनाम की <b>संख्या</b> बताए, वह <b>संख्यावाचक विशेषण</b> है।</p><ul><li><b>दो</b> पुस्तकें, <b>पाँच</b> कबूतर, <b>दस</b> खिलौने</li><li><b>कुछ</b> लोग, <b>सब</b> बच्चे, <b>अनेक</b> पतंगें</li></ul><div class="note">पूछो: <b>कितने? कितनी?</b> — जो उत्तर मिले, वह संख्यावाचक विशेषण है। <b>कुछ, सब, अनेक</b> भी गिनती बताते हैं।</div>'},
+  {h:'एक वाक्य, दो विशेषण', e:'✨', b:'<p>एक वाक्य में दोनों तरह के विशेषण हो सकते हैं:</p><p class="model">कक्षा में <b>कुछ</b> छात्र <b>शरारती</b> हैं।<br><b>कुछ</b> — संख्यावाचक विशेषण<br><b>शरारती</b> — गुणवाचक विशेषण</p><div class="note">हिंदी के उत्तर में संख्या <b>शब्दों</b> में लिखना अच्छा है: <b>दो</b> सेब।</div><div class="note red">वर्तनी: <b>स्वादिष्ट</b> (ष्ट = ष + ट)</div>'}
+],
+p2: [
+  {h:'वचन क्या है?', e:'👥', b:'<p>शब्द के जिस रूप से उसके <b>एक</b> या <b>अनेक</b> होने का पता चले, उसे <b>वचन</b> कहते हैं।</p><ul><li><b>एकवचन</b> — एक: बच्चा, कटोरी, राह</li><li><b>बहुवचन</b> — एक से अधिक: बच्चे, कटोरियाँ, राहें</li></ul>'},
+  {h:'नियम 1: आ से ए (बिंदी नहीं!)', e:'👦', b:'<p>अंत में <b>आ</b> वाले पुल्लिंग शब्दों में <b>आ</b> की जगह <b>ए</b> लगता है:</p><ul><li>बच्चा → <b>बच्चे</b></li><li>खिलौना → <b>खिलौने</b></li><li>घोंसला → <b>घोंसले</b></li></ul><div class="note red">यहाँ <b>बिंदी नहीं</b> लगती: <b>बच्चे</b> ✓ &nbsp; बच्चें ✗</div>'},
+  {h:'नियम 2: अ वाले शब्दों में ◌ें (बिंदी ज़रूरी)', e:'👕', b:'<p>अंत में <b>अ</b> वाले स्त्रीलिंग शब्दों में <b>◌ें</b> लगता है:</p><ul><li>राह → <b>राहें</b></li><li>कमीज़ → <b>कमीज़ें</b></li><li>दीवार → <b>दीवारें</b></li></ul><div class="note red">यहाँ <b>बिंदी ज़रूरी</b> है: <b>कमीज़ें</b> ✓ &nbsp; कमीज़े ✗</div>'},
+  {h:'नियम 3 और 4: आ और ई वाले स्त्रीलिंग', e:'🌿', b:'<p>अंत में <b>आ</b> वाले स्त्रीलिंग शब्दों में <b>एँ</b> जुड़ता है:</p><ul><li>लता → <b>लताएँ</b>, कविता → <b>कविताएँ</b>, भाषा → <b>भाषाएँ</b></li></ul><p>अंत में <b>ई</b> वाले स्त्रीलिंग शब्दों में <b>ई</b> छोटी <b>इ</b> बन जाती है और <b>याँ</b> जुड़ता है:</p><ul><li>कटोरी → <b>कटोरियाँ</b>, कहानी → <b>कहानियाँ</b></li></ul>'},
+  {h:'नियम 5: ऊ से उ + एँ', e:'👰', b:'<p><b>बहू</b> में बड़ा <b>ऊ</b> छोटा <b>उ</b> बन जाता है और <b>एँ</b> जुड़ता है:</p><ul><li>बहू → <b>बहुएँ</b></li></ul><div class="note red"><b>बहुएँ</b> ✓ &nbsp; बहूएँ ✗</div>'},
+  {h:'सदा बहुवचन वाले शब्द', e:'🙏', b:'<p>कुछ शब्द हमेशा <b>बहुवचन</b> में ही आते हैं:</p><ul><li><b>प्राण</b>, <b>दर्शन</b>, <b>हस्ताक्षर</b></li></ul><p>ये भी बहुवचन हैं: <b>हम</b>, <b>वे</b> और <b>गए</b>, <b>थे</b>।</p><p>ये एकवचन हैं: दीवार, चाँद, सूरज, कहानी।</p>'}
+],
+p3: [
+  {h:'अनेक शब्दों के लिए एक शब्द', e:'🧩', b:'<p>कई शब्दों (वाक्यांश) की जगह <b>एक शब्द</b> लिखने से वाक्य छोटा और सुंदर बनता है।</p><div class="tw"><table class="t"><tr><th>वाक्यांश</th><th>एक शब्द</th></tr><tr><td>जो किसी से न डरे / जिसमें कोई डर न हो</td><td><b>निडर</b></td></tr><tr><td>नीचे लिखा हुआ</td><td><b>निम्नलिखित</b></td></tr><tr><td>मीठा (मधुर) बोलने वाला</td><td><b>मृदुभाषी</b></td></tr><tr><td>साथ पढ़ने वाला</td><td><b>सहपाठी</b></td></tr></table></div>'},
+  {h:'चार शब्द और', e:'🔨', b:'<div class="tw"><table class="t"><tr><th>वाक्यांश</th><th>एक शब्द</th></tr><tr><td>लकड़ी का सामान बनाने वाला</td><td><b>बढ़ई</b></td></tr><tr><td>जो कभी बूढ़ा न हो / जिस पर कभी बुढ़ापा न आए</td><td><b>अजर</b></td></tr><tr><td>जिसमें दया हो</td><td><b>दयालु</b></td></tr><tr><td>जिसमें साहस हो</td><td><b>साहसी</b></td></tr></table></div>'},
+  {h:'ध्यान दो: तीन मिलते-जुलते शब्द', e:'⚠️', b:'<ul><li>जो कभी <b>बूढ़ा न हो</b> → <b>अजर</b></li><li>जिसकी कभी <b>मृत्यु न हो</b> → <b>अमर</b></li><li>जो कभी <b>न हारे</b> → <b>अजेय</b></li></ul><div class="note">बढ़ई <b>लकड़ी</b> का सामान बनाता है। <b>सोने</b> का सामान बनाने वाला <b>सुनार</b> होता है।</div>'}
+],
+p4: [
+  {h:'क्रिकेट कहाँ से आया?', e:'🏏', b:'<ul><li>क्रिकेट का आरंभ सबसे पहले <b>इंग्लैंड</b> में हुआ था।</li><li>उसके बाद यह <b>विश्व भर</b> में लोकप्रिय हो गया।</li><li>भारत में क्रिकेट <b>ब्रिटिश सरकार के आगमन</b> के बाद आया।</li></ul>'},
+  {h:'अंपायर, टॉस और ओवर', e:'🏟️', b:'<ul><li>क्रिकेट में <b>दो टीमें</b> खेलती हैं।</li><li>इस खेल में <b>दो अंपायर</b> होते हैं। उन्हीं के <b>संकेत</b> पर खेल खेला जाता है।</li><li>खेल आरंभ होने पर अंपायर गेंदबाज़ को गेंद फेंकने की <b>अनुमति देते</b> हैं।</li><li>खेल शुरू होने से पहले <b>सिक्का उछालकर टॉस</b> किया जाता है। टॉस जीतने वाली टीम का कप्तान तय करता है कि उसकी टीम पहले <b>बल्लेबाज़ी</b> करेगी <b>या</b> <b>गेंदबाज़ी</b>।</li><li>एक ओवर में <b>छह</b> गेंदें फेंकी जाती हैं।</li><li>बल्लेबाज़ का लक्ष्य <b>अधिक रन बनाना</b> होता है।</li></ul><div class="note red">बल्लेबाज़ी <b>या</b> गेंदबाज़ी। ‘गेंदबाज़ी और फील्डिंग’ तो एक ही बात है!</div>'},
+  {h:'क्रिकेट के तीन रूप', e:'🏆', b:'<p>अंतर्राष्ट्रीय स्तर पर क्रिकेट के <b>तीन</b> रूप हैं:</p><ul><li><b>टेस्ट मैच</b> — यह पाँच दिन तक चलता है।</li><li><b>एकदिवसीय मैच</b> — इसमें हर टीम 50 ओवर खेलती है।</li><li><b>टी-20 मैच</b> — इसमें हर टीम 20 ओवर खेलती है।</li></ul><div class="note red">‘कितने रूप हैं?’ पूछा जाए तो पहले संख्या लिखो: <b>तीन</b>। फिर तीनों के बारे में बताओ।</div>'},
+  {h:'महान खिलाड़ी', e:'🌟', b:'<ul><li><b>सचिन तेंदुलकर</b> को उनके बेहतरीन खेल प्रदर्शन और क्रिकेट में अनेक योगदान के कारण <b>गॉड ऑफ क्रिकेट</b> कहा जाने लगा।</li><li>सचिन को <b>भारत रत्न</b> से सम्मानित किया गया।</li><li>सचिन के खेल की सराहना विश्व के सर्वोत्तम खिलाड़ी <b>डॉन ब्रैडमैन</b> ने की थी।</li><li><b>कपिल देव</b> को <b>विस्डेन पुरस्कार</b> से सम्मानित किया गया।</li></ul><div class="note">‘ऑ’ की आवाज़ के लिए <b>◌ॉ</b> लगाओ — ऊपर सिर्फ़ छोटा अर्धचंद्र, <b>बिंदी नहीं</b>: <b>गॉड</b>, <b>ऑफ</b>, <b>डॉन</b>, <b>चॉकलेट</b>।</div>'},
+  {h:'शब्दार्थ', e:'📚', b:'<div class="tw"><table class="t"><tr><th>शब्द</th><th>अर्थ</th></tr><tr><td>आगमन</td><td>आना</td></tr><tr><td>पोशाक</td><td>वस्त्र</td></tr><tr><td>प्रतिद्वंदी</td><td>विरोधी</td></tr><tr><td>अनुमति</td><td>आज्ञा</td></tr><tr><td>आरंभ</td><td>शुरुआत</td></tr><tr><td>समतल</td><td>सपाट, बराबर</td></tr></table></div><p>वसंत ऋतु के <b>आगमन</b> पर सभी खुश हो जाते हैं।<br>मैं <b>बड़ों</b> की <b>अनुमति</b> के बिना घर से <b>बाहर</b> नहीं जाती।</p>'},
+  {h:'सच्ची खेल भावना', e:'🤝', b:'<p>खेल में जीतना अच्छा है, पर <b>सच्ची खेल भावना</b> सबसे ज़रूरी है:</p><ul><li>खेल के नियमों का पालन करना</li><li>हार-जीत को खुशी से स्वीकार करना</li><li>विरोधी टीम का भी सम्मान करना</li></ul>'}
+],
+p5: [
+  {h:'अनुच्छेद लेखन क्या है?', e:'✍️', b:'<p>जब हम किसी विषय पर अपने <b>भाव या विचार</b> <b>संक्षेप</b> में प्रकट करते हैं, तब उसे <b>अनुच्छेद लेखन</b> कहते हैं।</p>'},
+  {h:'ध्यान देने योग्य बातें', e:'📝', b:'<ol><li>विषय को ध्यानपूर्वक पढ़ना</li><li>सरल व शुद्ध भाषा का प्रयोग करना</li><li>छोटे-छोटे वाक्यों का प्रयोग करना</li><li>विषय के अनुसार लेखन</li><li>अपने विचारों को क्रम से लिखना</li><li>एक ही बात को बार-बार न दोहराना</li></ol>'},
+  {h:'अनुच्छेद का प्रारूप', e:'🧱', b:'<p class="model"><b>भूमिका</b> — नियमों के पालन का महत्व<br>↓<br><b>विषयवस्तु</b> — कार्य, उसके नियम, लाभ<br>↓<br><b>निष्कर्ष</b> — सावधानियाँ</p><p>लिखने से पहले ये बॉक्स भरो: <b>कार्य का नाम</b> → <b>कौन-कौन से नियम का पालन</b> → <b>लाभ</b> → <b>सावधानियाँ</b>।</p>'},
+  {h:'भूमिका (याद कर लो!)', e:'🚦', b:'<p class="model">हमें अपना जीवन जीने के लिए कुछ नियमों का पालन करना होता है, जिससे हमारा जीवन सरल हो जाता है। यदि हम ऐसा नहीं करते तो हम परेशानियों से घिर सकते हैं। इसी प्रकार यातायात को सुविधाजनक बनाने के लिए कुछ नियम बनाए गए हैं, जिनका पालन करना ज़रूरी ही नहीं, बल्कि हमारा कर्तव्य भी है।</p><div class="note red">वर्तनी: <b>यदि</b>, <b>बल्कि</b>, <b>कर्तव्य</b>, <b>यातायात</b>, <b>सुविधाजनक</b></div>'},
+  {h:'साइकिल चलाते समय सावधानी', e:'🚲', b:'<p>संकेत बिंदु:</p><ul><li>हेलमेट पहनना</li><li>ब्रेक, टायर में हवा और हैंडल की जाँच</li><li>सड़क के बाईं ओर चलना</li><li>मुड़ते समय हाथ से संकेत</li><li>दोनों हाथ हैंडल पर</li><li>रात में लाइट, पूरा ध्यान सड़क पर</li></ul><div class="note red">‘हवा’ स्त्रीलिंग है: टायर में हवा अवश्य <b>भरी</b> हो।</div>'},
+  {h:'आपातकालीन वाहन को रास्ता', e:'🚑', b:'<p>संकेत बिंदु:</p><ul><li>सड़क के नियमों का पालन; आपातकालीन वाहन (एंबुलेंस, दमकल) को रास्ता देना</li><li>यह सिर्फ़ ज़िम्मेदारी ही नहीं, <b>कानून</b> भी है — रास्ता न देने पर <b>जुर्माना</b></li><li>सायरन की आवाज़ पर ध्यान, <b>शांत</b> रहें</li><li><b>इंडिकेटर</b> का प्रयोग करें, <b>बाईं ओर</b> जाएँ, <b>गति कम</b> करें, जगह बनाएँ</li><li>कानून का पालन करके हम किसी की जान बचा सकते हैं</li></ul>'},
+  {h:'पैदल चलने के नियम (नमूना)', e:'🚶', b:'<ul><li>हमेशा सड़क पर बने <b>फुटपाथ</b> पर चलें।</li><li>सड़क <b>जेब्रा क्रॉसिंग</b> से या <b>सिग्नल</b> मिलने पर ही पार करें।</li><li>पहले <b>दाईं</b> ओर, फिर <b>बाईं</b> ओर और फिर <b>दाईं</b> ओर देखकर आगे बढ़ें।</li><li>चलते समय मोबाइल फ़ोन या इयरफ़ोन का प्रयोग न करें।</li></ul><p>निष्कर्ष: यदि हम इन सभी बातों का ध्यान रखेंगे तो हमारी यात्रा हमेशा सुखद होगी।</p>'}
+],
+p6: [
+  {h:'अपठित गद्यांश कैसे हल करें?', e:'📖', b:'<ol><li>पहले पूरा गद्यांश <b>ध्यान से</b> पढ़ो।</li><li>फिर प्रश्न पढ़ो और उसका उत्तर <b>गद्यांश में ढूँढ़ो</b>।</li><li>उत्तर गद्यांश की बातों से ही दो। अपनी तरफ़ से नई बात मत जोड़ो।</li><li><b>शीर्षक</b> छोटा हो और पूरे गद्यांश की मुख्य बात बताए।</li><li>व्याकरण वाले प्रश्न (विशेषण, वचन, अर्थ) भी गद्यांश में से ही आते हैं।</li></ol>'}
+]
+};
+
+/* ---------- Underlined adjective: which kind? (booklet pra.2, notebook) a: 'ग' guna / 'स' sankhya ---------- */
+var BHED = [
+  {id:'p1b1', s:'बगीचे में [[कुछ]] लोग टहल रहे थे।', a:'स'},
+  {id:'p1b2', s:'मैंने एक बहुत [[ऊँची]] इमारत देखी।', a:'ग'},
+  {id:'p1b3', s:'[[सब]] बच्चे कक्षा के बाहर हैं।', a:'स'},
+  {id:'p1b4', s:'उसके पास [[लाल]] कार है।', a:'ग'},
+  {id:'p1b5', s:'मुझे [[परिश्रमी]] व्यक्ति पसंद हैं।', a:'ग'},
+  {id:'p1b6', s:'[[बहादुर]] बच्चे ने अपने साथी की मदद की।', a:'ग'},
+  {id:'p1b7', s:'राम को [[दो]] पुस्तकें दे दो।', a:'स'},
+  {id:'p1b8', s:'[[पाँच]] कबूतर छत पर बैठकर दाना चुग रहे हैं।', a:'स'},
+  {id:'p1b9', s:'कक्षा में [[कुछ]] छात्र शरारती हैं।', a:'स'},
+  {id:'p1b10', s:'कक्षा में कुछ छात्र [[शरारती]] हैं।', a:'ग'},
+  {id:'p1b11', s:'मेरे पास [[नई]] घड़ी है।', a:'ग'},
+  {id:'p1b12', s:'माँ ने [[मीठी]] चॉकलेट खरीदी।', a:'ग'},
+  {id:'p1b13', s:'[[पुराने]] कपड़े अलमारी में रख दो।', a:'ग'},
+  {id:'p1b14', s:'मेरे पास [[दस]] खिलौने हैं।', a:'स'},
+  {id:'p1b15', s:'आज मैंने [[स्वादिष्ट]] खीर खाई।', a:'ग'},
+  {id:'p1b16', s:'मेरा भाई [[आलसी]] है।', a:'ग'},
+  {id:'p1b17', s:'रोहन ने [[दो]] सेब खाए।', a:'स'},
+  {id:'p1b18', s:'[[अनेक]] लोग मेला देखने आए।', a:'स'},
+  {id:'p1b19', s:'तालाब में [[गुलाबी]] कमल खिला है।', a:'ग'},
+  {id:'p1b20', s:'टोकरी में [[चार]] आम हैं।', a:'स'},
+  {id:'p1b21', s:'15 अगस्त को हम [[तिरंगा]] झंडा फहराते हैं।', a:'ग'},
+  {id:'p1b22', s:'[[खट्टे]] फल अलग रख दो।', a:'ग'}
+];
+
+/* ---------- Tap the adjective(s) in the sentence (notebook: कुछ छात्र शरारती) ---------- */
+var TAPW = [
+  {id:'p1t1', s:'बगीचे में सुंदर फूल खिले हैं।', a:['सुंदर']},
+  {id:'p1t2', s:'रीना ने तीन केले खाए।', a:['तीन']},
+  {id:'p1t3', s:'कक्षा में कुछ छात्र शरारती हैं।', a:['कुछ','शरारती'], tip:'कुछ — संख्यावाचक, शरारती — गुणवाचक। एक वाक्य में दो विशेषण!'},
+  {id:'p1t4', s:'छोटी बिल्ली दूध पी रही है।', a:['छोटी']},
+  {id:'p1t5', s:'दादी ने गरम जलेबी खिलाई।', a:['गरम']},
+  {id:'p1t6', s:'वीर सैनिक देश की रक्षा करते हैं।', a:['वीर']},
+  {id:'p1t7', s:'पेड़ पर पाँच चिड़ियाँ बैठी हैं।', a:['पाँच']},
+  {id:'p1t8', s:'राजू ने नीली कमीज़ पहनी है।', a:['नीली']},
+  {id:'p1t9', s:'मोहन ईमानदार लड़का है।', a:['ईमानदार']},
+  {id:'p1t10', s:'सब बच्चे मैदान में खेल रहे हैं।', a:['सब']},
+  {id:'p1t11', s:'आसमान में अनेक पतंगें उड़ रही हैं।', a:['अनेक']},
+  {id:'p1t12', s:'माँ ने दो मीठे आम दिए।', a:['दो','मीठे'], tip:'दो — संख्यावाचक, मीठे — गुणवाचक।'}
+];
+
+/* ---------- Picture + adjective (notebook: संज्ञा शब्द का चित्र बनाकर उसके विशेषण लिखिए) ---------- */
+var PIC = [
+  {id:'p1i1', e:'🍦', a:'ठंडी आइसक्रीम', o:['गरम आइसक्रीम','खट्टी आइसक्रीम'], tip:'ठंडी — गुणवाचक विशेषण (कैसी आइसक्रीम?)'},
+  {id:'p1i2', e:'🐘', a:'बड़ा हाथी', o:['छोटा हाथी','पतला हाथी'], tip:'बड़ा — गुणवाचक विशेषण (आकार)'},
+  {id:'p1i3', e:'🌹', a:'लाल गुलाब', o:['नीला गुलाब','काला गुलाब'], tip:'लाल — गुणवाचक विशेषण (रंग)'},
+  {id:'p1i4', e:'🎈🎈🎈🎈', a:'चार गुब्बारे', o:['तीन गुब्बारे','पाँच गुब्बारे'], tip:'चार — संख्यावाचक विशेषण (कितने?)'},
+  {id:'p1i5', e:'🐦🐦🐦🐦🐦', a:'पाँच चिड़ियाँ', o:['चार चिड़ियाँ','छह चिड़ियाँ'], tip:'पाँच — संख्यावाचक विशेषण'},
+  {id:'p1i6', e:'🍋', a:'खट्टा नींबू', o:['नीला नींबू','लंबा नींबू'], tip:'खट्टा — गुणवाचक विशेषण (स्वाद)'},
+  {id:'p1i7', e:'🐢', a:'धीमा कछुआ', o:['तेज़ कछुआ','उड़ता कछुआ'], tip:'धीमा — गुणवाचक विशेषण'},
+  {id:'p1i8', e:'⭐⭐', a:'दो तारे', o:['तीन तारे','चार तारे'], tip:'दो — संख्यावाचक विशेषण'},
+  {id:'p1i9', e:'🍬', a:'मीठी टॉफ़ी', o:['कड़वी टॉफ़ी','तीखी टॉफ़ी'], tip:'मीठी — गुणवाचक विशेषण (स्वाद)'}
+];
+
+/* ---------- Fill an adjective in the blank, then name its kind (booklet pra.3) ---------- */
+var ADJFILL = [
+  {id:'p1a1', passage:'______ कपड़े अलमारी में रख दो।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['पुराने','मीठे','खट्टे'], a:'पुराने'},{q:'‘पुराने’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}]},
+  {id:'p1a2', passage:'माँ ने ______ चॉकलेट खरीदी।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['मीठी','ऊँची','आलसी'], a:'मीठी'},{q:'‘मीठी’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}]},
+  {id:'p1a3', passage:'आज मैंने ______ खीर खाई।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['स्वादिष्ट','ऊँची','परिश्रमी'], a:'स्वादिष्ट'},{q:'‘स्वादिष्ट’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}]},
+  {id:'p1a4', passage:'______ कबूतर छत पर बैठकर दाना चुग रहे हैं।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['पाँच','खट्टे','मीठे'], a:'पाँच'},{q:'‘पाँच’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'संख्यावाचक'}]},
+  {id:'p1a5', passage:'मेरे पास ______ घड़ी है।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['नई','खट्टी','आलसी'], a:'नई'},{q:'‘नई’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}]},
+  {id:'p1a6', passage:'मेरे पास ______ खिलौने हैं।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['दस','खट्टे','आलसी'], a:'दस'},{q:'‘दस’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'संख्यावाचक'}]},
+  {id:'p1a7', passage:'रोहन ने ______ सेब खाए।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['दो','आलसी','ऊँचे'], a:'दो'},{q:'‘दो’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'संख्यावाचक'}]},
+  {id:'p1a8', passage:'मैं ______ भोजन बनाती हूँ।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['स्वादिष्ट','ऊँचा','आलसी'], a:'स्वादिष्ट'},{q:'‘स्वादिष्ट’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}]},
+  {id:'p1a9', passage:'मेरी ______ बिल्ली सो रही है।', parts:[{q:'खाली जगह के लिए सही विशेषण चुनो।', o:['छोटी','खट्टी','तीखी'], a:'छोटी'},{q:'‘छोटी’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}]}
+];
+
+/* ---------- Vachan: change the number. to: 'ब' make plural / 'ए' make singular ---------- */
+var VC = [
+  {id:'p2c1', w:'राह', to:'ब', a:'राहें', o:['राहे','राहाएँ','राहीं'], tip:'अ वाले स्त्रीलिंग शब्द में ◌ें: राह → राहें (बिंदी ज़रूरी)।'},
+  {id:'p2c2', w:'बच्चा', to:'ब', a:'बच्चे', o:['बच्चें','बच्चाएँ','बच्चो'], tip:'आ वाले पुल्लिंग शब्द में ए: बच्चा → बच्चे (बिंदी नहीं)।', slip:'कॉपी में तुमने ‘बच्चें’ लिखा था (बिंदी के साथ) और उस पर टिक भी लग गया था। सही है ‘बच्चे’ — बिना बिंदी!'},
+  {id:'p2c3', w:'कटोरी', to:'ब', a:'कटोरियाँ', o:['कटोरीयाँ','कटोरिये','कटोरीएँ'], tip:'ई → इ + याँ: कटोरी → कटोरियाँ।'},
+  {id:'p2c4', w:'लता', to:'ब', a:'लताएँ', o:['लते','लताँ','लतियाँ'], tip:'आ वाले स्त्रीलिंग शब्द में एँ: लता → लताएँ।'},
+  {id:'p2c5', w:'बहू', to:'ब', a:'बहुएँ', o:['बहूएँ','बहुवें','बहू'], tip:'ऊ → उ + एँ: बहू → बहुएँ।', slip:'बुकलेट में टीचर ने ‘बहुएँ’ ठीक करवाया था। बड़ा ‘ऊ’ छोटा ‘उ’ बन जाता है: बहू → बहुएँ।'},
+  {id:'p2c6', w:'खिलौना', to:'ब', a:'खिलौने', o:['खिलौनें','खिलोने','खिलौनाएँ'], tip:'आ → ए: खिलौना → खिलौने (बिंदी नहीं)।'},
+  {id:'p2c7', w:'कमीज़', to:'ब', a:'कमीज़ें', o:['कमीज़े','कमीज़ाएँ','कमीज़ियाँ'], tip:'अ वाले स्त्रीलिंग शब्द में ◌ें: कमीज़ → कमीज़ें (बिंदी ज़रूरी)।', slip:'कॉपी में तुमने ‘कमीज़े’ लिखा था (बिंदी नहीं थी)। सही है ‘कमीज़ें’ — यहाँ बिंदी ज़रूरी है।'},
+  {id:'p2c8', w:'कविता', to:'ब', a:'कविताएँ', o:['कविते','कविताँ','कवितियाँ'], tip:'आ वाले स्त्रीलिंग शब्द में एँ: कविता → कविताएँ।'},
+  {id:'p2c9', w:'कहानी', to:'ब', a:'कहानियाँ', o:['कहानीयाँ','कहानिएँ','कहाने'], tip:'ई → इ + याँ: कहानी → कहानियाँ।'},
+  {id:'p2c10', w:'भाषा', to:'ब', a:'भाषाएँ', o:['भाषे','भाषाँ','भाषियाँ'], tip:'भाषा → भाषाएँ।'},
+  {id:'p2c11', w:'दीवार', to:'ब', a:'दीवारें', o:['दीवारे','दीवाराएँ','दीवारियाँ'], tip:'अ वाले स्त्रीलिंग शब्द में ◌ें: दीवार → दीवारें।'},
+  {id:'p2c12', w:'बच्चे', to:'ए', a:'बच्चा', o:['बच्चें','बचा','बच्च'], tip:'बच्चे → बच्चा।'},
+  {id:'p2c13', w:'कटोरियाँ', to:'ए', a:'कटोरी', o:['कटोरिया','कटोरीया','कटोर'], tip:'कटोरियाँ → कटोरी।'},
+  {id:'p2c14', w:'राहें', to:'ए', a:'राह', o:['राहा','राहे','राहं'], tip:'राहें → राह।'},
+  {id:'p2c15', w:'बहुएँ', to:'ए', a:'बहू', o:['बहु','बहुए','बहूँ'], tip:'बहुएँ → बहू (एकवचन में बड़ा ऊ)।'},
+  {id:'p2c16', w:'खिलौने', to:'ए', a:'खिलौना', o:['खिलौनी','खिलौन','खिलोना'], tip:'खिलौने → खिलौना।'},
+  {id:'p2c17', w:'कमीज़ें', to:'ए', a:'कमीज़', o:['कमीज़ा','कमीज़ी','कमीज़े'], tip:'कमीज़ें → कमीज़।'},
+  {id:'p2c18', w:'लताएँ', to:'ए', a:'लता', o:['लताए','लते','लती'], tip:'लताएँ → लता।'}
+];
+
+/* ---------- Vachan: identify (booklet pra.6, notebook). a: 'ए' ekvachan / 'ब' bahuvachan ---------- */
+var VP = [
+  {id:'p2p1', w:'दीवार', a:'ए'},
+  {id:'p2p2', w:'चाँद', a:'ए'},
+  {id:'p2p3', w:'सूरज', a:'ए'},
+  {id:'p2p4', w:'हम', a:'ब', tip:'हम, वे — बहुवचन।'},
+  {id:'p2p5', w:'वे', a:'ब', tip:'हम, वे — बहुवचन।'},
+  {id:'p2p6', w:'गए', a:'ब', tip:'गए, थे — बहुवचन।'},
+  {id:'p2p7', w:'दर्शन', a:'ब', tip:'दर्शन सदा बहुवचन में आता है।'},
+  {id:'p2p8', w:'प्राण', a:'ब', tip:'प्राण सदा बहुवचन में आता है।'},
+  {id:'p2p9', w:'भाषाएँ', a:'ब'},
+  {id:'p2p10', w:'कहानी', a:'ए'},
+  {id:'p2p11', w:'हस्ताक्षर', a:'ब', tip:'हस्ताक्षर सदा बहुवचन में आता है।'},
+  {id:'p2p12', w:'थे', a:'ब', tip:'गए, थे — बहुवचन।'},
+  {id:'p2p13', w:'कटोरी', a:'ए'},
+  {id:'p2p14', w:'खिलौने', a:'ब'},
+  {id:'p2p15', w:'लता', a:'ए'},
+  {id:'p2p16', w:'बहुएँ', a:'ब'},
+  {id:'p2p17', w:'राहें', a:'ब'},
+  {id:'p2p18', w:'कमीज़', a:'ए'},
+  {id:'p2p19', w:'कविता', a:'ए'}
+];
+
+/* ---------- MCQ ----------
+   fx:1 keep option order, show अ) ब) स) ; one:1 phrase -> one word ; ph:1 word -> phrase (circle the phrase) ;
+   mean:1 word meaning ; vs:1 vishesan / visheshya ; sv:1 pick the correct sentence ; oo:1 odd one out ; f: fact tags */
+var MCQ = {
+p1: [
+  {id:'p1m1', q:'जो शब्द संज्ञा या सर्वनाम की विशेषता बताते हैं, उन्हें क्या कहते हैं?', o:['विशेषण','विशेष्य','संज्ञा','क्रिया'], a:'विशेषण', fx:1, tip:'विशेषता बताने वाला शब्द = विशेषण।'},
+  {id:'p1m2', q:'जिस संज्ञा या सर्वनाम की विशेषता बताई जाती है, उसे क्या कहते हैं?', o:['विशेष्य','विशेषण','सर्वनाम','वचन'], a:'विशेष्य', fx:1, tip:'गरम जलेबी: जलेबी की विशेषता बताई गई, इसलिए जलेबी विशेष्य है।'},
+  {id:'p1m3', q:'विशेषण के कितने भेद होते हैं?', o:['दो','तीन','चार','पाँच'], a:'चार', fx:1, f:['bhed-count'], tip:'विशेषण के चार भेद होते हैं। हम अभी दो पढ़ रहे हैं।'},
+  {id:'p1m4', q:'जो विशेषण गुण, रंग, आकार या स्वाद बताए, वह कौन-सा विशेषण है?', o:['गुणवाचक विशेषण','संख्यावाचक विशेषण'], a:'गुणवाचक विशेषण', fx:1, f:['guna-def']},
+  {id:'p1m5', q:'जो विशेषण संख्या बताए, वह कौन-सा विशेषण है?', o:['गुणवाचक विशेषण','संख्यावाचक विशेषण'], a:'संख्यावाचक विशेषण', fx:1, f:['sankhya-def']},
+  {id:'p1m6', q:'इनमें से गुणवाचक विशेषण कौन-सा है?', o:['लाल','दो','दस','पाँच'], a:'लाल', tip:'लाल रंग बताता है। बाकी संख्या बताते हैं।'},
+  {id:'p1m7', q:'इनमें से संख्यावाचक विशेषण कौन-सा है?', o:['अनेक','नीला','खट्टा','मीठा'], a:'अनेक', tip:'अनेक गिनती बताता है।'},
+  {id:'p1m8', q:'‘कैसा? कैसी?’ पूछने पर जो विशेषण उत्तर में आए, वह होता है—', o:['गुणवाचक विशेषण','संख्यावाचक विशेषण'], a:'गुणवाचक विशेषण', fx:1, f:['guna-def']},
+  {id:'p1m9', q:'‘कितने? कितनी?’ पूछने पर जो विशेषण उत्तर में आए, वह होता है—', o:['गुणवाचक विशेषण','संख्यावाचक विशेषण'], a:'संख्यावाचक विशेषण', fx:1, f:['sankhya-def']},
+  {id:'p1v1', vs:1, q:'‘गरम जलेबी’ में विशेषण कौन-सा है?', o:['गरम','जलेबी'], a:'गरम'},
+  {id:'p1v2', vs:1, q:'‘वीर सैनिक’ में विशेष्य कौन-सा है?', o:['वीर','सैनिक'], a:'सैनिक'},
+  {id:'p1v3', vs:1, q:'‘खट्टे फल’ में विशेष्य कौन-सा है?', o:['खट्टे','फल'], a:'फल'},
+  {id:'p1v4', vs:1, q:'‘गुलाबी कमल’ में विशेषण कौन-सा है?', o:['गुलाबी','कमल'], a:'गुलाबी'},
+  {id:'p1v5', vs:1, q:'‘नया कलमदान’ में विशेष्य कौन-सा है?', o:['नया','कलमदान'], a:'कलमदान'},
+  {id:'p1v6', vs:1, q:'‘पाँच कबूतर’ में विशेषण कौन-सा है?', o:['पाँच','कबूतर'], a:'पाँच'},
+  {id:'p1v7', vs:1, q:'‘ऊँची इमारत’ में विशेष्य कौन-सा है?', o:['ऊँची','इमारत'], a:'इमारत'},
+  {id:'p1v8', vs:1, q:'‘मीठी चॉकलेट’ में विशेष्य कौन-सा है?', o:['मीठी','चॉकलेट'], a:'चॉकलेट'},
+  {id:'p1d1', oo:1, q:'नीला, खट्टा, मीठा, दो', o:['नीला','खट्टा','मीठा','दो'], a:'दो', tip:'बाकी तीनों गुणवाचक हैं। ‘दो’ संख्यावाचक है।'},
+  {id:'p1d2', oo:1, q:'पाँच, दस, अनेक, लाल', o:['पाँच','दस','अनेक','लाल'], a:'लाल', tip:'बाकी तीनों संख्या बताते हैं। ‘लाल’ रंग बताता है।'},
+  {id:'p1d3', oo:1, q:'सुंदर, ऊँचा, दौड़ना, छोटा', o:['सुंदर','ऊँचा','दौड़ना','छोटा'], a:'दौड़ना', tip:'‘दौड़ना’ काम बताता है, यह विशेषण नहीं है।'}
+],
+p2: [
+  {id:'p2m1', q:'किस शब्द के बहुवचन में ‘ए’ के ऊपर बिंदी नहीं लगती?', o:['बच्चा','राह','कमीज़','दीवार'], a:'बच्चा', tip:'आ वाले पुल्लिंग: बच्चा → बच्चे (बिंदी नहीं)। राहें, कमीज़ें, दीवारें में बिंदी है।'},
+  {id:'p2m2', q:'‘प्राण’ शब्द हमेशा किस वचन में आता है?', o:['बहुवचन','एकवचन'], a:'बहुवचन', fx:1, f:['sada-bahu'], tip:'प्राण, दर्शन, हस्ताक्षर — सदा बहुवचन।'},
+  {id:'p2m3', q:'‘बहू’ का बहुवचन बनाते समय बड़ा ‘ऊ’ क्या बन जाता है?', o:['छोटा उ','ओ','ई'], a:'छोटा उ', fx:1, f:['bahu'], tip:'बहू → बहुएँ।'},
+  {id:'p2m4', q:'‘कटोरी’ का बहुवचन बनाते समय अंत का ‘ई’ क्या बन जाता है?', o:['इयाँ','एँ','ए'], a:'इयाँ', fx:1, f:['katori'], tip:'कटोरी → कटोरियाँ।'},
+  {id:'p2m5', q:'शब्द के जिस रूप से उसके एक या अनेक होने का पता चले, उसे क्या कहते हैं?', o:['वचन','विशेषण','लिंग','संज्ञा'], a:'वचन', fx:1},
+  {id:'p2m6', q:'इनमें से कौन-सा शब्द सदा बहुवचन में आता है?', o:['हस्ताक्षर','कहानी','दीवार','लता'], a:'हस्ताक्षर', f:['sada-bahu'], tip:'प्राण, दर्शन, हस्ताक्षर — सदा बहुवचन।'},
+  {id:'p2d1', oo:1, q:'बच्चे, खिलौने, कविताएँ, दीवार', o:['बच्चे','खिलौने','कविताएँ','दीवार'], a:'दीवार', tip:'बाकी तीनों बहुवचन हैं। ‘दीवार’ एकवचन है।'},
+  {id:'p2d2', oo:1, q:'प्राण, दर्शन, हस्ताक्षर, कहानी', o:['प्राण','दर्शन','हस्ताक्षर','कहानी'], a:'कहानी', f:['sada-bahu'], tip:'प्राण, दर्शन, हस्ताक्षर सदा बहुवचन हैं। कहानी एकवचन है।'}
+],
+p3: [
+  {id:'p3o1', one:1, q:'जिसमें कोई डर न हो', o:['निडर','दयालु','सहपाठी','बढ़ई'], a:'निडर'},
+  {id:'p3o2', one:1, q:'जो किसी से न डरे', o:['निडर','मृदुभाषी','अजर','निम्नलिखित'], a:'निडर'},
+  {id:'p3o3', one:1, q:'नीचे लिखा हुआ', o:['निम्नलिखित','सहपाठी','मृदुभाषी','अजर'], a:'निम्नलिखित'},
+  {id:'p3o4', one:1, q:'मीठा बोलने वाला', o:['मृदुभाषी','सहपाठी','दयालु','निडर'], a:'मृदुभाषी'},
+  {id:'p3o5', one:1, q:'मधुर बोलने वाला', o:['मृदुभाषी','बढ़ई','अजर','साहसी'], a:'मृदुभाषी'},
+  {id:'p3o6', one:1, q:'साथ पढ़ने वाला', o:['सहपाठी','मृदुभाषी','निडर','बढ़ई'], a:'सहपाठी'},
+  {id:'p3o7', one:1, q:'लकड़ी का सामान बनाने वाला', o:['बढ़ई','सुनार','सहपाठी','अजर'], a:'बढ़ई', tip:'सोने का सामान बनाने वाला सुनार होता है।'},
+  {id:'p3o8', one:1, q:'जो कभी बूढ़ा न हो', o:['अजर','अमर','अजेय','निडर'], a:'अजर', tip:'अजर = बूढ़ा न हो। अमर = मृत्यु न हो। अजेय = कभी न हारे।'},
+  {id:'p3o9', one:1, q:'जिस पर कभी बुढ़ापा न आए', o:['अजर','अमर','अजेय','दयालु'], a:'अजर', tip:'अजर = बूढ़ा न हो। अमर = मृत्यु न हो। अजेय = कभी न हारे।'},
+  {id:'p3o10', one:1, q:'जिसमें दया हो', o:['दयालु','साहसी','निडर','मृदुभाषी'], a:'दयालु'},
+  {id:'p3o11', one:1, q:'जिसमें साहस हो', o:['साहसी','दयालु','सहपाठी','निम्नलिखित'], a:'साहसी'},
+  {id:'p3o12', one:1, q:'जिसकी कभी मृत्यु न हो', o:['अमर','अजर','अजेय','निडर'], a:'अमर', tip:'यह शब्द बुकलेट के विकल्पों में आया है। अजर ≠ अमर।'},
+  {id:'p3o13', one:1, q:'जो कभी न हारे', o:['अजेय','अजर','अमर','सहपाठी'], a:'अजेय', tip:'यह शब्द भी बुकलेट के विकल्पों में आया है।'},
+  {id:'p3h1', ph:1, q:'बढ़ई', o:['जो लकड़ी का सामान बनाता हो','जो सोने का सामान बनाता हो'], a:'जो लकड़ी का सामान बनाता हो', fx:1},
+  {id:'p3h2', ph:1, q:'अजर', o:['जिसकी कभी मृत्यु न हो','जिस पर कभी बुढ़ापा न आए','जो कभी न हारे'], a:'जिस पर कभी बुढ़ापा न आए', fx:1, tip:'अजर = बूढ़ा न हो। अमर = मृत्यु न हो। अजेय = कभी न हारे।'},
+  {id:'p3h3', ph:1, q:'निडर', o:['जो किसी से न डरे','जो सबसे डरे','जो बहुत बोले'], a:'जो किसी से न डरे'},
+  {id:'p3h4', ph:1, q:'निम्नलिखित', o:['नीचे लिखा हुआ','ऊपर लिखा हुआ','बाद में लिखा जाने वाला'], a:'नीचे लिखा हुआ'},
+  {id:'p3h5', ph:1, q:'मृदुभाषी', o:['मधुर बोलने वाला','ज़ोर से बोलने वाला','कम खाने वाला'], a:'मधुर बोलने वाला'},
+  {id:'p3h6', ph:1, q:'सहपाठी', o:['साथ पढ़ने वाला','साथ खेलने वाला','पढ़ाने वाला'], a:'साथ पढ़ने वाला'},
+  {id:'p3h7', ph:1, q:'दयालु', o:['जिसमें दया हो','जिसमें साहस हो','जिसमें डर हो'], a:'जिसमें दया हो'},
+  {id:'p3h8', ph:1, q:'साहसी', o:['जिसमें साहस हो','जिसमें दया हो','जो कभी बूढ़ा न हो'], a:'जिसमें साहस हो'},
+  {id:'p3d1', oo:1, q:'निडर, साहसी, दयालु, बढ़ई', o:['निडर','साहसी','दयालु','बढ़ई'], a:'बढ़ई', tip:'निडर, साहसी, दयालु — गुण बताते हैं। बढ़ई एक काम करने वाला व्यक्ति है।'}
+],
+p4: [
+  {id:'p4m1', q:'सचिन के खेल की सराहना किसने की?', o:['कपिल देव ने','विराट कोहली ने','डॉन ब्रैडमैन ने'], a:'डॉन ब्रैडमैन ने', fx:1, f:['bradman']},
+  {id:'p4m2', q:'एक ओवर में कितनी गेंद फेंकते हैं?', o:['पाँच','छह','दस'], a:'छह', fx:1, f:['over']},
+  {id:'p4m3', q:'बल्लेबाज़ का लक्ष्य क्या होता है?', o:['अधिक रन बनाना','जल्दी आउट होना','सिर्फ़ एक जगह खड़े रहना'], a:'अधिक रन बनाना', fx:1, f:['runs']},
+  {id:'p4m4', q:'क्रिकेट का आरंभ सबसे पहले कहाँ हुआ?', o:['इंग्लैंड में','भारत में','अमेरिका में','चीन में'], a:'इंग्लैंड में', f:['england']},
+  {id:'p4m5', q:'भारत में क्रिकेट कब आया?', o:['ब्रिटिश सरकार के आगमन के बाद','आज़ादी के बहुत बाद','पिछले साल','2011 में'], a:'ब्रिटिश सरकार के आगमन के बाद', f:['british']},
+  {id:'p4m6', q:'क्रिकेट के मैदान पर कितने अंपायर होते हैं?', o:['दो','तीन','चार','एक'], a:'दो', f:['umpires']},
+  {id:'p4m7', q:'क्रिकेट का खेल किसके संकेत पर खेला जाता है?', o:['अंपायर के','दर्शकों के','कप्तान के','कोच के'], a:'अंपायर के', f:['umpire-role']},
+  {id:'p4m8', q:'खेल आरंभ होने पर अंपायर गेंदबाज़ को क्या देते हैं?', o:['गेंद फेंकने की अनुमति','एक पदक','नया बल्ला','पानी की बोतल'], a:'गेंद फेंकने की अनुमति', f:['umpire-role']},
+  {id:'p4m9', q:'खेल शुरू होने से पहले क्या किया जाता है?', o:['सिक्का उछालकर टॉस','पुरस्कार बाँटे जाते हैं','अंपायर बदले जाते हैं','मैदान में पानी डाला जाता है'], a:'सिक्का उछालकर टॉस', f:['toss']},
+  {id:'p4m10', q:'टॉस जीतने वाली टीम का कप्तान क्या तय करता है?', o:['उसकी टीम पहले बल्लेबाज़ी करेगी या गेंदबाज़ी','मैच कितने दिन चलेगा','अंपायर कौन होगा','गेंद किस रंग की होगी'], a:'उसकी टीम पहले बल्लेबाज़ी करेगी या गेंदबाज़ी', f:['toss'], slip:'बुकलेट में तुमने लिखा था ‘पहले गेंदबाज़ी और फील्डिंग’ — ये दोनों एक ही बात हैं! कप्तान चुनता है: पहले बल्लेबाज़ी या पहले गेंदबाज़ी।'},
+  {id:'p4m11', q:'सचिन तेंदुलकर को किस सम्मान से सम्मानित किया गया?', o:['भारत रत्न','नोबेल पुरस्कार','ऑस्कर पुरस्कार'], a:'भारत रत्न', f:['ratna']},
+  {id:'p4m12', q:'‘गॉड ऑफ क्रिकेट’ किसे कहा जाता है?', o:['सचिन तेंदुलकर','डॉन ब्रैडमैन','कपिल देव'], a:'सचिन तेंदुलकर', f:['god']},
+  {id:'p4m13', q:'सचिन को ‘गॉड ऑफ क्रिकेट’ क्यों कहा जाने लगा?', o:['बेहतरीन खेल प्रदर्शन और क्रिकेट में अनेक योगदान के कारण','क्योंकि वे अंपायर थे','क्योंकि वे सबसे लंबे थे'], a:'बेहतरीन खेल प्रदर्शन और क्रिकेट में अनेक योगदान के कारण', f:['god']},
+  {id:'p4m14', q:'कपिल देव को किस पुरस्कार से सम्मानित किया गया?', o:['विस्डेन पुरस्कार','भारत रत्न','नोबेल पुरस्कार'], a:'विस्डेन पुरस्कार', f:['wisden','ratna']},
+  {id:'p4m15', q:'अंतर्राष्ट्रीय स्तर पर क्रिकेट के कितने रूप हैं?', o:['तीन','दो','पाँच','एक'], a:'तीन', f:['forms'], slip:'बुकलेट में तुमने ‘कई रूप हैं — टेस्ट मैच’ लिखकर छोड़ दिया था। ‘कितने’ पूछा है तो संख्या लिखो: तीन! फिर तीनों रूप बताओ।'},
+  {id:'p4m16', q:'टेस्ट मैच कितने दिन तक चलता है?', o:['पाँच दिन','एक दिन','दस दिन'], a:'पाँच दिन', f:['forms']},
+  {id:'p4m17', q:'एकदिवसीय मैच में हर टीम कितने ओवर खेलती है?', o:['50','20','6'], a:'50', f:['forms']},
+  {id:'p4m18', q:'टी-20 मैच में हर टीम कितने ओवर खेलती है?', o:['20','50','100'], a:'20', f:['forms']},
+  {id:'p4m19', q:'डॉन ब्रैडमैन कौन थे?', o:['विश्व के सर्वोत्तम खिलाड़ी','एक अंपायर','एक गायक'], a:'विश्व के सर्वोत्तम खिलाड़ी', f:['bradman']},
+  {id:'p4m20', q:'क्रिकेट में कितनी टीमें खेलती हैं?', o:['दो','तीन','चार'], a:'दो', fx:1, f:['teams']},
+  {id:'p4m21', q:'सच्ची खेल भावना का अर्थ है—', o:['नियमों का पालन करना और हार-जीत को खुशी से स्वीकार करना','हर हाल में जीतना','हारने पर झगड़ा करना','विरोधी टीम का मज़ाक उड़ाना'], a:'नियमों का पालन करना और हार-जीत को खुशी से स्वीकार करना', f:['spirit']},
+  {id:'p4o1', mean:1, q:'आगमन', o:['आना','जाना','खाना','सोना'], a:'आना', f:['agaman']},
+  {id:'p4o2', mean:1, q:'पोशाक', o:['वस्त्र','भोजन','घर','खिलौना'], a:'वस्त्र', f:['poshak']},
+  {id:'p4o3', mean:1, q:'प्रतिद्वंदी', o:['विरोधी','साथी','दोस्त','अंपायर'], a:'विरोधी', f:['prati']},
+  {id:'p4o4', mean:1, q:'अनुमति', o:['आज्ञा','इनाम','डाँट','छुट्टी'], a:'आज्ञा', f:['anumati-mean']},
+  {id:'p4o5', mean:1, q:'आरंभ', o:['शुरुआत','अंत','बीच','आराम'], a:'शुरुआत', f:['arambh']},
+  {id:'p4o6', mean:1, q:'समतल', o:['सपाट और बराबर','ऊबड़-खाबड़','बहुत ऊँचा','बहुत गहरा'], a:'सपाट और बराबर', f:['samtal']},
+  {id:'p4y1', sv:1, q:'‘आगमन’ शब्द का सही प्रयोग किस वाक्य में है?', o:['वसंत ऋतु के आगमन पर सभी खुश हो जाते हैं।','मैंने आगमन को पानी पिलाया।','आगमन बहुत मीठा फल है।'], a:'वसंत ऋतु के आगमन पर सभी खुश हो जाते हैं।', f:['agaman']},
+  {id:'p4y2', sv:1, q:'‘पोशाक’ शब्द का सही प्रयोग किस वाक्य में है?', o:['माँ ने मुझे नई पोशाक उपहार में दी।','पोशाक तेज़ दौड़ती है।','मैंने पोशाक को खा लिया।'], a:'माँ ने मुझे नई पोशाक उपहार में दी।', f:['poshak']},
+  {id:'p4y3', sv:1, q:'‘प्रतिद्वंदी’ शब्द का सही प्रयोग किस वाक्य में है?', o:['भारतीय टीम ने प्रतिद्वंदी टीम को दो रनों से हरा दिया।','प्रतिद्वंदी पेड़ पर उगता है।','मैंने प्रतिद्वंदी से चाय बनाई।'], a:'भारतीय टीम ने प्रतिद्वंदी टीम को दो रनों से हरा दिया।', f:['prati']},
+  {id:'p4y4', sv:1, q:'‘आरंभ’ शब्द का सही प्रयोग किस वाक्य में है?', o:['मैं इस खेल का आरंभ करूँगी।','आरंभ आसमान में उड़ता है।','मैंने आरंभ को बस्ते में रखा।'], a:'मैं इस खेल का आरंभ करूँगी।', f:['arambh']},
+  {id:'p4y5', sv:1, q:'‘समतल’ शब्द का सही प्रयोग किस वाक्य में है?', o:['क्रिकेट का मैदान समतल होता है।','समतल ने मुझे गाना सुनाया।','मैंने समतल को दूध पिलाया।'], a:'क्रिकेट का मैदान समतल होता है।', f:['samtal']},
+  {id:'p4y6', sv:1, q:'सही वाक्य चुनिए।', o:['मैं बड़ों की अनुमति के बिना घर से बाहर नहीं जाती।','मैं बड़ी की अनुमति के बिना घर से बाहर नहीं जाती।','मैं बड़ों की अनुमती के बिना घर से बाहार नहीं जाती।'], a:'मैं बड़ों की अनुमति के बिना घर से बाहर नहीं जाती।', f:['anumati-mean','bahar'], slip:'कॉपी में तुमने ‘बड़ी की अनुमति’ लिखा था। घर के बड़े लोगों की अनुमति — ‘बड़ों की अनुमति’ लिखो। अनुमति और बाहर की वर्तनी भी देखो।'},
+  {id:'p4y7', sv:1, q:'सही वाक्य चुनिए।', o:['खेल आरंभ होने पर अंपायर गेंदबाज़ को गेंद फेंकने की अनुमति देते हैं।','खेल आरंभ होने पर अंपायर गेंदबाज़ को गेंद फेंकने की अनुमति हैं।','खेल आरंभ होने पर अंपायर खुद गेंद फेंकते हैं।'], a:'खेल आरंभ होने पर अंपायर गेंदबाज़ को गेंद फेंकने की अनुमति देते हैं।', f:['umpire-role'], slip:'कॉपी में तुमने लिखा था ‘गेंद फेंकने की अनुमति हैं’ — ‘देते’ छूट गया था। पूरा लिखो: अनुमति देते हैं।'},
+  {id:'p4d1', oo:1, q:'टेस्ट मैच, एकदिवसीय मैच, टी-20 मैच, कबड्डी मैच', o:['टेस्ट मैच','एकदिवसीय मैच','टी-20 मैच','कबड्डी मैच'], a:'कबड्डी मैच', f:['forms'], tip:'बाकी तीनों क्रिकेट के रूप हैं।'}
+],
+p5: [
+  {id:'p5m1', q:'जब हम किसी विषय पर अपने भाव या विचार संक्षेप में प्रकट करते हैं, तब उसे क्या कहते हैं?', o:['अनुच्छेद लेखन','पत्र लेखन','कहानी','कविता'], a:'अनुच्छेद लेखन', f:['anu-def']},
+  {id:'p5m2', q:'अनुच्छेद के प्रारूप में सबसे पहले क्या आता है?', o:['भूमिका','विषयवस्तु','निष्कर्ष'], a:'भूमिका', fx:1, f:['format']},
+  {id:'p5m3', q:'अनुच्छेद के अंत में क्या लिखते हैं?', o:['भूमिका','विषयवस्तु','निष्कर्ष'], a:'निष्कर्ष', fx:1, f:['format']},
+  {id:'p5m4', q:'अनुच्छेद की ‘विषयवस्तु’ में क्या लिखते हैं?', o:['कार्य, उसके नियम और लाभ','सिर्फ़ शीर्षक','अपना नाम और कक्षा'], a:'कार्य, उसके नियम और लाभ', f:['format']},
+  {id:'p5m5', q:'अनुच्छेद में कैसे वाक्य लिखने चाहिए?', o:['छोटे-छोटे वाक्य','बहुत लंबे वाक्य','एक ही वाक्य बार-बार'], a:'छोटे-छोटे वाक्य', f:['short']},
+  {id:'p5m6', q:'अनुच्छेद की भूमिका में क्या बताया जाता है?', o:['नियमों के पालन का महत्व','कहानी का अंत','खेल का स्कोर'], a:'नियमों के पालन का महत्व', f:['format']},
+  {id:'p5m7', q:'आपातकालीन वाहन की कौन-सी आवाज़ सुनते ही रास्ता देना चाहिए?', o:['सायरन की आवाज़','गाने की आवाज़','बच्चों की आवाज़'], a:'सायरन की आवाज़', f:['siren']},
+  {id:'p5m8', q:'आपातकालीन वाहन को रास्ता देने के लिए हमें सड़क की किस ओर जाना चाहिए?', o:['बाईं ओर','दाईं ओर','बीच में'], a:'बाईं ओर', fx:1, f:['left']},
+  {id:'p5m9', q:'आपातकालीन वाहन को रास्ता न देने पर क्या होता है?', o:['जुर्माना देना पड़ता है','इनाम मिलता है','कुछ नहीं होता'], a:'जुर्माना देना पड़ता है', f:['fine']},
+  {id:'p5m10', q:'इनमें से आपातकालीन वाहन कौन-सा है?', o:['एंबुलेंस','स्कूल बस','साइकिल','ऑटो रिक्शा'], a:'एंबुलेंस', f:['ambulance']},
+  {id:'p5m11', q:'साइकिल चलाते समय सिर पर क्या पहनना चाहिए?', o:['हेलमेट','टोपी','मुकुट'], a:'हेलमेट', f:['helmet']},
+  {id:'p5m12', q:'साइकिल चलाते समय हमारे दोनों हाथ कहाँ होने चाहिए?', o:['हैंडल पर','जेब में','फ़ोन पर'], a:'हैंडल पर', f:['handle']},
+  {id:'p5m13', q:'मुड़ने से पहले साइकिल चलाने वाले को क्या करना चाहिए?', o:['हाथ से संकेत देना','आँखें बंद करना','बीच सड़क पर रुक जाना'], a:'हाथ से संकेत देना', f:['signal']},
+  {id:'p5m14', q:'साइकिल चलाने से पहले किसकी जाँच करनी चाहिए?', o:['ब्रेक, टायर की हवा और हैंडल','सिर्फ़ घंटी का रंग','सीट का रंग'], a:'ब्रेक, टायर की हवा और हैंडल', f:['check']},
+  {id:'p5m15', q:'साइकिल सड़क की किस ओर चलानी चाहिए?', o:['बाईं ओर','दाईं ओर','बीच में'], a:'बाईं ओर', fx:1, f:['left']},
+  {id:'p5m16', q:'पैदल चलने वालों को कहाँ चलना चाहिए?', o:['फुटपाथ पर','सड़क के बीच में','डिवाइडर पर'], a:'फुटपाथ पर', f:['footpath']},
+  {id:'p5m17', q:'सड़क पार करने से पहले किस क्रम में देखना चाहिए?', o:['दाईं ओर, फिर बाईं ओर, फिर दाईं ओर','सिर्फ़ बाईं ओर','सिर्फ़ ऊपर की ओर'], a:'दाईं ओर, फिर बाईं ओर, फिर दाईं ओर', f:['look']},
+  {id:'p5m18', q:'सायरन की आवाज़ सुनकर हमें कैसे रहना चाहिए?', o:['शांत','घबराए हुए','गुस्से में'], a:'शांत', f:['calm']},
+  {id:'p5y1', sv:1, q:'सही वाक्य चुनिए।', o:['टायर में हवा अवश्य भरी हो।','टायर में हवा आवष्य भरा हो।','टायर में हवा अवश्य भरा हो।'], a:'टायर में हवा अवश्य भरी हो।', f:['avashya'], slip:'बुकलेट में तुमने लिखा था ‘टायर में हवा आवष्य भरा हो’। ‘हवा’ स्त्रीलिंग है, इसलिए ‘भरी हो’। और वर्तनी: अवश्य।'},
+  {id:'p5y2', sv:1, q:'सही वाक्य चुनिए।', o:['यदि हम ऐसा नहीं करते तो हम परेशानियों से घिर सकते हैं।','यदी हम ऐसा नहीं करते हम परेशानियों से घिर सकते हैं।','यदि हम ऐसा नहीं करते तो हम परेशानीयों से घिर सकते हैं।'], a:'यदि हम ऐसा नहीं करते तो हम परेशानियों से घिर सकते हैं।', f:['yadi'], slip:'बुकलेट में ‘यदी’ लिखा था और ‘तो’ छूट गया था। टीचर ने ‘तो’ जोड़ा था।'},
+  {id:'p5y3', sv:1, q:'सही वाक्य चुनिए।', o:['साइकिल चलाते समय हमारे दोनों हाथ हैंडल पर होने चाहिए।','हमें दोनों हाथ हैंडल पर होने चाहिए।','साइकिल चलाते समय हमारा एक हाथ फ़ोन पर होना चाहिए।'], a:'साइकिल चलाते समय हमारे दोनों हाथ हैंडल पर होने चाहिए।', f:['handle'], slip:'बुकलेट में तुमने लिखा था ‘हमें दोनों हाथ हैंडल पर होने चाहिए’। सही है: हमारे दोनों हाथ हैंडल पर होने चाहिए।'},
+  {id:'p5d1', oo:1, q:'हेलमेट, ब्रेक, टायर, सायरन', o:['हेलमेट','ब्रेक','टायर','सायरन'], a:'सायरन', f:['siren'], tip:'हेलमेट, ब्रेक, टायर साइकिल की सावधानियों से जुड़े हैं। सायरन आपातकालीन वाहन का है।'}
+]
+};
+
+/* ---------- Fill in the blanks ----------
+   a: one array per blank, first item is what the chip shows ; bank = wrong chips */
+var FILL = {
+p1: [
+  {id:'p1f1', q:'15 अगस्त को ___ झंडा फहराते हैं।', a:[['तिरंगा']], bank:['चार']},
+  {id:'p1f2', q:'___ फल अलग रख दो।', a:[['खट्टे']], bank:['ऊँचे']},
+  {id:'p1f3', q:'मेरा भाई ___ है।', a:[['आलसी']], bank:['सफ़ेद']},
+  {id:'p1f4', q:'माँ ने आज ___ साड़ी पहनी है।', a:[['नई']], bank:['मीठी']},
+  {id:'p1f5', q:'आसमान ___ है।', a:[['नीला']], bank:['खट्टा']},
+  {id:'p1f6', q:'नींबू का स्वाद ___ होता है।', a:[['खट्टा']], bank:['लंबा']},
+  {id:'p1f7', q:'मेरे पास ___ पेंसिलें हैं।', a:[['तीन']], bank:['मीठी']},
+  {id:'p1f8', q:'हाथी एक ___ जानवर है।', a:[['विशाल']], bank:['पाँच']}
+],
+p2: [
+  {id:'p2f1', q:'मेरे पास बहुत सारे ___ हैं।', a:[['खिलौने']], bank:['खिलौना','खिलौनें']},
+  {id:'p2f2', q:'बगीचे में दो ___ खेल रहे हैं।', a:[['बच्चे']], bank:['बच्चा','बच्चें']},
+  {id:'p2f3', q:'मेज़ पर तीन ___ रखी हैं।', a:[['कटोरियाँ']], bank:['कटोरी','कटोरीयाँ']},
+  {id:'p2f4', q:'दादी ने दो ___ सुनाईं।', a:[['कहानियाँ']], bank:['कहानी','कहानीयाँ']},
+  {id:'p2f5', q:'अलमारी में चार ___ टँगी हैं।', a:[['कमीज़ें']], bank:['कमीज़','कमीज़े']},
+  {id:'p2f6', q:'दीवार पर सुंदर ___ फैली हैं।', a:[['लताएँ']], bank:['लता','लते']}
+],
+p3: [
+  {id:'p3f1', q:'शेर ___ होता है, वह किसी से नहीं डरता।', a:[['निडर']], bank:['दयालु','सहपाठी']},
+  {id:'p3f2', q:'मेरी दादी बहुत ___ हैं, वे सब पर दया करती हैं।', a:[['दयालु']], bank:['निडर','बढ़ई']},
+  {id:'p3f3', q:'रोहन मेरा ___ है, हम एक ही कक्षा में पढ़ते हैं।', a:[['सहपाठी']], bank:['मृदुभाषी','अजर']},
+  {id:'p3f4', q:'___ ने लकड़ी की सुंदर कुर्सी बनाई।', a:[['बढ़ई']], bank:['सुनार','सहपाठी']},
+  {id:'p3f5', q:'___ प्रश्नों के उत्तर लिखिए।', a:[['निम्नलिखित']], bank:['मृदुभाषी','दयालु']},
+  {id:'p3f6', q:'हमारी शिक्षिका ___ हैं, वे सबसे मीठा बोलती हैं।', a:[['मृदुभाषी']], bank:['निम्नलिखित','बढ़ई']},
+  {id:'p3f7', q:'आग में फँसे बच्चे को बचाने वाला लड़का बहुत ___ था।', a:[['साहसी']], bank:['मृदुभाषी','बढ़ई']}
+]
+};
+
+/* ---------- True / False (fix = make the false one true) ---------- */
+var TF = {
+p1: [
+  {id:'p1n1', q:'विशेषण संज्ञा या सर्वनाम की विशेषता बताता है।', a:true},
+  {id:'p1n2', q:'‘लाल गेंद’ में ‘लाल’ विशेष्य है।', a:false, fix:{q:'सही करो: ‘लाल’ ___ है।', o:['विशेषण','विशेष्य','क्रिया'], a:'विशेषण'}},
+  {id:'p1n3', q:'‘दो पुस्तकें’ में ‘दो’ संख्यावाचक विशेषण है।', a:true},
+  {id:'p1n4', q:'विशेषण के केवल दो भेद होते हैं।', a:false, f:['bhed-count'], fix:{q:'सही करो: विशेषण के ___ भेद होते हैं।', o:['चार','दो','दस'], a:'चार'}},
+  {id:'p1n5', q:'‘मीठी चॉकलेट’ में ‘मीठी’ गुणवाचक विशेषण है।', a:true},
+  {id:'p1n6', q:'‘कुछ लोग’ में ‘कुछ’ गुणवाचक विशेषण है।', a:false, fix:{q:'सही करो: ‘कुछ’ ___ विशेषण है।', o:['संख्यावाचक','गुणवाचक'], a:'संख्यावाचक'}},
+  {id:'p1n7', q:'‘ऊँची इमारत’ में ‘इमारत’ विशेष्य है।', a:true},
+  {id:'p1n8', q:'रंग बताने वाले शब्द संख्यावाचक विशेषण होते हैं।', a:false, f:['guna-def'], fix:{q:'सही करो: रंग बताने वाले शब्द ___ विशेषण होते हैं।', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'}}
+],
+p2: [
+  {id:'p2n1', q:'‘बच्चा’ का बहुवचन ‘बच्चें’ होता है।', a:false, f:['bachcha'], fix:{q:'सही करो: ‘बच्चा’ का बहुवचन ___ होता है।', o:['बच्चे','बच्चें','बच्चाएँ'], a:'बच्चे'}},
+  {id:'p2n2', q:'‘प्राण’ सदा बहुवचन में आता है।', a:true, f:['sada-bahu']},
+  {id:'p2n3', q:'‘कमीज़’ का बहुवचन ‘कमीज़ें’ होता है।', a:true, f:['kamiz']},
+  {id:'p2n4', q:'‘हम’ एकवचन है।', a:false, fix:{q:'सही करो: ‘हम’ ___ है।', o:['बहुवचन','एकवचन'], a:'बहुवचन'}},
+  {id:'p2n5', q:'‘कहानी’ एकवचन है।', a:true},
+  {id:'p2n6', q:'‘बहू’ का बहुवचन ‘बहूएँ’ होता है।', a:false, f:['bahu'], fix:{q:'सही करो: ‘बहू’ का बहुवचन ___ होता है।', o:['बहुएँ','बहूएँ','बहू'], a:'बहुएँ'}}
+],
+p3: [
+  {id:'p3n1', q:'‘सहपाठी’ का अर्थ है — साथ खेलने वाला।', a:false, fix:{q:'सही करो: सहपाठी का अर्थ है —', o:['साथ पढ़ने वाला','साथ खेलने वाला','साथ खाने वाला'], a:'साथ पढ़ने वाला'}},
+  {id:'p3n2', q:'जो कभी बूढ़ा न हो, उसे ‘अजर’ कहते हैं।', a:true},
+  {id:'p3n3', q:'जिसकी कभी मृत्यु न हो, उसे ‘अजर’ कहते हैं।', a:false, fix:{q:'सही करो: जिसकी कभी मृत्यु न हो, उसे ___ कहते हैं।', o:['अमर','अजर','अजेय'], a:'अमर'}},
+  {id:'p3n4', q:'मृदुभाषी व्यक्ति मीठा बोलता है।', a:true},
+  {id:'p3n5', q:'बढ़ई सोने का सामान बनाता है।', a:false, fix:{q:'सही करो: बढ़ई ___ का सामान बनाता है।', o:['लकड़ी','सोने','मिट्टी'], a:'लकड़ी'}},
+  {id:'p3n6', q:'जिसमें दया हो, उसे दयालु कहते हैं।', a:true}
+],
+p4: [
+  {id:'p4n1', q:'क्रिकेट विश्वभर में लोकप्रिय है।', a:true, f:['popular']},
+  {id:'p4n2', q:'क्रिकेट के खेल में तीन टीमें एक साथ खेलती हैं।', a:false, f:['teams'], fix:{q:'सही करो: क्रिकेट के खेल में ___ टीमें खेलती हैं।', o:['दो','तीन','चार'], a:'दो'}},
+  {id:'p4n3', q:'क्रिकेट के खेल में चार अंपायर होते हैं।', a:false, f:['umpires'], fix:{q:'सही करो: पाठ के अनुसार मैदान पर ___ अंपायर होते हैं।', o:['दो','चार','दस'], a:'दो'}},
+  {id:'p4n4', q:'कपिल देव को विस्डेन पुरस्कार से सम्मानित किया गया।', a:true, f:['wisden']},
+  {id:'p4n5', q:'सचिन तेंदुलकर को भारत रत्न से सम्मानित किया गया।', a:true, f:['ratna']},
+  {id:'p4n6', q:'एक ओवर में पाँच गेंदें फेंकी जाती हैं।', a:false, f:['over'], fix:{q:'सही करो: एक ओवर में ___ गेंदें फेंकी जाती हैं।', o:['छह','पाँच','दस'], a:'छह'}},
+  {id:'p4n7', q:'क्रिकेट का आरंभ सबसे पहले भारत में हुआ।', a:false, f:['england'], fix:{q:'सही करो: क्रिकेट का आरंभ सबसे पहले ___ में हुआ।', o:['इंग्लैंड','भारत','चीन'], a:'इंग्लैंड'}},
+  {id:'p4n8', q:'सचिन के खेल की सराहना डॉन ब्रैडमैन ने की थी।', a:true, f:['bradman']},
+  {id:'p4n9', q:'बल्लेबाज़ का लक्ष्य जल्दी आउट होना होता है।', a:false, f:['runs'], fix:{q:'सही करो: बल्लेबाज़ का लक्ष्य ___ होता है।', o:['अधिक रन बनाना','जल्दी आउट होना','गेंद फेंकना'], a:'अधिक रन बनाना'}},
+  {id:'p4n10', q:'खेल आरंभ होने पर अंपायर गेंदबाज़ को गेंद फेंकने की अनुमति देते हैं।', a:true, f:['umpire-role']}
+],
+p5: [
+  {id:'p5n1', q:'अनुच्छेद में एक ही बात को बार-बार दोहराना चाहिए।', a:false, fix:{q:'सही करो: अनुच्छेद में एक ही बात को बार-बार ___।', o:['नहीं दोहराना चाहिए','दोहराना चाहिए','लिखना चाहिए'], a:'नहीं दोहराना चाहिए'}},
+  {id:'p5n2', q:'अनुच्छेद में सरल व शुद्ध भाषा का प्रयोग करना चाहिए।', a:true},
+  {id:'p5n3', q:'अनुच्छेद में अपने विचारों को क्रम से लिखना चाहिए।', a:true},
+  {id:'p5n4', q:'साइकिल चलाते समय एक हाथ में फ़ोन पकड़ना ठीक है।', a:false, f:['handle'], fix:{q:'सही करो: साइकिल चलाते समय हमारे ___ हैंडल पर होने चाहिए।', o:['दोनों हाथ','एक हाथ','पैर'], a:'दोनों हाथ'}},
+  {id:'p5n5', q:'आपातकालीन वाहन को रास्ता देना सिर्फ़ ज़िम्मेदारी ही नहीं, कानून भी है।', a:true, f:['fine']},
+  {id:'p5n6', q:'सायरन की आवाज़ सुनकर घबरा जाना चाहिए।', a:false, f:['calm'], fix:{q:'सही करो: सायरन की आवाज़ सुनकर ___ रहना चाहिए।', o:['शांत','घबराए हुए','गुस्से में'], a:'शांत'}},
+  {id:'p5n7', q:'साइकिल चलाने से पहले ब्रेक की जाँच करनी चाहिए।', a:true, f:['check']},
+  {id:'p5n8', q:'अनुच्छेद में बहुत लंबे-लंबे वाक्य लिखने चाहिए।', a:false, f:['short'], fix:{q:'सही करो: अनुच्छेद में ___ वाक्य लिखने चाहिए।', o:['छोटे-छोटे','बहुत लंबे','अधूरे'], a:'छोटे-छोटे'}}
+]
+};
+
+/* ---------- Give two examples (pick 2 correct) ---------- */
+var TWO = {
+p1: [
+  {id:'p1e1', q:'गुणवाचक विशेषण', ok:['लाल','खट्टा','ऊँची','बहादुर','मीठी'], no:['दो','पाँच','दस','कुछ']},
+  {id:'p1e2', q:'संख्यावाचक विशेषण', ok:['दो','पाँच','दस','अनेक'], no:['लाल','नीला','खट्टा','मीठा']}
+],
+p2: [
+  {id:'p2e1', q:'बहुवचन शब्द', ok:['बच्चे','खिलौने','कविताएँ','राहें','कटोरियाँ'], no:['बच्चा','खिलौना','कविता','राह']}
+],
+p4: [
+  {id:'p4e1', q:'अंतर्राष्ट्रीय क्रिकेट के रूप', ok:['टेस्ट मैच','एकदिवसीय मैच','टी-20 मैच'], no:['कबड्डी मैच','शतरंज की बाज़ी','कुश्ती का दंगल'], f:['forms']},
+  {id:'p4e2', q:'सच्ची खेल भावना', ok:['खेल के नियमों का पालन करना','हार-जीत को खुशी से स्वीकार करना','विरोधी टीम का सम्मान करना'], no:['हारने पर झगड़ा करना','अंपायर से बहस करना','विरोधी का मज़ाक उड़ाना'], f:['spirit']}
+],
+p5: [
+  {id:'p5e1', q:'साइकिल चलाते समय सावधानियाँ', ok:['हेलमेट पहनना','दोनों हाथ हैंडल पर रखना','ब्रेक की जाँच करना','टायर में हवा भरवाना'], no:['एक हाथ में फ़ोन पकड़ना','सड़क के बीच में चलाना','रात में बिना लाइट चलाना'], f:['helmet','handle','check']},
+  {id:'p5e2', q:'अनुच्छेद लिखते समय ध्यान देने योग्य बातें', ok:['छोटे-छोटे वाक्य लिखना','सरल व शुद्ध भाषा का प्रयोग करना','विचारों को क्रम से लिखना','विषय के अनुसार लिखना'], no:['एक ही बात बार-बार लिखना','बहुत लंबे वाक्य लिखना','विषय से हटकर लिखना'], f:['short']},
+  {id:'p5e3', q:'आपातकालीन वाहन देखकर क्या करें?', ok:['शांत रहें','इंडिकेटर का प्रयोग करें','बाईं ओर जाकर रास्ता दें','गति धीमी करें'], no:['रास्ता रोक लें','वाहन के पीछे दौड़ें','घबराकर बीच सड़क पर रुक जाएँ'], f:['calm','left']}
+]
+};
+
+/* ---------- Spell it right (शुद्ध वर्तनी पर गोला लगाइए) ---------- */
+var SPELL = {
+p1: [
+  {id:'p1s1', q:'आज मैंने ___ खीर खाई।', a:'स्वादिष्ट', w:['स्वादिश्ट','स्वादिस्ट','सवादिष्ट'], tip:'ष्ट = ष + ट।', slip:'कॉपी में तुमने ‘स्वादिश्ट’ लिखा था। सही है ‘स्वादिष्ट’। बुकलेट में तुमने सही लिखा था!'},
+  {id:'p1s2', q:'मुझे ___ व्यक्ति पसंद हैं।', a:'परिश्रमी', w:['परीश्रमी','परिशर्मी','परिश्रमि']},
+  {id:'p1s3', q:'गुण बताने वाला विशेषण', a:'गुणवाचक', w:['गुनवाचक','गुणवाचिक','गूणवाचक']},
+  {id:'p1s4', q:'संख्या बताने वाला विशेषण', a:'संख्यावाचक', w:['संख्यवाचक','सख्यावाचक','संखयावाचक']},
+  {id:'p1s5', q:'संज्ञा की विशेषता बताने वाला शब्द', a:'विशेषण', w:['विशेशण','विसेषण','विशेषन']},
+  {id:'p1s6', q:'जिसकी विशेषता बताई जाए', a:'विशेष्य', w:['विशेश्य','विशेषय','विसेष्य']},
+  {id:'p1s7', q:'मैंने एक बहुत ऊँची ___ देखी।', a:'इमारत', w:['ईमारत','इमारात','इमरत']},
+  {id:'p1s8', q:'माँ ने मीठी ___ खरीदी।', a:'चॉकलेट', w:['चोकलेट','चाकलेट','चॉकलैट'], tip:'◌ॉ — ऊपर छोटा अर्धचंद्र, बिंदी नहीं।'}
+],
+p2: [
+  {id:'p2s1', q:'एक से अधिक बताने वाला वचन', a:'बहुवचन', w:['बहूवचन','बहुवचण','बहुवाचन']},
+  {id:'p2s2', q:'एक बताने वाला वचन', a:'एकवचन', w:['एकवचण','ऐकवचन','एकवाचन']},
+  {id:'p2s3', q:'उसने कागज़ पर अपने ___ किए।', a:'हस्ताक्षर', w:['हस्ताछर','हसताक्षर','हस्ताक्शर']},
+  {id:'p2s4', q:'मंदिर में भगवान के ___ किए।', a:'दर्शन', w:['दरशन','दर्सन','र्दशन']}
+],
+p3: [
+  {id:'p3s1', q:'नीचे लिखा हुआ', a:'निम्नलिखित', w:['निमनलिखित','निम्नलिखीत','निम्नलीखित']},
+  {id:'p3s2', q:'मधुर बोलने वाला', a:'मृदुभाषी', w:['मृदूभाषी','म्रदुभाषी','मृदुभासी']},
+  {id:'p3s3', q:'साथ पढ़ने वाला', a:'सहपाठी', w:['सहपाटी','सहपाठि','साहपाठी']},
+  {id:'p3s4', q:'लकड़ी का सामान बनाने वाला', a:'बढ़ई', w:['बडई','बढई','बढ़इ'], tip:'ढ़ के नीचे बिंदी लगती है।'},
+  {id:'p3s5', q:'जिसमें साहस हो', a:'साहसी', w:['साहासी','सहसी','साहसि']},
+  {id:'p3s6', q:'जिसमें दया हो', a:'दयालु', w:['दयालू','दियालु','दयालो']},
+  {id:'p3s7', q:'जो किसी से न डरे', a:'निडर', w:['नीडर','निड़र','निढर']},
+  {id:'p3s8', q:'जो कभी बूढ़ा न हो', a:'अजर', w:['अजार','अजरा','आजर']}
+],
+p4: [
+  {id:'p4s1', q:'विरोधी (टीम)', a:'प्रतिद्वंदी', w:['प्रतिदवदी','प्रतींद्वदी'], f:['prati'], tip:'ध्यान दो: ‘द्व’ = आधा द + व।', slip:'कॉपी में टीचर ने इस शब्द का ‘द्व’ ठीक करवाया था।'},
+  {id:'p4s2', q:'जिसका उत्साह बढ़ाया गया हो', a:'प्रोत्साहित', w:['प्रोत्शाहित','प्रोतसाहीत']},
+  {id:'p4s3', q:'आज्ञा', a:'अनुमति', w:['अनूमती','अनुमती'], f:['anumati-mean'], tip:'अनुमति — अंत में छोटी इ की मात्रा (ति)।', slip:'कॉपी में तुमने ‘अनुमती’ लिखा था, टीचर ने ठीक करवाया: अनुमति।'},
+  {id:'p4s4', q:'खेल दिखाना (खेल ___)', a:'प्रदर्शन', w:['प्रदरशन','प्रर्दर्शन']},
+  {id:'p4s5', q:'मैदान पर खेल का फ़ैसला करने वाले', a:'अंपायर', w:['उंपायर','अंपयार','अंपायार'], f:['umpires'], tip:'शुरू में ‘अं’ आता है।', slip:'कॉपी में तुमने ‘उंपायर’ लिखा था। टीचर ने ठीक करवाया: अंपायर।'},
+  {id:'p4s6', q:'सचिन को भारत ___ से सम्मानित किया गया।', a:'रत्न', w:['रतन','रत्ण','रन्त'], f:['ratna'], tip:'त्न = आधा त + न।', slip:'कॉपी में तुमने ‘रतन’ लिखा था, टीचर ने ठीक करवाया: भारत रत्न।'},
+  {id:'p4s7', q:'___ ऑफ क्रिकेट', a:'गॉड', w:['गोड','गाड','गॉद'], f:['god'], tip:'◌ॉ — ऊपर सिर्फ़ छोटा अर्धचंद्र, बिंदी नहीं।', slip:'कॉपी में इस शब्द की मात्रा गलत लगी थी और टीचर ने उस पर गोला लगाया था। ‘ऑ’ की आवाज़ के लिए ◌ॉ लगाओ — बिंदी नहीं।'},
+  {id:'p4s8', q:'___ ब्रैडमैन', a:'डॉन', w:['डोन','डान','डौन'], f:['bradman']},
+  {id:'p4s9', q:'क्रिकेट का आरंभ सबसे पहले ___ में हुआ।', a:'इंग्लैंड', w:['इंग्लेंड','ईंग्लैंड','इग्लैंड'], f:['england']},
+  {id:'p4s10', q:'सचिन के खेल की ___ डॉन ब्रैडमैन ने की थी।', a:'सराहना', w:['साराहना','सराहणा','सरहाना'], f:['bradman']},
+  {id:'p4s11', q:'गेंद फेंकने वाला खिलाड़ी', a:'गेंदबाज़', w:['गेंदबाझ','गेदबाज़','गैंदबाज़']},
+  {id:'p4s12', q:'भारत में क्रिकेट ___ सरकार के आगमन के बाद आया।', a:'ब्रिटिश', w:['ब्रीटिश','ब्रिटीश','बिरटिश'], f:['british']},
+  {id:'p4s13', q:'मैं घर से ___ नहीं जाती।', a:'बाहर', w:['बाहार','बहर','बाहिर'], f:['bahar'], slip:'कॉपी में तुमने ‘बाहार’ लिखा था, टीचर ने गोला लगाकर ठीक करवाया: बाहर।'}
+],
+p5: [
+  {id:'p5s1', q:'ज़रूरी ही नहीं, बल्कि हमारा ___ भी है।', a:'कर्तव्य', w:['करतव्य','कतर्व्य','करत्व्य'], tip:'कर्तव्य में ‘र्त’ लिखते हैं — आधा र, त के ऊपर।', slip:'तुमने कॉपी और बुकलेट दोनों में ‘करतव्य’ लिखा था। सही है: कर्तव्य।'},
+  {id:'p5s2', q:'___ को सुविधाजनक बनाने के लिए नियम बनाए गए हैं।', a:'यातायात', w:['यातयात','यतायात','यातायत'], f:['yatayat'], tip:'या-ता-यात।', slip:'बुकलेट में टीचर ने ‘यातायात’ ठीक करवाया था।'},
+  {id:'p5s3', q:'एंबुलेंस एक ___ वाहन है।', a:'आपातकालीन', w:['आपातकालिन','आपातकलीन','अपातकालीन'], f:['ambulance'], tip:'आपातकालीन — ‘ली’ में बड़ी ई।', slip:'कॉपी में तुमने ‘आपातकालिन’ लिखा था, टीचर ने ठीक करवाया: आपातकालीन।'},
+  {id:'p5s4', q:'विचारों को संक्षेप में लिखना — ___ लेखन', a:'अनुच्छेद', w:['अनूच्छेद','अनुछेद','अनुच्छेध'], f:['anu-def']},
+  {id:'p5s5', q:'सायरन सुनते ही रास्ता ___ दें।', a:'अवश्य', w:['आवष्य','अवस्य','अवशय'], f:['avashya'], slip:'बुकलेट में तुमने ‘आवष्य’ लिखा था। सही है: अवश्य।'},
+  {id:'p5s6', q:'___ हम ऐसा नहीं करते तो परेशानियों से घिर सकते हैं।', a:'यदि', w:['यदी','यधि','यदिं'], f:['yadi'], slip:'बुकलेट में तुमने ‘यदी’ लिखा था। सही है: यदि (छोटी इ)।'},
+  {id:'p5s7', q:'ज़रूरी ही नहीं, ___ हमारा कर्तव्य भी है।', a:'बल्कि', w:['बल्की','बलकी','बल्के'], slip:'बुकलेट में तुमने ‘बल्की’ लिखा था। सही है: बल्कि (छोटी इ)।'},
+  {id:'p5s8', q:'यातायात को ___ बनाने के लिए', a:'सुविधाजनक', w:['सुविधजनक','सूविधाजनक','सुविधाजनख'], f:['yatayat']},
+  {id:'p5s9', q:'नियमों का पालन करने से हमारी ___ होती है।', a:'सुरक्षा', w:['सूरक्षा','सुरक्शा','सुरच्छा']},
+  {id:'p5s10', q:'रास्ता न देने पर ___ देना पड़ता है।', a:'जुर्माना', w:['जूर्माना','जुर्मना','जुर्माणा'], f:['fine']},
+  {id:'p5s11', q:'साइकिल चलाते समय ___ रखो।', a:'सावधानी', w:['सावधानि','सवधानी','सावदानी']},
+  {id:'p5s12', q:'साइकिल चलाते समय सिर पर पहनते हैं', a:'हेलमेट', w:['हैलमेट','हेलमैट','हेलमिट'], f:['helmet']}
+]
+};
+
+/* ---------- Match the following ---------- */
+var MATCH = {
+p3: {id:'p3x', pairs:[['निडर','जो किसी से न डरे'],['निम्नलिखित','नीचे लिखा हुआ'],['मृदुभाषी','मधुर बोलने वाला'],['सहपाठी','साथ पढ़ने वाला'],['बढ़ई','लकड़ी का सामान बनाने वाला'],['अजर','जो कभी बूढ़ा न हो'],['दयालु','जिसमें दया हो'],['साहसी','जिसमें साहस हो']]},
+p4: {id:'p4x', pairs:[['आगमन','आना'],['पोशाक','वस्त्र'],['प्रतिद्वंदी','विरोधी'],['अनुमति','आज्ञा'],['आरंभ','शुरुआत'],['समतल','सपाट']]},
+p5: {id:'p5x', lab:'अनुच्छेद से पहले बॉक्स मिलाइए', pairs:[['कार्य का नाम','साइकिल चलाना'],['नियमों का पालन','हेलमेट पहनना, बाईं ओर चलना'],['लाभ','दुर्घटना से बचाव'],['सावधानियाँ','ब्रेक और टायर की जाँच']]}
+};
+
+/* ---------- Sort it out (n per bucket) ---------- */
+var SORT = {
+p1: [{id:'p1k1', q:'गुणवाचक या संख्यावाचक?', buckets:['गुणवाचक','संख्यावाचक'], per:4, items:[['लाल',0],['खट्टा',0],['ऊँची',0],['परिश्रमी',0],['पुराने',0],['स्वादिष्ट',0],['बहादुर',0],['आलसी',0],['दो',1],['पाँच',1],['दस',1],['कुछ',1],['सब',1],['अनेक',1],['तीन',1]]}],
+p2: [{id:'p2k1', q:'एकवचन या बहुवचन?', buckets:['एकवचन','बहुवचन'], per:4, items:[['दीवार',0],['चाँद',0],['सूरज',0],['कहानी',0],['कटोरी',0],['लता',0],['बच्चा',0],['प्राण',1],['दर्शन',1],['हस्ताक्षर',1],['भाषाएँ',1],['बच्चे',1],['खिलौने',1],['राहें',1],['हम',1]]}],
+p5: [{id:'p5k1', q:'यह संकेत बिंदु किस अनुच्छेद का है?', buckets:['साइकिल चलाते समय सावधानी','आपातकालीन वाहन को रास्ता','पैदल चलने के नियम'], per:2, items:[['हेलमेट पहनना',0],['टायर में हवा और ब्रेक की जाँच',0],['दोनों हाथ हैंडल पर',0],['मुड़ते समय हाथ से संकेत',0],['सायरन की आवाज़ पर ध्यान',1],['इंडिकेटर देकर बाईं ओर हटना',1],['रास्ता न देने पर जुर्माना',1],['एंबुलेंस को आगे निकलने देना',1],['फुटपाथ पर चलना',2],['जेब्रा क्रॉसिंग से सड़क पार करना',2],['दाएँ-बाएँ-दाएँ देखकर सड़क पार करना',2],['सिग्नल मिलने पर ही सड़क पार करना',2]]}]
+};
+
+/* ---------- Put in order ---------- */
+var SEQ = [
+  {id:'p4q1', ch:'p4', q:'मैच शुरू होने का सही क्रम लगाइए।', f:['toss'], steps:['सिक्का उछालकर टॉस होता है','टॉस जीतने वाला कप्तान बल्लेबाज़ी या गेंदबाज़ी चुनता है','अंपायर गेंदबाज़ को गेंद फेंकने की अनुमति देते हैं','गेंदबाज़ गेंद फेंकता है और बल्लेबाज़ रन बनाता है']},
+  {id:'p5q1', ch:'p5', q:'अनुच्छेद के प्रारूप का सही क्रम लगाइए।', f:['format'], steps:['भूमिका — नियमों के पालन का महत्व','विषयवस्तु — कार्य, उसके नियम, लाभ','निष्कर्ष — सावधानियाँ']},
+  {id:'p5q2', ch:'p5', q:'अनुच्छेद लिखने से पहले ये बॉक्स किस क्रम में भरते हैं?', f:['boxes'], steps:['कार्य का नाम','कौन-कौन से नियम का पालन','लाभ','सावधानियाँ']},
+  {id:'p5q3', ch:'p5', q:'भूमिका के वाक्यों को सही क्रम में लगाइए।', f:['yadi','yatayat'], steps:['हमें अपना जीवन जीने के लिए कुछ नियमों का पालन करना होता है,','जिससे हमारा जीवन सरल हो जाता है।','यदि हम ऐसा नहीं करते तो हम परेशानियों से घिर सकते हैं।','इसी प्रकार यातायात को सुविधाजनक बनाने के लिए कुछ नियम बनाए गए हैं,','जिनका पालन करना ज़रूरी ही नहीं, बल्कि हमारा कर्तव्य भी है।']},
+  {id:'p5q4', ch:'p5', q:'सायरन सुनने पर वाहन चलाने वाले क्या करें? सही क्रम लगाइए।', f:['calm','left','siren'], steps:['सायरन की आवाज़ सुनकर शांत रहें','इंडिकेटर का प्रयोग करें','सड़क की बाईं ओर जाएँ और गति धीमी करें','एंबुलेंस को आगे निकलने दें']}
+];
+
+/* ---------- Unseen passages (original practice; booklet p 98 was not in the scan). Titles stay hidden: one question asks for the title. ---------- */
+var PASSAGES = [
+  {id:'p6g1', title:'अपठित गद्यांश', passage:'हमारे विद्यालय में हर साल खेल दिवस मनाया जाता है। इस दिन सभी बच्चे सफ़ेद पोशाक पहनकर मैदान में आते हैं। दौड़, कबड्डी और रस्साकशी जैसी कई प्रतियोगिताएँ होती हैं। इस बार मेरी सहेली रिया ने लंबी दौड़ में पहला स्थान पाया। वह रोज़ सुबह अभ्यास करती थी। प्रधानाचार्य जी ने विजेताओं को सुनहरे पदक दिए। उन्होंने कहा, ‘जीतना अच्छा है, पर सच्ची खेल भावना सबसे बड़ी जीत है।’', parts:[
+    {q:'खेल दिवस पर बच्चे कैसी पोशाक पहनकर आते हैं?', o:['सफ़ेद','लाल','नीली','काली'], a:'सफ़ेद'},
+    {q:'रिया ने किस प्रतियोगिता में पहला स्थान पाया?', o:['लंबी दौड़','कबड्डी','रस्साकशी','ऊँची कूद'], a:'लंबी दौड़'},
+    {q:'रिया क्यों जीती?', o:['वह रोज़ सुबह अभ्यास करती थी','उसके जूते नए थे','उसने टॉस जीता था'], a:'वह रोज़ सुबह अभ्यास करती थी'},
+    {q:'‘सुनहरे पदक’ में विशेषण कौन-सा है?', o:['सुनहरे','पदक'], a:'सुनहरे'},
+    {q:'गद्यांश का उचित शीर्षक चुनिए।', o:['हमारा खेल दिवस','मेरा घर','बाज़ार की सैर','बारिश का दिन'], a:'हमारा खेल दिवस'}
+  ]},
+  {id:'p6g2', title:'अपठित गद्यांश', passage:'मोर हमारा राष्ट्रीय पक्षी है। इसकी गर्दन लंबी और नीली होती है। इसके सिर पर एक सुंदर कलगी होती है। मोर के पंख रंग-बिरंगे और चमकीले होते हैं। जब आसमान में काले बादल छा जाते हैं, तब मोर अपने पंख फैलाकर नाचता है। मोर साँप जैसे जीवों को भी खा जाता है। हमें मोर की रक्षा करनी चाहिए।', parts:[
+    {q:'मोर हमारा कौन-सा पक्षी है?', o:['राष्ट्रीय पक्षी','पालतू पक्षी','सबसे छोटा पक्षी'], a:'राष्ट्रीय पक्षी'},
+    {q:'मोर की गर्दन कैसी होती है?', o:['लंबी और नीली','छोटी और लाल','मोटी और काली'], a:'लंबी और नीली'},
+    {q:'मोर कब नाचता है?', o:['जब आसमान में काले बादल छा जाते हैं','जब तेज़ धूप होती है','जब रात होती है'], a:'जब आसमान में काले बादल छा जाते हैं'},
+    {q:'‘चमकीले पंख’ में ‘चमकीले’ कौन-सा विशेषण है?', o:['गुणवाचक','संख्यावाचक'], a:'गुणवाचक'},
+    {q:'गद्यांश का उचित शीर्षक चुनिए।', o:['हमारा राष्ट्रीय पक्षी मोर','जंगल का राजा','मेरा प्यारा तोता'], a:'हमारा राष्ट्रीय पक्षी मोर'}
+  ]},
+  {id:'p6g3', title:'अपठित गद्यांश', passage:'हमारे गाँव में रामू काका रहते हैं। वे बढ़ई हैं और लकड़ी का सुंदर सामान बनाते हैं। उन्होंने मेरे लिए एक छोटी-सी मेज़ बनाई है। रामू काका बहुत मृदुभाषी हैं, वे सबसे मीठा बोलते हैं। वे दयालु भी हैं। सर्दियों में वे गरीब बच्चों को गरम कपड़े बाँटते हैं। मेरा सहपाठी मोहन कहता है कि रामू काका हमारे गाँव के सबसे अच्छे इंसान हैं।', parts:[
+    {q:'रामू काका क्या काम करते हैं?', o:['वे बढ़ई हैं','वे सुनार हैं','वे किसान हैं','वे दर्ज़ी हैं'], a:'वे बढ़ई हैं'},
+    {q:'रामू काका को मृदुभाषी क्यों कहा गया है?', o:['वे सबसे मीठा बोलते हैं','वे बहुत ज़ोर से बोलते हैं','वे बहुत कम खाते हैं'], a:'वे सबसे मीठा बोलते हैं'},
+    {q:'सर्दियों में रामू काका क्या करते हैं?', o:['गरीब बच्चों को गरम कपड़े बाँटते हैं','मेज़ें बेचते हैं','गाँव से बाहर चले जाते हैं'], a:'गरीब बच्चों को गरम कपड़े बाँटते हैं'},
+    {q:'गद्यांश में ‘सहपाठी’ शब्द आया है। इसका अर्थ है—', o:['साथ पढ़ने वाला','साथ खेलने वाला','साथ खाने वाला'], a:'साथ पढ़ने वाला'},
+    {q:'गद्यांश का उचित शीर्षक चुनिए।', o:['दयालु रामू काका','मेरा विद्यालय','सर्दी का मौसम'], a:'दयालु रामू काका'}
+  ]},
+  {id:'p6g4', title:'अपठित गद्यांश', passage:'पेड़ हमारे सच्चे मित्र हैं। वे हमें ठंडी छाया, मीठे फल और ताज़ी हवा देते हैं। पक्षी पेड़ों पर अपने घोंसले बनाते हैं। पेड़ों की जड़ें मिट्टी को बहने से रोकती हैं। आजकल लोग बहुत सारे पेड़ काट रहे हैं। इससे धरती गरम हो रही है। हम सबको हर साल कम से कम दो पेड़ लगाने चाहिए और उनकी देखभाल करनी चाहिए।', parts:[
+    {q:'पेड़ हमें क्या-क्या देते हैं?', o:['ठंडी छाया, मीठे फल और ताज़ी हवा','सिर्फ़ लकड़ी','सिर्फ़ फूल'], a:'ठंडी छाया, मीठे फल और ताज़ी हवा'},
+    {q:'पेड़ों की जड़ें क्या करती हैं?', o:['मिट्टी को बहने से रोकती हैं','पानी को गंदा करती हैं','पक्षियों को भगाती हैं'], a:'मिट्टी को बहने से रोकती हैं'},
+    {q:'गद्यांश के अनुसार हमें हर साल कम से कम कितने पेड़ लगाने चाहिए?', o:['दो','दस','एक भी नहीं'], a:'दो'},
+    {q:'‘घोंसले’ शब्द का एकवचन क्या है?', o:['घोंसला','घोंसलें','घोंसलो'], a:'घोंसला'},
+    {q:'गद्यांश का उचित शीर्षक चुनिए।', o:['पेड़ हमारे मित्र','मेरी पतंग','खेल का मैदान'], a:'पेड़ हमारे मित्र'}
+  ]}
+];
+
+/* ---------- Written answers (Answer Builder + Notebook) ----------
+   k: answer | hots | sent | copy | plan | para | draw ; m = marks ; pts = model points (para: checklist) ;
+   bad = wrong sentences for the builder ; model = full model paragraph */
+var MODEL_INTRO = 'हमें अपना जीवन जीने के लिए कुछ नियमों का पालन करना होता है, जिससे हमारा जीवन सरल हो जाता है। यदि हम ऐसा नहीं करते तो हम परेशानियों से घिर सकते हैं। इसी प्रकार यातायात को सुविधाजनक बनाने के लिए कुछ नियम बनाए गए हैं, जिनका पालन करना ज़रूरी ही नहीं, बल्कि हमारा कर्तव्य भी है।';
+var WRITTEN = [
+  /* p1 */
+  {id:'p1r1', ch:'p1', k:'answer', m:2, q:'विशेषण किसे कहते हैं? उदाहरण सहित लिखिए।', pts:['जो शब्द संज्ञा या सर्वनाम शब्दों की विशेषता बताते हैं, उन्हें विशेषण कहते हैं।','जैसे — नीला, खट्टा, दो, अनेक आदि।'], bad:['जो शब्द कोई काम बताते हैं, उन्हें विशेषण कहते हैं।','विशेषण किसी व्यक्ति का नाम होता है।'], kw:['विशेषता']},
+  {id:'p1r2', ch:'p1', k:'answer', m:2, q:'विशेष्य किसे कहते हैं? एक उदाहरण दीजिए।', pts:['जिन संज्ञा या सर्वनाम शब्दों की विशेषता बताई जाती है, उन्हें विशेष्य कहते हैं।','जैसे — ‘गरम जलेबी’ में विशेषण ‘गरम’ है और विशेष्य ‘जलेबी’ है।'], bad:['विशेष्य विशेषता बताने वाला शब्द होता है।','‘गरम जलेबी’ में ‘गरम’ विशेष्य है।'], kw:['विशेषता बताई जाती है']},
+  {id:'p1r3', ch:'p1', k:'answer', m:2, q:'विशेषण के कितने भेद होते हैं? हमने कौन-से दो भेद पढ़े? उदाहरण दीजिए।', f:['bhed-count'], pts:['विशेषण के चार भेद होते हैं।','हमने दो भेद पढ़े — गुणवाचक विशेषण और संख्यावाचक विशेषण।','गुणवाचक विशेषण — लाल गेंद, खट्टे फल।','संख्यावाचक विशेषण — दो पुस्तकें, पाँच कबूतर।'], bad:['विशेषण के केवल दो भेद होते हैं।','‘लाल गेंद’ में ‘लाल’ संख्यावाचक विशेषण है।'], kw:['चार','गुणवाचक','संख्यावाचक']},
+  {id:'p1r4', ch:'p1', k:'draw', m:2, q:'किसी संज्ञा शब्द का चित्र बनाकर उसका विशेषण लिखिए। (जैसे — गुलाबी कमल, नया कलमदान)', pts:['मैंने एक संज्ञा का चित्र बनाया।','चित्र के नीचे विशेषण और संज्ञा लिखी, जैसे — गुलाबी कमल।','विशेषण चित्र से मेल खाता है (रंग, आकार, स्वाद या संख्या)।','मैंने वर्तनी ठीक से जाँची।'], bad:[], kw:[]},
+  /* p2 */
+  {id:'p2r1', ch:'p2', k:'answer', m:2, q:'वचन किसे कहते हैं? इसके कितने भेद हैं?', pts:['शब्द के जिस रूप से उसके एक या अनेक होने का पता चले, उसे वचन कहते हैं।','वचन के दो भेद हैं — एकवचन और बहुवचन।'], bad:['वचन से पता चलता है कि कोई लड़का है या लड़की।','वचन के चार भेद होते हैं।'], kw:['एक या अनेक','एकवचन','बहुवचन']},
+  {id:'p2r2', ch:'p2', k:'copy', m:2, q:'इन शब्दों के वचन बदलकर कॉपी में लिखिए: राह, बच्चा, कटोरी, लता, बहू, खिलौना, कमीज़, कविता', pts:['राह — राहें','बच्चा — बच्चे (बिंदी नहीं)','कटोरी — कटोरियाँ','लता — लताएँ','बहू — बहुएँ (छोटा उ)','खिलौना — खिलौने','कमीज़ — कमीज़ें (बिंदी के साथ)','कविता — कविताएँ'], bad:[], kw:[]},
+  /* p3 */
+  {id:'p3r1', ch:'p3', k:'copy', m:2, q:'इन शब्दों के लिए वाक्यांश (अनेक शब्द) कॉपी में लिखिए: निडर, निम्नलिखित, मृदुभाषी, सहपाठी', pts:['निडर — जो किसी से न डरे','निम्नलिखित — नीचे लिखा हुआ','मृदुभाषी — मधुर बोलने वाला','सहपाठी — साथ पढ़ने वाला'], bad:[], kw:[]},
+  {id:'p3r2', ch:'p3', k:'copy', m:2, q:'इन वाक्यांशों के लिए एक शब्द कॉपी में लिखिए: लकड़ी का सामान बनाने वाला, जो कभी बूढ़ा न हो, जिसमें दया हो, जिसमें साहस हो', pts:['लकड़ी का सामान बनाने वाला — बढ़ई','जो कभी बूढ़ा न हो — अजर','जिसमें दया हो — दयालु','जिसमें साहस हो — साहसी'], bad:[], kw:[]},
+  /* p4 */
+  {id:'p4r1', ch:'p4', k:'answer', m:2, q:'क्रिकेट का आरंभ सबसे पहले कहाँ हुआ तथा भारत में यह कब आया?', f:['england','british','popular'], pts:['क्रिकेट का आरंभ सबसे पहले इंग्लैंड में हुआ था।','उसके बाद यह विश्व भर में लोकप्रिय हो गया।','भारत में क्रिकेट ब्रिटिश सरकार के आगमन के बाद आया।'], bad:['क्रिकेट का आरंभ सबसे पहले भारत में हुआ था।','भारत में क्रिकेट 2011 में आया।'], kw:['इंग्लैंड','ब्रिटिश सरकार']},
+  {id:'p4r2', ch:'p4', k:'answer', m:2, q:'क्रिकेट के मैदान के अंपायर और उनकी भूमिका बताइए।', f:['umpires','umpire-role'], pts:['इस खेल में दो अंपायर होते हैं।','उन्हीं के संकेत पर खेल खेला जाता है।','खेल आरंभ होने पर अंपायर गेंदबाज़ को गेंद फेंकने की अनुमति देते हैं।'], bad:['इस खेल में चार अंपायर होते हैं।','अंपायर खुद बल्लेबाज़ी करते हैं।'], kw:['दो अंपायर','संकेत','अनुमति देते'], slip:'कॉपी में तुमने लिखा था ‘गेंद फेंकने की अनुमति हैं’ — ‘देते’ छूट गया था। पूरा लिखो: अनुमति देते हैं।'},
+  {id:'p4r3', ch:'p4', k:'answer', m:2, q:'सचिन को गॉड ऑफ क्रिकेट क्यों कहा जाता है तथा उनकी सराहना किसने की?', f:['god','ratna','bradman'], pts:['सचिन तेंदुलकर के बेहतरीन खेल प्रदर्शन और क्रिकेट में अनेक योगदान की वजह से उन्हें गॉड ऑफ क्रिकेट कहा जाने लगा।','उन्हें भारत रत्न से भी सम्मानित किया गया।','उनकी सराहना विश्व के सर्वोत्तम खिलाड़ी डॉन ब्रैडमैन ने की थी।'], bad:['सचिन को गॉड ऑफ क्रिकेट इसलिए कहते हैं क्योंकि वे अंपायर थे।','सचिन की सराहना विराट कोहली ने की थी।'], kw:['प्रदर्शन','योगदान','भारत रत्न','डॉन ब्रैडमैन']},
+  {id:'p4r4', ch:'p4', k:'answer', m:2, q:'अंतर्राष्ट्रीय स्तर पर क्रिकेट के कितने रूप हैं? सभी के बारे में बताइए।', f:['forms'], pts:['अंतर्राष्ट्रीय स्तर पर क्रिकेट के तीन रूप हैं।','टेस्ट मैच — यह पाँच दिन तक चलता है।','एकदिवसीय मैच — इसमें हर टीम 50 ओवर खेलती है।','टी-20 मैच — इसमें हर टीम 20 ओवर खेलती है।'], bad:['अंतर्राष्ट्रीय स्तर पर क्रिकेट का केवल एक रूप है।','टी-20 मैच पाँच दिन तक चलता है।'], kw:['तीन','टेस्ट मैच','एकदिवसीय','टी-20'], slip:'बुकलेट में तुमने ‘कई रूप हैं — टेस्ट मैच’ लिखकर छोड़ दिया था। पहले संख्या लिखो (तीन), फिर तीनों रूप।'},
+  {id:'p4r5', ch:'p4', k:'answer', m:2, q:'खेल शुरू होने से पहले क्या किया जाता है तथा क्यों?', f:['toss'], pts:['खेल शुरू होने से पहले सिक्का उछालकर टॉस किया जाता है।','टॉस जीतने वाली टीम का कप्तान तय करता है कि उसकी टीम पहले बल्लेबाज़ी करेगी या गेंदबाज़ी।'], bad:['खेल शुरू होने से पहले अंपायर बल्लेबाज़ी करते हैं।','टॉस से तय होता है कि मैच कितने दिन चलेगा।'], kw:['टॉस','कप्तान','बल्लेबाज़ी','गेंदबाज़ी'], slip:'बुकलेट में तुमने लिखा था ‘पहले गेंदबाज़ी और फील्डिंग’ — ये दोनों एक ही बात हैं। कप्तान चुनता है: पहले बल्लेबाज़ी या पहले गेंदबाज़ी।'},
+  {id:'p4r6', ch:'p4', k:'hots', m:2, q:'यदि आप क्रिकेटर बनना चाहें तो उसके लिए क्या-क्या करेंगे?', f:['spirit'], pts:['मैं रोज़ मेहनत से अभ्यास करूँगी।','मैं किसी अच्छे कोच से खेल के नियम और सही तरीके सीखूँगी।','मैं पौष्टिक भोजन खाऊँगी और व्यायाम करूँगी।','मैं अनुशासन और सच्ची खेल भावना से खेलूँगी।'], bad:['मैं कभी अभ्यास नहीं करूँगी।','मैं हारने पर झगड़ा करूँगी।'], kw:['अभ्यास','नियम','खेल भावना']},
+  {id:'p4r7', ch:'p4', k:'sent', m:2, q:'इन शब्दों से वाक्य बनाइए: आरंभ, समतल', f:['arambh','samtal'], pts:['‘आरंभ’ वाला वाक्य पूरा है और शब्द ‘शुरुआत’ के अर्थ में आया है। (जैसे — मैं इस खेल का आरंभ करूँगी।)','‘समतल’ वाला वाक्य पूरा है और शब्द ‘सपाट, बराबर’ के अर्थ में आया है। (जैसे — क्रिकेट का मैदान समतल होता है।)','दोनों वाक्यों के अंत में पूर्ण विराम (।) लगाया है।'], bad:[], kw:[]},
+  {id:'p4r8', ch:'p4', k:'sent', m:2, q:'इन शब्दों से वाक्य बनाइए: आगमन, पोशाक, प्रतिद्वंदी, अनुमति', f:['agaman','poshak','prati','anumati-mean'], pts:['आगमन — जैसे: वसंत ऋतु के आगमन पर सभी खुश हो जाते हैं।','पोशाक — जैसे: माँ ने मुझे नई पोशाक उपहार में दी।','प्रतिद्वंदी — जैसे: भारतीय टीम ने प्रतिद्वंदी टीम को हरा दिया।','अनुमति — जैसे: मैं बड़ों की अनुमति के बिना घर से बाहर नहीं जाती।'], bad:[], kw:[]},
+  /* p5 */
+  {id:'p5r1', ch:'p5', k:'answer', m:1, q:'अनुच्छेद लेखन किसे कहते हैं?', f:['anu-def'], pts:['जब हम किसी विषय पर अपने भाव या विचार संक्षेप में प्रकट करते हैं, तब उसे अनुच्छेद लेखन कहते हैं।'], bad:['जब हम किसी को चिट्ठी लिखते हैं, तब उसे अनुच्छेद लेखन कहते हैं।','अनुच्छेद में एक ही बात बार-बार लिखते हैं।'], kw:['भाव या विचार','संक्षेप']},
+  {id:'p5r2', ch:'p5', k:'answer', m:2, q:'अनुच्छेद लिखते समय ध्यान देने योग्य कोई चार बातें लिखिए।', f:['short'], pts:['विषय को ध्यानपूर्वक पढ़ना।','सरल व शुद्ध भाषा का प्रयोग करना।','छोटे-छोटे वाक्यों का प्रयोग करना।','विषय के अनुसार लेखन करना।','अपने विचारों को क्रम से लिखना।','एक ही बात को बार-बार न दोहराना।'], bad:['बहुत लंबे-लंबे वाक्य लिखना।','विषय से हटकर लिखना।'], kw:[]},
+  {id:'p5r3', ch:'p5', k:'para', m:5, q:'‘साइकिल चलाते समय सावधानी’ विषय पर दिए गए प्रारूप व संकेत बिंदुओं की सहायता से अनुच्छेद लिखिए।', pts:['भूमिका: नियमों के पालन का महत्व (हमें अपना जीवन जीने के लिए…)','हेलमेट पहनना','ब्रेक, टायर में हवा और हैंडल की जाँच','सड़क के बाईं ओर साइकिल चलाना','मुड़ते समय हाथ से संकेत देना','दोनों हाथ हैंडल पर रखना','रात में लाइट जलाना और पूरा ध्यान सड़क पर','निष्कर्ष: इन बातों का ध्यान रखेंगे तो यात्रा सुरक्षित और सुखद होगी'], bad:[], kw:['यदि','बल्कि','कर्तव्य','यातायात','अवश्य'], slip:'बुकलेट वाले अनुच्छेद में कुछ संकेत बिंदु छूट गए थे (हैंडल की जाँच, बाईं ओर चलना, हाथ से संकेत, लाइट)। इस बार हर संकेत बिंदु पर एक वाक्य लिखो।', model: MODEL_INTRO+' सड़क पर कुछ लोग वाहन से चलते हैं तो कुछ साइकिल से। आज हम साइकिल चलाते समय रखी जाने वाली सावधानियाँ देखेंगे और उन्हें अपने जीवन में अपनाएँगे। साइकिल चलाते समय हमें हमेशा हेलमेट पहनना चाहिए। साइकिल चलाने से पहले उसके ब्रेक, टायर में हवा और हैंडल की जाँच कर लेनी चाहिए। हमें सड़क के बाईं ओर साइकिल चलानी चाहिए और मुड़ने से पहले हाथ से संकेत देना चाहिए। साइकिल चलाते समय हमारे दोनों हाथ हैंडल पर होने चाहिए। रात में साइकिल की लाइट जलाकर रखनी चाहिए और पूरा ध्यान सड़क पर रखना चाहिए। यदि हम इन सभी बातों का ध्यान रखेंगे तो हमारी यात्रा सुरक्षित और सुखद होगी।'},
+  {id:'p5r4', ch:'p5', k:'para', m:5, q:'‘आपातकालीन वाहन को रास्ता’ विषय पर संकेत बिंदुओं की सहायता से अनुच्छेद लिखिए।', pts:['भूमिका: नियमों के पालन का महत्व','सड़क पर कई तरह के वाहन; आपातकालीन वाहन (एंबुलेंस, दमकल)','सायरन सुनते ही रास्ता अवश्य दें','यह ज़िम्मेदारी ही नहीं, कानून भी है — रास्ता न देने पर जुर्माना','सायरन सुनकर शांत रहें','इंडिकेटर का प्रयोग करके बाईं ओर जाएँ और गति धीमी करें','निष्कर्ष: कानून का पालन करके हम किसी की जान बचा सकते हैं'], bad:[], kw:['आपातकालीन','अवश्य','जुर्माना'], model: MODEL_INTRO+' सड़क पर कई तरह के वाहन होते हैं। आपातकालीन वाहन भी उनमें से एक है, जैसे — एंबुलेंस और दमकल। ऐसे वाहन को देखते ही या सायरन की आवाज़ सुनते ही हमें रास्ता अवश्य देना चाहिए। यह सिर्फ़ हमारी ज़िम्मेदारी ही नहीं, कानून भी है। रास्ता न देने पर जुर्माना देना पड़ता है। सायरन की आवाज़ सुनकर हमें शांत रहना चाहिए। अपने वाहन के इंडिकेटर का प्रयोग करके सड़क की बाईं ओर जाना चाहिए और गति धीमी कर देनी चाहिए। इस प्रकार कानून का पालन करके हम किसी की जान बचा सकते हैं।'},
+  {id:'p5r5', ch:'p5', k:'para', m:5, q:'‘पैदल चलने के नियम’ विषय पर अनुच्छेद लिखिए।', pts:['भूमिका: नियमों के पालन का महत्व','हमेशा फुटपाथ पर चलें','सड़क जेब्रा क्रॉसिंग से या सिग्नल मिलने पर ही पार करें','दाईं ओर, फिर बाईं ओर, फिर दाईं ओर देखकर आगे बढ़ें','चलते समय मोबाइल फ़ोन या इयरफ़ोन का प्रयोग न करें','निष्कर्ष: इन बातों का ध्यान रखेंगे तो यात्रा सुखद होगी'], bad:[], kw:['फुटपाथ','जेब्रा क्रॉसिंग'], model: MODEL_INTRO+' सड़क पर कुछ लोग वाहन से चलते हैं तो कुछ पैदल। दोनों के लिए अलग-अलग नियम हैं। आज हम पैदल चलने के नियम देखेंगे और उन्हें अपने जीवन में अपनाएँगे। पैदल चलने वालों को हमेशा सड़क पर बने फुटपाथ पर ही चलना चाहिए। सड़क हमेशा जेब्रा क्रॉसिंग से या सिग्नल मिलने पर ही पार करनी चाहिए। सड़क पार करने से पहले दाईं ओर, फिर बाईं ओर और फिर दाईं ओर देखकर ही आगे बढ़ना चाहिए। चलते समय मोबाइल फ़ोन, इयरफ़ोन या अन्य इलेक्ट्रॉनिक उपकरणों का प्रयोग नहीं करना चाहिए। यदि हम इन सभी बातों का ध्यान रखेंगे तो हमारी यात्रा हमेशा सुखद होगी।'},
+  {id:'p5r6', ch:'p5', k:'plan', m:2, q:'‘साइकिल चलाते समय सावधानी’ — अनुच्छेद लिखने से पहले ये बॉक्स कॉपी में भरिए: कार्य का नाम, कौन-कौन से नियम का पालन, लाभ, सावधानियाँ', pts:['कार्य का नाम — साइकिल चलाना','कौन-कौन से नियम का पालन — हेलमेट पहनना, सड़क के बाईं ओर चलना, मुड़ते समय हाथ से संकेत देना','लाभ — दुर्घटना से बचाव, यात्रा सुरक्षित और सुखद','सावधानियाँ — ब्रेक, टायर की हवा, हैंडल और लाइट की जाँच; दोनों हाथ हैंडल पर'], bad:[], kw:[]}
+];
+
+/* ---------- Slip Doctor: her real notebook / booklet mistakes ---------- */
+var SLIP_IDS = ['p2c2','p2c7','p2c5','p4m15','p4m10','p4y7','p4y6','p1s1','p4s3','p4s5','p4s6','p4s7','p4s13','p5s1','p5s2','p5s3','p5s5','p5s6','p5s7','p5y1'];
+
+/* ---------- Plan: Sat 31 Oct - Mon 2 Nov 2026 (test on Mon 2 Nov) ---------- */
+var PLAN = [
+  {id:'S1', day:'2026-10-31', when:'शनिवार सुबह', kind:'ch', ch:'p1', title:'विशेषण', mins:25, sub:'गुणवाचक और संख्यावाचक'},
+  {id:'S2', day:'2026-10-31', when:'शनिवार सुबह', kind:'ch', ch:'p2', title:'वचन', mins:20, sub:'बच्चे या बच्चें? यहीं पता चलेगा!'},
+  {id:'S3', day:'2026-10-31', when:'शनिवार दोपहर', kind:'ch', ch:'p3', title:'अनेक शब्दों के लिए एक शब्द', mins:15},
+  {id:'S4', day:'2026-10-31', when:'शनिवार दोपहर', kind:'ch', ch:'p6', title:'अपठित गद्यांश', mins:15, sub:'दो गद्यांश पढ़ो और उत्तर दो'},
+  {id:'S5', day:'2026-10-31', when:'शनिवार शाम', kind:'ch', ch:'p5', title:'अनुच्छेद लेखन', mins:20, sub:'प्रारूप, संकेत बिंदु, भूमिका'},
+  {id:'S6', day:'2026-10-31', when:'सोने से पहले', kind:'slip', title:'स्लिप डॉक्टर', mins:10, sub:'तुम्हारी कॉपी और बुकलेट की गलतियाँ'},
+  {id:'S7', day:'2026-11-01', when:'रविवार सुबह', kind:'ch', ch:'p4', title:'पाठ: क्रिकेट', mins:25},
+  {id:'S8', day:'2026-11-01', when:'रविवार सुबह', kind:'lab', title:'लेखन लैब', mins:25, sub:'कॉपी में: बॉक्स भरो, फिर साइकिल वाला अनुच्छेद'},
+  {id:'S9', day:'2026-11-01', when:'रविवार शाम', kind:'boss', title:'बॉस: टेस्ट पेपर', mins:45, sub:'भाग 1 ऐप में, भाग 2 कॉपी में'},
+  {id:'S10', day:'2026-11-01', when:'सोने से पहले', kind:'fix', title:'गलतियाँ ठीक करो', mins:10, sub:'अब तक की सारी गलतियाँ'},
+  {id:'S11', day:'2026-11-02', when:'सोमवार सुबह', kind:'flash', title:'फ़्लैश राउंड', mins:10, sub:'बस वार्म-अप। कुछ नया नहीं!'}
+];
+
+
+/* ================= DRAWINGS (inline SVG, generic subjects) ================= */
+var ART = (function(){
+  var INK = '#1E2A3A', RED = '#C8323C', SEAM = '#F6E7D0';
+  /* ---- mascot: "Googly", a cricket ball. Gear appears as she levels up ---- */
+  function mascot(level){
+    var L = level||0, s = '<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">';
+    s += '<ellipse cx="50" cy="94" rx="24" ry="4" fill="rgba(0,0,0,.14)"/>';
+    s += '<circle cx="50" cy="56" r="34" fill="'+RED+'"/>';
+    s += '<ellipse cx="36" cy="38" rx="11" ry="6" fill="#fff" opacity=".22" transform="rotate(-25 36 38)"/>';
+    s += '<path d="M71 27 Q60 56 71 85" stroke="'+SEAM+'" stroke-width="2.4" fill="none"/>';
+    s += '<path d="M77 31 Q66 56 77 81" stroke="'+SEAM+'" stroke-width="2.4" fill="none"/>';
+    s += '<path d="M74 29 Q63 56 74 83" stroke="'+SEAM+'" stroke-width="3" stroke-dasharray="2 3.2" fill="none"/>';
+    s += '<circle cx="36" cy="54" r="6.5" fill="#fff"/><circle cx="54" cy="54" r="6.5" fill="#fff"/>';
+    s += '<circle cx="37" cy="55" r="3.2" fill="'+INK+'"/><circle cx="55" cy="55" r="3.2" fill="'+INK+'"/>';
+    s += '<circle cx="38.2" cy="53.6" r="1" fill="#fff"/><circle cx="56.2" cy="53.6" r="1" fill="#fff"/>';
+    s += '<path d="M37 66 Q45 74 53 66" stroke="'+INK+'" stroke-width="3" fill="none" stroke-linecap="round"/>';
+    s += '<circle cx="28" cy="64" r="3.6" fill="#FF9FB0" opacity=".75"/><circle cx="62" cy="64" r="3.6" fill="#FF9FB0" opacity=".75"/>';
+    if(L>=1) s += '<path d="M84 18 l2 5 5 2 -5 2 -2 5 -2 -5 -5 -2 5 -2z" fill="#FFB627"/>';
+    if(L>=2 && L<3) s += '<path d="M19 42 Q50 22 81 42" stroke="#2C8FD0" stroke-width="7" fill="none" stroke-linecap="round"/>';
+    if(L>=3 && L<6) s += '<path d="M22 38 Q50 6 78 38 Z" fill="#1E5FA8"/><path d="M70 36 L94 40 Q86 46 70 42 Z" fill="#16457A"/><circle cx="50" cy="16" r="3" fill="#1E5FA8"/>';
+    if(L>=4) s += '<g transform="translate(6 52) rotate(-20)"><rect x="0" y="0" width="9" height="36" rx="3" fill="#E8C27A" stroke="#9C7A3A" stroke-width="1.5"/><rect x="2.5" y="-12" width="4" height="14" rx="2" fill="#9C7A3A"/></g>';
+    if(L>=5) s += '<circle cx="50" cy="88" r="6" fill="#FFB627" stroke="#C98800" stroke-width="2"/><path d="M45 79 L50 84 L55 79" stroke="#2C8FD0" stroke-width="3" fill="none"/>';
+    if(L>=6) s += '<path d="M26 32 L32 12 L42 26 L50 8 L58 26 L68 12 L74 32 Z" fill="#FFB627" stroke="#C98800" stroke-width="2" stroke-linejoin="round"/>';
+    return s+'</svg>';
+  }
+  return {mascot:mascot};
+})();
+
+(function(){
+'use strict';
+/* ---------------- config ---------------- */
+var STORE_KEY = 'diksha_hindi_wt3_v1';
+var DB_PATH = 'progress/diksha_hindi_wt3';
+var LEVEL_XP = 150;
+var TITLES = ['नन्ही खिलाड़ी','फील्डर','गेंदबाज़','बल्लेबाज़','ऑलराउंडर','कप्तान','शतकवीर'];
+var KID = 'दीक्षा';
+var EXAM_Y = 2026, EXAM_M = 10, EXAM_D = 2;          /* Monday 2 Nov 2026 (month is 0-based) */
+var DAYS = ['2026-10-31','2026-11-01','2026-11-02'];
+var DAYN = ['शनि','रवि','सोम'];
+var LBL = ['अ','ब','स','द','य','र'];
+var PRAISE = ['शाबाश!','छक्का! 🏏','चौका! एकदम सही!','बहुत बढ़िया, दीक्षा!','कमाल कर दिया!','सही जवाब!'];
+var OOPS = ['अरे! कोई बात नहीं, अब याद रखना।','लगभग! सही उत्तर देखो।','अच्छी कोशिश! इसे ध्यान से पढ़ो।'];
+var GUNA = 'गुणवाचक विशेषण', SANKHYA = 'संख्यावाचक विशेषण';
+
+/* ---------------- rng ---------------- */
+function mulberry(a){return function(){a|=0;a=a+0x6D2B79F5|0;var t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+var rnd = (typeof window.__HIN_SEED === 'number') ? mulberry(window.__HIN_SEED) : Math.random;
+function ri(n){return Math.floor(rnd()*n);}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=ri(i+1);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function sample(a,n){return shuffle(a).slice(0,n);}
+function pick(a){return a[ri(a.length)];}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+function ulHTML(s){ return esc(s).replace(/\[\[(.+?)\]\]/g,'<u class="ul">$1</u>'); }
+function plainUL(s){ return String(s).replace(/\[\[|\]\]/g,''); }
+function underlined(s){ var m = /\[\[(.+?)\]\]/.exec(s); return m ? m[1] : ''; }
+function nowMs(){ return (typeof window.__HIN_NOW==='number') ? window.__HIN_NOW : Date.now(); }
+function dayKey(ms){ var d=new Date(ms); return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2); }
+
+/* ---------------- template index ---------------- */
+var TPL = {};
+function reg(t, ch, d){ if(TPL[d.id]) throw new Error('duplicate id '+d.id); TPL[d.id] = {t:t, ch:ch, d:d}; }
+CH.forEach(function(c){
+  (MCQ[c.id]||[]).forEach(function(d){ reg('mcq', c.id, d); });
+  (FILL[c.id]||[]).forEach(function(d){ reg('fill', c.id, d); });
+  (TF[c.id]||[]).forEach(function(d){ reg('tf', c.id, d); });
+  (TWO[c.id]||[]).forEach(function(d){ reg('two', c.id, d); });
+  (SPELL[c.id]||[]).forEach(function(d){ reg('spell', c.id, d); });
+  (SORT[c.id]||[]).forEach(function(d){ reg('sort', c.id, d); });
+  if(MATCH[c.id]) reg('match', c.id, MATCH[c.id]);
+});
+BHED.forEach(function(d){ reg('bh', 'p1', d); });
+TAPW.forEach(function(d){ reg('tw', 'p1', d); });
+PIC.forEach(function(d){ reg('pic', 'p1', d); });
+ADJFILL.forEach(function(d){ reg('af', 'p1', d); });
+VC.forEach(function(d){ reg('vc', 'p2', d); });
+VP.forEach(function(d){ reg('vp', 'p2', d); });
+SEQ.forEach(function(d){ reg('seq', d.ch, d); });
+PASSAGES.forEach(function(d){ reg('case', 'p6', d); });
+WRITTEN.forEach(function(d){ reg('w', d.ch, d); });
+
+function idsOf(type, ch, filter){
+  return Object.keys(TPL).filter(function(id){ var T=TPL[id]; return T.t===type && (!ch || T.ch===ch) && (!filter || filter(T.d)); });
+}
+function fillBlanks(d){ return d.q.split('___').length-1; }
+var KIND_LABEL = {answer:'प्रश्न का उत्तर', hots:'सोचकर उत्तर दो (HOTS)', sent:'वाक्य बनाइए', copy:'कॉपी में लिखिए', plan:'अनुच्छेद से पहले', para:'अनुच्छेद लेखन', draw:'चित्र बनाकर लिखिए'};
+function plainMcq(d){ return !d.one && !d.oo && !d.vs && !d.mean && !d.ph && !d.sv; }
+function gunaTip(d){ var w = underlined(d.s); return d.a==='ग' ? '‘'+w+'’ गुण, रंग, स्वाद, आकार या दशा बताता है (कैसा?), इसलिए गुणवाचक विशेषण।' : '‘'+w+'’ संख्या बताता है (कितने?), इसलिए संख्यावाचक विशेषण।'; }
+
+/* ---------------- build a runtime question from a template ---------------- */
+function make(id, o){
+  o = o||{};
+  var T = TPL[id]; if(!T) throw new Error('no template '+id);
+  var d = T.d;
+  var q = {key:id, ch:T.ch, marks:o.marks||1, sec:o.sec||'', part:o.part||''};
+  if(T.t==='mcq'){
+    var keep = !!(d.fx || d.oo || d.vs);
+    q.type='mcq'; q.fx=keep && !d.oo && !d.vs; q.opts=keep?d.o.slice():shuffle(d.o); q.ans=d.a;
+    q.tip=d.tip||''; q.slip=d.slip||''; q.oo=!!d.oo; q.sent=!!d.sv;
+    if(d.oo){ q.prompt='बेमेल शब्द पर गोला लगाइए:'; q.label='बेमेल शब्द चुनिए'; }
+    else if(d.one){ q.prompt=d.q; q.label='वाक्यांश के लिए एक शब्द'; q.pre='इस वाक्यांश के लिए एक शब्द चुनिए:'; }
+    else if(d.ph){ q.prompt='‘'+d.q+'’ के लिए सही वाक्यांश पर गोला लगाइए।'; q.word=d.q; q.label='सही वाक्यांश पर गोला लगाइए'; }
+    else if(d.mean){ q.prompt='‘'+d.q+'’ का अर्थ है—'; q.word=d.q; q.label='शब्दार्थ'; }
+    else if(d.vs){ q.prompt=d.q; q.label='विशेषण और विशेष्य'; }
+    else if(d.sv){ q.prompt=d.q; q.label='सही वाक्य चुनिए'; }
+    else { q.prompt=d.q; q.label='सही विकल्प पर गोला लगाइए'; }
+  } else if(T.t==='bh'){
+    q.type='mcq'; q.uprompt=d.s; q.prompt=plainUL(d.s); q.fx=false; q.two=true; q.opts=[GUNA, SANKHYA]; q.ans = d.a==='ग' ? GUNA : SANKHYA;
+    q.tip=d.tip||gunaTip(d); q.label='रेखांकित विशेषण का भेद लिखिए';
+  } else if(T.t==='pic'){
+    q.type='mcq'; q.emoji=d.e; q.prompt='चित्र देखो। सही शब्द-समूह चुनो।'; q.opts=shuffle([d.a].concat(d.o)); q.ans=d.a; q.tip=d.tip||''; q.label='चित्र देखकर विशेषण चुनिए';
+  } else if(T.t==='vc'){
+    q.type='mcq'; q.spell=true; q.word=d.w; q.prompt='‘'+d.w+'’ का '+(d.to==='ब'?'बहुवचन':'एकवचन')+' चुनिए।'; q.opts=shuffle([d.a].concat(d.o)); q.ans=d.a;
+    q.tip=d.tip||''; q.slip=d.slip||''; q.label='वचन बदलिए';
+  } else if(T.t==='vp'){
+    q.type='mcq'; q.word=d.w; q.two=true; q.prompt='इस शब्द का वचन पहचानिए: एकवचन या बहुवचन?'; q.opts=['एकवचन','बहुवचन']; q.ans = d.a==='ए' ? 'एकवचन' : 'बहुवचन'; q.fx=false;
+    q.tip=d.tip||''; q.label='वचन पहचानिए';
+  } else if(T.t==='spell'){
+    q.type='mcq'; q.spell=true; q.prompt=d.q; q.opts=shuffle([d.a].concat(d.w)); q.ans=d.a; q.slip=d.slip||'';
+    q.tip=(d.tip?d.tip+' ':'')+'सही वर्तनी: '+d.a; q.label='शुद्ध वर्तनी पर गोला लगाइए';
+  } else if(T.t==='tf'){
+    q.type='tf'; q.prompt=d.q; q.ans=d.a; q.tip=d.tip||''; q.slip=d.slip||''; q.note=d.note||''; q.label='सही या गलत';
+    q.fix = d.fix ? {prompt:d.fix.q, opts:shuffle(d.fix.o), ans:d.fix.a} : null;
+  } else if(T.t==='fill'){
+    q.type='fill'; q.parts=d.q.split('___'); q.ans=d.a; q.any=!!d.any; q.slip=d.slip||''; q.tip=d.tip||'';
+    q.chips=shuffle(d.a.map(function(x){return x[0];}).concat(d.bank)); q.label = T.ch==='p1' ? 'उचित विशेषण से खाली स्थान भरिए' : 'रिक्त स्थान भरिए';
+  } else if(T.t==='two'){
+    var nOk = Math.min(3, d.ok.length), okC = sample(d.ok, nOk), noC = sample(d.no, Math.min(d.no.length, 6-nOk));
+    q.type='two'; q.prompt=d.q; q.ok=okC; q.chips=shuffle(okC.concat(noC)); q.need=2; q.tip=d.tip||''; q.label='दो उदाहरण चुनिए';
+  } else if(T.t==='tw'){
+    q.type='tw'; q.sentence=d.s; q.words=d.s.replace(/।\s*$/,'').split(' '); q.ok=d.a.slice(); q.need=d.a.length; q.tip=d.tip||''; q.label='वाक्य में विशेषण पहचानिए';
+    q.prompt='इस वाक्य में विशेषण पर टैप करो।';
+  } else if(T.t==='match'){
+    var n = o.n||4, chosen=[];
+    var av = o.avoid||{}, avk = Object.keys(av);
+    function pairClash(p){ var t=' '+norm(p[0]+' '+p[1])+' '; return avk.some(function(f){ var c=f.charAt(0); if(c==='~'||c==='#') return false; var w = c==='!' ? f.slice(1) : f; return t.indexOf(' '+w+' ')>=0; }); }
+    var clean = shuffle(d.pairs.filter(function(p){ return !pairClash(p); })), dirty = shuffle(d.pairs.filter(pairClash));
+    clean.concat(dirty).forEach(function(p){ if(chosen.length<n) chosen.push(p); });
+    var right = shuffle(chosen.map(function(p){return p[1];}));
+    q.type='match'; q.prompt=d.lab||'मिलान कीजिए'; q.left=chosen.map(function(p){return p[0];}); q.right=right;
+    q.pair=chosen.map(function(p){return right.indexOf(p[1]);}); q.label=d.lab||'मिलान कीजिए';
+  } else if(T.t==='sort'){
+    var items=[];
+    d.buckets.forEach(function(b,bi){ sample(d.items.filter(function(it){return it[1]===bi;}), d.per).forEach(function(it){ items.push({t:it[0], b:bi}); }); });
+    q.type='sort'; q.prompt=d.q; q.buckets=d.buckets.slice(); q.items=shuffle(items); q.label='छाँटिए';
+  } else if(T.t==='seq'){
+    var rest = d.steps.slice(), ch2 = shuffle(rest), guard=0;
+    while(rest.length>1 && ch2.join('|')===rest.join('|') && guard++<20) ch2 = shuffle(rest);
+    q.type='seq'; q.prompt=d.q; q.steps=d.steps.slice(); q.chips=ch2; q.slip=d.slip||''; q.label='सही क्रम लगाइए';
+  } else if(T.t==='case' || T.t==='af'){
+    q.type='steps'; q.passage=d.passage; q.title=T.t==='case' ? d.title : ''; q.prompt = T.t==='case' ? 'गद्यांश पढ़कर उत्तर दीजिए।' : 'खाली जगह भरो, फिर भेद बताओ।';
+    q.parts=d.parts.map(function(p){ return {prompt:p.q, opts:(p.o.length===2 ? p.o.slice() : shuffle(p.o)), ans:p.a}; });
+    q.label = T.t==='case' ? 'अपठित गद्यांश' : 'रिक्त स्थान में विशेषण भरकर भेद लिखिए';
+  } else if(T.t==='w'){
+    q.kind=d.k; q.wm=d.m; q.prompt=d.q; q.kw=d.kw||[]; q.pts=d.pts.slice(); q.slip=d.slip||''; q.model=d.model||'';
+    if(o.mode==='note'){
+      q.type='note'; q.label=KIND_LABEL[d.k]||'कॉपी में लिखिए'; q.marks=o.marks||d.m;
+    } else {
+      var good = d.pts.length>3 ? sample(d.pts,3) : d.pts.slice();
+      q.type='build'; q.good=good; q.chips=shuffle(good.concat(d.bad)); q.label='उत्तर बनाइए — '+(KIND_LABEL[d.k]||'');
+    }
+  }
+  return q;
+}
+
+/* ---------------- no repeats: one fact per set, rotate through the bank across replays ---------------- */
+function norm(x){ return String(x).toLowerCase().replace(/\([^)]*\)/g,'').replace(/[^a-z0-9ऀ-ॣ०-ॿ]+/g,' ').trim(); }
+var ANSWERS = null;
+var COMMON = {'गुणवाचक':1,'संख्यावाचक':1,'गुणवाचक विशेषण':1,'संख्यावाचक विशेषण':1,'एकवचन':1,'बहुवचन':1,'विशेषण':1,'विशेष्य':1,'वचन':1,
+  'सही':1,'गलत':1,'दो':1,'तीन':1,'चार':1,'पाँच':1,'छह':1,'दस':1,'है':1,'हैं':1,'और':1,'के':1,'की':1,'का':1,'में':1,'से':1,'पर':1,'को':1,'ने':1,'नहीं':1};
+function ownAnswers(T){
+  var d=T.d, out=[];
+  if(T.t==='mcq'||T.t==='spell'||T.t==='pic'||T.t==='vc') out.push(d.a);
+  else if(T.t==='fill') d.a.forEach(function(a){ out = out.concat(a); });
+  else if(T.t==='tf' && d.fix) out.push(d.fix.a);
+  else if(T.t==='tw') out = out.concat(d.a);
+  else if(T.t==='af' || T.t==='case') d.parts.forEach(function(p){ out.push(p.a); });
+  return out.map(norm).filter(function(x){ return x.length>0; });
+}
+function promptText(T){
+  var d=T.d, t=[];
+  if(T.t==='bh' || T.t==='tw') t=[plainUL(d.s)];
+  else if(T.t==='vc' || T.t==='vp') t=[d.w];
+  else if(T.t==='af' || T.t==='case') t=[d.passage].concat(d.parts.map(function(p){ return p.q; }));
+  else if(T.t==='pic') t=[];
+  else if(T.t==='seq') t=[d.q].concat(d.steps);
+  else if(T.t==='w' || T.t==='sort') t=[d.q];
+  else if(d.sv) t=[d.q].concat(d.o);
+  else if(!d.oo) t=[d.q||''];
+  if(T.t==='two') t = t.concat(d.ok);
+  return ' '+norm(t.join(' '))+' ';
+}
+/* Spelling answers are one-way: a spelling item must not meet a question that shows its word,
+   but questions that merely show the word may meet each other. Other answers are two-way. */
+var SPELLW = null;
+function buildAnswers(){
+  ANSWERS={}; SPELLW={};
+  Object.keys(TPL).forEach(function(k){ var T=TPL[k]; ownAnswers(T).forEach(function(a){ if(a.length>=3 && !COMMON[a]){ if(T.t==='spell') SPELLW[a]=1; else ANSWERS[a]=1; } }); });
+  Object.keys(ANSWERS).forEach(function(a){ delete SPELLW[a]; });
+}
+function factsOf(id){
+  if(!ANSWERS) buildAnswers();
+  var T=TPL[id], out=[], own=ownAnswers(T);
+  if(T.t!=='match'){
+    var pt = promptText(T);
+    Object.keys(ANSWERS).forEach(function(a){ if(pt.indexOf(' '+a+' ')>=0) out.push(a); });
+    Object.keys(SPELLW).forEach(function(a){ if(pt.indexOf(' '+a+' ')>=0 && !(T.t==='spell' && own.indexOf(a)>=0)) out.push('~'+a); });
+  }
+  out = out.concat(own);
+  if(T.t==='spell') own.forEach(function(a){ out.push('!'+a); });
+  (T.d.f||[]).forEach(function(f){ out.push('#'+f); });
+  return out.filter(function(x){ return !COMMON[x]; });
+}
+function clash(id, used){ return factsOf(id).some(function(f){ if(f.charAt(0)==='~') return !!used['!'+f.slice(1)]; if(f.charAt(0)==='!') return !!(used[f] || used['~'+f.slice(1)]); return !!used[f]; }); }
+function useFacts(id, used){ factsOf(id).forEach(function(f){ used[f]=1; }); }
+function rotate(ids, n, used){
+  var seen = S.seen||{};
+  var sf = S.seenF||{};
+  var ordered = ids.filter(function(id){ return !clash(id, used); }).map(function(id){ var k = seen[id]||0; ownAnswers(TPL[id]).forEach(function(f){ if((sf[f]||0)>k) k=sf[f]; }); return {id:id, k:k + rnd()*1000}; }).sort(function(a,b){ return a.k-b.k; }).map(function(x){ return x.id; });
+  var out=[];
+  ordered.forEach(function(id){ if(out.length<n && !clash(id, used)){ out.push(id); useFacts(id, used); } });
+  return out;
+}
+
+/* ---------------- sets ---------------- */
+function cat(name, ch){
+  switch(name){
+    case 'mcq': return idsOf('mcq', ch, plainMcq);
+    case 'one': return idsOf('mcq', ch, function(d){ return d.one; });
+    case 'ph': return idsOf('mcq', ch, function(d){ return d.ph; });
+    case 'mean': return idsOf('mcq', ch, function(d){ return d.mean; });
+    case 'vs': return idsOf('mcq', ch, function(d){ return d.vs; });
+    case 'sv': return idsOf('mcq', ch, function(d){ return d.sv; });
+    case 'oo': return idsOf('mcq', ch, function(d){ return d.oo; });
+    case 'sorttwo': return idsOf('sort', ch).concat(idsOf('two', ch));
+    case 'twooo': return idsOf('two', ch).concat(idsOf('mcq', ch, function(d){ return d.oo; }));
+    default: return idsOf(name, ch);
+  }
+}
+var RECIPE = {
+  p1: [['bh',2],['tw',2],['vs',1],['mcq',2],['fill',1],['af',1],['pic',1],['tf',2],['spell',1],['sorttwo',1],['oo',1]],
+  p2: [['vc',4],['vp',3],['mcq',1],['oo',1],['fill',2],['tf',2],['spell',1],['sorttwo',1]],
+  p3: [['one',3],['ph',3],['match',1],['fill',2],['tf',2],['spell',2],['oo',1]],
+  p4: [['mcq',4],['mean',2],['match',1],['spell',2],['tf',3],['sv',2],['seq',1],['twooo',1]],
+  p5: [['mcq',4],['sort',1],['seq',1],['tf',2],['two',1],['sv',1],['spell',2],['match',1],['oo',1]]
+};
+var LONG = {match:1, sort:1, seq:1, steps:1};
+function chapterSet(ch){
+  if(ch==='p6') return rotate(idsOf('case','p6'), 2, {}).map(function(id){ return make(id); });
+  var used = {}, groups = [];
+  RECIPE[ch].forEach(function(r){
+    var ids = rotate(cat(r[0], ch), r[1], used);
+    if(ids.length) groups.push(ids);
+  });
+  /* round-robin across categories so the same kind of question does not come twice in a row; long ones go last */
+  var order = [], more = true, k = 0;
+  while(more){ more=false; groups.forEach(function(g){ if(k<g.length){ order.push(g[k]); more=true; } }); k++; }
+  var short = order.filter(function(id){ return !LONG[TPL[id].t] && TPL[id].t!=='af'; }), long = order.filter(function(id){ return LONG[TPL[id].t] || TPL[id].t==='af'; });
+  var Q = short.concat(long).map(function(id){ return TPL[id].t==='match' ? make(id,{avoid:used}) : make(id); });
+  var w = rotate(idsOf('w',ch,function(d){ return d.k==='answer'; }), ch==='p3'?0:1, used);
+  w.forEach(function(id){ Q.push(make(id,{mode:'build'})); });
+  return Q;
+}
+function labSet(chs){
+  if(!chs) return ['p5r6','p5r3'].map(function(id){ return make(id,{mode:'note'}); });
+  var ch = chs[0], all = idsOf('w', ch);
+  var slips = all.filter(function(id){ return TPL[id].d.slip; });
+  var rest = shuffle(all.filter(function(id){ return !TPL[id].d.slip; }));
+  return shuffle(slips).concat(rest).slice(0, 5).map(function(id){ return make(id,{mode:'note'}); });
+}
+/* Section A follows the Unit III booklet order: khand ka (passage), kha (grammar), ga (literature), gha (writing) */
+function bossA(){
+  var Q=[], used={};
+  useFacts('p5q1', used);
+  function add(ids, sec, marks){ ids.forEach(function(id,k){ Q.push(make(id,{marks:marks||1, sec:sec, part:(ids.length>1?LBL[k]:'')})); }); }
+  add(rotate(idsOf('case','p6'),1,used), 'खंड क · प्र.1 अपठित गद्यांश', 5);
+  add(rotate(idsOf('bh'),3,used), 'खंड ख · प्र.2 रेखांकित विशेषण का भेद लिखिए');
+  add(rotate(idsOf('af'),2,used), 'प्र.3 रिक्त स्थान में विशेषण भरकर भेद लिखिए');
+  add(rotate(idsOf('fill','p1'),2,used), 'प्र.4 उचित विशेषण से खाली स्थान भरिए');
+  add(rotate(idsOf('vc'),3,used), 'प्र.5 वचन बदलिए');
+  add(rotate(idsOf('vp'),2,used), 'प्र.6 वचन पहचानिए');
+  add(rotate(cat('one','p3'),2,used), 'प्र.7 वाक्यांश के लिए एक शब्द');
+  add(rotate(cat('ph','p3'),2,used), 'प्र.8 सही वाक्यांश पर गोला लगाइए');
+  add(rotate(idsOf('spell','p4').concat(idsOf('spell','p5')),3,used), 'खंड ग · प्र.9 शुद्ध वर्तनी पर गोला लगाइए');
+  add(rotate(cat('mcq','p4'),3,used), 'प्र.10 सही विकल्प पर गोला लगाइए');
+  add(rotate(idsOf('tf','p4'),3,used), 'प्र.11 सही/गलत का निशान लगाइए');
+  Q.push(make('p4x',{marks:2, sec:'प्र.12 शब्दार्थ — मिलान कीजिए', n:4, avoid:used}));
+  Q.push(make('p5q1',{marks:1, sec:'खंड घ · प्र.13 अनुच्छेद का प्रारूप'}));
+  return Q;
+}
+function bossB(){
+  var Q=[], qa = sample(['p4r1','p4r2','p4r3','p4r4','p4r5'],2);
+  qa.forEach(function(id,k){ Q.push(make(id,{mode:'note', marks:2, sec:'प्र.14 प्रश्नों के उत्तर लिखिए', part:LBL[k]})); });
+  Q.push(make('p4r7',{mode:'note', marks:2, sec:'प्र.15 वाक्य बनाइए'}));
+  Q.push(make('p4r6',{mode:'note', marks:2, sec:'प्र.16 सोचकर उत्तर दीजिए (HOTS)'}));
+  Q.push(make('p2r2',{mode:'note', marks:2, sec:'प्र.17 वचन बदलकर लिखिए'}));
+  return Q;
+}
+function canFix(id){ var T=TPL[id]; return !!T && !(T.t==='w' && !(T.d.bad && T.d.bad.length)); }
+function asTappable(id, o){ o=o||{}; return TPL[id].t==='w' ? make(id,{mode:'build'}) : make(id,{reshuffle:!!o.reshuffle}); }
+function practiceIds(){ return Object.keys(S.mist).filter(canFix).sort(function(a,b){ return (S.mist[b].n-S.mist[a].n) || (S.mist[a].t-S.mist[b].t); }); }
+function bookletIds(){ var wk=S.mist; return SLIP_IDS.filter(function(id){ return !S.cured[id] && !wk[id]; }); }
+function fixSet(ids){ return (ids || practiceIds().concat(bookletIds())).filter(canFix).slice(0,15).map(function(id){ return asTappable(id,{reshuffle:true}); }); }
+function shortQ(id){
+  var T=TPL[id], d=T.d, t;
+  if(T.t==='spell') t='वर्तनी: '+d.q;
+  else if(T.t==='w') t=d.q;
+  else if(T.t==='two') t='दो उदाहरण: '+d.q;
+  else if(T.t==='match') t='मिलान: '+(d.lab||'मिलान कीजिए');
+  else if(T.t==='bh') t='भेद: '+plainUL(d.s);
+  else if(T.t==='tw') t='विशेषण पहचानो: '+d.s;
+  else if(T.t==='pic') t='चित्र: '+d.e;
+  else if(T.t==='vc') t='‘'+d.w+'’ का '+(d.to==='ब'?'बहुवचन':'एकवचन');
+  else if(T.t==='vp') t='वचन पहचानो: '+d.w;
+  else if(T.t==='af') t='रिक्त स्थान: '+d.passage;
+  else if(T.t==='case') t='अपठित गद्यांश: '+d.parts[0].q;
+  else if(T.t==='mcq' && d.oo) t='बेमेल: '+d.q;
+  else if(T.t==='mcq' && d.mean) t='अर्थ: '+d.q;
+  else if(T.t==='mcq' && d.ph) t='वाक्यांश: '+d.q;
+  else if(T.t==='mcq' && d.sv) t='सही वाक्य: '+d.a;
+  else t=d.q||id;
+  t=t.replace(/_+/g,'___');
+  return t.length>72 ? t.slice(0,70)+'…' : t;
+}
+function slipSet(){ return shuffle(SLIP_IDS).map(asTappable); }
+function flashSet(){
+  var ids = practiceIds().slice(0,10);
+  shuffle(SLIP_IDS.filter(function(id){ return !S.cured[id] && ids.indexOf(id)<0; })).forEach(function(id){ if(ids.length<12) ids.push(id); });
+  shuffle(idsOf('bh').concat(idsOf('vc'), idsOf('vp'), cat('one','p3'), cat('mcq','p4'), idsOf('tf','p4'))).forEach(function(id){ if(ids.length<15 && ids.indexOf(id)<0) ids.push(id); });
+  return ids.map(asTappable);
+}
+function spellSet(){ return rotate(idsOf('spell'),12,{}).map(function(id){ return make(id); }); }
+function vachanSet(){ var used={}; return shuffle(rotate(idsOf('vc'),7,used).concat(rotate(idsOf('vp'),5,used))).map(function(id){ return make(id); }); }
+
+/* ---------------- state ---------------- */
+function fresh(){ return {v:1, xp:0, days:{}, ch:{}, done:{}, mist:{}, cured:{}, lab:{}, boss:{}, learned:{}, seen:{}, seenF:{}, sound:true, t:0}; }
+function normalize(o){
+  var f = fresh(); if(!o || typeof o!=='object') return f;
+  Object.keys(f).forEach(function(k){ if(o[k]===undefined || o[k]===null || typeof o[k]!==typeof f[k]) o[k]=f[k]; });
+  return o;
+}
+var lsOK = false;
+function loadLocal(){
+  try{ var raw = window.localStorage.getItem(STORE_KEY); lsOK = true; return raw ? normalize(JSON.parse(raw)) : fresh(); }
+  catch(e){ lsOK = false; return fresh(); }
+}
+function saveLocal(){ try{ window.localStorage.setItem(STORE_KEY, JSON.stringify(S)); lsOK = true; }catch(e){ lsOK = false; } }
+var S = loadLocal();
+
+/* optional cloud copy through the artifact runtime (absent on GitHub Pages) */
+var SYNC = {ref:null, status: lsOK ? 'device' : 'memory', writing:false, pending:false, timer:null};
+function better(a,b){ return (a.xp||0)>(b.xp||0) || ((a.xp||0)===(b.xp||0) && (a.t||0)>(b.t||0)); }
+function summary(){
+  var o = {xp:S.xp, level:lvl(S.xp)};
+  CH.forEach(function(c){ var r=S.ch[c.id]; o[c.id+'_best'] = r ? Math.round(r.best*100) : -1; });
+  o.mistakes = Object.keys(S.mist).join(',');
+  o.bossA = S.boss.a ? S.boss.a.got+'/'+S.boss.a.max : '';
+  o.bossB = S.boss.b ? S.boss.b.got+'/'+S.boss.b.max : '';
+  return o;
+}
+function flush(){
+  if(!SYNC.ref) return;
+  if(SYNC.writing){ SYNC.pending=true; return; }
+  SYNC.writing = true;
+  SYNC.ref.set({s:JSON.stringify(S), t:S.t, summary:summary()}).then(function(){ SYNC.status='cloud'; }, function(e){
+    if(e && (e.code==='invalid_argument' || e.code==='revoked' || e.code==='not_granted')){ SYNC.ref=null; SYNC.status = lsOK?'device':'memory'; }
+  }).then(function(){ SYNC.writing=false; paintSync(); if(SYNC.pending){ SYNC.pending=false; flush(); } });
+}
+function save(){ S.t = nowMs(); saveLocal(); if(typeof DikshaSync!=='undefined'){ try{ DikshaSync.push(STORE_KEY, S); }catch(e){} } if(!SYNC.ref && SYNC.status!=='cloud') SYNC.status = lsOK?'device':'memory'; if(SYNC.ref){ clearTimeout(SYNC.timer); SYNC.timer=setTimeout(flush, 1500); } }
+function initCloud(){
+  var c = window.claude;
+  if(!c || typeof c.use!=='function') return;
+  var p; try{ p = c.use('db'); }catch(e){ return; }
+  Promise.resolve(p).then(function(db){
+    if(!db) return;
+    var ref = db.doc(DB_PATH);
+    return ref.get().then(function(snap){
+      SYNC.ref = ref; SYNC.status='cloud';
+      var remote = null;
+      if(snap && snap.exists){ try{ remote = normalize(JSON.parse(snap.data().s)); }catch(e){ remote=null; } }
+      if(remote && better(remote, S)){ S = remote; saveLocal(); render(); }
+      else if(!remote || better(S, remote)){ flush(); }
+      paintSync();
+    });
+  }).catch(function(){ SYNC.ref=null; paintSync(); });
+}
+function paintSync(){
+  var el = document.getElementById('syncnote'); if(!el) return;
+  el.textContent = SYNC.status==='cloud' ? 'प्रगति तुम्हारे Claude खाते में सेव है।' : SYNC.status==='device' ? 'प्रगति इसी डिवाइस पर सेव है।' : 'पेज बंद करने पर प्रगति मिट जाएगी।';
+}
+
+function lvl(xp){ return Math.min(TITLES.length-1, Math.floor(xp/LEVEL_XP)); }
+function addXP(n){
+  if(n<=0) return;
+  var before = lvl(S.xp);
+  S.xp += n; var k = dayKey(nowMs()); S.days[k] = (S.days[k]||0)+n;
+  if(lvl(S.xp)>before){ toast('लेवल अप! अब तुम '+TITLES[lvl(S.xp)]+' हो!'); confetti(80); }
+}
+function markMistake(id){ var m = S.mist[id] || {n:0,t:0}; m.n++; m.t = nowMs(); S.mist[id]=m; }
+function clearMistake(id){ if(S.mist[id]){ S.mist[id].n--; if(S.mist[id].n<=0) delete S.mist[id]; } }
+
+/* ---------------- dates / plan ---------------- */
+function today(){ return dayKey(nowMs()); }
+function examChip(){
+  var d = new Date(nowMs()); var t0 = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+  var ex = new Date(EXAM_Y, EXAM_M, EXAM_D).getTime();
+  var days = Math.round((ex - t0)/86400000);
+  if(days>1) return 'टेस्ट '+days+' दिन में';
+  if(days===1) return 'कल टेस्ट है';
+  if(days===0) return 'आज टेस्ट है!';
+  return 'टेस्ट हो गया';
+}
+function planDone(p){
+  if(p.kind==='ch') return !!(S.ch[p.ch] && S.ch[p.ch].plays>0);
+  if(p.kind==='boss') return !!(S.boss.a && S.boss.b);
+  return !!S.done[p.id];
+}
+function nextPlan(){ for(var i=0;i<PLAN.length;i++){ if(!planDone(PLAN[i])) return PLAN[i]; } return null; }
+
+/* ---------------- sound / fx ---------------- */
+var AC = null;
+function beep(ok){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    var notes = ok ? [660, 880] : [240, 190];
+    notes.forEach(function(f,i){
+      var o = AC.createOscillator(), g = AC.createGain(); o.type = ok?'triangle':'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0.0001, AC.currentTime+i*0.11); g.gain.exponentialRampToValueAtTime(0.18, AC.currentTime+i*0.11+0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime+i*0.11+0.16);
+      o.connect(g); g.connect(AC.destination); o.start(AC.currentTime+i*0.11); o.stop(AC.currentTime+i*0.11+0.18);
+    });
+  }catch(e){}
+}
+var reduceMotion = false;
+try{ reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches; }catch(e){}
+function confetti(n){
+  if(reduceMotion) return;
+  var cv = document.getElementById('fx'); if(!cv || !cv.getContext) return;
+  var ctx; try{ ctx = cv.getContext('2d'); }catch(e){ return; } if(!ctx) return;
+  var W = cv.width = window.innerWidth, H = cv.height = window.innerHeight, P=[], cols=['#C8323C','#FFB627','#1E8A4C','#2C8FD0','#7A5AD6','#E0702A'];
+  for(var i=0;i<n;i++) P.push({x:W/2+(rnd()-.5)*W*.4, y:H*.35, vx:(rnd()-.5)*9, vy:-rnd()*9-3, s:5+rnd()*6, c:pick(cols), r:rnd()*6});
+  var t=0;
+  (function step(){
+    ctx.clearRect(0,0,W,H); t++;
+    P.forEach(function(p){ p.vy+=0.28; p.x+=p.vx; p.y+=p.vy; p.r+=0.1; ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2); ctx.restore(); });
+    if(t<110) requestAnimationFrame(step); else ctx.clearRect(0,0,W,H);
+  })();
+}
+var toastTimer=null;
+function toast(msg){
+  var el = document.getElementById('toast'); if(!el) return;
+  el.textContent = msg; el.hidden = false; clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.hidden = true; }, 2600);
+}
+
+/* ---------------- view state ---------------- */
+var V = {name:'home'};
+var QZ = null;
+var armed = {};
+
+function startQuiz(mode, list, meta){
+  QZ = {mode:mode, list:list, i:0, ui:newUI(list[0]), res:[], xp:0, combo:0, best:0, meta:meta||{}, started:nowMs()};
+  V = {name:'quiz'}; render(); scrollTop();
+}
+function newUI(q){
+  if(!q) return {};
+  switch(q.type){
+    case 'mcq': return {picked:null, done:false};
+    case 'tf': return {picked:null, fixPicked:null, done:false};
+    case 'fill': return {slots:q.ans.map(function(){return null;}), sel:0, done:false};
+    case 'two': return {sel:[], done:false};
+    case 'tw': return {sel:[], done:false};
+    case 'match': return {L:null, R:null, got:q.left.map(function(){return false;}), miss:q.left.map(function(){return false;}), flash:null, done:false};
+    case 'sort': return {i:0, placed:[], miss:0, flash:null, done:false};
+    case 'seq': return {filled:[], used:{}, miss:{}, flash:null, done:false};
+    case 'steps': return {k:0, picks:[], done:false};
+    case 'build': return {sel:[], done:false};
+    case 'note': return {phase:'write', ticks:q.pts.map(function(){return false;}), done:false};
+  }
+  return {};
+}
+function scrollTop(){ try{ window.scrollTo(0,0); }catch(e){} }
+
+/* ---------------- grading ---------------- */
+function grade(q, u){
+  switch(q.type){
+    case 'mcq': return u.picked===q.ans ? 1 : 0;
+    case 'tf': return u.picked===q.ans ? 1 : 0;
+    case 'fill': return fillScore(q,u.slots).score;
+    case 'two': var c=u.sel.filter(function(x){return q.ok.indexOf(x)>=0;}).length; return c/q.need;
+    case 'tw':
+      var tg=u.sel.filter(function(i){return q.ok.indexOf(q.words[i])>=0;}).length, tb=u.sel.length-tg;
+      if(tg===q.need && tb===0) return 1;
+      return Math.max(0, (tg-tb)/q.need);
+    case 'match': return u.miss.filter(function(m){return !m;}).length/q.left.length;
+    case 'sort': return u.placed.filter(function(p){return p.ok;}).length/q.items.length;
+    case 'seq': var slots=q.steps.length, miss=Object.keys(u.miss).length; return (slots-miss)/slots;
+    case 'steps': return u.picks.filter(function(p,k){return p===q.parts[k].ans;}).length/q.parts.length;
+    case 'build':
+      var g=u.sel.filter(function(x){return q.good.indexOf(x)>=0;}).length, b=u.sel.length-g;
+      if(g===q.good.length && b===0) return 1;
+      return Math.max(0, (g-b)/q.good.length);
+    case 'note': return u.ticks.filter(Boolean).length/q.pts.length;
+  }
+  return 0;
+}
+function fillScore(q, slots){
+  var res = slots.map(function(){return false;});
+  if(q.any){
+    var usedA = {};
+    slots.forEach(function(v,i){
+      for(var j=0;j<q.ans.length;j++){ if(!usedA[j] && v!==null && q.ans[j].indexOf(v)>=0){ usedA[j]=1; res[i]=true; break; } }
+    });
+  } else {
+    slots.forEach(function(v,i){ res[i] = v!==null && q.ans[i].indexOf(v)>=0; });
+  }
+  var ok = res.filter(Boolean).length;
+  return {res:res, score: ok/slots.length};
+}
+
+function finishQ(){
+  var q = QZ.list[QZ.i], u = QZ.ui;
+  if(u.done) return;
+  u.done = true;
+  var sc = grade(q, u);
+  var ok = sc>=0.999;
+  QZ.res[QZ.i] = {score:sc, ok:ok};
+  S.seen = S.seen||{}; S.seen[q.key] = nowMs(); S.seenF = S.seenF||{}; if(TPL[q.key]) ownAnswers(TPL[q.key]).forEach(function(f){ S.seenF[f] = nowMs(); });
+  var xp = q.type==='note' ? u.ticks.filter(Boolean).length*4 : Math.round(10*sc);
+  if(ok){ QZ.combo++; if(QZ.combo>=3) xp += Math.min(QZ.combo-2,5)*2; } else QZ.combo = 0;
+  QZ.best = Math.max(QZ.best, QZ.combo);
+  QZ.xp += xp; addXP(xp);
+  if(ok){ if(QZ.mode==='fix'){ delete S.mist[q.key]; if(SLIP_IDS.indexOf(q.key)>=0) S.cured[q.key]=true; QZ.fixed=(QZ.fixed||0)+1; } else clearMistake(q.key); if(QZ.mode==='slip') S.cured[q.key]=true; }
+  else if(canFix(q.key)) markMistake(q.key);
+  if(q.type!=='note') beep(ok);
+  save();
+}
+
+/* ---------------- actions ---------------- */
+var ACT = {};
+ACT.home = function(){ V={name:'home'}; QZ=null; render(); scrollTop(); };
+ACT.parent = function(){ V={name:'parent'}; render(); scrollTop(); };
+ACT.sound = function(){ S.sound=!S.sound; save(); render(); };
+ACT.reset = function(){
+  if(!armed.reset){ armed.reset=true; render(); setTimeout(function(){ armed.reset=false; }, 4000); return; }
+  armed.reset=false; S = fresh(); save(); toast('प्रगति मिटा दी गई।'); V={name:'home'}; render();
+};
+ACT.learn = function(el){ V={name:'learn', ch:el.getAttribute('data-ch'), i:0}; render(); scrollTop(); };
+ACT.lnext = function(){ var n=LEARN[V.ch].length; if(V.i<n-1){ V.i++; render(); scrollTop(); } };
+ACT.lprev = function(){ if(V.i>0){ V.i--; render(); scrollTop(); } };
+ACT.quest = function(el){
+  var ch = el.getAttribute('data-ch');
+  S.learned[ch] = true; save();
+  startQuiz('ch', chapterSet(ch), {ch:ch, title:CHMAP[ch].name});
+};
+ACT.plan = function(el){
+  var p = PLAN.filter(function(x){return x.id===el.getAttribute('data-id');})[0]; if(!p) return;
+  if(p.kind==='ch'){ V={name:'learn', ch:p.ch, i:0}; render(); scrollTop(); return; }
+  if(p.kind==='lab') return startQuiz('lab', labSet(null), {title:p.title, sid:p.id});
+  if(p.kind==='boss') return S.boss.a && !S.boss.b ? ACT.bossB() : ACT.bossA();
+  if(p.kind==='slip') return startQuiz('slip', slipSet(), {title:'स्लिप डॉक्टर', sid:p.id});
+  if(p.kind==='fix') return ACT.fixmine();
+  if(p.kind==='flash') return startQuiz('flash', flashSet(), {title:'फ़्लैश राउंड', sid:p.id});
+};
+ACT.lab = function(el){ var ch=el.getAttribute('data-ch'); startQuiz('lab', labSet([ch]), {ch:ch, title:CHMAP[ch].name+' — कॉपी'}); };
+ACT.bossA = function(){ startQuiz('bossA', bossA(), {title:'बॉस — भाग 1'}); };
+ACT.bossB = function(){ startQuiz('bossB', bossB(), {title:'बॉस — भाग 2'}); };
+ACT.fixmine = function(){
+  var L=fixSet();
+  if(!L.length){ S.done.S10 = {pct:1, t:nowMs()}; save(); render(); toast('अभी ठीक करने को कुछ नहीं है!'); return; }
+  startQuiz('fix', L, {title:'गलतियाँ ठीक करो', sid:'S10'});
+};
+ACT.fixthese = function(){ var ids=[]; QZ.list.forEach(function(q,i){ var r=QZ.res[i]; if(r && !r.ok && canFix(q.key) && ids.indexOf(q.key)<0) ids.push(q.key); }); if(!ids.length) return; startQuiz('fix', fixSet(ids), {title:'गलतियाँ ठीक करो'}); };
+ACT.slip = function(){ startQuiz('slip', slipSet(), {title:'स्लिप डॉक्टर', sid:'S6'}); };
+ACT.flash = function(){ startQuiz('flash', flashSet(), {title:'फ़्लैश राउंड', sid:'S11'}); };
+ACT.mixnote = function(){ startQuiz('lab', labSet(null), {title:'लेखन लैब', sid:'S8'}); };
+ACT.spell = function(){ startQuiz('spell', spellSet(), {title:'शुद्ध वर्तनी'}); };
+ACT.vachan = function(){ startQuiz('vachan', vachanSet(), {title:'वचन रेस'}); };
+ACT.passages = function(){ startQuiz('ch', chapterSet('p6'), {ch:'p6', title:CHMAP.p6.name}); };
+ACT.quit = function(){
+  if(!armed.quit){ armed.quit=true; render(); setTimeout(function(){ armed.quit=false; var b=document.querySelector('[data-act="quit"]'); if(b){ b.classList.remove('armed'); b.textContent='✕'; } }, 3000); return; }
+  armed.quit=false; ACT.home();
+};
+ACT.next = function(){
+  if(!QZ) return;
+  if(QZ.i < QZ.list.length-1){ QZ.i++; QZ.ui = newUI(QZ.list[QZ.i]); render(); scrollTop(); }
+  else endQuiz();
+};
+ACT.again = function(){
+  var m = QZ && QZ.mode, meta = QZ && QZ.meta;
+  if(m==='ch') return startQuiz('ch', chapterSet(meta.ch), meta);
+  if(m==='bossA') return ACT.bossA();
+  if(m==='bossB') return ACT.bossB();
+  if(m==='slip') return ACT.slip();
+  if(m==='fix') return ACT.fixmine();
+  if(m==='flash') return ACT.flash();
+  if(m==='spell') return ACT.spell();
+  if(m==='vachan') return ACT.vachan();
+  if(m==='lab') return startQuiz('lab', labSet(meta.ch ? [meta.ch] : null), meta);
+  ACT.home();
+};
+/* question interactions */
+ACT.opt = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  u.picked = q.opts[+el.getAttribute('data-i')]; finishQ(); render();
+};
+ACT.tf = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.picked!==null) return;
+  u.picked = el.getAttribute('data-v')==='1';
+  if(!q.fix){ finishQ(); render(); return; }
+  beep(u.picked===q.ans);
+  render();
+};
+ACT.fix = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done || u.picked===null) return;
+  u.fixPicked = q.fix.opts[+el.getAttribute('data-i')];
+  var sv = S.sound; S.sound = false; finishQ(); S.sound = sv;
+  if(u.fixPicked===q.fix.ans){ QZ.xp += 5; addXP(5); save(); }
+  render();
+};
+ACT.slot = function(el){
+  var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i');
+  if(u.slots[i]!==null){ u.slots[i]=null; }
+  u.sel = i; render();
+};
+ACT.chip = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')];
+  if(u.slots.indexOf(c)>=0) return;
+  var tgt = (u.sel!==null && u.slots[u.sel]===null) ? u.sel : u.slots.indexOf(null);
+  if(tgt<0) return;
+  u.slots[tgt]=c;
+  var nx = u.slots.indexOf(null); u.sel = nx>=0 ? nx : null;
+  render();
+};
+ACT.check = function(){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  if(q.type==='fill' && u.slots.indexOf(null)>=0) return;
+  if(q.type==='two' && u.sel.length<q.need) return;
+  if((q.type==='build' || q.type==='tw') && u.sel.length<1) return;
+  finishQ(); render();
+};
+ACT.tog = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')], k = u.sel.indexOf(c);
+  if(k>=0) u.sel.splice(k,1);
+  else { if(q.type==='two' && u.sel.length>=q.need) u.sel.shift(); u.sel.push(c); }
+  render();
+};
+ACT.word = function(el){
+  var u=QZ.ui; if(u.done) return;
+  var i = +el.getAttribute('data-i'), k = u.sel.indexOf(i);
+  if(k>=0) u.sel.splice(k,1); else u.sel.push(i);
+  render();
+};
+ACT.ml = function(el){ var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i'); if(u.got[i]) return; u.L=i; u.flash=null; tryPair(); };
+ACT.mr = function(el){ var u=QZ.ui; if(u.done) return; var j=+el.getAttribute('data-i'), q=QZ.list[QZ.i]; if(q.pair.indexOf(j)>=0 && u.got[q.pair.indexOf(j)]) return; u.R=j; u.flash=null; tryPair(); };
+function tryPair(){
+  var q=QZ.list[QZ.i], u=QZ.ui;
+  if(u.L===null || u.R===null){ render(); return; }
+  if(q.pair[u.L]===u.R){ u.got[u.L]=true; beep(true); }
+  else { u.miss[u.L]=true; u.flash={L:u.L, R:u.R}; beep(false); }
+  u.L=null; u.R=null;
+  if(u.got.every(Boolean)){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+}
+ACT.bucket = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var b=+el.getAttribute('data-i'), it=q.items[u.i], ok = it.b===b;
+  u.placed.push({t:it.t, b:it.b, ok:ok}); u.flash = ok ? null : b; if(!ok) u.miss++;
+  beep(ok); u.i++;
+  if(u.i>=q.items.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.seq = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var c = q.chips[+el.getAttribute('data-i')]; if(u.used[c]) return;
+  var slot = u.filled.length, want = q.steps[slot];
+  if(c===want){ u.filled.push(c); u.used[c]=1; u.flash=null; beep(true); }
+  else { u.miss[slot]=1; u.flash=c; beep(false); }
+  if(u.filled.length===q.steps.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.step = function(el){
+  var q=QZ.list[QZ.i], u=QZ.ui; if(u.done) return;
+  var p = q.parts[u.k], c = p.opts[+el.getAttribute('data-i')];
+  u.picks.push(c); beep(c===p.ans); u.k++;
+  if(u.k>=q.parts.length){ var sv=S.sound; S.sound=false; finishQ(); S.sound=sv; }
+  render();
+};
+ACT.nbshow = function(){ var u=QZ.ui; if(u.phase==='write'){ u.phase='check'; render(); } };
+ACT.nbpt = function(el){ var u=QZ.ui; if(u.done) return; var i=+el.getAttribute('data-i'); u.ticks[i]=!u.ticks[i]; render(); };
+ACT.nbdone = function(){ var u=QZ.ui; if(u.done || u.phase!=='check') return; finishQ(); render(); };
+
+function endQuiz(){
+  var tot=0, got=0, marks=0, maxM=0;
+  QZ.list.forEach(function(q,i){ var r=QZ.res[i]||{score:0}; tot++; got+=r.score; maxM+=q.marks; marks += Math.round(r.score*q.marks*2)/2; });
+  var pct = tot ? got/tot : 0;
+  var stars = pct>=0.9 ? 3 : pct>=0.7 ? 2 : 1;
+  QZ.pct = pct; QZ.stars = stars; QZ.marks = marks; QZ.maxM = maxM;
+  var m = QZ.mode;
+  if(m==='ch'){ var r = S.ch[QZ.meta.ch] || {best:0, stars:0, plays:0}; r.best=Math.max(r.best,pct); r.stars=Math.max(r.stars,stars); r.plays++; S.ch[QZ.meta.ch]=r; }
+  if(m==='lab'){ QZ.list.forEach(function(q,i){ if(q.type==='note'){ S.lab[q.key]={got:QZ.res[i]?Math.round(QZ.res[i].score*q.pts.length):0, of:q.pts.length, t:nowMs()}; } }); }
+  if(m==='bossA') S.boss.a = {got:marks, max:maxM, t:nowMs()};
+  if(m==='bossB') S.boss.b = {got:marks, max:maxM, t:nowMs()};
+  if(QZ.meta.sid && (m==='lab'||m==='slip'||m==='fix'||m==='flash')) S.done[QZ.meta.sid] = {pct:pct, t:nowMs()};
+  save();
+  V = {name:'result'}; render(); scrollTop();
+  if(stars>=2) confetti(stars===3?140:70);
+}
+
+/* ---------------- rendering ---------------- */
+var CHMAP = {}; CH.forEach(function(c){ CHMAP[c.id]=c; });
+function starStr(n, of){ var s=''; for(var i=0;i<(of||3);i++) s += i<n ? '★' : '☆'; return s; }
+function hl(text, kw){
+  var t = esc(text);
+  (kw||[]).forEach(function(k){
+    var re = new RegExp('('+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')');
+    t = t.replace(re,'<mark>$1</mark>');
+  });
+  return t;
+}
+function partChip(ch){ var c=CHMAP[ch]; return c ? 'भाग '+c.n : 'मिश्रित'; }
+
+function renderTop(){
+  var L = lvl(S.xp), into = S.xp - L*LEVEL_XP, pct = L>=TITLES.length-1 ? 100 : Math.round(into/LEVEL_XP*100);
+  var dots = DAYS.map(function(k,i){ return '<i class="'+(S.days[k]?'on':'')+'" title="'+DAYN[i]+'"></i>'; }).join('');
+  return '<div class="topin">'+
+    '<div class="ava">'+ART.mascot(L)+'</div>'+
+    '<div class="lvl"><b>'+esc(TITLES[L])+'</b><div class="xpbar"><i style="width:'+pct+'%"></i></div></div>'+
+    '<span class="chip xp">'+S.xp+' रन</span>'+
+    '<span class="chip exam">'+examChip()+'</span>'+
+    '<span class="streak" aria-label="जिन दिनों अभ्यास किया">'+dots+'</span>'+
+  '</div>';
+}
+
+function heroMsg(){
+  var d = today(), nx = nextPlan(), nxt = nx ? ' अगला: <b>'+esc(nx.title)+'</b>।' : '';
+  if(d<DAYS[0]) return '<b>नमस्ते '+KID+'!</b> मैं गुगली हूँ 🏏 सोमवार को हिंदी का टेस्ट है। तैयारी कल से शुरू होगी, पर चाहो तो आज ही पहला ओवर खेल लो!';
+  if(d===DAYS[0]) return '<b>शनिवार, '+KID+'!</b> आज विशेषण, वचन, अनेक शब्द, अपठित गद्यांश और अनुच्छेद।'+nxt;
+  if(d===DAYS[1]) return '<b>रविवार!</b> आज पाठ क्रिकेट, लेखन लैब और बॉस टेस्ट पेपर।'+nxt;
+  if(d===DAYS[2]) return '<b>आज टेस्ट है!</b> बस फ़्लैश राउंड, कुछ नया नहीं। तुमने बहुत अच्छी तैयारी की है। जाओ, छक्का लगाओ! 🏏';
+  return '<b>टेस्ट हो गया, '+KID+'!</b> जब मन करे, अभ्यास के लिए वापस आना।';
+}
+
+function mistakeSection(){
+  var wk = practiceIds(), bk = bookletIds(), n = wk.length + bk.length;
+  var h = '<section class="mist" id="mistakes"><div class="misth"><span class="mic">📒</span><div class="mtx"><h2>मेरी गलतियाँ</h2><p>'+
+    (n ? '<b>'+n+'</b> ठीक करनी हैं। यहाँ एक बार सही करो, तो सूची से हट जाएगी।' : 'अभी ठीक करने को कुछ नहीं। शाबाश! 🌟')+'</p></div></div>';
+  function grp(title, ids){
+    if(!ids.length) return '';
+    return '<div class="mgrp"><small>'+title+' ('+ids.length+')</small><ul>'+ids.slice(0,4).map(function(id){ return '<li><span class="mchip">'+partChip(TPL[id].ch)+'</span>'+esc(shortQ(id))+'</li>'; }).join('')+
+      (ids.length>4?'<li class="more">+ '+(ids.length-4)+' और</li>':'')+'</ul></div>';
+  }
+  if(n){
+    h += grp('अभ्यास से', wk) + grp('मेरी कॉपी और बुकलेट से', bk);
+    h += '<div class="btnrow"><button class="btn mbtn" data-act="fixmine">🔧 गलतियाँ ठीक करो ('+Math.min(n,15)+')</button></div>';
+  }
+  return h + '</section>';
+}
+function planIcon(p){ return p.kind==='ch' ? CHMAP[p.ch].icon : p.kind==='lab' ? '📝' : p.kind==='boss' ? '👑' : p.kind==='slip' ? '🩺' : p.kind==='fix' ? '🔧' : '⚡'; }
+function renderHome(){
+  var nx = nextPlan(), h = '';
+  h += '<section class="hero"><div class="bigfrog">'+ART.mascot(Math.max(3,lvl(S.xp)))+'</div><div class="bubble">'+heroMsg()+
+    (nx ? '<div class="btnrow"><button class="btn" data-act="plan" data-id="'+nx.id+'">▶ '+esc(nx.title)+' शुरू करो</button></div>' : '<p>सारे ओवर पूरे! 🎉</p>')+'</div></section>';
+  h += mistakeSection();
+  var days = [{d:DAYS[0], t:'शनिवार, 31 अक्टूबर', s:'व्याकरण, गद्यांश और अनुच्छेद'},{d:DAYS[1], t:'रविवार, 1 नवंबर', s:'पाठ, लेखन और बॉस'},{d:DAYS[2], t:'सोमवार, 2 नवंबर', s:'टेस्ट का दिन'}];
+  h += '<h2>शब्दों का शतक — 11 ओवर</h2><div class="pond">';
+  days.forEach(function(D){
+    h += '<div class="dayhead"><b>'+D.t+'</b><span>'+D.s+'</span></div>';
+    PLAN.filter(function(p){return p.day===D.d;}).forEach(function(p, k){
+      var done = planDone(p), isNext = nx && nx.id===p.id;
+      var st = '';
+      if(p.kind==='ch' && S.ch[p.ch]) st = '<span class="stars">'+starStr(S.ch[p.ch].stars)+'</span>';
+      if(p.kind==='boss') st = '<span class="mini">'+(S.boss.a?'भाग 1: '+S.boss.a.got+'/'+S.boss.a.max:'भाग 1: –')+' · '+(S.boss.b?'भाग 2: '+S.boss.b.got+'/'+S.boss.b.max:'भाग 2: –')+'</span>';
+      h += '<button class="pad'+(done?' done':'')+(isNext?' next':'')+(k%2?' alt':'')+'" data-act="plan" data-id="'+p.id+'">'+
+        '<span class="lily"><span class="lic">'+planIcon(p)+'</span>'+(done?'<span class="tick">✓</span>':'')+'</span>'+(isNext?'<span class="hopper">'+ART.mascot(4)+'</span>':'')+
+        '<span class="pt"><small>'+esc(p.when)+' · '+p.mins+' मिनट</small><b>'+esc(p.id.replace('S','ओवर '))+': '+esc(p.title)+'</b>'+(p.sub?'<span class="sub">'+esc(p.sub)+'</span>':'')+st+'</span>'+
+      '</button>';
+    });
+  });
+  h += '</div>';
+  h += '<h2>किसी भी भाग का अभ्यास करो</h2><div class="chgrid">';
+  CH.forEach(function(c){
+    var r = S.ch[c.id], hasW = idsOf('w', c.id).length>0;
+    h += '<div class="cht" style="--hue:'+c.hue+'"><div class="chh"><span class="ci">'+c.icon+'</span><span><small>भाग '+c.n+'</small><b>'+esc(c.name)+'</b></span></div>'+
+      '<div class="chs">'+esc(c.short)+'<br>'+(r?'<span class="stars">'+starStr(r.stars)+'</span> सबसे अच्छा '+Math.round(r.best*100)+'%':'अभी शुरू नहीं किया')+'</div>'+
+      '<div class="chb"><button class="btn ghost sm" data-act="learn" data-ch="'+c.id+'">📖 सीखो</button><button class="btn sm" data-act="quest" data-ch="'+c.id+'">🎯 खेलो</button>'+
+      (hasW?'<button class="btn ghost sm" data-act="lab" data-ch="'+c.id+'">✍️ कॉपी</button>':'')+'</div></div>';
+  });
+  h += '</div>';
+  var mcount = Object.keys(S.mist).length;
+  h += '<h2>खास राउंड</h2><div class="extras">'+
+    '<button class="ex" data-act="spell"><span>🐝</span><b>शुद्ध वर्तनी</b><small>12 शब्दों की वर्तनी</small></button>'+
+    '<button class="ex" data-act="vachan"><span>🏃</span><b>वचन रेस</b><small>12 शब्द: बदलो और पहचानो</small></button>'+
+    '<button class="ex" data-act="passages"><span>📖</span><b>अपठित गद्यांश</b><small>2 गद्यांश पढ़ो</small></button>'+
+    '<button class="ex" data-act="bossA"><span>👑</span><b>बॉस: भाग 1</b><small>टेस्ट पेपर, ऐप में</small></button>'+
+    '<button class="ex" data-act="bossB"><span>📝</span><b>बॉस: भाग 2</b><small>कॉपी में उत्तर</small></button>'+
+    '<button class="ex" data-act="mixnote"><span>✍️</span><b>लेखन लैब</b><small>बॉक्स + अनुच्छेद</small></button>'+
+    '<button class="ex" data-act="flash"><span>⚡</span><b>फ़्लैश राउंड</b><small>'+(mcount?mcount+' ठीक करनी हैं':'झटपट वार्म-अप')+'</small></button>'+
+  '</div>';
+  h += '<div class="foot"><button class="btn ghost sm en" data-act="parent">For grown-ups</button><button class="btn ghost sm" data-act="sound">'+(S.sound?'🔊 आवाज़ चालू':'🔇 आवाज़ बंद')+'</button><span id="syncnote"></span></div>';
+  return h;
+}
+
+function renderLearn(){
+  var ch = CHMAP[V.ch], cards = LEARN[V.ch], c = cards[V.i];
+  var h = '<div class="qhead"><button class="qx" data-act="home" aria-label="वापस">←</button><div class="ltitle">'+ch.icon+' भाग '+ch.n+': '+esc(ch.name)+'</div></div>';
+  h += '<article class="lc" style="--hue:'+ch.hue+'"><div class="lch"><span class="le">'+c.e+'</span><h3>'+esc(c.h)+'</h3><span class="lnum">'+(V.i+1)+' / '+cards.length+'</span></div>'+c.b+'</article>';
+  h += '<div class="dots">'+cards.map(function(x,i){return '<i class="'+(i===V.i?'on':'')+'"></i>';}).join('')+'</div>';
+  h += '<div class="btnrow spread">'+(V.i>0?'<button class="btn ghost" data-act="lprev">← पीछे</button>':'<span></span>')+
+    (V.i<cards.length-1 ? '<button class="btn" data-act="lnext">आगे →</button>' : '<button class="btn" data-act="quest" data-ch="'+ch.id+'">🎯 खेल शुरू करो</button>')+'</div>';
+  if(V.i<cards.length-1) h += '<p class="skip"><button class="link" data-act="quest" data-ch="'+ch.id+'">सीधे खेल पर जाओ</button></p>';
+  return h;
+}
+
+/* ----- question bodies ----- */
+function optBtn(q, u, o, i, act, picked, ans, done){
+  var cls='opt'+(q.spell?' spell':'')+(q.sent?' sent':'');
+  if(done){ if(o===ans) cls+=' ok'; else if(o===picked) cls+=' bad'; else cls+=' dim'; }
+  return '<button class="'+cls+'" data-act="'+act+'" data-i="'+i+'"'+(done?' disabled':'')+'>'+(q.fx?'<span class="ol">'+LBL[i]+')</span> ':'')+esc(o)+'</button>';
+}
+function longOpts(opts){ return opts.some(function(o){ return o.length>22; }); }
+function bodyMCQ(q,u){
+  var h = '';
+  if(q.uprompt) h += '<p class="prompt sentence">'+ulHTML(q.uprompt)+'</p><p class="hint">रेखांकित शब्द कौन-सा विशेषण है?</p>';
+  else if(q.emoji) h += '<p class="prompt sm">'+esc(q.prompt)+'</p><div class="emo" role="img" aria-label="चित्र">'+q.emoji+'</div>';
+  else if(q.word && !q.spell && q.label!=='वचन पहचानिए') h += '<div class="bigword">'+esc(q.word)+'</div><p class="prompt sm">'+esc(q.prompt)+'</p>';
+  else if(q.word) h += '<p class="prompt sm">'+esc(q.prompt)+'</p><div class="bigword">'+esc(q.word)+'</div>';
+  else { if(q.pre) h += '<p class="hint">'+esc(q.pre)+'</p>'; h += '<p class="prompt'+(q.oo?'':'')+'">'+esc(q.prompt)+'</p>'; if(q.oo) h += '<p class="hint">चार में से जो शब्द बाकी से अलग है, उस पर टैप करो।</p>'; }
+  var one = q.sent || q.two || longOpts(q.opts);
+  return h+'<div class="opts'+(one?' one':'')+'">'+q.opts.map(function(o,i){ return optBtn(q,u,o,i,'opt',u.picked,q.ans,u.done); }).join('')+'</div>';
+}
+function bodyTF(q,u){
+  var h = '<p class="prompt stmt">“'+esc(q.prompt)+'”</p><div class="tfrow">';
+  [[true,'✔ सही'],[false,'✘ गलत']].forEach(function(v){
+    var cls='opt tfb';
+    if(u.picked!==null){ if(v[0]===q.ans) cls+=' ok'; else if(v[0]===u.picked) cls+=' bad'; else cls+=' dim'; }
+    h += '<button class="'+cls+'" data-act="tf" data-v="'+(v[0]?1:0)+'"'+(u.picked!==null?' disabled':'')+'>'+v[1]+'</button>';
+  });
+  h += '</div>';
+  if(u.picked!==null && q.fix){
+    h += '<div class="fixbox"><p class="glabel">'+(u.picked===q.ans?'हाँ, यह गलत है! अब इसे सही करो और बोनस पाओ:':'यह वाक्य गलत है। क्या तुम इसे सही कर सकती हो?')+'</p><p class="prompt sm">'+esc(q.fix.prompt)+'</p><div class="opts one">'+
+      q.fix.opts.map(function(o,i){ return optBtn({fx:false},u,o,i,'fix',u.fixPicked,q.fix.ans,u.done); }).join('')+'</div></div>';
+  }
+  return h;
+}
+function bodyFill(q,u){
+  var res = u.done ? fillScore(q,u.slots).res : null;
+  function slot(i){
+    var v=u.slots[i], cls='slot'+(v!==null?' filled':'')+(!u.done && u.sel===i?' sel':'');
+    if(res) cls += res[i] ? ' ok' : ' bad';
+    return '<button class="'+cls+'" data-act="slot" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+(v!==null?esc(v):' ? ')+'</button>';
+  }
+  var h = '<p class="prompt sentence">';
+  q.parts.forEach(function(p,i){ h += esc(p); if(i<q.parts.length-1) h += slot(i); });
+  h += '</p>';
+  h += '<div class="chips">'+q.chips.map(function(c,i){ var used=u.slots.indexOf(c)>=0; return '<button class="chp'+(used?' gone':'')+'" data-act="chip" data-i="'+i+'"'+(u.done||used?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.slots.indexOf(null)>=0?' disabled':'')+'>जाँचो</button></div>';
+  return h;
+}
+function bodyTwo(q,u){
+  var h = '<p class="prompt">दो उदाहरण चुनिए: <b>'+esc(q.prompt)+'</b></p><p class="hint">जो 2 सही हों, उन पर टैप करो।</p><div class="opts'+(longOpts(q.chips)?' one':'')+'">';
+  q.chips.forEach(function(c,i){
+    var sel = u.sel.indexOf(c)>=0, cls='opt';
+    if(u.done){ var good=q.ok.indexOf(c)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':' dim'); }
+    else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="tog" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(c)+'</button>';
+  });
+  h += '</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<q.need?' disabled':'')+'>जाँचो</button></div>';
+  return h;
+}
+function bodyTW(q,u){
+  var h = '<p class="prompt sm">'+esc(q.prompt)+'</p><p class="hint">इस वाक्य में <b>'+q.need+'</b> विशेषण '+(q.need>1?'हैं':'है')+'।</p><div class="words">';
+  q.words.forEach(function(w,i){
+    var sel = u.sel.indexOf(i)>=0, cls='wd';
+    if(u.done){ var good=q.ok.indexOf(w)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':''); }
+    else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="word" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(w)+'</button>';
+  });
+  h += '<span class="wd" aria-hidden="true" style="border:0;background:none">।</span></div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<1?' disabled':'')+'>जाँचो</button></div>';
+  return h;
+}
+function bodyMatch(q,u){
+  var h = '<p class="prompt sm">बाईं ओर एक पर टैप करो, फिर दाईं ओर उसका जोड़ा।</p><div class="mrow"><div class="mcol">';
+  q.left.forEach(function(l,i){
+    var cls='mi'+(u.got[i]?' ok':'')+(u.L===i?' sel':'')+(u.flash&&u.flash.L===i?' bad shake':'');
+    h += '<button class="'+cls+'" data-act="ml" data-i="'+i+'"'+(u.got[i]||u.done?' disabled':'')+'>'+esc(l)+'</button>';
+  });
+  h += '</div><div class="mcol">';
+  q.right.forEach(function(r,j){
+    var li = q.pair.indexOf(j), cls='mi r'+(u.got[li]?' ok':'')+(u.R===j?' sel':'')+(u.flash&&u.flash.R===j?' bad shake':'');
+    h += '<button class="'+cls+'" data-act="mr" data-i="'+j+'"'+(u.got[li]||u.done?' disabled':'')+'>'+esc(r)+'</button>';
+  });
+  return h + '</div></div>';
+}
+function bodySort(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(!u.done){ var it=q.items[u.i]; h += '<div class="tray"><small>'+q.items.length+' में से '+(u.i+1)+' · यह कहाँ जाएगा?</small><b class="pop">'+esc(it.t)+'</b></div>'; }
+  h += '<div class="buckets">';
+  q.buckets.forEach(function(b,bi){
+    var inB = u.placed.filter(function(p){return p.b===bi;});
+    h += '<button class="bk'+(u.flash===bi?' bad shake':'')+'" data-act="bucket" data-i="'+bi+'"'+(u.done?' disabled':'')+'><b>'+esc(b)+'</b><span class="in">'+
+      inB.map(function(p){ return '<span class="'+(p.ok?'':'miss')+'">'+esc(p.t)+'</span>'; }).join('')+'</span></button>';
+  });
+  return h + '</div>';
+}
+function bodySeq(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><p class="hint">सही क्रम में एक-एक करके टैप करो।</p><ol class="seq">';
+  q.steps.forEach(function(st,i){
+    var f = u.filled[i];
+    h += '<li class="'+(f?'f':'')+(i===u.filled.length&&!u.done?' cur':'')+'"><span class="n">'+(i+1)+'</span><span class="st">'+(f?esc(f):'?')+'</span></li>';
+  });
+  h += '</ol>';
+  h += '<div class="chips">'+q.chips.map(function(c,i){ return '<button class="chp'+(u.used[c]?' gone':'')+(u.flash===c?' bad shake':'')+'" data-act="seq" data-i="'+i+'"'+(u.used[c]||u.done?' disabled':'')+'>'+esc(c)+'</button>'; }).join('')+'</div>';
+  return h;
+}
+function bodySteps(q,u){
+  var h = '<div class="passage">'+(q.title?'<b>'+esc(q.title)+'</b><br>':'')+esc(q.passage)+'</div>';
+  q.parts.forEach(function(p,k){
+    if(k<u.k){ var ok=u.picks[k]===p.ans; h += '<div class="stepdone '+(ok?'ok':'bad')+'"><small>'+(k+1)+'. '+esc(p.prompt)+'</small><b>'+(ok?'✓ ':'✗ '+esc(u.picks[k])+' → ')+esc(p.ans)+'</b></div>'; }
+  });
+  if(!u.done){ var p=q.parts[u.k]; h += '<p class="prompt sm">'+(u.k+1)+'. '+esc(p.prompt)+'</p><div class="opts'+(longOpts(p.opts)||p.opts.length===2?' one':'')+'">'+p.opts.map(function(o,i){ return '<button class="opt" data-act="step" data-i="'+i+'">'+esc(o)+'</button>'; }).join('')+'</div>'; }
+  return h;
+}
+function bodyBuild(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p><p class="hint">अच्छे उत्तर में जो वाक्य आएँगे, उन सब पर टैप करो। ऐसे <b>'+q.good.length+'</b> वाक्य हैं।</p><div class="opts one">';
+  q.chips.forEach(function(c,i){
+    var sel=u.sel.indexOf(c)>=0, cls='opt sent';
+    if(u.done){ var good=q.good.indexOf(c)>=0; cls += sel ? (good?' ok':' bad') : (good?' also':' dim'); } else if(sel) cls+=' pick';
+    h += '<button class="'+cls+'" data-act="tog" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+esc(c)+'</button>';
+  });
+  h += '</div>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="check"'+(u.sel.length<1?' disabled':'')+'>जाँचो</button></div>';
+  return h;
+}
+function modelHTML(q){ return '<p class="model">'+q.pts.map(function(p){ return hl(p,q.kw); }).join(' ')+'</p>'; }
+function writeHint(q){
+  if(q.kind==='para') return 'यह <b>'+q.marks+' अंक</b> का प्रश्न है। प्रारूप (भूमिका → विषयवस्तु → निष्कर्ष) के अनुसार <b>8–10 छोटे वाक्य</b> लिखो।';
+  if(q.kind==='copy' || q.kind==='plan') return 'इसे साफ़-साफ़ अपनी <b>कॉपी</b> में लिखो।';
+  if(q.kind==='sent') return 'हर शब्द से एक पूरा वाक्य बनाओ और अंत में पूर्ण विराम (।) लगाओ।';
+  if(q.kind==='draw') return 'कॉपी में चित्र बनाओ और उसके नीचे विशेषण के साथ संज्ञा लिखो।';
+  if(q.kind==='hots') return 'यह <b>'+q.marks+' अंक</b> का प्रश्न है। अपने <b>3–4 विचार</b> पूरे वाक्यों में लिखो।';
+  return 'यह <b>'+q.marks+' अंक</b> का प्रश्न है, इसलिए '+(q.marks>1?'<b>2–4 पूरे वाक्य</b>':'<b>1–2 पूरे वाक्य</b>')+' लिखो।';
+}
+function bodyNote(q,u){
+  var h = '<p class="prompt">'+esc(q.prompt)+'</p>';
+  if(u.phase==='write'){
+    h += '<div class="nb"><span class="pen">✍️</span><p>अपनी <b>कॉपी</b> में लिखो। '+writeHint(q)+'</p></div>';
+    h += '<div class="btnrow"><button class="btn" data-act="nbshow">मैंने लिख लिया — जाँचो</button></div>';
+    return h;
+  }
+  h += '<p class="glabel">'+(q.kind==='para'?'तुम्हारे अनुच्छेद में ये बातें आईं? हर एक पर टिक करो:':'जो-जो तुमने लिखा, उस पर टिक करो:')+'</p><div class="opts one">';
+  q.pts.forEach(function(p,i){ var on=u.ticks[i]; h += '<button class="opt sent'+(on?' ok':'')+'" data-act="nbpt" data-i="'+i+'"'+(u.done?' disabled':'')+'>'+(on?'☑ ':'☐ ')+hl(p,q.kw)+'</button>'; });
+  h += '</div>';
+  if(q.model) h += '<details class="modelbox"><summary>📄 नमूना अनुच्छेद देखो</summary><p class="model">'+esc(q.model)+'</p></details>';
+  if(q.kw && q.kw.length) h += '<p class="kw">इन शब्दों की वर्तनी ध्यान से: '+q.kw.map(function(k){return '<b>'+esc(k)+'</b>';}).join(', ')+'</p>';
+  if(!u.done) h += '<div class="btnrow"><button class="btn ink" data-act="nbdone">हो गया</button></div>';
+  return h;
+}
+function fixSentence(fix){
+  var p = fix.prompt.replace(/^सही करो: ?/,'');
+  if(p.indexOf('___')>=0) return p.replace('___', fix.ans);
+  return (p ? p+' ' : '')+fix.ans;
+}
+function answerLine(q){
+  switch(q.type){
+    case 'mcq': var ix = q.opts.indexOf(q.ans); return 'उत्तर: <b>'+(q.fx && ix>=0 ? '('+LBL[ix]+') ' : '')+esc(q.ans)+'</b>';
+    case 'tf': return 'उत्तर: <b>'+(q.ans?'सही':'गलत')+'</b>'+(q.fix?'<br>सही वाक्य: <b>'+esc(fixSentence(q.fix))+'</b>':'');
+    case 'fill': return q.parts.map(function(p,k){ return esc(p)+(k<q.parts.length-1?'<b>'+esc(q.ans[k][0])+'</b>':''); }).join('');
+    case 'two': return 'सही उदाहरण: <b>'+q.ok.map(esc).join(', ')+'</b>';
+    case 'tw': return 'विशेषण: <b>'+q.ok.map(esc).join(', ')+'</b>';
+    case 'match': return q.left.map(function(l,i){ return esc(l)+' → <b>'+esc(q.right[q.pair[i]])+'</b>'; }).join('<br>');
+    case 'seq': return '<b>'+q.steps.map(esc).join(' → ')+'</b>';
+    case 'steps': return q.parts.map(function(p,k){ return (k+1)+'. '+esc(p.prompt)+' <b>'+esc(p.ans)+'</b>'; }).join('<br>');
+    case 'build': return '<span class="glabel">ऐसे लिखो:</span>'+modelHTML(q);
+  }
+  return '';
+}
+function fbHTML(q,u,r){
+  var ok = r.ok, h = '<div class="fb'+(ok?'':' bad')+'">';
+  if(q.type==='note'){
+    var n=u.ticks.filter(Boolean).length;
+    h += '<p class="ft">'+(n===q.pts.length?'पूरे अंक! शाबाश!':n?'तुमने '+q.pts.length+' में से '+n+' बातें लिखीं।':'चलो, इसे सीखते हैं।')+'</p>';
+    if(n<q.pts.length) h += '<p class="tip">जो बातें छूट गईं, उन्हें कॉपी में दूसरे रंग से जोड़ दो।</p>';
+  } else {
+    var tfFix = q.type==='tf' && q.fix && u.fixPicked!==null;
+    h += '<p class="ft">'+(ok?pick(PRAISE):pick(OOPS))+(tfFix && u.fixPicked===q.fix.ans ? ' <span class="bonus">+5 बोनस</span>':'')+'</p>';
+    var al = (q.type==='steps') ? '' : answerLine(q); if(al && (!ok || q.type==='build' || q.type==='tf')) h += '<div class="fa">'+al+'</div>';
+  }
+  if(QZ.mode==='fix') h += '<p class="fixline">'+(ok?'✅ ठीक हो गई! सूची से हट गई।':'📒 अभी सूची में है। यह फिर आएगी।')+'</p>';
+  if(q.tip) h += '<p class="tip">'+esc(q.tip)+'</p>';
+  if(q.note) h += '<p class="tip">'+esc(q.note)+'</p>';
+  if(q.slip) h += '<div class="slipnote">🩺 '+esc(q.slip)+'</div>';
+  h += '<div class="btnrow"><button class="btn" data-act="next">'+(QZ.i<QZ.list.length-1?'आगे →':'मेरा स्कोर देखो')+'</button></div></div>';
+  return h;
+}
+function renderQuiz(){
+  var q = QZ.list[QZ.i], u = QZ.ui, n = QZ.list.length;
+  var h = '<div class="qhead"><button class="qx'+(armed.quit?' armed':'')+'" data-act="quit" aria-label="बंद करो">'+(armed.quit?'फिर से टैप करो':'✕')+'</button>'+
+    '<div class="pbar"><i style="width:'+Math.round(QZ.i/n*100)+'%"></i></div><span class="combo">'+(QZ.combo>=2?'🔥'+QZ.combo:'')+'</span><span class="qn">'+(QZ.i+1)+'/'+n+'</span></div>';
+  var marks = (QZ.mode==='bossA'||QZ.mode==='bossB') ? '<span class="mk">'+q.marks+' अंक</span>' : '';
+  h += '<div class="sec"><span>'+esc(q.sec || q.label)+(q.part?' · ('+q.part+')':'')+'</span>'+marks+'</div>';
+  var body = '';
+  switch(q.type){
+    case 'mcq': body=bodyMCQ(q,u); break; case 'tf': body=bodyTF(q,u); break; case 'fill': body=bodyFill(q,u); break;
+    case 'two': body=bodyTwo(q,u); break; case 'tw': body=bodyTW(q,u); break; case 'match': body=bodyMatch(q,u); break; case 'sort': body=bodySort(q,u); break;
+    case 'seq': body=bodySeq(q,u); break; case 'steps': body=bodySteps(q,u); break;
+    case 'build': body=bodyBuild(q,u); break; case 'note': body=bodyNote(q,u); break;
+  }
+  h += '<div class="qc" data-type="'+q.type+'">'+body+'</div>';
+  if(u.done) h += fbHTML(q,u,QZ.res[QZ.i]);
+  return h;
+}
+function wrongTitle(q){
+  if(q.type==='steps') return q.label;
+  if(q.uprompt) return plainUL(q.uprompt);
+  if(q.emoji) return 'चित्र '+q.emoji;
+  if(q.oo) return 'बेमेल: '+q.opts.join(', ');
+  if(q.word && q.label==='वचन पहचानिए') return 'वचन पहचानो: '+q.word;
+  return q.prompt||q.label;
+}
+function renderResult(){
+  var boss = QZ.mode==='bossA'||QZ.mode==='bossB';
+  var h = '<div class="res"><div class="bigfrog sm">'+ART.mascot(lvl(S.xp))+'</div><p class="rt">'+esc(QZ.meta.title||'पूरा हुआ')+'</p>';
+  if(boss) h += '<p class="score">'+QZ.marks+' / '+QZ.maxM+'</p><p class="sub">अंक'+(QZ.mode==='bossB'?' (कॉपी के उत्तर तुमने खुद जाँचे)':'')+'</p>';
+  else h += '<p class="score">'+Math.round(QZ.pct*100)+'%</p>';
+  h += '<p class="stars big">'+starStr(QZ.stars)+'</p><p class="sub">+'+QZ.xp+' रन'+(QZ.best>=3?' · लगातार सही 🔥'+QZ.best:'')+'</p>';
+  var wrong = QZ.list.map(function(q,i){return {q:q, r:QZ.res[i]};}).filter(function(x){ return x.r && !x.r.ok; });
+  var fixable = wrong.filter(function(x){ return canFix(x.q.key); });
+  if(QZ.mode!=='fix' && fixable.length) h += '<div class="btnrow center"><button class="btn mbtn" data-act="fixthese">🔧 इन्हें अभी ठीक करो ('+fixable.length+')</button></div>';
+  if(wrong.length){
+    h += '<div class="wrongs"><h3>इन्हें याद रखो</h3>'+wrong.map(function(x){
+      var q=x.q, line = q.type==='note' || q.type==='build' ? '<div class="small">'+modelHTML(q)+'</div>' : answerLine(q);
+      return '<div class="wr"><b>'+esc(wrongTitle(q))+'</b><div>'+line+'</div></div>';
+    }).join('')+'</div>';
+  } else h += '<p class="perfect">हर एक सही! 🌟</p>';
+  if(QZ.mode==='fix'){ var left = practiceIds().length + bookletIds().length; h += '<p class="perfect">'+QZ.list.length+' में से '+(QZ.fixed||0)+' ठीक हुईं। '+(left?left+' अभी सूची में हैं।':'सूची खाली हो गई! 🎉')+'</p>'; }
+  if(QZ.mode==='bossA' && !S.boss.b) h += '<div class="btnrow center"><button class="btn" data-act="bossB">भाग 2 पर चलो →</button></div>';
+  h += '<div class="btnrow center"><button class="btn ghost" data-act="again">फिर से खेलो</button><button class="btn" data-act="home">मैदान पर वापस</button></div></div>';
+  return h;
+}
+function renderParent(){
+  var h = '<div class="qhead"><button class="qx" data-act="home" aria-label="Back home">←</button><div class="ltitle en">For grown-ups</div></div>';
+  h += '<div class="lc en"><h3>Plan</h3><div class="tw"><table class="t"><tr><th>Session</th><th>When</th><th>Status</th></tr>'+
+    PLAN.map(function(p){ return '<tr><td>'+esc(p.id+' '+p.title)+'</td><td>'+esc(p.when)+'</td><td>'+(planDone(p)?'✅ done':'–')+'</td></tr>'; }).join('')+'</table></div></div>';
+  h += '<div class="lc en"><h3>Parts</h3><div class="tw"><table class="t"><tr><th>Part</th><th>Best</th><th>Plays</th></tr>'+
+    CH.map(function(c){ var r=S.ch[c.id]; return '<tr><td>'+esc(c.n+'. '+c.name)+'</td><td>'+(r?Math.round(r.best*100)+'%':'–')+'</td><td>'+(r?r.plays:0)+'</td></tr>'; }).join('')+'</table></div>'+
+    '<p>Boss A: <b>'+(S.boss.a?S.boss.a.got+' / '+S.boss.a.max:'not yet')+'</b> · Boss B: <b>'+(S.boss.b?S.boss.b.got+' / '+S.boss.b.max:'not yet')+'</b> (Section B is self-checked, so take a look at her notebook).</p></div>';
+  var mk = practiceIds();
+  h += '<div class="lc en"><h3>Still shaky ('+mk.length+')</h3>'+(mk.length? '<ul class="shaky">'+mk.slice(0,25).map(function(id){ return '<li><b>'+esc(partChip(TPL[id].ch))+'</b> '+esc(shortQ(id))+' <span class="mini">×'+S.mist[id].n+'</span></li>'; }).join('')+'</ul>' : '<p>Nothing yet.</p>')+'</div>';
+  h += '<div class="lc en"><h3>About the answers</h3><ul>'+
+    '<li>Built from her Unit III booklet (pp 99–105) and notebook (7–27 Oct). Booklet p 98 (खंड क, प्र.1) and the क्रिकेट lesson pages were not in the scan, so the four unseen passages are original practice passages, and the lesson drills use only the booklet and notebook questions.</li>'+
+    '<li>Booklet प्र.12 marks <b>प्रतिद्वंदी</b> as the correct spelling. Dictionaries give <b>प्रतिद्वंद्वी</b>. The app drills the booklet answer for the test and never shows प्रतिद्वंद्वी to her. Worth teaching after the test.</li>'+
+    '<li>True/false “चार अंपायर” is गलत according to the lesson. In real international matches there is also a TV (third) umpire and a fourth umpire, so the app says “मैदान पर दो अंपायर”, which is true either way.</li>'+
+    '<li>The answers on the three forms of cricket (Test 5 days, ODI 50 overs, T20 20 overs) are standard facts. I have not checked them against the lesson page.</li>'+
+    '<li>The “सच्ची खेल भावना” item is a guess at the booklet question marked “चर्चा हो चुकी है”, whose wording was hidden by the page fold.</li>'+
+    '<li>In “गॉड ऑफ क्रिकेट” she wrote a chandrabindu where ॉ goes. The app teaches ॉ but never shows her version, because with ँ it spells a rude word.</li>'+
+    '<li>कमीज़े (missing bindu) in her notebook is a likely slip, because the scan is faint there.</li>'+
+  '</ul></div>';
+  h += '<div class="lc en"><h3>Settings</h3><p id="syncnote"></p><div class="btnrow"><button class="btn ghost'+(armed.reset?' danger':'')+'" data-act="reset">'+(armed.reset?'Tap again to clear all progress':'Clear progress')+'</button></div></div>';
+  return h;
+}
+function render(){
+  var top = document.getElementById('topin'); if(top) top.innerHTML = renderTop();
+  var app = document.getElementById('app'); if(!app) return;
+  var h = '';
+  if(V.name==='home') h = renderHome();
+  else if(V.name==='learn') h = renderLearn();
+  else if(V.name==='quiz') h = renderQuiz();
+  else if(V.name==='result') h = renderResult();
+  else if(V.name==='parent') h = renderParent();
+  app.innerHTML = h;
+  paintSync();
+}
+
+document.addEventListener('click', function(e){
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if(!el || el.disabled) return;
+  var a = el.getAttribute('data-act');
+  if(a!=='quit' && armed.quit){ armed.quit=false; }
+  if(a!=='reset' && armed.reset){ armed.reset=false; }
+  if(ACT[a]) ACT[a](el);
+});
+
+render();
+setTimeout(initCloud, 0);
+
+/* Study Hub cross-device sync (GitHub Pages build loads firebase + sync.js; absent elsewhere = no-op) */
+if(typeof DikshaSync!=='undefined' && DikshaSync.init()){
+  try{ DikshaSync.attachUI(); }catch(e){}
+  DikshaSync.pull(STORE_KEY).then(function(remote){
+    if(remote && typeof remote==='object' && (remote.t||0) > (S.t||0)){ S = normalize(remote); saveLocal(); if(V.name!=='quiz') render(); }
+    DikshaSync.arm();
+    try{ DikshaSync.push(STORE_KEY, S); }catch(e){}
+  });
+}
+
+/* QA hooks */
+window.__HIN = {TPL:TPL, make:make, chapterSet:chapterSet, labSet:labSet, bossA:bossA, bossB:bossB, slipSet:slipSet, flashSet:flashSet, spellSet:spellSet, vachanSet:vachanSet, factsOf:factsOf, norm:norm, practiceIds:practiceIds, bookletIds:bookletIds, fixSet:fixSet, cat:cat,
+  grade:grade, fillScore:fillScore, start:startQuiz, state:function(){return S;}, quiz:function(){return QZ;}, view:function(){return V;}, act:ACT, render:render, idsOf:idsOf, planDone:planDone, nextPlan:nextPlan, sync:function(){return SYNC;}, examChip:examChip, heroMsg:heroMsg};
+})();
+
+</script>
+</body>
+</html>
