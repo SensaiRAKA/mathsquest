@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>English W.T.-III Quest - Mrs Tubbs</title>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="sync.js"></script>
+<style>
+:root{--bg:#fff8ec;--ink:#2b2140;--card:#ffffff;--line:#e9dcc6;--pri:#6c3fd1;--pri2:#4d2aa3;--ok:#1f9d55;--okbg:#e4f7ea;--bad:#d64545;--badbg:#fdeaea;--gold:#f5a623;--mute:#6f6787}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif;font-size:17px;line-height:1.45;-webkit-tap-highlight-color:transparent}
+.wrap{max-width:640px;margin:0 auto;padding:16px 14px 40px}
+header{text-align:center;padding:10px 0 6px}
+h1{font-size:1.55rem;margin:0;color:var(--pri2);letter-spacing:.3px}
+.sub{color:var(--mute);font-size:.92rem;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+.tile{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:14px 12px;text-align:left;cursor:pointer;font:inherit;color:inherit;box-shadow:0 3px 0 var(--line);min-height:112px;display:flex;flex-direction:column;justify-content:space-between}
+.tile:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.tile .ic{font-size:1.7rem;line-height:1}
+.tile .nm{font-weight:700;margin-top:6px}
+.tile .bs{font-size:.8rem;color:var(--mute);margin-top:2px}
+.tile.wide{grid-column:1 / -1;background:var(--pri);border-color:var(--pri2);color:#fff;box-shadow:0 3px 0 var(--pri2);min-height:84px}
+.tile.wide .bs{color:#e3d9ff}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:12px 0 4px}
+.bar i{display:block;height:100%;background:var(--gold);width:0;transition:width .25s}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:.9rem;color:var(--mute)}
+.linkbtn{background:none;border:0;color:var(--pri);font:inherit;font-weight:700;cursor:pointer;padding:6px 0}
+.q{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px 16px;margin-top:10px;font-size:1.12rem;font-weight:700}
+.opts{display:grid;gap:10px;margin-top:14px}
+.opt{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:14px;font:inherit;color:inherit;text-align:left;cursor:pointer;box-shadow:0 3px 0 var(--line)}
+.opt:disabled{cursor:default;box-shadow:none}
+.opt.ok{background:var(--okbg);border-color:var(--ok)}
+.opt.bad{background:var(--badbg);border-color:var(--bad)}
+.fb{margin-top:14px;padding:12px 14px;border-radius:14px;font-size:.98rem}
+.fb.ok{background:var(--okbg);color:#14653a}
+.fb.bad{background:var(--badbg);color:#8f2424}
+.next{margin-top:14px;width:100%;background:var(--pri);color:#fff;border:0;border-radius:14px;padding:15px;font:inherit;font-weight:700;font-size:1.05rem;cursor:pointer;box-shadow:0 3px 0 var(--pri2)}
+.res{text-align:center;background:var(--card);border:2px solid var(--line);border-radius:22px;padding:26px 16px;margin-top:18px}
+.big{font-size:2.6rem;font-weight:800;color:var(--pri2)}
+.stars{font-size:2rem;color:var(--gold);letter-spacing:6px}
+.miss{text-align:left;margin-top:16px;font-size:.93rem}
+.miss li{margin-bottom:8px}
+.hide{display:none}
+.hub{display:inline-block;margin-top:6px;color:var(--pri);font-weight:700;font-size:.9rem;text-decoration:none}
+.tot{text-align:center;margin-top:14px;font-weight:700;color:var(--pri2)}
+.sync-row{display:none;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;padding:22px 0 0;font-size:14px}
+.sync-row span{background:var(--card);color:var(--pri2);font-weight:700;padding:5px 12px;border-radius:99px;cursor:pointer;border:1px solid var(--line)}
+.sync-row button{background:none;border:0;font:inherit;color:var(--mute);font-weight:700;font-size:14px;text-decoration:underline;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+<h1>English W.T.-III Quest</h1>
+<div class="sub">Class IV &middot; L-8 The Story of Mrs Tubbs &middot; Tenses &middot; Conjunctions</div>
+<a class="hub" href="index.html">&larr; Study Hub</a>
+</header>
+
+<section id="home">
+<div class="grid" id="tiles"></div>
+<div class="tot" id="tot"></div>
+</section>
+
+<section id="play" class="hide">
+<div class="top"><button class="linkbtn" id="quit">&larr; Topics</button><span id="count"></span><span id="score"></span></div>
+<div class="bar"><i id="prog"></i></div>
+<div class="q" id="qtext"></div>
+<div class="opts" id="opts"></div>
+<div id="fb" class="fb hide"></div>
+<button class="next hide" id="next">Next</button>
+</section>
+
+<section id="done" class="hide">
+<div class="res">
+<div class="stars" id="stars"></div>
+<div class="big" id="final"></div>
+<div id="msg"></div>
+<ul class="miss" id="miss"></ul>
+<button class="next" id="again">Play again</button>
+<button class="linkbtn" id="back">Choose another topic</button>
+</div>
+</section>
+<div class="sync-row" id="syncRow"><span id="syncCodeLabel"></span><button id="syncChangeBtn">Use a different code</button></div>
+</div>
+
+<script>
+/*BANK_START*/
+var BANK = {
+story: {name: "Story", icon: "&#128054;", qs: [
+{q: "Who was Peter Punk?", o: ["The dog", "The duck", "The pig", "The rat"], a: 0, e: "Peter Punk was the dog."},
+{q: "Who was Polly Ponk?", o: ["The duck", "The dog", "The pig", "The swallow"], a: 0, e: "Polly Ponk was the duck."},
+{q: "Who was Patrick Pink?", o: ["The pig", "The dog", "The duck", "The cat"], a: 0, e: "Patrick Pink was the pig."},
+{q: "Who owned the farm where Mrs Tubbs lived?", o: ["A man in London", "Mrs Tubbs", "Tommy Squeak", "The nephew"], a: 0, e: "The farm belonged to a man in London. He sent his nephew to live there."},
+{q: "Who dug truffles in the woods?", o: ["Pink", "Punk", "Ponk", "Mrs Tubbs"], a: 0, e: "Pink the pig dug truffles."},
+{q: "Who caught a fine trout in the river?", o: ["Polly Ponk", "Peter Punk", "Patrick Pink", "Tilly Twitter"], a: 0, e: "Ponk the duck caught the trout."},
+{q: "What did Punk do to help with the meal?", o: ["Gathered sticks and made a fire", "Dug truffles", "Caught a fish", "Found a spoon"], a: 0, e: "Punk got sticks together and made a fire."},
+{q: "Where did the animals make a bed for Mrs Tubbs?", o: ["In a cave", "In the barn", "Under a bridge", "In a hollow tree"], a: 0, e: "They made a soft bed of leaves in a cave."},
+{q: "Tommy Squeak was the King of the ...", o: ["Water-rats", "Swallows", "Wasps", "Cats"], a: 0, e: "Tommy Squeak was the King of the Water-rats."},
+{q: "What was Tommy Squeak stealing last summer?", o: ["Cheese", "Truffles", "Trout", "A bone"], a: 0, e: "He was stealing cheese at the farm and fell into a bucket of water."},
+{q: "Who reminded Tommy Squeak how Mrs Tubbs had been kind to him?", o: ["Polly Ponk", "Peter Punk", "Patrick Pink", "Tilly Twitter"], a: 0, e: "Ponk the duck spoke to him on the bridge."},
+{q: "What did the rats eat holes in?", o: ["The man's new green hat", "The man's coat", "The kitchen door", "The man's boots"], a: 0, e: "They ate holes in his new green hat."},
+{q: "How did the man drive the rats away?", o: ["He got three wagonloads of cats", "He got a big dog", "He set traps", "He left the house"], a: 0, e: "Three wagonloads of cats drove the rats back to the river."},
+{q: "Tilly Twitter was the Queen of the ...", o: ["Swallows", "Water-rats", "Wasps", "Ducks"], a: 0, e: "Tilly Twitter was the Queen of the Swallows. Watch the spelling: Twitter."},
+{q: "What did Mrs Tubbs throw at the weasel?", o: ["Her porridge spoon", "A big stick", "A pan", "Her shoe"], a: 0, e: "She threw her porridge spoon at the weasel to save Philip."},
+{q: "Who was Philip?", o: ["Tilly Twitter's chick", "The man from London", "The King-Rat", "The pig"], a: 0, e: "Philip was Tilly's child who fell out of the nest."},
+{q: "Where had Punk hidden a bone?", o: ["In the trunk of a hollow tree", "In the barn", "Under the bridge", "In the cave"], a: 0, e: "He hid it in a tree trunk. Wasps had made a nest there."},
+{q: "Who threw a big stick into the hole in the tree?", o: ["Punk", "The man", "Pink", "Tommy Squeak"], a: 0, e: "Punk threw the stick, and the wasps came flying out."},
+{q: "Through which door did Punk run INTO the house?", o: ["The back door", "The front door", "The barn door", "The kitchen window"], a: 0, e: "In through the back door, out through the front door."},
+{q: "Where did the man shut himself to escape the wasps?", o: ["In the barn", "In the kitchen", "In the cave", "In the hall"], a: 0, e: "He ran into the yard and shut himself in the barn."},
+{q: "Why did the wasps sting the man?", o: ["They thought he had hidden Punk", "He broke their nest", "He threw a stick at them", "He shouted at them"], a: 0, e: "When they could not find Punk, they thought the man had hidden him."},
+{q: "For how long did the rats trouble the man?", o: ["A whole day and a night", "One hour", "A week", "Two days"], a: 0, e: "A whole day and a night."},
+{q: "Where do the swallows fly for the winter?", o: ["Africa", "London", "India", "The woods"], a: 0, e: "They fly to Africa because England is cold in winter."},
+{q: "Who wrote 'The Story of Mrs Tubbs'?", o: ["Hugh Lofting", "Ruskin Bond", "Roald Dahl", "Enid Blyton"], a: 0, e: "Hugh Lofting, who also created Dr. Dolittle."}
+]},
+words: {name: "Word Meanings", icon: "&#128218;", qs: [
+{q: "What does 'snore' mean?", o: ["To breathe noisily while asleep", "To eat very fast", "To walk quietly", "To sing loudly"], a: 0, e: "Snore: to breathe noisily through the nose and mouth when asleep."},
+{q: "A 'trout' is a ...", o: ["freshwater fish", "kind of bird", "small insect", "farm tool"], a: 0, e: "A trout is a freshwater fish."},
+{q: "'Rustling' is the sound of ...", o: ["leaves or paper moving", "a bell ringing", "water boiling", "a dog barking"], a: 0, e: "Rustling: a soft sound of leaves or paper moving."},
+{q: "A 'weasel' is ...", o: ["a small wild animal with a long body", "a large farm bird", "a kind of fish", "a stinging insect"], a: 0, e: "A weasel is a small wild animal with a long body and short legs."},
+{q: "A 'truffle' in the story is ...", o: ["a fungus that grows underground", "a kind of fish", "a small stick", "a soft bed"], a: 0, e: "Truffle: a fungus that grows underground and can be eaten."},
+{q: "'Stuffing' is ...", o: ["soft material that fills a chair or pillow", "a hard wooden seat", "food for cats", "a hole in a hat"], a: 0, e: "Stuffing: soft filling inside a chair or pillow."},
+{q: "'Wagonloads' of cats means ...", o: ["a very large number of cats", "three cats", "cats in a basket", "cats that pull a wagon"], a: 0, e: "Here wagonload means a large quantity."},
+{q: "'Eaves' are ...", o: ["the edges of a roof", "the leaves of a tree", "the steps of a house", "the sides of a river"], a: 0, e: "Eaves: the edge of a roof. Tilly built her nest under them."},
+{q: "A 'hollow' tree is ...", o: ["empty inside", "very tall", "full of fruit", "freshly cut"], a: 0, e: "Hollow: having an empty space inside."},
+{q: "A 'barn' is ...", o: ["a farm building for storing things", "a small river", "a kind of spade", "a rat's home"], a: 0, e: "A barn is a farm building used for storage."},
+{q: "The 'edge' of the woods means ...", o: ["the border of the woods", "the middle of the woods", "the tallest tree", "the path through the woods"], a: 0, e: "Edge: border or boundary."},
+{q: "To 'rattle' the pans means ...", o: ["to make short, sharp sounds with them", "to wash them", "to hide them", "to break them"], a: 0, e: "Rattle: a series of short, sharp sounds."},
+{q: "A 'wasp' is ...", o: ["a yellow and black insect that stings", "a small brown bird", "a river fish", "a baby rat"], a: 0, e: "A wasp is an insect that can sting."},
+{q: "A 'cave' is ...", o: ["a natural hole in a hillside", "a wooden hut", "a deep river", "a big nest"], a: 0, e: "Cave: a natural hole or chamber in a hillside or mountain."}
+]},
+spell: {name: "Spelling Bee", icon: "&#128029;", qs: [
+{q: "Pick the correct spelling.", o: ["truffles", "trufles", "truffels", "trufflles"], a: 0, e: "truffles"},
+{q: "Pick the correct spelling.", o: ["stuffing", "stufing", "stuffeng", "stuffin"], a: 0, e: "stuffing"},
+{q: "Pick the correct spelling.", o: ["gathered", "gatherd", "gatherred", "gethered"], a: 0, e: "gathered"},
+{q: "Pick the correct spelling.", o: ["frightened", "frightend", "frihtened", "fritened"], a: 0, e: "frightened"},
+{q: "Pick the correct spelling.", o: ["whispering", "wispering", "whisperring", "whispring"], a: 0, e: "whispering"},
+{q: "Pick the correct spelling.", o: ["splashing", "spalshing", "splasing", "splashhing"], a: 0, e: "splashing"},
+{q: "Pick the correct spelling.", o: ["weasel", "weasle", "wesel", "weezel"], a: 0, e: "weasel"},
+{q: "Pick the correct spelling.", o: ["rattle", "ratle", "rattel", "rattal"], a: 0, e: "rattle"},
+{q: "Pick the correct spelling.", o: ["gracious", "gratious", "gracous", "grasious"], a: 0, e: "gracious"},
+{q: "Pick the correct spelling.", o: ["Tommy Squeak", "Tommy Sqeak", "Tomy Squeak", "Tommy Squeek"], a: 0, e: "Tommy Squeak"},
+{q: "Pick the correct spelling.", o: ["Tilly Twitter", "Tilly Tweeter", "Tily Twitter", "Tilly Twiter"], a: 0, e: "Tilly Twitter"},
+{q: "Pick the correct spelling.", o: ["continuous", "continous", "continuos", "continuious"], a: 0, e: "continuous"},
+{q: "Pick the correct spelling.", o: ["referred", "reffered", "refered", "refferred"], a: 0, e: "referred"},
+{q: "Pick the correct spelling.", o: ["rustling", "russling", "rustleing", "rusling"], a: 0, e: "rustling"}
+]},
+sp: {name: "Simple Present", icon: "&#9728;", qs: [
+{q: "The bus ____ the depot at 7 o'clock every day.", o: ["leaves", "leave", "is leave", "leaving"], a: 0, e: "One bus: add s. The bus leaves."},
+{q: "Rohan and Aakriti ____ to eat noodles.", o: ["like", "likes", "is liking", "liking"], a: 0, e: "Two people joined by 'and' are plural: they like."},
+{q: "I ____ not play cricket.", o: ["do", "does", "am", "is"], a: 0, e: "With I, use do: I do not play."},
+{q: "This car ____ to me.", o: ["belongs", "belong", "belonging", "are belong"], a: 0, e: "One car: belongs."},
+{q: "Ms Das ____ in this office.", o: ["works", "work", "working", "are working"], a: 0, e: "One person: works."},
+{q: "Mr Anand ____ for a walk every evening.", o: ["goes", "go", "going", "gos"], a: 0, e: "go becomes goes for he, she, it."},
+{q: "Honesty ____ the best policy.", o: ["is", "are", "am", "be"], a: 0, e: "Honesty is one thing: is."},
+{q: "The moon ____ the sun's light.", o: ["reflects", "reflect", "reflecting", "are reflecting"], a: 0, e: "A fact, and one moon: reflects."},
+{q: "The children ____ to school every day.", o: ["go", "goes", "going", "is going"], a: 0, e: "Children is plural: go."},
+{q: "Anusha ____ to music every day.", o: ["listens", "listen", "listening", "are listening"], a: 0, e: "One person: add s. Anusha listens."},
+{q: "Dad never ____ us play in the street when it is dark.", o: ["lets", "let", "letting", "is letting"], a: 0, e: "'Never' is a simple present clue. Dad lets."},
+{q: "My teacher ____ a lot about plants and animals.", o: ["knows", "know", "is knowing", "knowing"], a: 0, e: "know stays in the simple present: knows."},
+{q: "The dog ____ the children play.", o: ["watches", "watch", "watchs", "watching"], a: 0, e: "Verbs ending in ch take es: watches."},
+{q: "Tom and Sam ____ sweets from the shop.", o: ["buy", "buys", "buying", "is buying"], a: 0, e: "Tom and Sam are two people: buy."},
+{q: "Which sentence is correct?", o: ["Anwar usually cooks his lunch in the morning.", "Anwar usually cook his lunch in the morning.", "Anwar cooks usually his lunch in morning the.", "Anwar usually cooking his lunch."], a: 0, e: "Subject + usually + verb with s."}
+]},
+pc: {name: "Present Continuous", icon: "&#9203;", qs: [
+{q: "She ____ a book now.", o: ["is reading", "reads", "are reading", "read"], a: 0, e: "'Now' needs is + reading."},
+{q: "The children ____ in the garden at the moment.", o: ["are playing", "is playing", "plays", "play"], a: 0, e: "Children is plural: are playing."},
+{q: "I ____ my homework right now.", o: ["am writing", "is writing", "am writeing", "write"], a: 0, e: "I am. Drop the e: write becomes writing."},
+{q: "Look! The dog ____ loudly.", o: ["is barking", "barks", "are barking", "bark"], a: 0, e: "'Look!' means it is happening now."},
+{q: "The sun ____ brightly today.", o: ["is shining", "is shineing", "are shining", "shine"], a: 0, e: "Drop the e: shine becomes shining."},
+{q: "Mr Lee ____ sun cream on his hands.", o: ["is rubbing", "is rubing", "are rubbing", "rub"], a: 0, e: "Double the b: rub becomes rubbing."},
+{q: "Sam ____ a sandcastle.", o: ["is building", "is builting", "are building", "builds now"], a: 0, e: "build + ing = building."},
+{q: "Mrs Lee ____ on the sand.", o: ["is sunbathing", "is sunbatheing", "are sunbathing", "sunbathe"], a: 0, e: "Drop the e: sunbathing."},
+{q: "Be quiet! We ____ to listen to the radio.", o: ["are trying", "try", "is trying", "tries"], a: 0, e: "'Be quiet!' means now. We are trying."},
+{q: "The wind ____ very strongly today.", o: ["is blowing", "blows", "are blowing", "blow"], a: 0, e: "'Today' here means happening now: is blowing."},
+{q: "A small boat ____ past in the distance.", o: ["is sailing", "are sailing", "sail", "is sail"], a: 0, e: "One boat: is sailing."},
+{q: "Other children ____ a large beach ball to one another.", o: ["are throwing", "is throwing", "throws", "are throw"], a: 0, e: "Children: are throwing."},
+{q: "Which is the correct -ing form of 'clap'?", o: ["clapping", "claping", "clapeing", "clappeing"], a: 0, e: "Consonant-vowel-consonant: double the last letter."},
+{q: "Which is the correct -ing form of 'dance'?", o: ["dancing", "danceing", "dancceing", "dancng"], a: 0, e: "Drop the e before adding ing."},
+{q: "My father is not watching TV. He ____ in the kitchen.", o: ["is cooking", "cooks", "are cooking", "cook"], a: 0, e: "It is happening right now: is cooking."},
+{q: "The teacher always ____ us interesting project work.", o: ["gives", "is giving", "give", "are giving"], a: 0, e: "'Always' needs the simple present: gives."}
+]},
+conj: {name: "Conjunctions", icon: "&#128279;", qs: [
+{q: "____ we last saw him, he was in good health.", o: ["When", "If", "And", "Or"], a: 0, e: "'When' tells the time."},
+{q: "We went to the beach ____ enjoyed ourselves.", o: ["and", "but", "or", "yet"], a: 0, e: "'And' joins two things that go together."},
+{q: "The guests praised the house ____ they said nothing about my pet dog.", o: ["but", "if", "or", "so"], a: 0, e: "'But' shows contrast."},
+{q: "Don't take the car out ____ it is foggy.", o: ["if", "but", "although", "and"], a: 0, e: "'If' shows a condition."},
+{q: "We could not see the match on TV ____ there was no light.", o: ["because", "and", "if", "or"], a: 0, e: "'Because' gives the reason."},
+{q: "You can offer Sanskrit ____ French. You cannot study both.", o: ["or", "and", "so", "but"], a: 0, e: "'Or' offers a choice."},
+{q: "Minisha is seventeen, ____ she cannot vote.", o: ["therefore", "although", "since", "until"], a: 0, e: "'Therefore' shows the result."},
+{q: "Virat played well ____ he had an injured arm.", o: ["although", "so", "or", "therefore"], a: 0, e: "'Although' shows contrast."},
+{q: "Murthy tried his best, ____ he did not get selected.", o: ["yet", "so", "because", "or"], a: 0, e: "'Yet' shows contrast."},
+{q: "____ the man spoke, I had not realised that he was Spanish.", o: ["Until", "Although", "Therefore", "Or"], a: 0, e: "'Until' means up to that time."},
+{q: "Let's wait ____ the rain stops.", o: ["until", "yet", "or", "but"], a: 0, e: "Wait until something happens."},
+{q: "Shelly was tired ____ she dozed off in the car.", o: ["so", "or", "but", "although"], a: 0, e: "'So' shows the result."},
+{q: "Is Anthony your real brother ____ your cousin?", o: ["or", "but", "so", "and"], a: 0, e: "'Or' offers a choice."},
+{q: "My grandfather is eighty, ____ he jogs every day.", o: ["yet", "so", "because", "if"], a: 0, e: "'Yet' shows a surprising contrast."},
+{q: "The stars have their own light ____ the planets do not.", o: ["but", "or", "so", "if"], a: 0, e: "'But' shows contrast."},
+{q: "You will do well ____ you work hard.", o: ["if", "but", "or", "yet"], a: 0, e: "'If' shows the condition for doing well."},
+{q: "She is ill, ____ she didn't come for the class.", o: ["so", "because", "or", "if"], a: 0, e: "Reason first, result next: use 'so'."},
+{q: "I have been visiting this park ____ I was a child.", o: ["since", "if", "or", "but"], a: 0, e: "'Since' tells from what time."},
+{q: "We stayed at home and watched a movie ____ it was cold outside.", o: ["for", "or", "yet", "until"], a: 0, e: "'For' can give a reason, like 'because'."},
+{q: "Dinesh went to the mall ____ Jerry was studying.", o: ["while", "or", "therefore", "if"], a: 0, e: "'While' means at the same time."}
+]}
+};
+/*BANK_END*/
+
+var ROUND = 10;
+var STORE_KEY = "diksha_english_wt3_v1";
+function normalize(o) {
+  o = (o && typeof o === "object") ? o : {};
+  return {best: (o.best && typeof o.best === "object") ? o.best : {}, stars: Number(o.stars) || 0, rounds: Number(o.rounds) || 0,
+    wrong: (o.wrong && typeof o.wrong === "object") ? o.wrong : {}, lastPlayed: o.lastPlayed || "", t: Number(o.t) || 0};
+}
+var S = normalize(null);
+try { S = normalize(JSON.parse(localStorage.getItem(STORE_KEY) || "null")); } catch (err) { S = normalize(null); }
+var best = S.best;
+function saveLocal() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (err) {} }
+function today() { var d = new Date(); function p(n) { return (n < 10 ? "0" : "") + n; } return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
+function saveBest() {
+  S.t = Date.now(); S.lastPlayed = today(); saveLocal();
+  if (typeof DikshaSync !== "undefined") { try { DikshaSync.push(STORE_KEY, S); } catch (err) {} }
+}
+function $(id) { return document.getElementById(id); }
+function shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
+function show(id) { ["home", "play", "done"].forEach(function (s) { $(s).classList.toggle("hide", s !== id); }); window.scrollTo(0, 0); }
+
+var cur = null;
+function drawHome() {
+  var h = "";
+  Object.keys(BANK).forEach(function (k) {
+    var b = best[k];
+    h += '<button class="tile" data-k="' + k + '"><span class="ic">' + BANK[k].icon + '</span><span><span class="nm">' + BANK[k].name + '</span><br><span class="bs">' + (b === undefined ? BANK[k].qs.length + " questions" : "Best: " + b + "/" + ROUND) + '</span></span></button>';
+  });
+  h += '<button class="tile wide" data-k="mix"><span class="nm">&#11088; Mixed Challenge</span><span class="bs">' + (best.mix === undefined ? "10 questions from every topic" : "Best: " + best.mix + "/" + ROUND) + '</span></button>';
+  $("tiles").innerHTML = h;
+  $("tot").innerHTML = S.rounds ? "&#11088; " + S.stars + " stars from " + S.rounds + (S.rounds === 1 ? " round" : " rounds") : "";
+}
+function start(k) {
+  var pool = [];
+  if (k === "mix") { Object.keys(BANK).forEach(function (t) { pool = pool.concat(BANK[t].qs); }); } else { pool = BANK[k].qs; }
+  cur = {k: k, qs: shuffle(pool).slice(0, ROUND), i: 0, score: 0, missed: []};
+  show("play"); drawQ();
+}
+function drawQ() {
+  var item = cur.qs[cur.i];
+  $("count").textContent = "Question " + (cur.i + 1) + " of " + cur.qs.length;
+  $("score").textContent = "Score " + cur.score;
+  $("prog").style.width = (cur.i / cur.qs.length * 100) + "%";
+  $("qtext").textContent = item.q;
+  $("fb").className = "fb hide"; $("next").classList.add("hide");
+  var order = shuffle(item.o.map(function (t, n) { return {t: t, right: n === item.a}; }));
+  var box = $("opts"); box.innerHTML = "";
+  order.forEach(function (op) {
+    var b = document.createElement("button");
+    b.className = "opt"; b.textContent = op.t;
+    b.addEventListener("click", function () { pick(b, op, item); });
+    if (op.right) { b.setAttribute("data-r", "1"); }
+    box.appendChild(b);
+  });
+}
+function pick(btn, op, item) {
+  var all = $("opts").querySelectorAll(".opt");
+  for (var n = 0; n < all.length; n++) { all[n].disabled = true; if (all[n].getAttribute("data-r")) { all[n].classList.add("ok"); } }
+  var fb = $("fb");
+  if (op.right) { cur.score++; fb.className = "fb ok"; fb.textContent = "Correct! " + item.e; }
+  else { btn.classList.add("bad"); cur.missed.push(item); fb.className = "fb bad"; fb.textContent = "Not quite. " + item.e; }
+  $("score").textContent = "Score " + cur.score;
+  $("next").textContent = cur.i + 1 === cur.qs.length ? "See my score" : "Next";
+  $("next").classList.remove("hide");
+}
+function finish() {
+  var s = cur.score, n = cur.qs.length;
+  var st = s >= 9 ? 3 : (s >= 7 ? 2 : (s >= 5 ? 1 : 0));
+  if (best[cur.k] === undefined || s > best[cur.k]) { best[cur.k] = s; }
+  S.stars += st; S.rounds += 1;
+  cur.missed.forEach(function (it) { var id = it.q === "Pick the correct spelling." ? "Spelling: " + it.o[it.a] : it.q; S.wrong[id] = (S.wrong[id] || 0) + 1; });
+  saveBest();
+  $("stars").innerHTML = st ? new Array(st + 1).join("&#9733;") : "&#9734;";
+  $("final").textContent = s + " / " + n;
+  $("msg").textContent = s === n ? "Perfect round!" : (s >= 7 ? "Good work. Try for all ten." : "Read the notes below and try again.");
+  var m = "";
+  cur.missed.forEach(function (it) { m += "<li><b></b><br><span></span></li>"; });
+  $("miss").innerHTML = m;
+  var lis = $("miss").querySelectorAll("li");
+  cur.missed.forEach(function (it, n2) { lis[n2].querySelector("b").textContent = it.q; lis[n2].querySelector("span").textContent = it.o[it.a] + " - " + it.e; });
+  show("done");
+}
+$("tiles").addEventListener("click", function (ev) { var t = ev.target.closest(".tile"); if (t) { start(t.getAttribute("data-k")); } });
+$("next").addEventListener("click", function () { cur.i++; if (cur.i >= cur.qs.length) { finish(); } else { drawQ(); window.scrollTo(0, 0); } });
+$("quit").addEventListener("click", function () { drawHome(); show("home"); });
+$("back").addEventListener("click", function () { drawHome(); show("home"); });
+$("again").addEventListener("click", function () { start(cur.k); });
+drawHome();
+
+/* Study Hub cross-device sync (no-op when firebase or sync.js is absent) */
+if (typeof DikshaSync !== "undefined" && DikshaSync.init()) {
+  try { DikshaSync.attachUI(); } catch (err) {}
+  DikshaSync.pull(STORE_KEY).then(function (remote) {
+    if (remote && typeof remote === "object" && (remote.t || 0) > (S.t || 0)) {
+      S = normalize(remote); best = S.best; saveLocal();
+      if (!$("home").classList.contains("hide")) { drawHome(); }
+    }
+    DikshaSync.arm();
+    try { DikshaSync.push(STORE_KEY, S); } catch (err) {}
+  });
+}
+</script>
+</body>
+</html>
