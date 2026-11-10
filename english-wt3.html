@@ -44,6 +44,23 @@ h1{font-size:1.55rem;margin:0;color:var(--pri2);letter-spacing:.3px}
 .stars{font-size:2rem;color:var(--gold);letter-spacing:6px}
 .miss{text-align:left;margin-top:16px;font-size:.93rem}
 .miss li{margin-bottom:8px}
+.plan{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px;margin-top:16px}
+.ph{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;color:var(--pri2)}
+.ph span{font-size:.78rem;font-weight:700;background:#fff3e6;color:#c2560f;border-radius:99px;padding:3px 9px;white-space:nowrap}
+.prow{display:flex;align-items:center;gap:10px;width:100%;background:var(--bg);border:2px solid var(--line);border-radius:12px;padding:9px 10px;margin-top:8px;font:inherit;color:inherit;text-align:left;cursor:pointer}
+.prow.today{border-color:var(--gold);background:#fff3d6}
+.prow.fin{opacity:.6}
+.pd{flex:0 0 52px;font-weight:800;color:var(--pri2);font-size:.9rem}
+.pt{flex:1;font-weight:700;font-size:.95rem;line-height:1.25}
+.pt small{display:block;font-weight:400;color:var(--mute);font-size:.76rem}
+.ps{flex:0 0 auto;font-size:.78rem;font-weight:700;color:var(--pri);text-align:right;max-width:84px}
+.pn{font-size:.8rem;color:var(--mute);margin-top:8px}
+.tile.fix{background:#d64545;border-color:#a83232;box-shadow:0 3px 0 #a83232}
+.tile.fix .bs{color:#ffe1e1}
+.tile.fix:disabled{background:#1f9d55;border-color:#177a42;box-shadow:0 3px 0 #177a42;cursor:default}
+.task{text-align:left;background:#fff3d6;border:2px solid var(--gold);border-radius:14px;padding:12px 14px;margin-top:16px}
+.task p{margin:6px 0 0}
+.task .next:disabled{background:var(--ok);box-shadow:none}
 .hide{display:none}
 .hub{display:inline-block;margin-top:6px;color:var(--pri);font-weight:700;font-size:.9rem;text-decoration:none}
 .tot{text-align:center;margin-top:14px;font-weight:700;color:var(--pri2)}
@@ -61,6 +78,7 @@ h1{font-size:1.55rem;margin:0;color:var(--pri2);letter-spacing:.3px}
 </header>
 
 <section id="home">
+<div class="plan" id="plan"></div>
 <div class="grid" id="tiles"></div>
 <div class="tot" id="tot"></div>
 </section>
@@ -80,6 +98,7 @@ h1{font-size:1.55rem;margin:0;color:var(--pri2);letter-spacing:.3px}
 <div class="big" id="final"></div>
 <div id="msg"></div>
 <ul class="miss" id="miss"></ul>
+<div class="task hide" id="task"><b>Now on paper (5 minutes)</b><p id="tasktext"></p><button class="next" id="taskdone">I finished my paper task</button></div>
 <button class="next" id="again">Play again</button>
 <button class="linkbtn" id="back">Choose another topic</button>
 </div>
@@ -204,23 +223,54 @@ conj: {name: "Conjunctions", icon: "&#128279;", qs: [
 {q: "I have been visiting this park ____ I was a child.", o: ["since", "if", "or", "but"], a: 0, e: "'Since' tells from what time."},
 {q: "We stayed at home and watched a movie ____ it was cold outside.", o: ["for", "or", "yet", "until"], a: 0, e: "'For' can give a reason, like 'because'."},
 {q: "Dinesh went to the mall ____ Jerry was studying.", o: ["while", "or", "therefore", "if"], a: 0, e: "'While' means at the same time."}
+]},
+slips: {name: "Notebook slips", icon: "", hidden: true, qs: [
+{q: "\"Do you remember, last summer, when you were stealing cheese at the farm?\" Who is the speaker?", o: ["Polly Ponk, the duck", "Peter Punk, the dog", "Patrick Pink, the pig", "Mrs Tubbs"], a: 0, e: "Ponk says this to Tommy Squeak. Ponk is the duck; Punk is the dog."},
+{q: "Where were the wasps when they stung the man?", o: ["In the hall of the farmhouse", "In the barn", "On the bridge", "In the woods"], a: 0, e: "Punk found the man in the hall of the house, and the wasps stung him there."},
+{q: "Mrs Tubbs lived all alone ____ a farm.", o: ["on", "in", "at", "into"], a: 0, e: "We live ON a farm, not in a farm."},
+{q: "The old woman ____ them Punk, Ponk and Pink.", o: ["called", "call", "calls", "calling"], a: 0, e: "The story is in the past, so use called."},
+{q: "I ____ chocolate ice cream.", o: ["like", "am liking", "likes", "liking"], a: 0, e: "like stays in the simple present. With I, no s."},
+{q: "The children ____ for swimming every day.", o: ["go", "goes", "are going", "is going"], a: 0, e: "'Every day' needs the simple present. Children is plural: go."},
+{q: "We are trying to catch the ball that ____ down the hill.", o: ["is rolling", "rolls", "are rolling", "roll"], a: 0, e: "It is happening now, and it is one ball: is rolling."},
+{q: "Sam is building a sandcastle. His sister ____ him.", o: ["is helping", "are helping", "help", "is help"], a: 0, e: "One sister, happening now: is helping."},
+{q: "She ____ a bucket with sand.", o: ["is filling", "is fillling", "are filling", "fill"], a: 0, e: "fill + ing = filling."},
+{q: "Birds ____ overhead.", o: ["are flying", "is flying", "flies", "are fly"], a: 0, e: "Birds is plural: are flying."},
+{q: "What is the past form of 'stick'?", o: ["stuck", "sticked", "stack", "sticking"], a: 0, e: "stick becomes stuck: the socks were stuck on his legs."},
+{q: "Uncle Bumble's machine sprayed ____ first.", o: ["cold water", "hot water", "hot air", "socks"], a: 0, e: "First cold water, then hot air, then socks."}
 ]}
 };
 /*BANK_END*/
-
 var ROUND = 10;
 var STORE_KEY = "diksha_english_wt3_v1";
+var WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+var PLAN = [
+{date: "2026-11-11", title: "Story and word meanings", parts: [["story", 10], ["words", 8], ["fix", 6]], task: "Write the meanings of snore, trout, rustling and weasel. Then make one sentence with each word."},
+{date: "2026-11-12", title: "Simple present and present continuous", parts: [["sp", 10], ["pc", 10], ["fix", 5]], task: "Open your English worksheet. Finish exercise C5 and fill the empty blanks in C4 (the seaside passage)."},
+{date: "2026-11-13", title: "Conjunctions and spelling", parts: [["conj", 12], ["spell", 8], ["fix", 5]], task: "Ask Papa or Mumma to dictate the 10 drill words. Then write the answer to: Why did Mrs Tubbs leave the farm?"},
+{date: "2026-11-14", title: "Story and letter writing", parts: [["story", 10], ["conj", 5], ["pc", 5], ["fix", 5]], task: "Write the format of an informal letter: address, date, Dear ..., body, Yours lovingly, name. Then write four lines to your cousin about your school."},
+{date: "2026-11-15", title: "Full revision", parts: [["story", 5], ["words", 4], ["spell", 3], ["sp", 4], ["pc", 4], ["conj", 4], ["fix", 5]], task: "Write the answers to: How did the wasps help Mrs Tubbs? How did Mrs Tubbs help Tommy Squeak? Then pack your bag. You are ready!"}
+];
+/* Slips from her notebook and worksheet: ids of bank questions that match them. */
+var SLIP_IDS = ["Spelling: Tilly Twitter", "Spelling: referred", "Spelling: continuous", "Rohan and Aakriti ____ to eat noodles.", "You will do well ____ you work hard.",
+"The teacher always ____ us interesting project work.", "The wind ____ very strongly today.", "Be quiet! We ____ to listen to the radio.", "Dad never ____ us play in the street when it is dark.",
+"My teacher ____ a lot about plants and animals.", "A small boat ____ past in the distance.", "Other children ____ a large beach ball to one another."];
+
+function qid(it) { return it.q === "Pick the correct spelling." ? "Spelling: " + it.o[it.a] : it.q; }
+var ALL = {};
+Object.keys(BANK).forEach(function (k) { BANK[k].qs.forEach(function (it) { ALL[qid(it)] = it; }); });
+BANK.slips.qs.forEach(function (it) { SLIP_IDS.push(qid(it)); });
+
+function obj(v) { return (v && typeof v === "object") ? v : {}; }
 function normalize(o) {
-  o = (o && typeof o === "object") ? o : {};
-  return {best: (o.best && typeof o.best === "object") ? o.best : {}, stars: Number(o.stars) || 0, rounds: Number(o.rounds) || 0,
-    wrong: (o.wrong && typeof o.wrong === "object") ? o.wrong : {}, lastPlayed: o.lastPlayed || "", t: Number(o.t) || 0};
+  o = obj(o);
+  return {best: obj(o.best), stars: Number(o.stars) || 0, rounds: Number(o.rounds) || 0, wrong: obj(o.wrong), fixed: obj(o.fixed),
+    plan: obj(o.plan), days: obj(o.days), lastPlayed: o.lastPlayed || "", t: Number(o.t) || 0};
 }
 var S = normalize(null);
 try { S = normalize(JSON.parse(localStorage.getItem(STORE_KEY) || "null")); } catch (err) { S = normalize(null); }
-var best = S.best;
 function saveLocal() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (err) {} }
 function today() { var d = new Date(); function p(n) { return (n < 10 ? "0" : "") + n; } return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()); }
-function saveBest() {
+function save() {
   S.t = Date.now(); S.lastPlayed = today(); saveLocal();
   if (typeof DikshaSync !== "undefined") { try { DikshaSync.push(STORE_KEY, S); } catch (err) {} }
 }
@@ -228,21 +278,62 @@ function $(id) { return document.getElementById(id); }
 function shuffle(arr) { var a = arr.slice(); for (var i = a.length - 1; i > 0; i--) { var j = Math.floor(Math.random() * (i + 1)); var t = a[i]; a[i] = a[j]; a[j] = t; } return a; }
 function show(id) { ["home", "play", "done"].forEach(function (s) { $(s).classList.toggle("hide", s !== id); }); window.scrollTo(0, 0); }
 
+/* Everything still to fix: quiz misses first, then notebook slips not yet answered right twice. */
+function fixPool() {
+  var ids = [], seen = {};
+  Object.keys(S.wrong).forEach(function (id) { if (S.wrong[id] > 0 && ALL[id]) { ids.push(id); seen[id] = 1; } });
+  SLIP_IDS.forEach(function (id) { if (!seen[id] && ALL[id] && (S.fixed[id] || 0) < 2) { ids.push(id); seen[id] = 1; } });
+  return ids;
+}
+function topicPool(k) {
+  var pool = [];
+  if (k === "mix") { Object.keys(BANK).forEach(function (t) { if (!BANK[t].hidden) { pool = pool.concat(BANK[t].qs); } }); } else { pool = BANK[k].qs; }
+  return pool;
+}
+function buildSession(n) {
+  var out = [], used = {}, fixIds = {};
+  PLAN[n].parts.forEach(function (part) {
+    var src = part[0] === "fix" ? fixPool().map(function (id) { return ALL[id]; }) : BANK[part[0]].qs;
+    var got = 0;
+    shuffle(src).forEach(function (it) {
+      var id = qid(it);
+      if (got < part[1] && !used[id]) { used[id] = 1; out.push(it); got++; if (part[0] === "fix") { fixIds[id] = 1; } }
+    });
+  });
+  return {qs: out, fixIds: fixIds};
+}
+
 var cur = null;
+function dayLabel(ds) { var d = new Date(ds + "T00:00:00"); return WD[d.getDay()] + " " + d.getDate(); }
 function drawHome() {
-  var h = "";
+  var td = today(), h = "", p = "";
+  p += '<div class="ph"><b>Daily 15-minute plan</b><span>Test: Mon 16 Nov</span></div>';
+  PLAN.forEach(function (d, n) {
+    var st = S.plan[n] || 0, isToday = d.date === td, past = d.date < td;
+    var cnt = 0; d.parts.forEach(function (x) { cnt += x[1]; });
+    var status = st === 2 ? "&#9989; Done" : (st === 1 ? "Paper task left" : (isToday ? "Start &rarr;" : (past ? "Missed - do it" : "")));
+    p += '<button class="prow' + (isToday ? " today" : "") + (st === 2 ? " fin" : "") + '" data-k="day:' + n + '"><span class="pd">' + dayLabel(d.date) + '</span><span class="pt">' + d.title + '<small>About ' + cnt + ' questions + paper task</small></span><span class="ps">' + status + '</span></button>';
+  });
+  if (td < PLAN[0].date) { p += '<div class="pn">The plan starts on Wed 11 Nov. You can begin early by tapping a day.</div>'; }
+  $("plan").innerHTML = p;
+  var nfix = fixPool().length;
+  h += '<button class="tile wide fix" data-k="fix"' + (nfix ? "" : " disabled") + '><span class="nm">&#129658; Fix My Mistakes</span><span class="bs">' + (nfix ? nfix + (nfix === 1 ? " question" : " questions") + " to fix: notebook slips and quiz misses" : "Nothing left to fix. Well done!") + '</span></button>';
   Object.keys(BANK).forEach(function (k) {
-    var b = best[k];
+    if (BANK[k].hidden) { return; }
+    var b = S.best[k];
     h += '<button class="tile" data-k="' + k + '"><span class="ic">' + BANK[k].icon + '</span><span><span class="nm">' + BANK[k].name + '</span><br><span class="bs">' + (b === undefined ? BANK[k].qs.length + " questions" : "Best: " + b + "/" + ROUND) + '</span></span></button>';
   });
-  h += '<button class="tile wide" data-k="mix"><span class="nm">&#11088; Mixed Challenge</span><span class="bs">' + (best.mix === undefined ? "10 questions from every topic" : "Best: " + best.mix + "/" + ROUND) + '</span></button>';
+  h += '<button class="tile wide" data-k="mix"><span class="nm">&#11088; Mixed Challenge</span><span class="bs">' + (S.best.mix === undefined ? "10 questions from every topic" : "Best: " + S.best.mix + "/" + ROUND) + '</span></button>';
   $("tiles").innerHTML = h;
   $("tot").innerHTML = S.rounds ? "&#11088; " + S.stars + " stars from " + S.rounds + (S.rounds === 1 ? " round" : " rounds") : "";
 }
 function start(k) {
-  var pool = [];
-  if (k === "mix") { Object.keys(BANK).forEach(function (t) { pool = pool.concat(BANK[t].qs); }); } else { pool = BANK[k].qs; }
-  cur = {k: k, qs: shuffle(pool).slice(0, ROUND), i: 0, score: 0, missed: []};
+  var qs, fixIds = {}, day = -1;
+  if (k.indexOf("day:") === 0) { day = Number(k.slice(4)); var b = buildSession(day); qs = b.qs; fixIds = b.fixIds; }
+  else if (k === "fix") { qs = shuffle(fixPool()).slice(0, ROUND).map(function (id) { fixIds[id] = 1; return ALL[id]; }); }
+  else { qs = shuffle(topicPool(k)).slice(0, ROUND); }
+  if (!qs.length) { return; }
+  cur = {k: k, day: day, qs: qs, fixIds: fixIds, i: 0, score: 0, missed: []};
   show("play"); drawQ();
 }
 function drawQ() {
@@ -263,37 +354,57 @@ function drawQ() {
   });
 }
 function pick(btn, op, item) {
-  var all = $("opts").querySelectorAll(".opt");
+  var all = $("opts").querySelectorAll(".opt"), id = qid(item), td = today();
   for (var n = 0; n < all.length; n++) { all[n].disabled = true; if (all[n].getAttribute("data-r")) { all[n].classList.add("ok"); } }
   var fb = $("fb");
-  if (op.right) { cur.score++; fb.className = "fb ok"; fb.textContent = "Correct! " + item.e; }
-  else { btn.classList.add("bad"); cur.missed.push(item); fb.className = "fb bad"; fb.textContent = "Not quite. " + item.e; }
+  S.days[td] = (S.days[td] || 0) + 1;
+  if (op.right) {
+    cur.score++; fb.className = "fb ok"; fb.textContent = "Correct! " + item.e;
+    if (cur.fixIds[id]) {
+      S.fixed[id] = (S.fixed[id] || 0) + 1;
+      if (S.wrong[id] > 0) { S.wrong[id]--; if (!S.wrong[id]) { delete S.wrong[id]; } }
+    }
+  } else {
+    btn.classList.add("bad"); cur.missed.push(item); fb.className = "fb bad"; fb.textContent = "Not quite. " + item.e;
+    S.wrong[id] = (S.wrong[id] || 0) + 1;
+  }
+  saveLocal();
   $("score").textContent = "Score " + cur.score;
   $("next").textContent = cur.i + 1 === cur.qs.length ? "See my score" : "Next";
   $("next").classList.remove("hide");
 }
 function finish() {
-  var s = cur.score, n = cur.qs.length;
-  var st = s >= 9 ? 3 : (s >= 7 ? 2 : (s >= 5 ? 1 : 0));
-  if (best[cur.k] === undefined || s > best[cur.k]) { best[cur.k] = s; }
+  var s = cur.score, n = cur.qs.length, pct = s / n;
+  var st = pct >= 0.9 ? 3 : (pct >= 0.7 ? 2 : (pct >= 0.5 ? 1 : 0));
+  if (cur.day < 0 && cur.k !== "fix" && (S.best[cur.k] === undefined || s > S.best[cur.k])) { S.best[cur.k] = s; }
   S.stars += st; S.rounds += 1;
-  cur.missed.forEach(function (it) { var id = it.q === "Pick the correct spelling." ? "Spelling: " + it.o[it.a] : it.q; S.wrong[id] = (S.wrong[id] || 0) + 1; });
-  saveBest();
+  if (cur.day >= 0 && !S.plan[cur.day]) { S.plan[cur.day] = 1; }
+  save();
   $("stars").innerHTML = st ? new Array(st + 1).join("&#9733;") : "&#9734;";
   $("final").textContent = s + " / " + n;
-  $("msg").textContent = s === n ? "Perfect round!" : (s >= 7 ? "Good work. Try for all ten." : "Read the notes below and try again.");
+  $("msg").textContent = s === n ? "Perfect round!" : (pct >= 0.7 ? "Good work. The ones you missed are saved in Fix My Mistakes." : "Read the notes below. They are saved in Fix My Mistakes.");
   var m = "";
-  cur.missed.forEach(function (it) { m += "<li><b></b><br><span></span></li>"; });
+  cur.missed.forEach(function () { m += "<li><b></b><br><span></span></li>"; });
   $("miss").innerHTML = m;
   var lis = $("miss").querySelectorAll("li");
   cur.missed.forEach(function (it, n2) { lis[n2].querySelector("b").textContent = it.q; lis[n2].querySelector("span").textContent = it.o[it.a] + " - " + it.e; });
+  var tb = $("task");
+  if (cur.day >= 0) {
+    tb.classList.remove("hide");
+    $("tasktext").textContent = PLAN[cur.day].task;
+    var done = S.plan[cur.day] === 2;
+    $("taskdone").disabled = done; $("taskdone").textContent = done ? "Paper task done. Session complete!" : "I finished my paper task";
+  } else { tb.classList.add("hide"); }
   show("done");
 }
-$("tiles").addEventListener("click", function (ev) { var t = ev.target.closest(".tile"); if (t) { start(t.getAttribute("data-k")); } });
+$("home").addEventListener("click", function (ev) { var t = ev.target.closest("[data-k]"); if (t && !t.disabled) { start(t.getAttribute("data-k")); } });
 $("next").addEventListener("click", function () { cur.i++; if (cur.i >= cur.qs.length) { finish(); } else { drawQ(); window.scrollTo(0, 0); } });
-$("quit").addEventListener("click", function () { drawHome(); show("home"); });
+$("quit").addEventListener("click", function () { save(); drawHome(); show("home"); });
 $("back").addEventListener("click", function () { drawHome(); show("home"); });
-$("again").addEventListener("click", function () { start(cur.k); });
+$("again").addEventListener("click", function () { start(cur.k); if (!$("done").classList.contains("hide")) { drawHome(); show("home"); } });
+$("taskdone").addEventListener("click", function () {
+  if (cur && cur.day >= 0) { S.plan[cur.day] = 2; save(); $("taskdone").disabled = true; $("taskdone").textContent = "Paper task done. Session complete!"; }
+});
 drawHome();
 
 /* Study Hub cross-device sync (no-op when firebase or sync.js is absent) */
@@ -301,7 +412,7 @@ if (typeof DikshaSync !== "undefined" && DikshaSync.init()) {
   try { DikshaSync.attachUI(); } catch (err) {}
   DikshaSync.pull(STORE_KEY).then(function (remote) {
     if (remote && typeof remote === "object" && (remote.t || 0) > (S.t || 0)) {
-      S = normalize(remote); best = S.best; saveLocal();
+      S = normalize(remote); saveLocal();
       if (!$("home").classList.contains("hide")) { drawHome(); }
     }
     DikshaSync.arm();
