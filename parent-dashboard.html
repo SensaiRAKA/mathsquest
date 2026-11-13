@@ -51,11 +51,41 @@
   }
   .stat .n{font-size:1.35rem; font-weight:800}
   .stat .l{font-size:.72rem; color:var(--dim); text-transform:uppercase; letter-spacing:.04em}
-  .group{margin-bottom:6px}
-  .group h2{
-    font-size:.78rem; text-transform:uppercase; letter-spacing:.06em; color:var(--dim);
-    margin:18px 2px 8px; font-weight:700;
+  /* Collapsible sections: Class > Term > Test group > module cards */
+  details.sec{margin-bottom:10px}
+  details.sec>summary{
+    list-style:none; cursor:pointer; display:flex; align-items:center; gap:10px;
+    min-height:48px; padding:10px 12px; border-radius:12px; user-select:none;
+    -webkit-tap-highlight-color:transparent;
   }
+  details.sec>summary::-webkit-details-marker{display:none}
+  details.sec>summary:focus-visible{outline:2px solid var(--mint); outline-offset:2px}
+  .chev{flex-shrink:0; width:12px; font-size:.68rem; color:var(--dim); transition:transform .15s}
+  details.sec[open]>summary>.chev{transform:rotate(90deg)}
+  .s-ico{font-size:1.25rem; flex-shrink:0}
+  .s-text{flex:1; min-width:0}
+  .s-name{display:block; font-weight:800; line-height:1.25}
+  .s-meta{display:block; margin-top:2px; font-size:.74rem; color:var(--dim); line-height:1.45}
+  .s-meta .warn{color:var(--red); font-weight:700}
+  .s-meta .soon{color:var(--sun); font-weight:700}
+  .s-count{
+    flex-shrink:0; font-size:.7rem; font-weight:800; color:var(--dim); background:#0d1530;
+    border:1px solid var(--line); border-radius:999px; padding:3px 9px; white-space:nowrap;
+  }
+  details.lvl-class{background:#121c3a; border:1px solid var(--line); border-radius:16px; padding:4px 8px 0; margin-bottom:14px}
+  details.lvl-class>summary .s-name{font-size:1.08rem}
+  details.lvl-term>summary{background:var(--card2)}
+  details.lvl-term>summary .s-name{font-size:.95rem}
+  details.lvl-term>.sec-body{margin-left:6px; padding:8px 0 0 10px; border-left:2px solid var(--line)}
+  details.lvl-group>summary{background:var(--card); border:1px solid var(--line); border-left:4px solid var(--line)}
+  details.lvl-group>summary .s-name{font-size:.9rem}
+  details.lvl-group>.sec-body{padding:8px 0 2px}
+  details.lvl-group[data-g="daily"]>summary{border-left-color:#3ee6b0}
+  details.lvl-group[data-g="wt1"]>summary{border-left-color:#a78bfa}
+  details.lvl-group[data-g="wt2"]>summary{border-left-color:#2dd4bf}
+  details.lvl-group[data-g="mid"]>summary{border-left-color:#ff9f43}
+  details.lvl-group[data-g="wt3"]>summary{border-left-color:#ff6a6a}
+  details.lvl-group[data-g="sp"]>summary{border-left-color:#ff6fa5}
   .card{
     background:var(--card); border:1px solid var(--line); border-radius:14px;
     padding:13px 14px; margin-bottom:10px; display:flex; align-items:center; gap:12px;
@@ -100,7 +130,8 @@
   </div>
 
   <footer>
-    Modules are read live from the hub page, so new quests appear here on their own.<br>
+    Modules are read live from the hub page, so new quests appear here on their own,<br>
+    sorted into class, term and test by the hub's test dates.<br>
     Not linked from the main hub on purpose &mdash; bookmark this page for yourself.<br>
     <span id="buildStamp"></span>
   </footer>
@@ -112,7 +143,7 @@
 /* Bump BUILD on every change to this file. On load the page fetches its own
    latest copy and, if BUILD differs, reloads itself under a new URL, so a
    browser holding a cached copy (GitHub Pages sends max-age=600) updates itself. */
-var BUILD = "2026-10-04.2";
+var BUILD = "2026-11-13.1";
 
 var LAST_CODE_KEY = "dikshaParentDashLastCode_v1";
 var SCAN_KEY = "dikshaParentDashScan_v1";
@@ -259,11 +290,27 @@ function fetchHub(){
     if(!lit) throw new Error("no GROUPS");
     var groups = (new Function("return (" + lit + ");"))();
     if(!Array.isArray(groups)) throw new Error("GROUPS not a list");
-    return groups.filter(function(g){ return g && Array.isArray(g.items); }).map(function(g){
-      return { id:g.id || "", name:String(g.name || ""), items:g.items.filter(function(it){
-        return it && typeof it.href==="string" && /\.html$/i.test(it.href);
-      }).map(function(it){ return { icon:it.icon || "📘", name:String(it.name || it.href), href:it.href }; }) };
-    });
+    /* TESTS dates place each group in its class and term. Optional: if it can't
+       be read, groups still show, just without terms. */
+    var tests = [];
+    var tlit = extractArrayLiteral(t, "const TESTS");
+    if(tlit){
+      try{
+        var tv = (new Function("return (" + tlit + ");"))();
+        if(Array.isArray(tv)) tests = tv.filter(function(x){ return x && isoDate(x.date); })
+          .map(function(x){ return { date:x.date, group:String(x.group || "") }; });
+      }catch(e){ tests = []; }
+    }
+    return {
+      tests: tests,
+      groups: groups.filter(function(g){ return g && Array.isArray(g.items); }).map(function(g){
+        return { id:String(g.id || ""), icon:String(g.icon || ""), name:String(g.name || ""),
+          note:String(g.note || ""), always:!!g.always, year:g.year, term:g.term,
+          items:g.items.filter(function(it){
+            return it && typeof it.href==="string" && /\.html$/i.test(it.href);
+          }).map(function(it){ return { icon:it.icon || "📘", name:String(it.name || it.href), href:it.href }; }) };
+      })
+    };
   });
 }
 
@@ -350,54 +397,223 @@ function renderCard(entry, data){
   return div;
 }
 
-function render(code, groups, scanned, doc, hubOk){
+/* ---------- grouping: Class > Term > Test group ---------- */
+/* The school year runs April to March. Term 1 holds groups whose first test
+   falls in Apr-Sep (WT1, WT2, mid-term); Term 2 holds Oct-Mar. A group's class
+   and term come from its earliest TESTS date, so nothing here needs editing
+   when the hub grows. A GROUPS entry can pin them instead: year:"2027-28",
+   term:1 or 2. Groups with no dated tests (Every Day, Special Classes) sit
+   directly under the latest class, outside the terms. */
+var CLASS_ANCHOR = { year:2026, cls:4 };   /* 2026-27 is Class 4; one class up each April */
+var TERM_NAMES = { 1:"Term 1 · Apr–Sep", 2:"Term 2 · Oct–Mar" };
+/* Fixed names, not toLocaleDateString: browsers disagree ("Sep" vs "Sept"). */
+var MONTH_ABBR = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+var DAY_ABBR = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+var RECENT_DAYS = 2;   /* groups practised this recently open by default */
+
+function isoDate(s){ return (typeof s==="string" && /^\d{4}-\d{2}-\d{2}$/.test(s)) ? s : null; }
+function todayISO(){ return new Date().toLocaleDateString("en-CA"); }
+function schoolYearOf(iso){ var y = +iso.slice(0,4), m = +iso.slice(5,7); return m>=4 ? y : y-1; }
+function termOf(iso){ var m = +iso.slice(5,7); return (m>=4 && m<=9) ? 1 : 2; }
+function yearOverride(v){
+  if(typeof v==="number" && v>2000) return v;
+  var m = String(v == null ? "" : v).match(/^(\d{4})/);
+  return m ? +m[1] : null;
+}
+function yearLabel(y){ var n = (y+1)%100; return y + "-" + (n<10 ? "0"+n : n); }
+function classOf(y){ return CLASS_ANCHOR.cls + (y - CLASS_ANCHOR.year); }
+function fmtDay(iso, withWeekday){
+  var dt = new Date(iso + "T00:00:00");
+  var s = dt.getDate() + " " + MONTH_ABBR[dt.getMonth()];
+  return withWeekday ? DAY_ABBR[dt.getDay()] + " " + s : s;
+}
+
+function rollup(cards){
+  var r = { synced:0, withData:0, latest:null, wrong:0 };
+  cards.forEach(function(c){
+    r.synced++;
+    if(!c.data) return;
+    r.withData++;
+    r.wrong += mistakesCount(c.data);
+    var la = lastActiveISO(c.data);
+    if(la && (!r.latest || la > r.latest)) r.latest = la;
+  });
+  return r;
+}
+function mergeRollups(list){
+  var r = { synced:0, withData:0, latest:null, wrong:0 };
+  list.forEach(function(x){
+    r.synced += x.synced; r.withData += x.withData; r.wrong += x.wrong;
+    if(x.latest && (!r.latest || x.latest > r.latest)) r.latest = x.latest;
+  });
+  return r;
+}
+function rollupHTML(r){
+  var parts = [];
+  if(r.synced) parts.push(esc(r.withData + "/" + r.synced + " with progress"));
+  if(r.latest) parts.push(esc("last active " + fmtDate(r.latest)));
+  if(r.wrong>0) parts.push('<span class="warn">&#9888; ' + r.wrong + ' to review</span>');
+  return parts.join(" · ");
+}
+function sectionEl(o){
+  var d = document.createElement("details");
+  d.className = "sec lvl-" + o.level;
+  d.setAttribute("data-id", o.id);
+  if(o.gid) d.setAttribute("data-g", o.gid);
+  if(o.open) d.open = true;
+  var s = document.createElement("summary");
+  s.innerHTML = '<span class="chev">&#9654;</span>' +
+    (o.icon ? '<span class="s-ico">' + esc(o.icon) + '</span>' : '') +
+    '<span class="s-text"><span class="s-name">' + esc(o.name) + '</span>' +
+    (o.meta ? '<span class="s-meta">' + o.meta + '</span>' : '') + '</span>' +
+    (o.pill ? '<span class="s-count">' + esc(o.pill) + '</span>' : '');
+  d.appendChild(s);
+  var body = document.createElement("div");
+  body.className = "sec-body";
+  o.children.forEach(function(c){ body.appendChild(c); });
+  d.appendChild(body);
+  return d;
+}
+
+function render(code, hub, scanned, doc){
+  var hubOk = hub.ok;
+  var today = todayISO();
   var docKeys = Object.keys(doc).filter(function(k){ return asState(doc[k]); });
   var matched = {};
-  var sections = [];
   var syncedCount = 0;
   var withData = [];
+  var tests = hub.tests || [];
 
-  groups.forEach(function(g, gi){
-    var cards = [], localOnly = [], latest = null;
+  /* 1. Module cards for each hub group, plus the group's test dates. */
+  var gsecs = hub.groups.map(function(g, gi){
+    var cards = [], localOnly = [];
     g.items.forEach(function(it){
       var info = scanned[it.href];
       if(info && info.synced === false){ localOnly.push(it.name); return; }
       var data = (info && info.key) ? asState(doc[info.key]) : null;
       if(info && info.key) matched[info.key] = true;
       syncedCount++;
-      if(data){
-        withData.push(data);
-        var la = lastActiveISO(data);
-        if(la && (!latest || la > latest)) latest = la;
-      }
+      if(data) withData.push(data);
       cards.push({ entry:it, data:data });
     });
-    sections.push({ name:g.name, cards:cards, localOnly:localOnly, latest:latest, order:gi });
+    var dates = tests.filter(function(t){ return t.group===g.id; }).map(function(t){ return t.date; }).sort();
+    var upcoming = dates.filter(function(d){ return d >= today; });
+    return { g:g, order:gi, cards:cards, localOnly:localOnly, r:rollup(cards),
+      empty:!cards.length && !localOnly.length,
+      first:dates[0] || null, last:dates[dates.length-1] || null, next:upcoming[0] || null };
   });
 
+  /* 2. Place each group: school year (class), then term or outside terms. */
+  var years = [];
+  gsecs.forEach(function(s){
+    var y = yearOverride(s.g.year);
+    if(y===null && s.first) y = schoolYearOf(s.first);
+    s.year = y;
+    var t = (s.g.term===1 || s.g.term===2) ? s.g.term : (s.first ? termOf(s.first) : null);
+    s.term = t;
+    s.kind = s.g.always ? "daily" : (t ? "term" : "extra");
+    if(y!==null && years.indexOf(y)<0) years.push(y);
+  });
+  var latestYear = years.length ? Math.max.apply(null, years) : schoolYearOf(today);
+  gsecs.forEach(function(s){
+    if(s.year===null) s.year = latestYear;
+    if(years.indexOf(s.year)<0) years.push(s.year);
+  });
+  years.sort(function(a, b){ return b - a; });
+
+  /* 3. Default open: the group holding the next test (with none coming, the
+     group practised last), any group practised in the last RECENT_DAYS days,
+     and Every Day. Everything else starts folded. */
+  var coming = tests.filter(function(t){ return t.date >= today; })
+    .sort(function(a, b){ return a.date < b.date ? -1 : (a.date > b.date ? 1 : 0); });
+  var focusId = coming.length ? coming[0].group : null;
+  if(focusId===null){
+    /* Every Day is always open anyway, so it never takes the focus. */
+    var best = null;
+    gsecs.forEach(function(s){
+      if(s.g.always || s.empty) return;
+      if(s.r.latest && (!best || s.r.latest > best.r.latest)) best = s;
+    });
+    focusId = best ? best.g.id : null;
+  }
+  gsecs.forEach(function(s){
+    var ago = daysAgo(s.r.latest);
+    s.open = s.g.always || (focusId!==null && s.g.id===focusId) || (ago!==null && ago<=RECENT_DAYS);
+  });
+
+  /* A refresh keeps whatever the parent opened or closed. */
+  var groupsEl = $("groups");
+  var prevOpen = {};
+  Array.prototype.forEach.call(groupsEl.querySelectorAll("details[data-id]"), function(d){
+    prevOpen[d.getAttribute("data-id")] = d.open;
+  });
+  function isOpen(id, dflt){ return Object.prototype.hasOwnProperty.call(prevOpen, id) ? prevOpen[id] : !!dflt; }
+
+  function groupEl(s){
+    var kids = s.cards.map(function(c){ return renderCard(c.entry, c.data); });
+    if(s.localOnly.length){
+      var lo = document.createElement("div");
+      lo.className = "localonly";
+      lo.innerHTML = "Not synced, so progress stays on her tablet: <b>" + s.localOnly.map(esc).join("</b>, <b>") + "</b>";
+      kids.push(lo);
+    }
+    var meta = [];
+    if(s.next) meta.push('<span class="soon">' + esc(s.next===today ? "Test today" : "Next test " + fmtDay(s.next, true)) + '</span>');
+    else if(s.first) meta.push(esc(s.first===s.last ? "Test " + fmtDay(s.first, false)
+      : "Tests " + fmtDay(s.first, false) + " – " + fmtDay(s.last, false)));
+    var rh = rollupHTML(s.r);
+    if(rh) meta.push(rh);
+    var n = s.cards.length + s.localOnly.length;
+    var id = "g:" + s.year + ":" + (s.g.id || s.g.name);
+    return sectionEl({ id:id, level:"group", gid:s.g.id, icon:s.g.icon, name:s.g.name,
+      meta:meta.join(" · "), pill:n + (n===1 ? " module" : " modules"),
+      open:isOpen(id, s.open), children:kids });
+  }
+  function byOrder(a, b){ return a.order - b.order; }
+
+  groupsEl.innerHTML = "";
+  years.forEach(function(y){
+    var inYear = gsecs.filter(function(s){ return s.year===y && !s.empty; });
+    if(!inYear.length) return;
+    var kids = [];
+    inYear.filter(function(s){ return s.kind==="daily"; }).sort(byOrder).forEach(function(s){ kids.push(groupEl(s)); });
+    [2, 1].forEach(function(t){
+      var tg = inYear.filter(function(s){ return s.kind==="term" && s.term===t; }).sort(function(a, b){
+        var fa = a.first || "", fb = b.first || "";
+        if(fa!==fb) return fa < fb ? 1 : -1;   /* latest test first */
+        return a.order - b.order;
+      });
+      if(!tg.length) return;
+      var tid = "t:" + y + ":" + t;
+      var topen = tg.some(function(s){ return s.open; });
+      kids.push(sectionEl({ id:tid, level:"term", name:TERM_NAMES[t],
+        meta:rollupHTML(mergeRollups(tg.map(function(s){ return s.r; }))),
+        open:isOpen(tid, topen), children:tg.map(groupEl) }));
+    });
+    inYear.filter(function(s){ return s.kind==="extra"; }).sort(byOrder).forEach(function(s){ kids.push(groupEl(s)); });
+    var cid = "c:" + y;
+    var copen = y===latestYear || inYear.some(function(s){ return s.open; });
+    groupsEl.appendChild(sectionEl({ id:cid, level:"class", icon:"🎒",
+      name:"Class " + classOf(y) + " · " + yearLabel(y),
+      meta:rollupHTML(mergeRollups(inYear.map(function(s){ return s.r; }))),
+      open:isOpen(cid, copen), children:kids }));
+  });
+
+  /* Progress whose storage key matches no hub module: never hidden, folded last. */
   var orphans = docKeys.filter(function(k){ return !matched[k]; });
   if(orphans.length){
-    var oc = [], latestO = null;
-    orphans.forEach(function(k){
+    var oc = orphans.map(function(k){
       var d = asState(doc[k]);
       withData.push(d);
-      var la = lastActiveISO(d);
-      if(la && (!latestO || la > latestO)) latestO = la;
-      oc.push({ entry:{ icon:"🗂️", name:k, href:"" }, data:d });
+      return { entry:{ icon:"🗂️", name:k, href:"" }, data:d };
     });
     syncedCount += orphans.length;
-    sections.push({ name: hubOk ? "Other synced data" : "Synced modules", cards:oc, localOnly:[], latest:latestO, order:999 });
+    var oid = hubOk ? "other" : "all";
+    groupsEl.appendChild(sectionEl({ id:oid, level:"group", icon:"🗂️",
+      name: hubOk ? "Other synced data" : "Synced modules",
+      meta:rollupHTML(rollup(oc)), pill:oc.length + (oc.length===1 ? " key" : " keys"),
+      open:isOpen(oid, !hubOk), children:oc.map(function(c){ return renderCard(c.entry, c.data); }) }));
   }
-
-  /* Groups with the most recent practice come first; the rest keep hub order.
-     Leftover keys with no hub module always go last. */
-  sections.sort(function(a, b){
-    if((a.order===999) !== (b.order===999)) return a.order===999 ? 1 : -1;
-    if(a.latest && b.latest && a.latest !== b.latest) return a.latest < b.latest ? 1 : -1;
-    if(a.latest && !b.latest) return -1;
-    if(!a.latest && b.latest) return 1;
-    return a.order - b.order;
-  });
 
   var totalPoints = 0, bestStreak = 0, totalMistakes = 0, mostRecent = null;
   withData.forEach(function(d){
@@ -417,25 +633,6 @@ function render(code, groups, scanned, doc, hubOk){
   if(totalMistakes>0){
     summary.innerHTML += '<div class="stat"><div class="n" style="color:var(--red)">'+totalMistakes+'</div><div class="l">Mistakes to review</div></div>';
   }
-
-  var groupsEl = $("groups");
-  groupsEl.innerHTML = "";
-  sections.forEach(function(s){
-    if(!s.cards.length && !s.localOnly.length) return;
-    var h = document.createElement("div");
-    h.className = "group";
-    var title = document.createElement("h2");
-    title.textContent = s.name;
-    h.appendChild(title);
-    s.cards.forEach(function(c){ h.appendChild(renderCard(c.entry, c.data)); });
-    if(s.localOnly.length){
-      var lo = document.createElement("div");
-      lo.className = "localonly";
-      lo.innerHTML = "Not synced, so progress stays on her tablet: <b>" + s.localOnly.map(esc).join("</b>, <b>") + "</b>";
-      h.appendChild(lo);
-    }
-    groupsEl.appendChild(h);
-  });
 
   var st = $("status");
   st.className = hubOk ? "status ok" : "status err";
@@ -460,7 +657,8 @@ function loadAll(code){
   loading = true;
   lsSet(LAST_CODE_KEY, code);
 
-  var hubP = fetchHub().then(function(g){ return { ok:true, groups:g }; }, function(){ return { ok:false, groups:[] }; });
+  var hubP = fetchHub().then(function(h){ return { ok:true, groups:h.groups, tests:h.tests }; },
+    function(){ return { ok:false, groups:[], tests:[] }; });
   var docP = readDoc(db, code);
 
   Promise.all([hubP, docP]).then(function(res){
@@ -503,7 +701,7 @@ function loadAll(code){
       cache.__orphans = orphanMemo;
       lsSet(SCAN_KEY, JSON.stringify(cache));
       loading = false;
-      render(code, hub.groups, scanned, doc, hub.ok);
+      render(code, hub, scanned, doc);
     });
   }).catch(function(){
     loading = false;

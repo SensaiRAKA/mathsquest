@@ -42,6 +42,13 @@ This is zero-impact work on a personal study site. Always take it all the way li
   plain array literal declared as `const GROUPS = [`, and (c) the quest declares
   its storage key as one of those three constants with a quoted literal value.
   `KNOWN` in the dashboard is only a shortcut that skips fetching pages.
+- The dashboard nests Class > Term > hub group, all collapsible. A group's school
+  year (April-March, 2026-27 = Class 4) and term (Apr-Sep = Term 1, Oct-Mar =
+  Term 2) come from its earliest `TESTS` date, so give every new exam group at
+  least one `TESTS` row. Groups with no dated tests (`always:true` Every Day,
+  Special Classes) sit under the latest class, outside the terms. To pin a group
+  elsewhere, add `year:"2026-27"` and/or `term:1|2` to its `GROUPS` entry, e.g.
+  pin Special Classes once Class 5 tests are added, or it moves up with them.
 - The dashboard reads progress fields by name: points in `xp`/`stars`/`points`;
   streak in `streak`, or a `days` map of `"YYYY-MM-DD": number`; mistakes in
   `wrong` (object), `mistakes` (array), `totalWrong` or `mist` (object); last
