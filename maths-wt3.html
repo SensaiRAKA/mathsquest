@@ -1,0 +1,1808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="sync.js"></script>
+  <title>MathsQuest: WT-3 Expedition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #ecfeff 100%);
+      min-height: 100vh;
+      color: #1e1b4b;
+    }
+    h1, h2, h3, .font-display {
+      font-family: 'Fredoka', sans-serif;
+    }
+    .card-shadow {
+      box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.12), 0 4px 10px -2px rgba(79, 70, 229, 0.06);
+    }
+    .btn-pop {
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+    }
+    .btn-pop:active {
+      transform: scale(0.97);
+    }
+    .hop-arc {
+      stroke-dasharray: 200;
+      stroke-dashoffset: 200;
+      animation: drawArc 0.55s ease forwards;
+    }
+    @keyframes drawArc {
+      to { stroke-dashoffset: 0; }
+    }
+    .sym-line {
+      stroke-dasharray: 8 5;
+      stroke-dashoffset: 120;
+      animation: drawSym 0.6s ease forwards;
+    }
+    @keyframes drawSym {
+      to { stroke-dashoffset: 0; }
+    }
+    .scratch-grid {
+      background-color: #ffffff;
+      background-image:
+        linear-gradient(to right, rgba(99, 102, 241, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99, 102, 241, 0.12) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+    }
+    /* Custom scrollbar for clean look */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #ede9fe; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb { background: #a78bfa; border-radius: 999px; }
+  </style>
+</head>
+<body class="pb-16">
+  <!-- Confetti Canvas -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Top Dashboard Bar -->
+  <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-indigo-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-3 sm:px-6 py-3">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <!-- Brand & Level -->
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 flex items-center justify-center text-white text-2xl shadow-md">
+            🧭
+          </div>
+          <div>
+            <h1 class="text-lg sm:text-xl font-bold text-indigo-950 leading-tight">MathsQuest: WT-3</h1>
+            <div class="flex items-center gap-2 mt-0.5">
+              <span id="dash-level" class="text-xs font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Lv. 1 Explorer</span>
+              <div class="w-24 sm:w-32 h-2.5 bg-indigo-100 rounded-full overflow-hidden">
+                <div id="dash-xp-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+              <span id="dash-xp-text" class="text-xs font-bold text-indigo-600">0 XP</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats & Controls -->
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <!-- Stars -->
+          <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 px-3 py-1.5 rounded-xl">
+            <span class="text-base">⭐</span>
+            <span id="dash-stars" class="font-extrabold text-amber-700 text-sm">0</span>
+          </div>
+          <!-- Streak -->
+          <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-200 px-3 py-1.5 rounded-xl">
+            <span class="text-base">🔥</span>
+            <span id="dash-streak" class="font-extrabold text-rose-700 text-sm">0</span>
+          </div>
+          <!-- Study Session Timer -->
+          <div class="flex items-center gap-2 bg-teal-50 border border-teal-200 px-3 py-1.5 rounded-xl">
+            <span class="text-base">⏱️</span>
+            <div class="leading-tight">
+              <div id="dash-timer" class="font-extrabold text-teal-800 text-xs sm:text-sm">00:00:00</div>
+              <div class="text-[10px] font-bold text-teal-600">Goal: 2–3 hrs</div>
+            </div>
+            <button id="btn-timer-toggle" onclick="toggleStudyTimer()" class="ml-1 px-2 py-1 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold btn-pop" title="Pause or Resume Study Timer">
+              Pause
+            </button>
+          </div>
+          <!-- Scratchpad Button -->
+          <button onclick="toggleScratchpad()" class="flex items-center gap-1.5 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold shadow-sm btn-pop">
+            <span>✏️</span> <span class="hidden sm:inline">Scratchpad</span>
+          </button>
+          <!-- Sound Toggle -->
+          <button id="btn-sound" onclick="toggleSound()" class="p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 btn-pop" title="Toggle Sound Effects">
+            🔊
+          </button>
+          <!-- Reset Progress -->
+          <button onclick="openResetModal()" class="p-2 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-600 hover:text-rose-700 border border-slate-200 btn-pop text-xs font-bold" title="Reset Progress">
+            ↺
+          </button>
+        </div>
+      </div>
+
+      <!-- Main Navigation Tabs -->
+      <nav class="flex gap-2 mt-3 overflow-x-auto pb-1">
+        <button onclick="switchTab('revision')" id="tab-revision" class="nav-tab flex-1 min-w-[130px] py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span>🧪</span> Revision Lab
+        </button>
+        <button onclick="switchTab('quest')" id="tab-quest" class="nav-tab flex-1 min-w-[130px] py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span>🗺️</span> Quest Map
+        </button>
+        <button onclick="switchTab('mock')" id="tab-mock" class="nav-tab flex-1 min-w-[130px] py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all">
+          <span>🏆</span> Mock Test Arena
+        </button>
+        <button onclick="switchTab('vault')" id="tab-vault" class="nav-tab flex-1 min-w-[130px] py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all relative">
+          <span>🛡️</span> Mistake Vault
+          <span id="vault-badge" class="hidden ml-1 px-1.5 py-0.5 text-[11px] font-extrabold rounded-full bg-rose-500 text-white">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Stretch & Water Break Banner (every 25 mins) -->
+  <div id="break-banner" class="hidden max-w-4xl mx-auto mt-4 px-4">
+    <div class="bg-gradient-to-r from-teal-500 to-emerald-500 text-white rounded-2xl p-4 shadow-lg flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="text-3xl">💧🧘‍♀️</span>
+        <div>
+          <h3 class="font-bold text-lg">Stretch & Water Break!</h3>
+          <p class="text-sm text-teal-50">You've been studying for 25 minutes straight! Take a 3-minute breather, drink some water, and stretch your arms.</p>
+        </div>
+      </div>
+      <button onclick="dismissBreakBanner()" class="bg-white text-teal-700 font-extrabold px-4 py-2 rounded-xl shadow-sm hover:bg-teal-50 btn-pop text-sm">
+        I'm Refreshed! ✨
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Area -->
+  <main class="max-w-6xl mx-auto px-3 sm:px-6 mt-6">
+    <!-- ==================== TAB 1: REVISION LAB ==================== -->
+    <section id="view-revision" class="space-y-8">
+      <!-- Section 1: Metric Conversion Ladder -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-indigo-100">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-purple-600 bg-purple-50 px-3 py-1 rounded-full">Chapter 8 • Measurement</span>
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-950 mt-2">Metric Conversion Ladder 🪜</h2>
+            <p class="text-sm text-slate-600 mt-1"><strong>"King Henry Died Mother Did Cry Much"</strong> — Tap a <strong>FROM</strong> unit, then tap a <strong>TO</strong> unit to see the magic hops!</p>
+          </div>
+          <!-- Metric Type Switcher -->
+          <div class="flex bg-indigo-50 p-1 rounded-2xl border border-indigo-100">
+            <button onclick="setLadderType('length')" id="ladder-btn-length" class="px-3.5 py-2 rounded-xl text-sm font-bold transition-all bg-indigo-600 text-white shadow-sm">📏 Length</button>
+            <button onclick="setLadderType('weight')" id="ladder-btn-weight" class="px-3.5 py-2 rounded-xl text-sm font-bold transition-all text-indigo-700 hover:bg-indigo-100">⚖️ Weight</button>
+            <button onclick="setLadderType('capacity')" id="ladder-btn-capacity" class="px-3.5 py-2 rounded-xl text-sm font-bold transition-all text-indigo-700 hover:bg-indigo-100">🧪 Capacity</button>
+          </div>
+        </div>
+
+        <!-- Example Input -->
+        <div class="flex flex-wrap items-center gap-3 mb-5 bg-slate-50 p-3 rounded-2xl border border-slate-200">
+          <label for="ladder-val" class="text-sm font-bold text-slate-700">Try a number:</label>
+          <input id="ladder-val" type="number" value="5" min="1" max="99999" oninput="renderLadderAnimation()" class="w-28 px-3 py-1.5 rounded-xl border-2 border-indigo-200 font-extrabold text-indigo-900 focus:outline-none focus:border-indigo-500" />
+          <span class="text-xs text-slate-500 font-semibold">Tip: Forward (→) = Multiply by 10 per hop. Backward (←) = Divide by 10 per hop.</span>
+        </div>
+
+        <!-- Interactive Ladder Pillars -->
+        <div class="overflow-x-auto pb-2">
+          <div class="min-w-[600px]">
+            <!-- Animated Hop Arcs SVG -->
+            <svg id="ladder-svg" viewBox="0 0 700 85" class="w-full h-20 mb-1"></svg>
+            <!-- 7 Units Grid -->
+            <div id="ladder-units" class="grid grid-cols-7 gap-2"></div>
+          </div>
+        </div>
+
+        <!-- Live Conversion Result Box -->
+        <div id="ladder-result" class="mt-5 p-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
+          <div>
+            <div class="text-xs uppercase tracking-wider font-bold text-indigo-200">Live Conversion Example</div>
+            <div id="ladder-result-text" class="text-lg sm:text-2xl font-display font-bold mt-0.5">5 km = 5 × 1000 m = 5000 m</div>
+          </div>
+          <div id="ladder-direction-badge" class="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-sm font-extrabold text-sm">
+            3 Hops Forward (× 1000) ➡️
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Symmetry Mirror Explorer -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-indigo-100">
+        <span class="text-xs font-extrabold uppercase tracking-wider text-teal-600 bg-teal-50 px-3 py-1 rounded-full">Chapter 10 • Patterns & Symmetry</span>
+        <h2 class="text-2xl sm:text-3xl font-bold text-indigo-950 mt-2">Symmetry Mirror Explorer 🪞</h2>
+        <p class="text-sm text-slate-600 mt-1">Click any shape or letter to animate its <strong>Lines of Symmetry</strong>!</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
+          <!-- Shape Selector Buttons -->
+          <div class="lg:col-span-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5" id="sym-buttons"></div>
+
+          <!-- SVG Display Stage -->
+          <div class="lg:col-span-7 bg-gradient-to-br from-indigo-50 to-purple-50 rounded-3xl p-6 border-2 border-indigo-100 flex flex-col items-center justify-center min-h-[260px]">
+            <svg id="sym-svg" viewBox="0 0 220 220" class="w-48 h-48 sm:w-56 sm:h-56"></svg>
+            <div class="text-center mt-3">
+              <h3 id="sym-title" class="text-xl font-bold text-indigo-950">Square</h3>
+              <p id="sym-desc" class="text-sm font-bold text-purple-700 mt-0.5">4 Lines of Symmetry (Vertical, Horizontal & 2 Diagonals)</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- A-Z Alphabet Symmetry Grid -->
+        <div class="mt-7 pt-6 border-t border-indigo-100">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <h3 class="text-lg font-bold text-indigo-950">🔤 A–Z Alphabet Symmetry Grid (HOTS!)</h3>
+            <div class="flex items-center gap-3 text-xs font-bold">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span> Symmetrical (16)</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-rose-400 inline-block"></span> No Symmetry (10)</span>
+            </div>
+          </div>
+          <div id="alphabet-grid" class="grid grid-cols-6 sm:grid-cols-9 md:grid-cols-[repeat(13,minmax(0,1fr))] gap-2"></div>
+          <p class="text-xs sm:text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3 mt-3 font-bold">
+            ⭐ Exam Fact: Exactly <strong>10 letters</strong> of the English alphabet have NO line of symmetry: <strong>F, G, J, L, N, P, Q, R, S, Z</strong>.
+          </p>
+        </div>
+      </div>
+
+      <!-- Section 3: Watch Out! Common Mistakes -->
+      <div class="bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-amber-200">
+        <div class="flex items-center gap-2 mb-4">
+          <span class="text-2xl">⚠️</span>
+          <h2 class="text-2xl font-bold text-amber-900">Watch Out! Common Exam Traps</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+            <div class="font-extrabold text-amber-900 text-base">1. Forward = Multiply, NOT Divide!</div>
+            <p class="text-sm text-slate-700 mt-1">Convert <strong>150 m</strong> into <strong>dm</strong>:</p>
+            <div class="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+              <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 line-through">150 ÷ 10 = 15 dm</span>
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">✅ 150 × 10 = 1500 dm</span>
+            </div>
+          </div>
+          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+            <div class="font-extrabold text-amber-900 text-base">2. Pad with Zeros in Columns!</div>
+            <p class="text-sm text-slate-700 mt-1">Writing <strong>40 kg 85 g</strong> in kg/g columns:</p>
+            <div class="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+              <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 line-through">40 kg 850 g</span>
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">✅ 40 kg 085 g</span>
+            </div>
+          </div>
+          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+            <div class="font-extrabold text-amber-900 text-base">3. Count Every Single Step!</div>
+            <p class="text-sm text-slate-700 mt-1">Convert <strong>4200 mL</strong> into <strong>cL</strong> (only 1 step back!):</p>
+            <div class="mt-2 flex flex-wrap gap-2 text-xs font-bold">
+              <span class="px-2.5 py-1 rounded-lg bg-rose-100 text-rose-700 line-through">4200 ÷ 100 = 42 cL</span>
+              <span class="px-2.5 py-1 rounded-lg bg-emerald-100 text-emerald-800">✅ 4200 ÷ 10 = 420 cL</span>
+            </div>
+          </div>
+          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200">
+            <div class="font-extrabold text-amber-900 text-base">4. Never Mix Different Quantities!</div>
+            <p class="text-sm text-slate-700 mt-1">Can you add <strong>5 kg + 3 L</strong>?</p>
+            <div class="mt-2 text-xs font-bold px-2.5 py-1.5 rounded-lg bg-emerald-100 text-emerald-800">
+              ✅ NO! kg measures Weight (mass) and L measures Capacity (liquid). They cannot be added!
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 2: QUEST MAP ==================== -->
+    <section id="view-quest" class="hidden space-y-6">
+      <!-- Zone Selection Grid -->
+      <div id="quest-map-grid">
+        <div class="mb-5">
+          <h2 class="text-2xl sm:text-3xl font-bold text-indigo-950">Choose Your Quest Zone 🗺️</h2>
+          <p class="text-sm text-slate-600 mt-1">Conquer all 5 zones of increasing difficulty! Use <strong>Generate More Practice</strong> inside any zone for unlimited drills.</p>
+        </div>
+        <div id="zones-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+      </div>
+
+      <!-- Active Zone Drill Runner -->
+      <div id="quest-runner" class="hidden">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <button onclick="exitQuestZone()" class="px-4 py-2 rounded-xl bg-white border border-indigo-200 text-indigo-700 font-bold text-sm hover:bg-indigo-50 btn-pop">
+            ← Back to Quest Map
+          </button>
+          <div class="flex items-center gap-2">
+            <span id="runner-zone-badge" class="px-3 py-1 rounded-full bg-indigo-100 text-indigo-800 font-extrabold text-xs">Zone 1</span>
+            <span id="runner-progress-text" class="font-extrabold text-sm text-slate-700">Question 1 / 10</span>
+          </div>
+          <button onclick="startInfiniteMode()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold text-sm shadow-sm hover:opacity-95 btn-pop">
+            ⚡ Generate More Practice
+          </button>
+        </div>
+
+        <!-- Progress Bar -->
+        <div class="w-full h-3 bg-indigo-100 rounded-full overflow-hidden mb-5">
+          <div id="runner-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 via-purple-500 to-teal-400 transition-all duration-300" style="width: 10%"></div>
+        </div>
+
+        <!-- Question Card -->
+        <div class="bg-white rounded-3xl p-5 sm:p-8 card-shadow border border-indigo-100">
+          <div class="flex items-start justify-between gap-3 mb-4">
+            <span id="q-tag" class="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-purple-50 text-purple-700">Unit Basics</span>
+            <button id="btn-hint" onclick="showHint()" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-bold text-xs btn-pop">
+              💡 Need a Hint?
+            </button>
+          </div>
+
+          <h3 id="q-text" class="text-xl sm:text-2xl font-bold text-indigo-950 leading-snug mb-4"></h3>
+
+          <!-- Optional Visual Aid (e.g. for pyramid/bubbles/wheel) -->
+          <div id="q-visual" class="hidden mb-5 flex justify-center"></div>
+
+          <!-- Hint Box -->
+          <div id="q-hint-box" class="hidden mb-5 p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-sm font-semibold"></div>
+
+          <!-- Options Grid -->
+          <div id="q-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+          <!-- Feedback & Explanation Box -->
+          <div id="q-feedback" class="hidden mt-5 p-4 rounded-2xl border-2">
+            <div id="q-feedback-title" class="font-display font-bold text-lg"></div>
+            <p id="q-feedback-exp" class="text-sm mt-1 leading-relaxed"></p>
+            <div class="mt-4 flex justify-end">
+              <button id="btn-next-q" onclick="nextQuestQuestion()" class="px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-md btn-pop">
+                Next Question →
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Zone Complete Summary -->
+      <div id="quest-summary" class="hidden bg-white rounded-3xl p-8 card-shadow border border-indigo-100 text-center max-w-xl mx-auto">
+        <div class="text-6xl mb-3">🎉🏆</div>
+        <h2 id="summary-title" class="text-3xl font-bold text-indigo-950">Zone Conquered!</h2>
+        <p id="summary-stats" class="text-slate-600 font-bold mt-2 text-lg"></p>
+        <div id="summary-stars" class="text-4xl my-4">⭐⭐⭐</div>
+        <div class="flex flex-wrap justify-center gap-3 mt-6">
+          <button onclick="exitQuestZone()" class="px-5 py-2.5 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold btn-pop">
+            🗺️ Back to Map
+          </button>
+          <button onclick="startInfiniteMode()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-bold shadow-md btn-pop">
+            ⚡ Practice More Like This
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 3: MOCK TEST ARENA ==================== -->
+    <section id="view-mock" class="hidden space-y-6">
+      <!-- Mock Tier Selector -->
+      <div id="mock-selector">
+        <div class="mb-5">
+          <h2 class="text-2xl sm:text-3xl font-bold text-indigo-950">Mock Test Arena 🏆</h2>
+          <p class="text-sm text-slate-600 mt-1">Test your exam readiness under real timed conditions! Use the Scratchpad anytime for column addition & subtraction.</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <!-- Bronze -->
+          <div class="bg-white rounded-3xl p-6 card-shadow border-2 border-amber-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-4xl">🥉</span>
+                <span id="mock-best-bronze" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-amber-50 text-amber-800">Not attempted</span>
+              </div>
+              <h3 class="text-xl font-bold text-indigo-950 mt-3">Tier 1: Bronze Mock</h3>
+              <p class="text-sm text-slate-600 mt-1">15 Questions • 20 Minutes. Warm-up basics, metric units, and simple conversions.</p>
+            </div>
+            <button onclick="startMockTest('bronze')" class="mt-5 w-full py-3 rounded-2xl bg-gradient-to-r from-amber-500 to-orange-500 text-white font-extrabold shadow-md hover:opacity-95 btn-pop">
+              Start Bronze Test
+            </button>
+          </div>
+
+          <!-- Silver -->
+          <div class="bg-white rounded-3xl p-6 card-shadow border-2 border-indigo-200 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-4xl">🥈</span>
+                <span id="mock-best-silver" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-800">Not attempted</span>
+              </div>
+              <h3 class="text-xl font-bold text-indigo-950 mt-3">Tier 2: Silver Mock</h3>
+              <p class="text-sm text-slate-600 mt-1">20 Questions • 30 Minutes. Full WT-3 school paper style covering all chapters.</p>
+            </div>
+            <button onclick="startMockTest('silver')" class="mt-5 w-full py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-extrabold shadow-md hover:opacity-95 btn-pop">
+              Start Silver Test
+            </button>
+          </div>
+
+          <!-- Gold -->
+          <div class="bg-white rounded-3xl p-6 card-shadow border-2 border-yellow-300 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center justify-between">
+                <span class="text-4xl">🥇</span>
+                <span id="mock-best-gold" class="text-xs font-extrabold px-2.5 py-1 rounded-full bg-yellow-50 text-yellow-800">Not attempted</span>
+              </div>
+              <h3 class="text-xl font-bold text-indigo-950 mt-3">Tier 3: Gold Boss Mock</h3>
+              <p class="text-sm text-slate-600 mt-1">25 Questions • 40 Minutes. Hard word problems, tricky patterns, symmetry & Olympiad!</p>
+            </div>
+            <button onclick="startMockTest('gold')" class="mt-5 w-full py-3 rounded-2xl bg-gradient-to-r from-yellow-500 to-amber-500 text-white font-extrabold shadow-md hover:opacity-95 btn-pop">
+              Start Gold Boss Test
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Mock Test Runner -->
+      <div id="mock-runner" class="hidden">
+        <!-- Mock Header -->
+        <div class="bg-white rounded-2xl p-4 card-shadow border border-indigo-100 flex flex-wrap items-center justify-between gap-3 mb-5">
+          <div>
+            <h3 id="mock-active-title" class="font-bold text-lg text-indigo-950">Silver Mock Test</h3>
+            <div id="mock-answered-count" class="text-xs font-bold text-slate-500">Answered: 0 / 20</div>
+          </div>
+          <div class="flex items-center gap-3">
+            <div class="px-4 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 font-extrabold text-base flex items-center gap-1.5">
+              <span>⏳</span> <span id="mock-countdown">30:00</span>
+            </div>
+            <button id="btn-mock-submit" onclick="askSubmitMock()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-sm btn-pop">
+              Submit Exam ✓
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <!-- Question Area -->
+          <div class="lg:col-span-8 bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-indigo-100">
+            <div class="flex items-center justify-between mb-3">
+              <span id="mock-q-num" class="text-xs font-extrabold uppercase tracking-wider px-3 py-1 rounded-full bg-indigo-50 text-indigo-700">Question 1</span>
+              <span id="mock-q-cat" class="text-xs font-bold text-slate-500">Measurement</span>
+            </div>
+            <h3 id="mock-q-text" class="text-xl font-bold text-indigo-950 leading-snug mb-5"></h3>
+            <div id="mock-q-options" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+            <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-100">
+              <button id="mock-prev-btn" onclick="navMock(-1)" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm btn-pop">← Previous</button>
+              <button id="mock-next-btn" onclick="navMock(1)" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm btn-pop">Next →</button>
+            </div>
+          </div>
+
+          <!-- Question Navigator Palette -->
+          <div class="lg:col-span-4 bg-white rounded-3xl p-5 card-shadow border border-indigo-100 h-fit">
+            <h4 class="font-bold text-sm text-indigo-950 mb-3">Question Palette</h4>
+            <div id="mock-palette" class="grid grid-cols-5 gap-2"></div>
+            <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-3 text-xs font-bold text-slate-600">
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-indigo-600 inline-block"></span> Current</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-emerald-500 inline-block"></span> Answered</span>
+              <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-slate-200 inline-block"></span> Unanswered</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mock Test Results & Step-by-Step Review -->
+      <div id="mock-results" class="hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 sm:p-8 card-shadow border border-indigo-100 text-center">
+          <div id="mock-res-emoji" class="text-6xl mb-2">🏆</div>
+          <h2 id="mock-res-title" class="text-3xl font-bold text-indigo-950">Exam Complete!</h2>
+          <div class="flex flex-wrap justify-center gap-4 mt-4">
+            <div class="px-5 py-3 rounded-2xl bg-indigo-50 border border-indigo-100">
+              <div class="text-xs font-bold text-indigo-500 uppercase">Score</div>
+              <div id="mock-res-score" class="text-2xl font-display font-bold text-indigo-900">18 / 20</div>
+            </div>
+            <div class="px-5 py-3 rounded-2xl bg-emerald-50 border border-emerald-100">
+              <div class="text-xs font-bold text-emerald-600 uppercase">Percentage</div>
+              <div id="mock-res-pct" class="text-2xl font-display font-bold text-emerald-800">90%</div>
+            </div>
+            <div class="px-5 py-3 rounded-2xl bg-amber-50 border border-amber-100">
+              <div class="text-xs font-bold text-amber-600 uppercase">Stars Earned</div>
+              <div id="mock-res-stars" class="text-2xl">⭐⭐⭐</div>
+            </div>
+          </div>
+          <button onclick="exitMockResults()" class="mt-6 px-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md btn-pop">
+            Back to Mock Test Arena
+          </button>
+        </div>
+
+        <div class="bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-indigo-100">
+          <h3 class="text-xl font-bold text-indigo-950 mb-4">📝 Full Step-by-Step Review</h3>
+          <div id="mock-review-list" class="space-y-4"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== TAB 4: MISTAKE VAULT ==================== -->
+    <section id="view-vault" class="hidden space-y-6">
+      <div class="bg-white rounded-3xl p-5 sm:p-7 card-shadow border border-indigo-100">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h2 class="text-2xl sm:text-3xl font-bold text-indigo-950">Mistake Vault 🛡️</h2>
+            <p class="text-sm text-slate-600 mt-1">Every question you miss in Quests or Mock Tests lands here. Solve it correctly to clear it and earn <strong>+25 Bonus XP</strong>!</p>
+          </div>
+          <span id="vault-count-pill" class="px-4 py-1.5 rounded-full bg-rose-50 text-rose-700 font-extrabold text-sm border border-rose-200">0 Mistakes to Fix</span>
+        </div>
+
+        <div id="vault-empty" class="text-center py-12">
+          <div class="text-6xl mb-3">🌟</div>
+          <h3 class="text-xl font-bold text-indigo-950">Your Mistake Vault is Squeaky Clean!</h3>
+          <p class="text-sm text-slate-500 mt-1">Keep practicing in the Quest Map or Mock Test Arena. Any tricky questions will appear here for smart revision.</p>
+        </div>
+
+        <div id="vault-list" class="space-y-4"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ==================== ROUGH WORK SCRATCHPAD MODAL ==================== -->
+  <div id="scratchpad-modal" class="hidden fixed inset-0 z-50 bg-indigo-950/50 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6">
+    <div class="bg-white rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl border-2 border-purple-200 flex flex-col">
+      <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-3 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 font-display font-bold text-lg">
+          <span>✏️</span> Rough Work Scratchpad
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="setPenColor('#1e1b4b')" class="w-6 h-6 rounded-full bg-indigo-950 border-2 border-white" title="Dark Pen"></button>
+          <button onclick="setPenColor('#dc2626')" class="w-6 h-6 rounded-full bg-red-600 border-2 border-white" title="Red Pen"></button>
+          <button onclick="setPenColor('#0d9488')" class="w-6 h-6 rounded-full bg-teal-600 border-2 border-white" title="Teal Pen"></button>
+          <button id="btn-eraser" onclick="toggleEraser()" class="px-2.5 py-1 rounded-lg bg-white/20 hover:bg-white/30 text-xs font-bold">Eraser</button>
+          <button onclick="clearScratchpad()" class="px-2.5 py-1 rounded-lg bg-rose-500 hover:bg-rose-600 text-xs font-bold">Clear</button>
+          <button onclick="toggleScratchpad()" class="ml-1 px-2.5 py-1 rounded-lg bg-white text-indigo-700 font-extrabold text-xs">Close ✕</button>
+        </div>
+      </div>
+      <div class="p-3 bg-indigo-50/50">
+        <canvas id="scratch-canvas" class="w-full h-[340px] sm:h-[400px] rounded-2xl border-2 border-indigo-200 scratch-grid touch-none cursor-crosshair"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== RESET CONFIRMATION MODAL ==================== -->
+  <div id="reset-modal" class="hidden fixed inset-0 z-50 bg-indigo-950/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-rose-100 text-center">
+      <div class="text-5xl mb-2">⚠️</div>
+      <h3 class="text-xl font-bold text-indigo-950">Reset All Progress?</h3>
+      <p class="text-sm text-slate-600 mt-1">This will clear your XP, stars, streak, study timer, mock scores, and Mistake Vault.</p>
+      <div class="flex gap-3 justify-center mt-5">
+        <button onclick="closeResetModal()" class="px-5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm btn-pop">Cancel</button>
+        <button onclick="confirmResetProgress()" class="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-sm btn-pop">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. STATE & LOCALSTORAGE PERSISTENCE
+       ========================================================================= */
+    const STORAGE_KEY = 'diksha_maths_wt3_v1';
+
+    const defaultState = {
+      xp: 0,
+      stars: 0,
+      streak: 0,
+      studySeconds: 0,
+      completedZones: [],
+      mockBest: { bronze: null, silver: null, gold: null },
+      mistakes: [],
+      soundOn: true,
+      t: 0
+    };
+
+    let state = loadState();
+    let studyTimerInterval = null;
+    let studyTimerRunning = true;
+    let secondsSinceBreak = 0;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(defaultState));
+        const parsed = JSON.parse(raw);
+        return { ...defaultState, ...parsed, mockBest: { ...defaultState.mockBest, ...(parsed.mockBest || {}) } };
+      } catch (e) {
+        return JSON.parse(JSON.stringify(defaultState));
+      }
+    }
+
+    function saveState() {
+      state.t = Date.now();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
+      if (typeof DikshaSync !== 'undefined') { try { DikshaSync.push(STORAGE_KEY, state); } catch (e) {} }
+      updateDashboard();
+    }
+
+    /* =========================================================================
+       2. WEB AUDIO API SOUND EFFECTS & CONFETTI
+       ========================================================================= */
+    let audioCtx = null;
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        if (AudioContext) audioCtx = new AudioContext();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!state.soundOn) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'correct') {
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now);
+          osc.frequency.setValueAtTime(659.25, now + 0.08);
+          osc.frequency.setValueAtTime(783.99, now + 0.16);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+          osc.start(now);
+          osc.stop(now + 0.35);
+        } else if (type === 'wrong') {
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(240, now);
+          osc.frequency.linearRampToValueAtTime(170, now + 0.22);
+          gain.gain.setValueAtTime(0.14, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'fanfare') {
+          const notes = [523.25, 659.25, 783.99, 1046.5];
+          notes.forEach((freq, i) => {
+            const o = ctx.createOscillator();
+            const g = ctx.createGain();
+            o.type = 'triangle';
+            o.connect(g);
+            g.connect(ctx.destination);
+            o.frequency.setValueAtTime(freq, now + i * 0.1);
+            g.gain.setValueAtTime(0.14, now + i * 0.1);
+            g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.1 + 0.35);
+            o.start(now + i * 0.1);
+            o.stop(now + i * 0.1 + 0.35);
+          });
+        }
+      } catch (e) {}
+    }
+
+    function toggleSound() {
+      state.soundOn = !state.soundOn;
+      saveState();
+    }
+
+    // Lightweight Confetti Burst
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const colors = ['#6366f1', '#a855f7', '#14b8a6', '#f59e0b', '#ec4899', '#10b981'];
+      const particles = Array.from({ length: 85 }, () => ({
+        x: Math.random() * canvas.width,
+        y: -10 - Math.random() * 100,
+        r: 4 + Math.random() * 5,
+        c: colors[Math.floor(Math.random() * colors.length)],
+        vx: (Math.random() - 0.5) * 5,
+        vy: 3 + Math.random() * 4,
+        rot: Math.random() * 360,
+        vrot: (Math.random() - 0.5) * 10
+      }));
+      let frame = 0;
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.rot += p.vrot;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.c;
+          ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r);
+          ctx.restore();
+        });
+        frame++;
+        if (frame < 110) requestAnimationFrame(animate);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+      animate();
+    }
+
+    /* =========================================================================
+       3. DASHBOARD & STUDY TIMER
+       ========================================================================= */
+    const LEVELS = [
+      { name: 'Explorer', min: 0 },
+      { name: 'Pathfinder', min: 150 },
+      { name: 'Metric Scout', min: 350 },
+      { name: 'Pattern Wizard', min: 650 },
+      { name: 'Maths Knight', min: 1000 },
+      { name: 'WT-3 Champion', min: 1500 }
+    ];
+
+    function updateDashboard() {
+      let lvIdx = 0;
+      for (let i = 0; i < LEVELS.length; i++) {
+        if (state.xp >= LEVELS[i].min) lvIdx = i;
+      }
+      const curLv = LEVELS[lvIdx];
+      const nextLv = LEVELS[lvIdx + 1];
+      const pct = nextLv ? Math.min(100, Math.round(((state.xp - curLv.min) / (nextLv.min - curLv.min)) * 100)) : 100;
+
+      document.getElementById('dash-level').textContent = `Lv. ${lvIdx + 1} ${curLv.name}`;
+      document.getElementById('dash-xp-bar').style.width = `${pct}%`;
+      document.getElementById('dash-xp-text').textContent = `${state.xp} XP`;
+      document.getElementById('dash-stars').textContent = state.stars;
+      document.getElementById('dash-streak').textContent = state.streak;
+      document.getElementById('btn-sound').textContent = state.soundOn ? '🔊' : '🔇';
+
+      // Timer display
+      const h = String(Math.floor(state.studySeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((state.studySeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(state.studySeconds % 60).padStart(2, '0');
+      document.getElementById('dash-timer').textContent = `${h}:${m}:${s}`;
+
+      // Mistake Vault badge
+      const vBadge = document.getElementById('vault-badge');
+      if (state.mistakes.length > 0) {
+        vBadge.textContent = state.mistakes.length;
+        vBadge.classList.remove('hidden');
+      } else {
+        vBadge.classList.add('hidden');
+      }
+
+      // Mock Best Scores
+      ['bronze', 'silver', 'gold'].forEach(tier => {
+        const el = document.getElementById(`mock-best-${tier}`);
+        if (el) {
+          el.textContent = state.mockBest[tier] !== null ? `Best: ${state.mockBest[tier]}%` : 'Not attempted';
+        }
+      });
+    }
+
+    function startStudyTimerLoop() {
+      if (studyTimerInterval) clearInterval(studyTimerInterval);
+      studyTimerInterval = setInterval(() => {
+        if (!studyTimerRunning) return;
+        state.studySeconds++;
+        secondsSinceBreak++;
+        if (secondsSinceBreak >= 25 * 60) {
+          secondsSinceBreak = 0;
+          document.getElementById('break-banner').classList.remove('hidden');
+          playSound('fanfare');
+        }
+        if (state.studySeconds % 10 === 0) {
+          try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+        }
+        const h = String(Math.floor(state.studySeconds / 3600)).padStart(2, '0');
+        const m = String(Math.floor((state.studySeconds % 3600) / 60)).padStart(2, '0');
+        const s = String(state.studySeconds % 60).padStart(2, '0');
+        document.getElementById('dash-timer').textContent = `${h}:${m}:${s}`;
+      }, 1000);
+    }
+
+    function toggleStudyTimer() {
+      studyTimerRunning = !studyTimerRunning;
+      document.getElementById('btn-timer-toggle').textContent = studyTimerRunning ? 'Pause' : 'Resume';
+    }
+
+    function dismissBreakBanner() {
+      document.getElementById('break-banner').classList.add('hidden');
+    }
+
+    function addXP(amount) {
+      state.xp += amount;
+      saveState();
+    }
+
+    /* =========================================================================
+       4. NAVIGATION TABS
+       ========================================================================= */
+    function switchTab(tab) {
+      ['revision', 'quest', 'mock', 'vault'].forEach(t => {
+        document.getElementById(`view-${t}`).classList.toggle('hidden', t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.className = 'nav-tab flex-1 min-w-[130px] py-2 px-3 rounded-xl font-extrabold text-sm flex items-center justify-center gap-2 transition-all bg-indigo-600 text-white shadow-md';
+        } else {
+          btn.className = 'nav-tab flex-1 min-w-[130px] py-2 px-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all bg-indigo-50 text-indigo-700 hover:bg-indigo-100';
+        }
+      });
+      if (tab === 'quest') renderZonesGrid();
+      if (tab === 'vault') renderMistakeVault();
+    }
+
+    /* =========================================================================
+       5. REVISION LAB: METRIC CONVERSION LADDER
+       ========================================================================= */
+    const LADDER_DATA = {
+      length: [
+        { code: 'km', name: 'Kilo', word: 'King' },
+        { code: 'hm', name: 'Hecto', word: 'Henry' },
+        { code: 'dam', name: 'Deca', word: 'Died' },
+        { code: 'm', name: 'Metre (Base)', word: 'Mother' },
+        { code: 'dm', name: 'Deci', word: 'Did' },
+        { code: 'cm', name: 'Centi', word: 'Cry' },
+        { code: 'mm', name: 'Milli', word: 'Much' }
+      ],
+      weight: [
+        { code: 'kg', name: 'Kilo', word: 'King' },
+        { code: 'hg', name: 'Hecto', word: 'Henry' },
+        { code: 'dag', name: 'Deca', word: 'Died' },
+        { code: 'g', name: 'Gram (Base)', word: 'Mother' },
+        { code: 'dg', name: 'Deci', word: 'Did' },
+        { code: 'cg', name: 'Centi', word: 'Cry' },
+        { code: 'mg', name: 'Milli', word: 'Much' }
+      ],
+      capacity: [
+        { code: 'kL', name: 'Kilo', word: 'King' },
+        { code: 'hL', name: 'Hecto', word: 'Henry' },
+        { code: 'daL', name: 'Deca', word: 'Died' },
+        { code: 'L', name: 'Litre (Base)', word: 'Mother' },
+        { code: 'dL', name: 'Deci', word: 'Did' },
+        { code: 'cL', name: 'Centi', word: 'Cry' },
+        { code: 'mL', name: 'Milli', word: 'Much' }
+      ]
+    };
+
+    let ladderType = 'length';
+    let ladderFrom = 0;
+    let ladderTo = 3;
+    let selectingFrom = true;
+
+    function setLadderType(type) {
+      ladderType = type;
+      ['length', 'weight', 'capacity'].forEach(t => {
+        const btn = document.getElementById(`ladder-btn-${t}`);
+        btn.className = t === type
+          ? 'px-3.5 py-2 rounded-xl text-sm font-bold transition-all bg-indigo-600 text-white shadow-sm'
+          : 'px-3.5 py-2 rounded-xl text-sm font-bold transition-all text-indigo-700 hover:bg-indigo-100';
+      });
+      renderLadderUnits();
+      renderLadderAnimation();
+    }
+
+    function selectLadderUnit(idx) {
+      if (selectingFrom) {
+        ladderFrom = idx;
+        selectingFrom = false;
+      } else {
+        ladderTo = idx;
+        selectingFrom = true;
+      }
+      playSound('correct');
+      renderLadderUnits();
+      renderLadderAnimation();
+    }
+
+    function renderLadderUnits() {
+      const container = document.getElementById('ladder-units');
+      const units = LADDER_DATA[ladderType];
+      container.innerHTML = units.map((u, i) => {
+        const isFrom = i === ladderFrom;
+        const isTo = i === ladderTo;
+        const isBase = i === 3;
+        let bg = isBase ? 'bg-amber-50 border-amber-300' : 'bg-indigo-50/70 border-indigo-200';
+        if (isFrom) bg = 'bg-indigo-600 text-white border-indigo-700 ring-4 ring-indigo-200';
+        else if (isTo) bg = 'bg-teal-500 text-white border-teal-600 ring-4 ring-teal-200';
+
+        return `
+          <button onclick="selectLadderUnit(${i})" class="p-3 rounded-2xl border-2 text-center transition-all hover:-translate-y-0.5 btn-pop ${bg}">
+            <div class="text-[11px] font-extrabold uppercase opacity-80">${u.word}</div>
+            <div class="text-xl font-display font-bold my-0.5">${u.code}</div>
+            <div class="text-[10px] font-bold opacity-85">${u.name}</div>
+            ${isFrom ? '<div class="mt-1 text-[10px] font-extrabold bg-white/25 rounded-full px-1.5 py-0.5">FROM</div>' : ''}
+            ${isTo && !isFrom ? '<div class="mt-1 text-[10px] font-extrabold bg-white/25 rounded-full px-1.5 py-0.5">TO</div>' : ''}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderLadderAnimation() {
+      const svg = document.getElementById('ladder-svg');
+      const units = LADDER_DATA[ladderType];
+      const val = parseFloat(document.getElementById('ladder-val').value) || 1;
+      const diff = ladderTo - ladderFrom;
+      const steps = Math.abs(diff);
+      const factor = Math.pow(10, steps);
+      const fromCode = units[ladderFrom].code;
+      const toCode = units[ladderTo].code;
+
+      let paths = '';
+      if (diff !== 0) {
+        const dir = diff > 0 ? 1 : -1;
+        for (let s = 0; s < steps; s++) {
+          const i1 = ladderFrom + s * dir;
+          const i2 = i1 + dir;
+          const x1 = i1 * 100 + 50;
+          const x2 = i2 * 100 + 50;
+          const mx = (x1 + x2) / 2;
+          const color = dir > 0 ? '#4f46e5' : '#0d9488';
+          const label = dir > 0 ? '×10' : '÷10';
+          paths += `
+            <path d="M ${x1} 72 Q ${mx} 12 ${x2} 72" fill="none" stroke="${color}" stroke-width="3.5" stroke-linecap="round" class="hop-arc" style="animation-delay:${s * 0.1}s" />
+            <text x="${mx}" y="22" text-anchor="middle" fill="${color}" font-size="13" font-weight="800">${label}</text>
+          `;
+        }
+      } else {
+        paths = `<text x="350" y="50" text-anchor="middle" fill="#6366f1" font-size="15" font-weight="700">Tap another unit to see the conversion hops!</text>`;
+      }
+      svg.innerHTML = paths;
+
+      const resText = document.getElementById('ladder-result-text');
+      const badge = document.getElementById('ladder-direction-badge');
+      if (diff === 0) {
+        resText.textContent = `${val} ${fromCode} = ${val} ${toCode}`;
+        badge.textContent = 'Same Unit (0 Hops)';
+      } else if (diff > 0) {
+        const ans = +(val * factor).toFixed(6);
+        resText.textContent = `${val} ${fromCode} = ${val} × ${factor} ${toCode} = ${ans} ${toCode}`;
+        badge.textContent = `${steps} Hop${steps > 1 ? 's' : ''} Forward (× ${factor}) ➡️`;
+      } else {
+        const ans = +(val / factor).toFixed(6);
+        resText.textContent = `${val} ${fromCode} = ${val} ÷ ${factor} ${toCode} = ${ans} ${toCode}`;
+        badge.textContent = `${steps} Hop${steps > 1 ? 's' : ''} Backward (÷ ${factor}) ⬅️`;
+      }
+    }
+
+    /* =========================================================================
+       6. REVISION LAB: SYMMETRY MIRROR EXPLORER & ALPHABET GRID
+       ========================================================================= */
+    const SYM_SHAPES = [
+      {
+        id: 'square', name: 'Square', count: '4',
+        desc: '4 Lines of Symmetry (Vertical, Horizontal & 2 Diagonals)',
+        shape: '<rect x="45" y="45" width="130" height="130" fill="#c7d2fe" stroke="#4338ca" stroke-width="4" rx="4"/>',
+        lines: [
+          '<line x1="110" y1="20" x2="110" y2="200" stroke="#e11d48" stroke-width="3" class="sym-line"/>',
+          '<line x1="20" y1="110" x2="200" y2="110" stroke="#e11d48" stroke-width="3" class="sym-line"/>',
+          '<line x1="30" y1="30" x2="190" y2="190" stroke="#e11d48" stroke-width="3" class="sym-line"/>',
+          '<line x1="190" y1="30" x2="30" y2="190" stroke="#e11d48" stroke-width="3" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'rectangle', name: 'Rectangle', count: '2',
+        desc: '2 Lines of Symmetry (Vertical & Horizontal only — NOT diagonals!)',
+        shape: '<rect x="30" y="60" width="160" height="100" fill="#bae6fd" stroke="#0369a1" stroke-width="4" rx="4"/>',
+        lines: [
+          '<line x1="110" y1="35" x2="110" y2="185" stroke="#e11d48" stroke-width="3" class="sym-line"/>',
+          '<line x1="15" y1="110" x2="205" y2="110" stroke="#e11d48" stroke-width="3" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'equilateral', name: 'Equilateral Triangle', count: '3',
+        desc: '3 Lines of Symmetry (All 3 sides are equal)',
+        shape: '<polygon points="110,35 35,175 185,175" fill="#bbf7d0" stroke="#15803d" stroke-width="4"/>',
+        lines: [
+          '<line x1="110" y1="20" x2="110" y2="190" stroke="#e11d48" stroke-width="3" class="sym-line"/>',
+          '<line x1="35" y1="175" x2="155" y2="95" stroke="#e11d48" stroke-width="3" class="sym-line"/>',
+          '<line x1="185" y1="175" x2="65" y2="95" stroke="#e11d48" stroke-width="3" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'isosceles', name: 'Isosceles Triangle', count: '1',
+        desc: '1 Line of Symmetry (2 equal sides)',
+        shape: '<polygon points="110,30 55,180 165,180" fill="#fde68a" stroke="#b45309" stroke-width="4"/>',
+        lines: [
+          '<line x1="110" y1="15" x2="110" y2="195" stroke="#e11d48" stroke-width="3" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'scalene', name: 'Scalene Triangle', count: '0',
+        desc: '0 Lines of Symmetry (All 3 sides have different lengths)',
+        shape: '<polygon points="65,45 30,175 190,155" fill="#fecdd3" stroke="#be123c" stroke-width="4"/>',
+        lines: []
+      },
+      {
+        id: 'semicircle', name: 'Semicircle', count: '1',
+        desc: '1 Line of Symmetry (Straight down the middle)',
+        shape: '<path d="M 35 145 A 75 75 0 0 1 185 145 Z" fill="#ddd6fe" stroke="#6d28d9" stroke-width="4"/>',
+        lines: [
+          '<line x1="110" y1="50" x2="110" y2="165" stroke="#e11d48" stroke-width="3" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'circle', name: 'Circle', count: 'Infinite',
+        desc: 'Infinite Lines of Symmetry (Every line through the center!)',
+        shape: '<circle cx="110" cy="110" r="72" fill="#99f6e4" stroke="#0f766e" stroke-width="4"/>',
+        lines: [
+          '<line x1="110" y1="25" x2="110" y2="195" stroke="#e11d48" stroke-width="2.5" class="sym-line"/>',
+          '<line x1="25" y1="110" x2="195" y2="110" stroke="#e11d48" stroke-width="2.5" class="sym-line"/>',
+          '<line x1="48" y1="48" x2="172" y2="172" stroke="#e11d48" stroke-width="2.5" class="sym-line"/>',
+          '<line x1="172" y1="48" x2="48" y2="172" stroke="#e11d48" stroke-width="2.5" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'letterV', name: 'Letter V', count: '1',
+        desc: '1 Line of Symmetry (Vertical)',
+        shape: '<text x="110" y="165" text-anchor="middle" font-size="145" font-weight="800" fill="#4f46e5" font-family="Fredoka, sans-serif">V</text>',
+        lines: [
+          '<line x1="110" y1="25" x2="110" y2="190" stroke="#e11d48" stroke-width="3.5" class="sym-line"/>'
+        ]
+      },
+      {
+        id: 'letterH', name: 'Letter H', count: '2',
+        desc: '2 Lines of Symmetry (Vertical & Horizontal)',
+        shape: '<text x="110" y="165" text-anchor="middle" font-size="145" font-weight="800" fill="#7c3aed" font-family="Fredoka, sans-serif">H</text>',
+        lines: [
+          '<line x1="110" y1="25" x2="110" y2="190" stroke="#e11d48" stroke-width="3.5" class="sym-line"/>',
+          '<line x1="35" y1="112" x2="185" y2="112" stroke="#e11d48" stroke-width="3.5" class="sym-line"/>'
+        ]
+      }
+    ];
+
+    function initSymmetryExplorer() {
+      const btnWrap = document.getElementById('sym-buttons');
+      btnWrap.innerHTML = SYM_SHAPES.map(s => `
+        <button onclick="selectSymShape('${s.id}')" id="sym-btn-${s.id}" class="p-3 rounded-2xl border-2 border-indigo-100 bg-white hover:bg-indigo-50 text-left transition-all btn-pop">
+          <div class="font-bold text-sm text-indigo-950">${s.name}</div>
+          <div class="text-xs font-extrabold text-purple-600">${s.count} line${s.count === '1' ? '' : 's'}</div>
+        </button>
+      `).join('');
+      selectSymShape('square');
+
+      // Alphabet Grid
+      const asym = new Set(['F', 'G', 'J', 'L', 'N', 'P', 'Q', 'R', 'S', 'Z']);
+      const alphaGrid = document.getElementById('alphabet-grid');
+      alphaGrid.innerHTML = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(ch => {
+        const isAsym = asym.has(ch);
+        return `
+          <div class="py-2 rounded-xl text-center font-display font-bold text-lg border-2 ${isAsym ? 'bg-rose-100 border-rose-300 text-rose-800' : 'bg-emerald-50 border-emerald-200 text-emerald-800'}" title="${isAsym ? 'No line of symmetry' : 'Symmetrical'}">
+            ${ch}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function selectSymShape(id) {
+      const s = SYM_SHAPES.find(x => x.id === id);
+      if (!s) return;
+      SYM_SHAPES.forEach(x => {
+        const b = document.getElementById(`sym-btn-${x.id}`);
+        if (b) {
+          b.className = x.id === id
+            ? 'p-3 rounded-2xl border-2 border-indigo-600 bg-indigo-50 text-left transition-all shadow-sm btn-pop'
+            : 'p-3 rounded-2xl border-2 border-indigo-100 bg-white hover:bg-indigo-50 text-left transition-all btn-pop';
+        }
+      });
+      document.getElementById('sym-svg').innerHTML = s.shape + s.lines.join('');
+      document.getElementById('sym-title').textContent = s.name;
+      document.getElementById('sym-desc').textContent = s.desc;
+    }
+
+    /* =========================================================================
+       7. CURATED QUESTION BANK (ALL 5 ZONES FROM TEXTBOOK, ASSIGNMENT & NOTEBOOK)
+       ========================================================================= */
+    const ZONES = [
+      {
+        id: 'z1', num: 1, name: 'Warm-Up Woods', difficulty: 'Easy', icon: '🌲',
+        color: 'from-emerald-500 to-teal-500', desc: 'Right units, base units, quintal, hectometre & basic rules.',
+        questions: [
+          { id: 'z1_1', tag: 'Units of Length', q: 'The longest bone (femur) in the human body is about 48 ______ long.', options: ['cm', 'm', 'km', 'mm'], ans: 0, hint: 'Think about the length of a school ruler (30 cm). A thigh bone is a bit longer!', exp: 'A femur bone is about 48 cm (centimetres) long.' },
+          { id: 'z1_2', tag: 'Units of Length', q: 'The Eiffel Tower in Paris is about 324 ______ tall.', options: ['cm', 'm', 'km', 'mm'], ans: 1, hint: 'Tall buildings and towers are measured in metres.', exp: 'The Eiffel Tower is about 324 m (metres) tall.' },
+          { id: 'z1_3', tag: 'Units of Length', q: 'The length of the Great Wall of China is about 21,196 ______.', options: ['cm', 'm', 'km', 'dm'], ans: 2, hint: 'Very long distances across countries use kilometres.', exp: 'Long distances like the Great Wall of China are measured in km (kilometres).' },
+          { id: 'z1_4', tag: 'Units of Weight', q: 'The weight of a cricket ball is about 150 ______.', options: ['kg', 'g', 'mg', 'L'], ans: 1, hint: 'A cricket ball is light enough to hold in one hand.', exp: 'Light objects like a cricket ball are measured in g (grams): 150 g.' },
+          { id: 'z1_5', tag: 'Units of Weight', q: 'The weight of your Mathematics textbook is about 250 ______.', options: ['kg', 'g', 'mL', 'km'], ans: 1, hint: 'A single book weighs less than 1 kg.', exp: 'A textbook weighs about 250 g (grams).' },
+          { id: 'z1_6', tag: 'Units of Weight', q: 'Your body weight is about 39 ______.', options: ['g', 'mg', 'kg', 'L'], ans: 2, hint: 'Heavier weights like people and school bags use kilograms.', exp: 'Body weight is measured in kg (kilograms): 39 kg.' },
+          { id: 'z1_7', tag: 'Units of Capacity', q: 'The capacity of one teaspoon of medicine is about 5 ______.', options: ['L', 'kL', 'mL', 'g'], ans: 2, hint: 'Very small amounts of liquid use millilitres.', exp: 'A teaspoon holds about 5 mL (millilitres).' },
+          { id: 'z1_8', tag: 'Units of Capacity', q: 'A big Bisleri water refill bottle has a capacity of about 40 ______.', options: ['mL', 'L', 'kg', 'cm'], ans: 1, hint: 'Large water bottles and buckets are measured in litres.', exp: 'Large containers of water are measured in L (litres).' },
+          { id: 'z1_9', tag: 'Base Units', q: 'What are the standard (base) units of Length, Weight, and Capacity?', options: ['cm, kg, mL', 'metre, gram, litre', 'km, kg, kL', 'mm, mg, mL'], ans: 1, hint: 'Remember the middle pillar "Mother" in King Henry Died Mother Did Cry Much!', exp: 'The base units are Metre (length), Gram (weight), and Litre (capacity).' },
+          { id: 'z1_10', tag: 'Key Facts', q: '1 quintal = ______ kg, and 1 hectometre = ______ metres.', options: ['100 kg and 100 m', '1000 kg and 10 m', '10 kg and 100 m', '100 kg and 1000 m'], ans: 0, hint: 'Hecto means 100, and a quintal is also 100 kg!', exp: '1 quintal = 100 kg, and 1 hectometre (hm) = 100 m.' },
+          { id: 'z1_11', tag: 'Conversion Rule', q: 'To convert a SMALLER unit into a BIGGER unit, we always ______.', options: ['multiply', 'divide', 'add', 'subtract'], ans: 1, hint: 'Moving backward (left) on the Metric Ladder means...', exp: 'Moving from a smaller unit to a bigger unit (backward on the ladder) means we DIVIDE.' }
+        ]
+      },
+      {
+        id: 'z2', num: 2, name: 'Conversion Canyon', difficulty: 'Medium', icon: '🏜️',
+        color: 'from-amber-500 to-orange-500', desc: 'Master the Metric Ladder: km, m, cm, mm, kg, g, mg, L, mL & more!',
+        questions: [
+          { id: 'z2_1', tag: 'Length', q: 'Convert 3 km into metres.', options: ['300 m', '3000 m', '30 m', '30000 m'], ans: 1, hint: '1 km = 1000 m (3 hops forward).', exp: '3 km = 3 × 1000 m = 3000 m.' },
+          { id: 'z2_2', tag: 'Length', q: 'Convert 5 m 36 cm into cm.', options: ['536 cm', '5036 cm', '86 cm', '5360 cm'], ans: 0, hint: '1 m = 100 cm. Convert 5 m first, then add 36 cm.', exp: '5 m 36 cm = (5 × 100) cm + 36 cm = 500 + 36 = 536 cm.' },
+          { id: 'z2_3', tag: 'Length', q: 'Convert 3274 m into km and m.', options: ['32 km 74 m', '3 km 274 m', '3 km 27 m', '327 km 4 m'], ans: 1, hint: 'Divide by 1000: 3274 m = 3000 m + 274 m.', exp: '3274 m = 3000 m + 274 m = 3 km 274 m.' },
+          { id: 'z2_4', tag: 'Length', q: 'Convert 18 km 75 m into metres.', options: ['1875 m', '18075 m', '18750 m', '180075 m'], ans: 1, hint: '18 km = 18000 m. Add 75 m carefully!', exp: '18 km 75 m = 18000 m + 75 m = 18075 m.' },
+          { id: 'z2_5', tag: 'Weight', q: 'Convert 42798 g into kg and g.', options: ['4 kg 2798 g', '42 kg 798 g', '427 kg 98 g', '42 kg 79 g'], ans: 1, hint: '1 kg = 1000 g. Split the last 3 digits for grams.', exp: '42798 g = 42000 g + 798 g = 42 kg 798 g.' },
+          { id: 'z2_6', tag: 'Capacity', q: 'Convert 3456 hL into daL.', options: ['34560 daL', '345.6 daL', '345600 daL', '345 daL'], ans: 0, hint: 'hL to daL is 1 hop forward (× 10).', exp: '1 hL = 10 daL, so 3456 hL = 3456 × 10 = 34560 daL.' },
+          { id: 'z2_7', tag: 'Weight', q: 'Convert 789 mg into cg and mg.', options: ['7 cg 89 mg', '78 cg 9 mg', '780 cg 9 mg', '7 cg 8 mg'], ans: 1, hint: '1 cg = 10 mg. Divide 789 by 10.', exp: '789 ÷ 10 gives quotient 78 and remainder 9 → 78 cg 9 mg.' },
+          { id: 'z2_8', tag: 'Capacity', q: 'Convert 13000 mL into dL.', options: ['13 dL', '130 dL', '1300 dL', '130000 dL'], ans: 1, hint: 'mL → cL → dL is 2 hops backward (÷ 100).', exp: '13000 mL ÷ 100 = 130 dL.' },
+          { id: 'z2_9', tag: 'Weight', q: 'Convert 26 dag into mg.', options: ['2600 mg', '26000 mg', '260000 mg', '260 mg'], ans: 2, hint: 'dag → g → dg → cg → mg is 4 hops forward (× 10000).', exp: '26 dag = 26 × 10000 mg = 260000 mg.' },
+          { id: 'z2_10', tag: 'Length', q: 'Convert 18 dam into dm.', options: ['180 dm', '1800 dm', '18000 dm', '1.8 dm'], ans: 1, hint: 'dam → m → dm is 2 hops forward (× 100).', exp: '18 dam = 18 × 100 dm = 1800 dm.' },
+          { id: 'z2_11', tag: 'Weight', q: '13 g − 1000 mg = ______ mg', options: ['1200 mg', '12000 mg', '3000 mg', '14000 mg'], ans: 1, hint: 'First convert 13 g to mg (13 × 1000 = 13000 mg).', exp: '13 g = 13000 mg. 13000 mg − 1000 mg = 12000 mg.' },
+          { id: 'z2_12', tag: 'Length', q: 'Convert 1 m 15 cm into mm.', options: ['115 mm', '1150 mm', '1015 mm', '1500 mm'], ans: 1, hint: '1 m = 1000 mm and 15 cm = 150 mm.', exp: '1000 mm + 150 mm = 1150 mm.' },
+          { id: 'z2_13', tag: 'Capacity', q: 'Convert 41000 L into kL.', options: ['41 kL', '410 kL', '4.1 kL', '4100 kL'], ans: 0, hint: '1 kL = 1000 L, so divide by 1000.', exp: '41000 L ÷ 1000 = 41 kL.' },
+          { id: 'z2_14', tag: 'Capacity', q: 'Convert 2016 L into kL and L.', options: ['20 kL 16 L', '2 kL 16 L', '2 kL 160 L', '201 kL 6 L'], ans: 1, hint: '2016 L = 2000 L + 16 L.', exp: '2016 L = 2 kL 16 L.' },
+          { id: 'z2_15', tag: 'Capacity', q: 'Convert 1425 mL into L and mL.', options: ['14 L 25 mL', '1 L 425 mL', '1 L 42 mL', '142 L 5 mL'], ans: 1, hint: '1000 mL = 1 L.', exp: '1425 mL = 1000 mL + 425 mL = 1 L 425 mL.' }
+        ]
+      },
+      {
+        id: 'z3', num: 3, name: 'Comparison & Column Castle', difficulty: 'Medium-Hard', icon: '🏰',
+        color: 'from-indigo-500 to-blue-600', desc: 'Compare (>, <, =) and master column addition & subtraction with borrowing!',
+        questions: [
+          { id: 'z3_1', tag: 'Compare', q: 'Compare: 415 cm ____ 4 m', options: ['>', '<', '='], ans: 0, hint: 'Convert 4 m to cm: 4 m = 400 cm.', exp: '415 cm > 400 cm, so 415 cm > 4 m.' },
+          { id: 'z3_2', tag: 'Compare', q: 'Compare: 2000 g ____ 3 kg', options: ['>', '<', '='], ans: 1, hint: '3 kg = 3000 g.', exp: '2000 g < 3000 g, so 2000 g < 3 kg.' },
+          { id: 'z3_3', tag: 'Compare', q: 'Compare: 5000 mL ____ 5 L', options: ['>', '<', '='], ans: 2, hint: '1 L = 1000 mL.', exp: '5 L = 5000 mL, so they are equal (=).' },
+          { id: 'z3_4', tag: 'Compare', q: 'Compare: 9 L ____ 9003 mL', options: ['>', '<', '='], ans: 1, hint: '9 L = 9000 mL.', exp: '9000 mL < 9003 mL, so 9 L < 9003 mL.' },
+          { id: 'z3_5', tag: 'Compare', q: 'Compare: 4 kg 235 g ____ 1 kg 135 g + 3 kg 185 g', options: ['>', '<', '='], ans: 1, hint: 'Add the right side first: 1 kg 135 g + 3 kg 185 g.', exp: 'Right side = 4 kg 320 g. Since 4 kg 235 g < 4 kg 320 g, the answer is <.' },
+          { id: 'z3_6', tag: 'Compare', q: 'Compare: 5050 m ____ 5 km 50 m', options: ['>', '<', '='], ans: 2, hint: '5 km = 5000 m. Add 50 m!', exp: '5 km 50 m = 5050 m, so they are equal (=).' },
+          { id: 'z3_7', tag: 'Compare', q: 'Compare: 60 hm ____ 6 km', options: ['>', '<', '='], ans: 2, hint: '1 km = 10 hm.', exp: '6 km = 60 hm, so they are equal (=).' },
+          { id: 'z3_8', tag: 'Compare', q: 'Compare: 70 dm ____ 7 cm', options: ['>', '<', '='], ans: 0, hint: '1 dm = 10 cm, so 70 dm = 700 cm.', exp: '700 cm > 7 cm, so 70 dm > 7 cm.' },
+          { id: 'z3_9', tag: 'Compare', q: 'Compare: 500 mg ____ 1 g', options: ['>', '<', '='], ans: 1, hint: '1 g = 1000 mg.', exp: '500 mg < 1000 mg, so 500 mg < 1 g.' },
+          { id: 'z3_10', tag: 'Compare', q: 'Compare: 10 mg ____ 1 cg', options: ['>', '<', '='], ans: 2, hint: '1 cg = 10 mg.', exp: '10 mg = 1 cg.' },
+          { id: 'z3_11', tag: 'Column Add', q: 'Add: 49 km 326 m + 34 km 689 m', options: ['83 km 15 m', '84 km 15 m', '84 km 115 m', '83 km 915 m'], ans: 1, hint: '326 + 689 = 1015 m = 1 km 15 m. Carry 1 km!', exp: '326 + 689 = 1015 m (write 015, carry 1 km). 49 + 34 + 1 = 84 km. Answer: 84 km 15 m.' },
+          { id: 'z3_12', tag: 'Column Sub', q: 'Subtract: 49 km 326 m − 34 km 689 m', options: ['14 km 637 m', '15 km 637 m', '14 km 363 m', '15 km 363 m'], ans: 0, hint: 'Borrow 1 km (1000 m) from 49 km → 48 km 1326 m.', exp: '1326 − 689 = 637 m; 48 − 34 = 14 km. Answer: 14 km 637 m.' },
+          { id: 'z3_13', tag: 'Column Sub', q: 'Subtract: 80 L − 29 L 287 mL', options: ['51 L 713 mL', '50 L 713 mL', '50 L 813 mL', '51 L 287 mL'], ans: 1, hint: 'Write 80 L as 79 L 1000 mL, then subtract!', exp: '1000 − 287 = 713 mL; 79 − 29 = 50 L. Answer: 50 L 713 mL.' },
+          { id: 'z3_14', tag: 'Column Add', q: 'Add: 32 m 25 cm + 15 m 36 cm', options: ['47 m 51 cm', '47 m 61 cm', '48 m 61 cm', '46 m 61 cm'], ans: 1, hint: 'Add cm column (25 + 36) and m column (32 + 15).', exp: '25 + 36 = 61 cm; 32 + 15 = 47 m. Answer: 47 m 61 cm.' },
+          { id: 'z3_15', tag: 'Column Sub', q: 'Subtract: 15 m 13 cm − 8 m 29 cm', options: ['7 m 84 cm', '6 m 84 cm', '6 m 94 cm', '7 m 16 cm'], ans: 1, hint: 'Borrow 1 m (100 cm) from 15 m → 14 m 113 cm.', exp: '113 − 29 = 84 cm; 14 − 8 = 6 m. Answer: 6 m 84 cm.' },
+          { id: 'z3_16', tag: 'Column Sub', q: 'Subtract: 36 km 100 m − 25 km 123 m', options: ['11 km 977 m', '10 km 977 m', '10 km 877 m', '11 km 23 m'], ans: 1, hint: 'Borrow 1 km (1000 m) → 35 km 1100 m.', exp: '1100 − 123 = 977 m; 35 − 25 = 10 km. Answer: 10 km 977 m.' },
+          { id: 'z3_17', tag: 'Column Sub', q: 'Subtract: 16 L − 8 L 250 mL', options: ['8 L 750 mL', '7 L 750 mL', '7 L 250 mL', '8 L 250 mL'], ans: 1, hint: 'Rewrite 16 L as 15 L 1000 mL.', exp: '1000 − 250 = 750 mL; 15 − 8 = 7 L. Answer: 7 L 750 mL.' },
+          { id: 'z3_18', tag: 'Column Sub', q: 'Subtract: 300 L 125 mL − 108 L 275 mL', options: ['192 L 850 mL', '191 L 850 mL', '191 L 750 mL', '192 L 150 mL'], ans: 1, hint: 'Borrow 1 L from 300 L → 299 L 1125 mL.', exp: '1125 − 275 = 850 mL; 299 − 108 = 191 L. Answer: 191 L 850 mL.' }
+        ]
+      },
+      {
+        id: 'z4', num: 4, name: 'Pattern & Symmetry Palace', difficulty: 'Hard', icon: '🔮',
+        color: 'from-purple-600 to-fuchsia-600', desc: 'Number sequences, secret codes, pyramids, wheels & lines of symmetry!',
+        questions: [
+          { id: 'z4_1', tag: 'Sequence', q: 'Find the next number: 17, 34, 35, 70, 71, ______', options: ['72', '142', '140', '141'], ans: 1, hint: 'Look at the alternating rule: ×2, +1, ×2, +1, ...', exp: '17 × 2 = 34, +1 = 35, ×2 = 70, +1 = 71, ×2 = 142!' },
+          { id: 'z4_2', tag: 'Sequence', q: 'Find the next number: 3, 9, 27, 81, ______', options: ['162', '243', '216', '324'], ans: 1, hint: 'Each number is multiplied by 3!', exp: '81 × 3 = 243.' },
+          { id: 'z4_3', tag: 'Sequence', q: 'Find the next term: A9, B8, C7, D6, E5, F4, ______', options: ['G2', 'G3', 'H3', 'G5'], ans: 1, hint: 'Letters go forward (A, B, C...) and numbers count down (9, 8, 7...).', exp: 'After F comes G, and after 4 comes 3 → G3.' },
+          { id: 'z4_4', tag: 'Coding', q: 'If 1 2 3 4 is coded as AbCd, then 5 6 7 8 will be coded as ______.', options: ['dEFG', 'EfGh', 'eFgH', 'EFGH'], ans: 1, hint: 'Notice the Capital/small pattern: Big, small, Big, small!', exp: '5=E, 6=f, 7=G, 8=h → EfGh.' },
+          { id: 'z4_5', tag: 'Number Pyramid', q: 'In a Number Pyramid, each block is the SUM of the two blocks below it. Base row: 15, 15, 5, 5. Row 2: 30, 20, 10. Row 3: ?, 30. What is the TOP block?', options: ['70', '80', '90', '60'], ans: 1, hint: 'First find Row 3 left block: 30 + 20 = 50. Then add 50 + 30!', exp: 'Row 3 is 50 and 30. Top block = 50 + 30 = 80.' },
+          { id: 'z4_6', tag: 'Number Bubbles', q: 'Find the missing bubble: (8, 3) → 29; (9, 7) → 68; (5, 6) → ?', options: ['30', '35', '36', '41'], ans: 1, hint: 'Multiply the two top numbers, then add 5!', exp: '8×3+5 = 29; 9×7+5 = 68; so 5×6+5 = 35.' },
+          { id: 'z4_7', tag: 'Opposite Wheel', q: 'In a multiplication wheel, opposite slices follow ×4: (4 ↔ 16), (8 ↔ 32), (7 ↔ 28). What is opposite to 5?', options: ['15', '20', '25', '24'], ans: 1, hint: 'Multiply 5 by 4!', exp: '5 × 4 = 20.' },
+          { id: 'z4_8', tag: 'Symmetry', q: 'How many lines of symmetry does a Square have?', options: ['2', '3', '4', 'Infinite'], ans: 2, hint: 'Vertical, horizontal, and both diagonals!', exp: 'A square has 4 lines of symmetry.' },
+          { id: 'z4_9', tag: 'Symmetry', q: 'How many lines of symmetry does the letter V have?', options: ['0', '1', '2', '3'], ans: 1, hint: 'Can you fold V left-to-right?', exp: 'Letter V has 1 vertical line of symmetry.' },
+          { id: 'z4_10', tag: 'Symmetry', q: 'How many lines of symmetry does a Rectangle have?', options: ['1', '2', '4', '0'], ans: 1, hint: 'Be careful! Folding a rectangle diagonally does NOT match corners.', exp: 'A rectangle has 2 lines of symmetry (vertical and horizontal).' },
+          { id: 'z4_11', tag: 'Symmetry', q: 'How many lines of symmetry does a Scalene Triangle have?', options: ['0', '1', '2', '3'], ans: 0, hint: 'All 3 sides of a scalene triangle are different.', exp: 'A scalene triangle has 0 lines of symmetry.' },
+          { id: 'z4_12', tag: 'HOTS Symmetry', q: 'How many letters of the English alphabet are NOT symmetrical about any line?', options: ['8', '10', '12', '6'], ans: 1, hint: 'Count: F, G, J, L, N, P, Q, R, S, Z.', exp: 'There are 10 asymmetrical letters: F, G, J, L, N, P, Q, R, S, Z.' }
+        ]
+      },
+      {
+        id: 'z5', num: 5, name: 'Word Problem & Olympiad Boss Arena', difficulty: 'Boss Level', icon: '🐉',
+        color: 'from-rose-600 to-pink-600', desc: 'Real-life statement sums, fractions of units & Olympiad challenges!',
+        questions: [
+          { id: 'z5_1', tag: 'Statement Sum', q: 'A 10 m 78 cm long pole was put in a pond. If 4 m 83 cm remains outside water, what is the depth of the pond?', options: ['6 m 95 cm', '5 m 95 cm', '5 m 85 cm', '6 m 05 cm'], ans: 1, hint: 'Subtract 4 m 83 cm from 10 m 78 cm (borrow 1 m = 100 cm).', exp: '10 m 78 cm − 4 m 83 cm = 9 m 178 cm − 4 m 83 cm = 5 m 95 cm.' },
+          { id: 'z5_2', tag: 'Statement Sum', q: 'Bag A has 48 kg 600 g of rice and Bag B has 37 kg 760 g. Which bag has more and by how much?', options: ['Bag A by 10 kg 840 g', 'Bag A by 11 kg 840 g', 'Bag B by 10 kg 840 g', 'Bag A by 10 kg 160 g'], ans: 0, hint: 'Subtract 37 kg 760 g from 48 kg 600 g.', exp: '48 kg 600 g − 37 kg 760 g = 47 kg 1600 g − 37 kg 760 g = 10 kg 840 g.' },
+          { id: 'z5_3', tag: 'Statement Sum', q: 'One container has 3 L 250 mL of water and another has 5 L. What is the total water?', options: ['8 L 250 mL', '8 L 500 mL', '7 L 250 mL', '3 L 750 mL'], ans: 0, hint: 'Add 3 L 250 mL + 5 L 000 mL.', exp: '3 L 250 mL + 5 L = 8 L 250 mL.' },
+          { id: 'z5_4', tag: 'Word Problem', q: 'How many packs of 500 mL juice make 2 L?', options: ['2', '4', '5', '6'], ans: 1, hint: '2 L = 2000 mL. How many 500s fit in 2000?', exp: '2000 mL ÷ 500 mL = 4 packs.' },
+          { id: 'z5_5', tag: 'Statement Sum', q: "Shreya's school bag weighs 6 kg 300 g. She removed books weighing 2 kg 700 g. What is the weight now?", options: ['4 kg 600 g', '3 kg 600 g', '3 kg 400 g', '4 kg 400 g'], ans: 1, hint: '6 kg 300 g − 2 kg 700 g (borrow 1 kg = 1000 g).', exp: '5 kg 1300 g − 2 kg 700 g = 3 kg 600 g.' },
+          { id: 'z5_6', tag: 'Two-Step Boss', q: 'A bullock cart can carry at most 20 kg. A rice bag (8 kg 700 g) and a sugar bag (9 kg 300 g) are already in it. How much more weight can be kept?', options: ['2 kg', '3 kg', '1 kg 500 g', '2 kg 500 g'], ans: 0, hint: 'First add 8 kg 700 g + 9 kg 300 g, then subtract from 20 kg.', exp: '8 kg 700 g + 9 kg 300 g = 18 kg. Remaining = 20 kg − 18 kg = 2 kg.' },
+          { id: 'z5_7', tag: 'Multiplication', q: 'Atharv takes 7 mL of cough syrup in one day. How much will he take in 15 days?', options: ['95 mL', '105 mL', '115 mL', '100 mL'], ans: 1, hint: 'Multiply 7 × 15.', exp: '7 mL × 15 = 105 mL.' },
+          { id: 'z5_8', tag: 'Statement Sum', q: 'A bucket can hold 15 L of water. It has 8 L 715 mL in it. How much more water can it hold?', options: ['6 L 285 mL', '7 L 285 mL', '6 L 385 mL', '7 L 715 mL'], ans: 0, hint: '15 L = 14 L 1000 mL. Subtract 8 L 715 mL.', exp: '14 L 1000 mL − 8 L 715 mL = 6 L 285 mL.' },
+          { id: 'z5_9', tag: 'Fractions of Units', q: 'Find three quarters (3/4) of a litre in mL.', options: ['250 mL', '500 mL', '750 mL', '800 mL'], ans: 2, hint: '1 quarter of 1000 mL is 250 mL. Multiply by 3!', exp: '3/4 of 1000 mL = 3 × 250 mL = 750 mL.' },
+          { id: 'z5_10', tag: 'Fractions of Units', q: 'Find one-fourth (1/4) of a kg in grams.', options: ['200 g', '250 g', '500 g', '750 g'], ans: 1, hint: 'Divide 1000 g by 4.', exp: '1000 g ÷ 4 = 250 g.' },
+          { id: 'z5_11', tag: 'Fractions of Units', q: 'Find one-third (1/3) of 1½ km in metres.', options: ['300 m', '500 m', '600 m', '750 m'], ans: 1, hint: '1½ km = 1500 m. Divide 1500 m by 3!', exp: '1500 m ÷ 3 = 500 m.' },
+          { id: 'z5_12', tag: 'Fractions of Units', q: 'Find half of 2 L 500 mL.', options: ['1 L 250 mL', '1 L 500 mL', '1 L 200 mL', '1 L 750 mL'], ans: 0, hint: '2 L 500 mL = 2500 mL. Divide by 2!', exp: '2500 mL ÷ 2 = 1250 mL = 1 L 250 mL.' },
+          { id: 'z5_13', tag: 'Olympiad', q: "Jaya is 92 cm tall. Her brother Abhishek is twice as tall as Jaya. How tall is Jaya's mother if she is 36 cm shorter than Abhishek?", options: ['164 cm', '152 cm', '148 cm', '136 cm'], ans: 2, hint: 'First find Abhishek: 92 × 2 = 184 cm. Then subtract 36 cm.', exp: 'Abhishek = 92 × 2 = 184 cm. Mother = 184 − 36 = 148 cm.' },
+          { id: 'z5_14', tag: 'Olympiad', q: 'Which of the following options is INCORRECT?', options: ['1 L 30 mL = 1030 mL', '2 L 75 mL = 2075 mL', '3 L 50 mL = 3500 mL', '3 L 25 mL = 3025 mL'], ans: 2, hint: 'Watch out for the zero trap! 3 L 50 mL = 3000 + 50.', exp: '3 L 50 mL = 3050 mL, NOT 3500 mL! So option C is incorrect.' },
+          { id: 'z5_15', tag: 'Olympiad', q: 'Mr Gupta travelled 75 km 800 m by car and 1800 km 40 m by train. How much distance did he travel in all?', options: ['1875 km 840 m', '1675 km', '175800 km', '255840 km'], ans: 0, hint: 'Add km: 75 + 1800. Add m: 800 + 40.', exp: '75 + 1800 = 1875 km; 800 + 40 = 840 m → 1875 km 840 m.' }
+        ]
+      }
+    ];
+
+    /* =========================================================================
+       8. PROCEDURAL INFINITE PRACTICE GENERATOR
+       ========================================================================= */
+    function randInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function shuffle(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function generatePracticeQuestions(zoneId, count = 8) {
+      const list = [];
+      for (let i = 0; i < count; i++) {
+        const uid = `gen_${zoneId}_${Date.now()}_${i}`;
+        if (zoneId === 'z1') {
+          const items = [
+            { q: 'Which unit is best to measure the length of a pencil?', ans: 'cm', opts: ['cm', 'km', 'kg', 'L'] },
+            { q: 'Which unit is best to measure the distance between Delhi and Agra?', ans: 'km', opts: ['cm', 'm', 'km', 'mm'] },
+            { q: 'Which unit is best to measure water in a swimming pool?', ans: 'kL', opts: ['mL', 'kL', 'g', 'cm'] },
+            { q: 'Which unit is best to measure a sack of potatoes?', ans: 'kg', opts: ['g', 'mg', 'kg', 'mL'] },
+            { q: 'Which unit is best to measure the width of a postage stamp?', ans: 'mm', opts: ['mm', 'm', 'km', 'kg'] },
+            { q: 'Which unit is best to measure a spoonful of cough syrup?', ans: 'mL', opts: ['L', 'kL', 'mL', 'g'] },
+            { q: 'Which unit is best to measure the weight of a feather?', ans: 'mg', opts: ['kg', 'mg', 'L', 'm'] },
+            { q: 'Which unit is best to measure the height of a school building?', ans: 'm', opts: ['cm', 'm', 'km', 'mm'] }
+          ];
+          if (i === 0) window.__z1Items = shuffle(items);
+          const pick = window.__z1Items[i % window.__z1Items.length];
+          const opts = shuffle(pick.opts);
+          list.push({ id: uid, tag: 'Generated Basics', q: pick.q, options: opts, ans: opts.indexOf(pick.ans), hint: 'Think about whether the object is small or large, and whether it is length, weight, or liquid.', exp: `The best unit is ${pick.ans}.` });
+        } else if (zoneId === 'z2') {
+          const type = i % 3;
+          if (type === 0) {
+            const km = randInt(2, 19);
+            const m = randInt(12, 95);
+            const correct = `${km * 1000 + m} m`;
+            const opts = shuffle([correct, `${km * 100 + m} m`, `${km * 1000 + m * 10} m`, `${km + m} m`]);
+            list.push({ id: uid, tag: 'Generated Conversion', q: `Convert ${km} km ${m} m into metres.`, options: opts, ans: opts.indexOf(correct), hint: `1 km = 1000 m, so ${km} km = ${km * 1000} m.`, exp: `${km} km ${m} m = ${km * 1000} m + ${m} m = ${correct}.` });
+          } else if (type === 1) {
+            const kg = randInt(3, 25);
+            const g = randInt(105, 950);
+            const total = kg * 1000 + g;
+            const correct = `${kg} kg ${g} g`;
+            const opts = shuffle([correct, `${kg * 10} kg ${g} g`, `${kg} kg ${g - 50} g`, `${kg + 1} kg ${g} g`]);
+            list.push({ id: uid, tag: 'Generated Conversion', q: `Convert ${total} g into kg and g.`, options: opts, ans: opts.indexOf(correct), hint: 'Divide by 1000: the thousands digit(s) are kg!', exp: `${total} g = ${kg * 1000} g + ${g} g = ${correct}.` });
+          } else {
+            const l = randInt(2, 15);
+            const ml = randInt(15, 90);
+            const correct = `${l * 1000 + ml} mL`;
+            const opts = shuffle([correct, `${l * 100 + ml} mL`, `${l * 1000 + ml * 10} mL`, `${l * 10000 + ml} mL`]);
+            list.push({ id: uid, tag: 'Generated Conversion', q: `Convert ${l} L ${ml} mL into mL.`, options: opts, ans: opts.indexOf(correct), hint: `1 L = 1000 mL. Don't forget the zero!`, exp: `${l} L ${ml} mL = ${l * 1000} + ${ml} = ${correct}.` });
+          }
+        } else if (zoneId === 'z3') {
+          const isAdd = i % 2 === 0;
+          if (isAdd) {
+            const a1 = randInt(12, 45), a2 = randInt(400, 850);
+            const b1 = randInt(10, 35), b2 = randInt(300, 750);
+            const sumM = a2 + b2;
+            const carry = Math.floor(sumM / 1000);
+            const remM = sumM % 1000;
+            const sumKm = a1 + b1 + carry;
+            const correct = `${sumKm} km ${remM} m`;
+            const opts = shuffle([correct, `${sumKm - 1} km ${remM} m`, `${sumKm} km ${remM + 10} m`, `${sumKm + 1} km ${remM} m`]);
+            list.push({ id: uid, tag: 'Generated Column Add', q: `Add: ${a1} km ${a2} m + ${b1} km ${b2} m`, options: opts, ans: opts.indexOf(correct), hint: 'Add metres first. If ≥ 1000 m, carry 1 km!', exp: `${a2} + ${b2} = ${sumM} m → carry ${carry} km, leave ${remM} m. ${a1} + ${b1} + ${carry} = ${sumKm} km.` });
+          } else {
+            const a1 = randInt(30, 75), a2 = randInt(100, 350);
+            const b1 = randInt(10, 25), b2 = randInt(450, 850);
+            const diffM = 1000 + a2 - b2;
+            const diffL = (a1 - 1) - b1;
+            const correct = `${diffL} L ${diffM} mL`;
+            const opts = shuffle([correct, `${diffL + 1} L ${diffM} mL`, `${diffL} L ${diffM - 100} mL`, `${diffL - 1} L ${diffM} mL`]);
+            list.push({ id: uid, tag: 'Generated Column Sub', q: `Subtract: ${a1} L ${a2} mL − ${b1} L ${b2} mL`, options: opts, ans: opts.indexOf(correct), hint: `Borrow 1 L (1000 mL) from ${a1} L.`, exp: `${a1 - 1} L ${1000 + a2} mL − ${b1} L ${b2} mL = ${correct}.` });
+          }
+        } else if (zoneId === 'z4') {
+          const start = randInt(2, 9);
+          const mult = randInt(2, 4);
+          const seq = [start, start * mult, start * mult * mult, start * mult * mult * mult];
+          const ansVal = seq[3] * mult;
+          const opts = shuffle([String(ansVal), String(ansVal + mult), String(ansVal - mult), String(seq[3] + mult)]);
+          list.push({ id: uid, tag: 'Generated Pattern', q: `Find the next number: ${seq.join(', ')}, ______`, options: opts, ans: opts.indexOf(String(ansVal)), hint: `Each number is multiplied by ${mult}!`, exp: `${seq[3]} × ${mult} = ${ansVal}.` });
+        } else {
+          const daily = randInt(4, 12);
+          const days = randInt(6, 15);
+          const total = daily * days;
+          const opts = shuffle([`${total} mL`, `${total + daily} mL`, `${total - daily} mL`, `${total + daily * 10} mL`]);
+          list.push({ id: uid, tag: 'Generated Word Problem', q: `Riya takes ${daily} mL of vitamin syrup every day. How much will she take in ${days} days?`, options: opts, ans: opts.indexOf(`${total} mL`), hint: `Multiply ${daily} × ${days}.`, exp: `${daily} mL × ${days} = ${total} mL.` });
+        }
+      }
+      return list;
+    }
+
+    /* =========================================================================
+       9. QUEST MAP & DRILL RUNNER
+       ========================================================================= */
+    let activeZone = null;
+    let activeQuestions = [];
+    let currentQIdx = 0;
+    let zoneCorrectCount = 0;
+    let isInfiniteMode = false;
+
+    function renderZonesGrid() {
+      const wrap = document.getElementById('zones-container');
+      wrap.innerHTML = ZONES.map(z => {
+        const done = state.completedZones.includes(z.id);
+        return `
+          <div class="bg-white rounded-3xl p-6 card-shadow border-2 ${done ? 'border-emerald-300' : 'border-indigo-100'} flex flex-col justify-between hover:-translate-y-1 transition-all">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-br ${z.color} flex items-center justify-center text-3xl shadow-md text-white">
+                  ${z.icon}
+                </div>
+                <span class="text-xs font-extrabold px-3 py-1 rounded-full ${done ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-700'}">
+                  ${done ? '✅ Conquered' : z.difficulty}
+                </span>
+              </div>
+              <h3 class="text-xl font-bold text-indigo-950">Zone ${z.num}: ${z.name}</h3>
+              <p class="text-sm text-slate-600 mt-1">${z.desc}</p>
+              <div class="text-xs font-bold text-indigo-500 mt-3">${z.questions.length} Curated Questions + Unlimited Practice</div>
+            </div>
+            <button onclick="startQuestZone('${z.id}')" class="mt-5 w-full py-3 rounded-2xl bg-gradient-to-r ${z.color} text-white font-extrabold shadow-md hover:opacity-95 btn-pop">
+              ${done ? 'Replay Zone' : 'Enter Zone →'}
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function startQuestZone(zoneId) {
+      activeZone = ZONES.find(z => z.id === zoneId);
+      activeQuestions = [...activeZone.questions];
+      currentQIdx = 0;
+      zoneCorrectCount = 0;
+      isInfiniteMode = false;
+
+      document.getElementById('quest-map-grid').classList.add('hidden');
+      document.getElementById('quest-summary').classList.add('hidden');
+      document.getElementById('quest-runner').classList.remove('hidden');
+      renderQuestQuestion();
+    }
+
+    function startInfiniteMode() {
+      if (!activeZone) return;
+      activeQuestions = generatePracticeQuestions(activeZone.id, 8);
+      currentQIdx = 0;
+      zoneCorrectCount = 0;
+      isInfiniteMode = true;
+      document.getElementById('quest-summary').classList.add('hidden');
+      document.getElementById('quest-runner').classList.remove('hidden');
+      renderQuestQuestion();
+    }
+
+    function exitQuestZone() {
+      document.getElementById('quest-runner').classList.add('hidden');
+      document.getElementById('quest-summary').classList.add('hidden');
+      document.getElementById('quest-map-grid').classList.remove('hidden');
+      renderZonesGrid();
+    }
+
+    function renderQuestQuestion() {
+      const q = activeQuestions[currentQIdx];
+      document.getElementById('runner-zone-badge').textContent = isInfiniteMode
+        ? `⚡ Bonus Practice • Zone ${activeZone.num}`
+        : `Zone ${activeZone.num}: ${activeZone.name}`;
+      document.getElementById('runner-progress-text').textContent = `Question ${currentQIdx + 1} / ${activeQuestions.length}`;
+      document.getElementById('runner-progress-bar').style.width = `${((currentQIdx + 1) / activeQuestions.length) * 100}%`;
+
+      document.getElementById('q-tag').textContent = q.tag;
+      document.getElementById('q-text').textContent = q.q;
+      document.getElementById('q-hint-box').classList.add('hidden');
+      document.getElementById('q-hint-box').textContent = `💡 Hint: ${q.hint}`;
+      document.getElementById('q-feedback').classList.add('hidden');
+
+      const optWrap = document.getElementById('q-options');
+      optWrap.innerHTML = q.options.map((opt, idx) => `
+        <button onclick="answerQuestOption(${idx})" id="q-opt-${idx}" class="p-4 rounded-2xl border-2 border-indigo-100 bg-indigo-50/40 hover:bg-indigo-100/70 hover:border-indigo-300 text-left font-bold text-indigo-950 text-base transition-all btn-pop flex items-center gap-3">
+          <span class="w-8 h-8 rounded-xl bg-white border border-indigo-200 flex items-center justify-center font-extrabold text-indigo-700 text-sm shrink-0">${String.fromCharCode(65 + idx)}</span>
+          <span>${opt}</span>
+        </button>
+      `).join('');
+    }
+
+    function showHint() {
+      document.getElementById('q-hint-box').classList.remove('hidden');
+    }
+
+    function answerQuestOption(idx) {
+      const q = activeQuestions[currentQIdx];
+      const isCorrect = idx === q.ans;
+
+      // Disable all option buttons
+      q.options.forEach((_, i) => {
+        const btn = document.getElementById(`q-opt-${i}`);
+        btn.disabled = true;
+        if (i === q.ans) {
+          btn.className = 'p-4 rounded-2xl border-2 border-emerald-500 bg-emerald-50 text-left font-extrabold text-emerald-900 text-base flex items-center gap-3';
+        } else if (i === idx && !isCorrect) {
+          btn.className = 'p-4 rounded-2xl border-2 border-rose-500 bg-rose-50 text-left font-bold text-rose-900 text-base flex items-center gap-3';
+        } else {
+          btn.className = 'p-4 rounded-2xl border-2 border-slate-100 bg-slate-50 text-left font-semibold text-slate-400 text-base flex items-center gap-3';
+        }
+      });
+
+      const fb = document.getElementById('q-feedback');
+      const fbTitle = document.getElementById('q-feedback-title');
+      const fbExp = document.getElementById('q-feedback-exp');
+      fb.classList.remove('hidden');
+
+      if (isCorrect) {
+        zoneCorrectCount++;
+        state.streak++;
+        state.stars++;
+        addXP(15);
+        playSound('correct');
+        fb.className = 'mt-5 p-4 rounded-2xl border-2 border-emerald-300 bg-emerald-50 text-emerald-900';
+        fbTitle.textContent = '🎉 Awesome! +15 XP & +1 ⭐';
+      } else {
+        state.streak = 0;
+        addToMistakeVault(q);
+        saveState();
+        playSound('wrong');
+        fb.className = 'mt-5 p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 text-rose-900';
+        fbTitle.textContent = '🤔 Not quite! Saved to your Mistake Vault for later.';
+      }
+      fbExp.textContent = `Step-by-step: ${q.exp}`;
+      document.getElementById('btn-next-q').textContent = currentQIdx === activeQuestions.length - 1 ? 'Finish Zone 🏆' : 'Next Question →';
+    }
+
+    function nextQuestQuestion() {
+      if (currentQIdx < activeQuestions.length - 1) {
+        currentQIdx++;
+        renderQuestQuestion();
+      } else {
+        finishQuestZone();
+      }
+    }
+
+    function finishQuestZone() {
+      document.getElementById('quest-runner').classList.add('hidden');
+      document.getElementById('quest-summary').classList.remove('hidden');
+      const pct = Math.round((zoneCorrectCount / activeQuestions.length) * 100);
+      if (!isInfiniteMode && pct >= 60 && !state.completedZones.includes(activeZone.id)) {
+        state.completedZones.push(activeZone.id);
+        addXP(50);
+      }
+      saveState();
+      playSound('fanfare');
+      launchConfetti();
+
+      document.getElementById('summary-title').textContent = isInfiniteMode ? 'Bonus Practice Complete!' : `${activeZone.name} Conquered!`;
+      document.getElementById('summary-stats').textContent = `You scored ${zoneCorrectCount} out of ${activeQuestions.length} (${pct}%)`;
+      document.getElementById('summary-stars').textContent = pct >= 90 ? '⭐⭐⭐' : pct >= 70 ? '⭐⭐' : '⭐';
+    }
+
+    /* =========================================================================
+       10. MOCK TEST ARENA
+       ========================================================================= */
+    let mockTier = null;
+    let mockQuestions = [];
+    let mockAnswers = [];
+    let mockCurIdx = 0;
+    let mockTimeLeft = 0;
+    let mockInterval = null;
+
+    function startMockTest(tier) {
+      mockTier = tier;
+      let pool = [];
+      let count = 15, mins = 20, title = 'Tier 1: Bronze Mock Test';
+
+      if (tier === 'bronze') {
+        pool = [...ZONES[0].questions, ...ZONES[1].questions.slice(0, 6)];
+        count = 15; mins = 20; title = '🥉 Tier 1: Bronze Mock Test';
+      } else if (tier === 'silver') {
+        pool = [...ZONES[0].questions.slice(0, 4), ...ZONES[1].questions.slice(0, 5), ...ZONES[2].questions.slice(0, 5), ...ZONES[3].questions.slice(0, 4), ...ZONES[4].questions.slice(0, 4)];
+        count = 20; mins = 30; title = '🥈 Tier 2: Silver Mock Test';
+      } else {
+        pool = [...ZONES[1].questions.slice(5), ...ZONES[2].questions.slice(8), ...ZONES[3].questions, ...ZONES[4].questions];
+        count = 25; mins = 40; title = '🥇 Tier 3: Gold Boss Mock Test';
+      }
+
+      mockQuestions = shuffle(pool).slice(0, count);
+      mockAnswers = new Array(mockQuestions.length).fill(null);
+      mockCurIdx = 0;
+      mockTimeLeft = mins * 60;
+
+      document.getElementById('mock-active-title').textContent = title;
+      document.getElementById('mock-selector').classList.add('hidden');
+      document.getElementById('mock-results').classList.add('hidden');
+      document.getElementById('mock-runner').classList.remove('hidden');
+
+      if (mockInterval) clearInterval(mockInterval);
+      updateMockTimerDisplay();
+      mockInterval = setInterval(() => {
+        mockTimeLeft--;
+        updateMockTimerDisplay();
+        if (mockTimeLeft <= 0) submitMockTest();
+      }, 1000);
+
+      renderMockQuestion();
+      renderMockPalette();
+    }
+
+    function updateMockTimerDisplay() {
+      const m = String(Math.floor(Math.max(0, mockTimeLeft) / 60)).padStart(2, '0');
+      const s = String(Math.max(0, mockTimeLeft) % 60).padStart(2, '0');
+      document.getElementById('mock-countdown').textContent = `${m}:${s}`;
+    }
+
+    function renderMockQuestion() {
+      const q = mockQuestions[mockCurIdx];
+      const answeredCount = mockAnswers.filter(a => a !== null).length;
+      document.getElementById('mock-answered-count').textContent = `Answered: ${answeredCount} / ${mockQuestions.length}`;
+      document.getElementById('mock-q-num').textContent = `Question ${mockCurIdx + 1} of ${mockQuestions.length}`;
+      document.getElementById('mock-q-cat').textContent = q.tag;
+      document.getElementById('mock-q-text').textContent = q.q;
+
+      const optWrap = document.getElementById('mock-q-options');
+      optWrap.innerHTML = q.options.map((opt, idx) => {
+        const selected = mockAnswers[mockCurIdx] === idx;
+        return `
+          <button onclick="selectMockAnswer(${idx})" class="p-4 rounded-2xl border-2 text-left font-bold text-base transition-all btn-pop flex items-center gap-3 ${selected ? 'border-indigo-600 bg-indigo-50 text-indigo-950 ring-2 ring-indigo-200' : 'border-slate-200 bg-white hover:bg-indigo-50/40 text-slate-800'}">
+            <span class="w-8 h-8 rounded-xl ${selected ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'} flex items-center justify-center font-extrabold text-sm shrink-0">${String.fromCharCode(65 + idx)}</span>
+            <span>${opt}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.getElementById('mock-prev-btn').disabled = mockCurIdx === 0;
+      document.getElementById('mock-next-btn').textContent = mockCurIdx === mockQuestions.length - 1 ? 'Review Palette' : 'Next →';
+    }
+
+    function selectMockAnswer(idx) {
+      mockAnswers[mockCurIdx] = idx;
+      renderMockQuestion();
+      renderMockPalette();
+    }
+
+    function navMock(delta) {
+      const next = mockCurIdx + delta;
+      if (next >= 0 && next < mockQuestions.length) {
+        mockCurIdx = next;
+        renderMockQuestion();
+        renderMockPalette();
+      }
+    }
+
+    function jumpMock(idx) {
+      mockCurIdx = idx;
+      renderMockQuestion();
+      renderMockPalette();
+    }
+
+    function renderMockPalette() {
+      const pal = document.getElementById('mock-palette');
+      pal.innerHTML = mockQuestions.map((_, i) => {
+        let cls = 'bg-slate-100 text-slate-700 border-slate-200';
+        if (i === mockCurIdx) cls = 'bg-indigo-600 text-white border-indigo-700 ring-2 ring-indigo-200';
+        else if (mockAnswers[i] !== null) cls = 'bg-emerald-500 text-white border-emerald-600';
+        return `<button onclick="jumpMock(${i})" class="h-10 rounded-xl border font-extrabold text-sm btn-pop ${cls}">${i + 1}</button>`;
+      }).join('');
+    }
+
+    let submitArmTimer = null;
+    function askSubmitMock() {
+      const btn = document.getElementById('btn-mock-submit');
+      if (submitArmTimer) {
+        clearTimeout(submitArmTimer); submitArmTimer = null;
+        submitMockTest();
+        return;
+      }
+      const left = mockAnswers.filter(a => a === null).length;
+      btn.textContent = left > 0 ? `${left} unanswered. Tap again to submit` : 'Tap again to submit';
+      submitArmTimer = setTimeout(() => { submitArmTimer = null; btn.textContent = 'Submit Exam ✓'; }, 4000);
+    }
+
+    function submitMockTest() {
+      if (submitArmTimer) { clearTimeout(submitArmTimer); submitArmTimer = null; }
+      const sb = document.getElementById('btn-mock-submit');
+      if (sb) sb.textContent = 'Submit Exam ✓';
+      if (mockInterval) clearInterval(mockInterval);
+      let correct = 0;
+      const reviewHtml = mockQuestions.map((q, i) => {
+        const userAns = mockAnswers[i];
+        const isRight = userAns === q.ans;
+        if (isRight) correct++;
+        else addToMistakeVault(q);
+
+        return `
+          <div class="p-4 rounded-2xl border-2 ${isRight ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'}">
+            <div class="flex items-start justify-between gap-2">
+              <div class="font-bold text-indigo-950 text-sm sm:text-base">Q${i + 1}. ${q.q}</div>
+              <span class="text-xs font-extrabold px-2.5 py-1 rounded-full shrink-0 ${isRight ? 'bg-emerald-200 text-emerald-900' : 'bg-rose-200 text-rose-900'}">${isRight ? '✅ Correct' : '❌ Missed'}</span>
+            </div>
+            <div class="mt-2 text-xs sm:text-sm space-y-1">
+              <div><strong>Your Answer:</strong> ${userAns !== null ? q.options[userAns] : '<span class="text-slate-400">Not answered</span>'}</div>
+              <div><strong>Correct Answer:</strong> <span class="text-emerald-800 font-bold">${q.options[q.ans]}</span></div>
+              <div class="text-slate-700 bg-white/80 p-2 rounded-xl mt-1"><strong>Explanation:</strong> ${q.exp}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const pct = Math.round((correct / mockQuestions.length) * 100);
+      if (state.mockBest[mockTier] === null || pct > state.mockBest[mockTier]) {
+        state.mockBest[mockTier] = pct;
+      }
+      const starsEarned = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 50 ? 1 : 0;
+      state.stars += starsEarned;
+      addXP(correct * 10 + 30);
+      saveState();
+
+      document.getElementById('mock-runner').classList.add('hidden');
+      document.getElementById('mock-results').classList.remove('hidden');
+      document.getElementById('mock-res-score').textContent = `${correct} / ${mockQuestions.length}`;
+      document.getElementById('mock-res-pct').textContent = `${pct}%`;
+      document.getElementById('mock-res-stars').textContent = starsEarned > 0 ? '⭐'.repeat(starsEarned) : 'Keep Trying!';
+      document.getElementById('mock-review-list').innerHTML = reviewHtml;
+
+      playSound('fanfare');
+      if (pct >= 70) launchConfetti();
+    }
+
+    function exitMockResults() {
+      document.getElementById('mock-results').classList.add('hidden');
+      document.getElementById('mock-selector').classList.remove('hidden');
+      updateDashboard();
+    }
+
+    /* =========================================================================
+       11. MISTAKE VAULT (SMART REVISION)
+       ========================================================================= */
+    function addToMistakeVault(q) {
+      if (!state.mistakes.some(item => item.q === q.q)) {
+        state.mistakes.push(q);
+      }
+    }
+
+    function renderMistakeVault() {
+      const list = document.getElementById('vault-list');
+      const empty = document.getElementById('vault-empty');
+      document.getElementById('vault-count-pill').textContent = `${state.mistakes.length} Mistake${state.mistakes.length === 1 ? '' : 's'} to Fix`;
+
+      if (state.mistakes.length === 0) {
+        empty.classList.remove('hidden');
+        list.innerHTML = '';
+        return;
+      }
+      empty.classList.add('hidden');
+      list.innerHTML = state.mistakes.map((q, vIdx) => `
+        <div class="p-5 rounded-2xl border-2 border-indigo-100 bg-indigo-50/30" id="vault-card-${vIdx}">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-extrabold uppercase px-2.5 py-1 rounded-full bg-rose-100 text-rose-700">${q.tag}</span>
+            <span class="text-xs font-bold text-indigo-600">+25 Bonus XP to Clear!</span>
+          </div>
+          <h4 class="font-bold text-indigo-950 text-base sm:text-lg mb-3">${q.q}</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            ${q.options.map((opt, oIdx) => `
+              <button onclick="attemptVault(${vIdx}, ${oIdx})" class="p-3 rounded-xl border-2 border-white bg-white hover:border-indigo-300 text-left font-bold text-sm text-indigo-950 shadow-sm btn-pop">
+                ${String.fromCharCode(65 + oIdx)}. ${opt}
+              </button>
+            `).join('')}
+          </div>
+          <div id="vault-msg-${vIdx}" class="hidden mt-3 text-sm font-bold p-3 rounded-xl"></div>
+        </div>
+      `).join('');
+    }
+
+    let vaultBusy = false;
+    function attemptVault(vIdx, oIdx) {
+      if (vaultBusy) return;
+      const q = state.mistakes[vIdx];
+      const msg = document.getElementById(`vault-msg-${vIdx}`);
+      msg.classList.remove('hidden');
+
+      if (oIdx === q.ans) {
+        vaultBusy = true;
+        playSound('correct');
+        msg.className = 'mt-3 text-sm font-bold p-3 rounded-xl bg-emerald-100 text-emerald-900';
+        msg.textContent = `🎉 Cleared! +25 Bonus XP! (${q.exp})`;
+        setTimeout(() => {
+          const at = state.mistakes.indexOf(q);
+          if (at !== -1) state.mistakes.splice(at, 1);
+          vaultBusy = false;
+          addXP(25);
+          saveState();
+          renderMistakeVault();
+        }, 1200);
+      } else {
+        playSound('wrong');
+        msg.className = 'mt-3 text-sm font-bold p-3 rounded-xl bg-amber-100 text-amber-900';
+        msg.textContent = `💡 Hint: ${q.hint} Try again!`;
+      }
+    }
+
+    /* =========================================================================
+       12. ROUGH WORK SCRATCHPAD (HTML5 CANVAS)
+       ========================================================================= */
+    let scratchOpen = false;
+    let isDrawing = false;
+    let penColor = '#1e1b4b';
+    let isEraser = false;
+    let scratchCtx = null;
+
+    function toggleScratchpad() {
+      scratchOpen = !scratchOpen;
+      const modal = document.getElementById('scratchpad-modal');
+      modal.classList.toggle('hidden', !scratchOpen);
+      if (scratchOpen) {
+        setTimeout(resizeScratchpad, 30);
+      }
+    }
+
+    function resizeScratchpad() {
+      const canvas = document.getElementById('scratch-canvas');
+      const rect = canvas.getBoundingClientRect();
+      if (canvas.width !== Math.floor(rect.width) || canvas.height !== Math.floor(rect.height)) {
+        canvas.width = Math.floor(rect.width);
+        canvas.height = Math.floor(rect.height);
+      }
+      scratchCtx = canvas.getContext('2d');
+      scratchCtx.lineCap = 'round';
+      scratchCtx.lineJoin = 'round';
+    }
+
+    function initScratchpadEvents() {
+      const canvas = document.getElementById('scratch-canvas');
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      };
+
+      const start = (e) => {
+        e.preventDefault();
+        isDrawing = true;
+        const p = getPos(e);
+        scratchCtx.beginPath();
+        scratchCtx.moveTo(p.x, p.y);
+      };
+
+      const move = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const p = getPos(e);
+        scratchCtx.globalCompositeOperation = isEraser ? 'destination-out' : 'source-over';
+        scratchCtx.strokeStyle = penColor;
+        scratchCtx.lineWidth = isEraser ? 22 : 3.5;
+        scratchCtx.lineTo(p.x, p.y);
+        scratchCtx.stroke();
+      };
+
+      const stop = () => { isDrawing = false; };
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      window.addEventListener('mouseup', stop);
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      canvas.addEventListener('touchend', stop);
+    }
+
+    function setPenColor(color) {
+      penColor = color;
+      isEraser = false;
+      document.getElementById('btn-eraser').classList.remove('bg-white', 'text-indigo-700');
+    }
+
+    function toggleEraser() {
+      isEraser = !isEraser;
+      const btn = document.getElementById('btn-eraser');
+      btn.classList.toggle('bg-white', isEraser);
+      btn.classList.toggle('text-indigo-700', isEraser);
+    }
+
+    function clearScratchpad() {
+      const canvas = document.getElementById('scratch-canvas');
+      if (scratchCtx) scratchCtx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    /* =========================================================================
+       13. RESET PROGRESS MODAL
+       ========================================================================= */
+    function openResetModal() {
+      document.getElementById('reset-modal').classList.remove('hidden');
+    }
+    function closeResetModal() {
+      document.getElementById('reset-modal').classList.add('hidden');
+    }
+    function confirmResetProgress() {
+      state = JSON.parse(JSON.stringify(defaultState));
+      secondsSinceBreak = 0;
+      saveState();
+      closeResetModal();
+      renderZonesGrid();
+      renderMistakeVault();
+    }
+
+    /* =========================================================================
+       14. INITIALIZE APP
+       ========================================================================= */
+    window.onload = function () {
+      updateDashboard();
+      startStudyTimerLoop();
+      setLadderType('length');
+      initSymmetryExplorer();
+      initScratchpadEvents();
+      switchTab('revision');
+
+      /* Study Hub cross-device sync (no-op when firebase/sync.js are absent) */
+      if (typeof DikshaSync !== 'undefined' && DikshaSync.init()) {
+        try { DikshaSync.attachUI(); } catch (e) {}
+        DikshaSync.pull(STORAGE_KEY).then(function (remote) {
+          if (remote && typeof remote === 'object' && (remote.t || 0) > (state.t || 0)) {
+            state = { ...defaultState, ...remote, mockBest: { ...defaultState.mockBest, ...(remote.mockBest || {}) } };
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+            updateDashboard();
+          }
+          DikshaSync.arm();
+          try { DikshaSync.push(STORAGE_KEY, state); } catch (e) {}
+        });
+      }
+    };
+  </script>
+</body>
+</html>
