@@ -143,7 +143,7 @@
 /* Bump BUILD on every change to this file. On load the page fetches its own
    latest copy and, if BUILD differs, reloads itself under a new URL, so a
    browser holding a cached copy (GitHub Pages sends max-age=600) updates itself. */
-var BUILD = "2026-11-13.1";
+var BUILD = "2026-11-22.1";
 
 var LAST_CODE_KEY = "dikshaParentDashLastCode_v1";
 var SCAN_KEY = "dikshaParentDashScan_v1";
@@ -230,6 +230,15 @@ function streakOf(obj){
 }
 /* Mock-paper scores ({a:{got,max}, b:{got,max}}), shown when a quest records them. */
 function bossText(obj){
+  /* Fallback: tiered mock quests (maths-wt3) store best percentages in mockBest {bronze,silver,gold}. */
+  if((!obj.boss || typeof obj.boss!=="object") && obj.mockBest && typeof obj.mockBest==="object"){
+    var tiers = [];
+    [["bronze","Bronze"],["silver","Silver"],["gold","Gold"]].forEach(function(p){
+      var v = obj.mockBest[p[0]];
+      if(typeof v==="number") tiers.push(p[1]+" "+v+"%");
+    });
+    return tiers.join(" \u00b7 ");
+  }
   if(!obj.boss || typeof obj.boss!=="object") return "";
   var parts = [];
   [["a","Sec A"],["b","Sec B"]].forEach(function(p){
