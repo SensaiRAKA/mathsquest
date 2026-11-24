@@ -768,7 +768,7 @@
         <button class="nav-pill" id="nav-icso" onclick="switchView('icso')">💻 ICSO (10Q)</button>
         <button class="nav-pill" id="nav-mock" onclick="switchView('mock')">🏆 Mock Arena</button>
         <button class="nav-pill" id="nav-vault" onclick="switchView('vault')">
-          🛡️ Mistake Vault <span id="vault-badge" class="badge-count hidden">0</span>
+          🛡️ Vaults <span id="vault-badge" class="badge-count hidden">0</span>
         </button>
       </nav>
     </div>
@@ -1327,15 +1327,18 @@
       <div class="card">
         <div class="section-header">
           <div>
-            <h2 style="font-size:1.65rem;">🛡️ Mistake Vault</h2>
-            <p style="font-size:0.9rem; color:var(--slate-700);">Missed questions from Drills and Mock Tests land here. Solve them right to clear them and earn <strong>+25 Bonus XP</strong>!</p>
+            <h2 style="font-size:1.65rem;">🛡️ Vaults</h2>
+            <p style="font-size:0.9rem; color:var(--slate-700);">Questions you got wrong or skipped in Drills and Mock Tests land here. Solve them right to clear them and earn <strong>+25 Bonus XP</strong> each!</p>
           </div>
-          <span id="vault-pill" class="tag-pill" style="background:var(--coral-soft); color:var(--coral);">0 Mistakes</span>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="vault-tab-mistakes" onclick="setVaultTab('mistakes')">❌ Mistakes <span id="vault-count-mistakes">0</span></button>
+          <button class="sub-tab-btn" id="vault-tab-unanswered" onclick="setVaultTab('unanswered')">⏭️ Unanswered <span id="vault-count-unanswered">0</span></button>
         </div>
         <div id="vault-empty" style="text-align:center; padding:36px 10px;">
           <div style="font-size:3.5rem;">🌟</div>
-          <h3 style="margin-top:8px;">Your Vault is 100% Clean!</h3>
-          <p style="font-size:0.9rem; color:var(--slate-500);">Any tricky questions you miss will automatically appear here for smart practice.</p>
+          <h3 id="vault-empty-title" style="margin-top:8px;">This vault is clean!</h3>
+          <p id="vault-empty-text" style="font-size:0.9rem; color:var(--slate-500);"></p>
         </div>
         <div id="vault-list" style="display:grid; gap:14px;"></div>
       </div>
@@ -1373,7 +1376,7 @@
     <div class="modal-card" style="max-width:380px; padding:24px; text-align:center;">
       <div style="font-size:2.8rem;">⚠️</div>
       <h3 style="margin-top:6px;">Reset All Progress?</h3>
-      <p style="font-size:0.88rem; color:var(--slate-700); margin:8px 0 18px;">This will clear your XP, stars, streak, roadmap checkboxes, writing draft, and Mistake Vault.</p>
+      <p style="font-size:0.88rem; color:var(--slate-700); margin:8px 0 18px;">This will clear your XP, stars, streak, roadmap checkboxes, writing draft, and both Vaults.</p>
       <div style="display:flex; gap:10px; justify-content:center;">
         <button class="pill-btn" onclick="closeResetModal()">Cancel</button>
         <button class="btn-primary" style="background:var(--coral);" onclick="confirmReset()">Yes, Reset</button>
@@ -1393,6 +1396,7 @@
       sound: true,
       completedSprints: [],
       mistakes: [],
+      unanswered: [],
       sprintXpGiven: [],
       updatedAt: 0,
       writingClaimed: [],
@@ -1487,7 +1491,8 @@
       document.getElementById('btn-sound').textContent = state.sound ? '🔊' : '🔇';
 
       const vb = document.getElementById('vault-badge');
-      if (state.mistakes.length > 0) { vb.textContent = state.mistakes.length; vb.classList.remove('hidden'); }
+      const vTotal = state.mistakes.length + state.unanswered.length;
+      if (vTotal > 0) { vb.textContent = vTotal; vb.classList.remove('hidden'); }
       else vb.classList.add('hidden');
     }
 
@@ -2374,7 +2379,8 @@
       const revHtml = mockData.qs.map((q, i) => {
         const u = mockData.ans[i], ok = u === q.ans;
         subScores[q.subj][1]++;
-        if (ok) { totalRight++; subScores[q.subj][0]++; }
+        if (ok) { totalRight++; subScores[q.subj][0]++; dropFromUnanswered(q); }
+        else if (u === null) logUnanswered(q, q.subj);
         else logMistake(q, q.subj);
 
         return `
@@ -2427,23 +2433,47 @@
     /* =========================================================================
        11. MISTAKE VAULT
        ========================================================================= */
+    function dropFromUnanswered(q) {
+      const at = state.unanswered.findIndex(m => m.q === q.q);
+      if (at >= 0) state.unanswered.splice(at, 1);
+    }
     function logMistake(q, subj) {
+      dropFromUnanswered(q);
       if (!state.mistakes.some(m => m.q === q.q)) {
         state.mistakes.push({ ...q, subj });
       }
     }
+    /* Skipped questions in a mock go to their own vault (not counted as mistakes). */
+    function logUnanswered(q, subj) {
+      if (state.mistakes.some(m => m.q === q.q)) return;
+      if (!state.unanswered.some(m => m.q === q.q)) {
+        state.unanswered.push({ ...q, subj });
+      }
+    }
+
+    let vaultTab = 'mistakes';
+    const VAULT_EMPTY = {
+      mistakes: 'Any question you answer wrong will automatically appear here for smart practice.',
+      unanswered: 'Questions you skip in a Mock Test will appear here so you can learn them calmly, with no timer.'
+    };
+    function setVaultTab(t) { vaultTab = t; renderVault(); }
 
     function renderVault() {
       const list = document.getElementById('vault-list');
       const empty = document.getElementById('vault-empty');
-      const n = state.mistakes.length;
-      document.getElementById('vault-pill').textContent = `${n} Mistake${n === 1 ? '' : 's'} to Master`;
-      if (n === 0) { empty.classList.remove('hidden'); list.innerHTML = ''; return; }
+      ['mistakes', 'unanswered'].forEach(k => {
+        document.getElementById('vault-tab-' + k).classList.toggle('active', k === vaultTab);
+        document.getElementById('vault-count-' + k).textContent = state[k].length ? '(' + state[k].length + ')' : '';
+      });
+      const items = state[vaultTab];
+      document.getElementById('vault-empty-text').textContent = VAULT_EMPTY[vaultTab];
+      if (items.length === 0) { empty.classList.remove('hidden'); list.innerHTML = ''; return; }
       empty.classList.add('hidden');
-      list.innerHTML = state.mistakes.map((q, vIdx) => `
+      const tagStyle = vaultTab === 'mistakes' ? 'background:var(--coral-soft); color:var(--coral);' : 'background:var(--amber-soft); color:#b45309;';
+      list.innerHTML = items.map((q, vIdx) => `
         <div class="lab-box" style="margin-bottom:0; background:white;">
           <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
-            <span class="tag-pill" style="background:var(--coral-soft); color:var(--coral);">${(q.subj || 'Review').toUpperCase()} • ${q.tag}</span>
+            <span class="tag-pill" style="${tagStyle}">${(q.subj || 'Review').toUpperCase()} • ${q.tag}</span>
             <span style="font-size:0.78rem; font-weight:800; color:var(--teal);">+25 Bonus XP to Clear</span>
           </div>
           <div style="font-weight:800; margin-bottom:10px;">${q.q}</div>
@@ -2461,7 +2491,9 @@
 
     const vaultClearing = new Set();
     function tryVault(vIdx, oIdx) {
-      const q = state.mistakes[vIdx];
+      const kind = vaultTab;
+      const q = state[kind][vIdx];
+      if (!q) return;
       const msg = document.getElementById('vmsg-' + vIdx);
       msg.classList.remove('hidden');
       if (oIdx === q.ans) {
@@ -2472,8 +2504,8 @@
         msg.textContent = `🎉 Mastered! +25 Bonus XP! (${q.exp})`;
         setTimeout(() => {
           vaultClearing.delete(q.q);
-          const at = state.mistakes.findIndex(m => m.q === q.q);
-          if (at >= 0) { state.mistakes.splice(at, 1); awardXP(25); }
+          const at = state[kind].findIndex(m => m.q === q.q);
+          if (at >= 0) { state[kind].splice(at, 1); awardXP(25); }
           saveState(); renderVault();
         }, 1100);
       } else {
