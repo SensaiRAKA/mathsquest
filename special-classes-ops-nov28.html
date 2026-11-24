@@ -1,0 +1,2570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author" content="Rakesh Kumar" />
+  <title>Special Ops Academy: Mission Nov 28</title>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="sync.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --indigo: #4f46e5;
+      --indigo-dark: #3730a3;
+      --indigo-soft: #eef2ff;
+      --teal: #0d9488;
+      --teal-soft: #ccfbf1;
+      --amber: #f59e0b;
+      --amber-soft: #fef3c7;
+      --coral: #f43f5e;
+      --coral-soft: #ffe4e6;
+      --purple: #7c3aed;
+      --purple-soft: #f3e8ff;
+      --emerald: #10b981;
+      --emerald-soft: #d1fae5;
+      --slate-900: #1e1b4b;
+      --slate-700: #334155;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --white: #ffffff;
+      --radius-lg: 22px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.12), 0 4px 10px -2px rgba(79, 70, 229, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #eef2ff 0%, #f5f3ff 45%, #ecfeff 100%);
+      color: var(--slate-900);
+      min-height: 100vh;
+      padding-bottom: 64px;
+      line-height: 1.5;
+    }
+
+    h1, h2, h3, h4, .font-display {
+      font-family: 'Fredoka', 'Nunito', 'Comic Sans MS', sans-serif;
+      letter-spacing: 0.01em;
+    }
+
+    button {
+      font-family: inherit;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.12s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    button:active { transform: scale(0.97); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .home-link { display: block; text-align: center; margin: 12px 0 0; }
+    .home-link a { color: var(--slate-500); font-weight: 800; font-size: 13px; text-decoration: none; }
+    .home-link a:hover { text-decoration: underline; }
+    .sync-row { display: none; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin: 24px 0 0; font-size: 12px; }
+    .sync-row span { background: var(--indigo-soft); color: var(--indigo); font-weight: 800; padding: 5px 10px; border-radius: 99px; cursor: pointer; }
+    .sync-row button { background: none; border: none; color: var(--slate-500); font-weight: 700; font-size: 12px; text-decoration: underline; }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    /* Top HUD Header */
+    .hud-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid #e0e7ff;
+      box-shadow: 0 4px 16px rgba(79, 70, 229, 0.07);
+    }
+
+    .hud-inner {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 10px 16px;
+    }
+
+    .hud-top-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .brand-box {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--indigo), var(--purple));
+      color: white;
+      font-size: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-title { font-size: 1.15rem; font-weight: 700; color: var(--slate-900); line-height: 1.2; }
+    .xp-row { display: flex; align-items: center; gap: 8px; margin-top: 3px; flex-wrap: wrap; }
+    .rank-pill {
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: var(--indigo-soft);
+      color: var(--indigo-dark);
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+    .xp-track {
+      width: 110px;
+      height: 9px;
+      background: #e0e7ff;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .xp-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--indigo), var(--teal));
+      border-radius: 999px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+    .xp-text { font-size: 0.75rem; font-weight: 800; color: var(--indigo); }
+
+    .hud-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .stat-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 11px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      border: 1.5px solid transparent;
+    }
+    .chip-stars { background: var(--amber-soft); color: #b45309; border-color: #fde68a; }
+    .chip-streak { background: var(--coral-soft); color: #be123c; border-color: #fecdd3; }
+
+    .sprint-widget {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: #f0fdfa;
+      border: 1.5px solid #99f6e4;
+      padding: 5px 10px;
+      border-radius: 12px;
+    }
+    .sprint-time {
+      font-family: 'Fredoka', monospace;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f766e;
+      min-width: 48px;
+      text-align: center;
+    }
+    .sprint-btn {
+      padding: 4px 8px;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      background: var(--teal);
+      color: white;
+    }
+    .sprint-btn.secondary { background: #ccfbf1; color: #0f766e; }
+
+    .hud-btn {
+      padding: 7px 12px;
+      border-radius: 12px;
+      font-size: 0.8rem;
+      font-weight: 800;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-scratch { background: var(--purple); color: white; box-shadow: 0 3px 10px rgba(124, 58, 237, 0.25); }
+    .btn-icon { background: var(--slate-100); color: var(--slate-700); border: 1.5px solid var(--slate-200); padding: 7px 10px; }
+
+    /* Main Nav Bar */
+    .main-nav {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      overflow-x: auto;
+      padding-bottom: 3px;
+      scrollbar-width: none;
+    }
+    .main-nav::-webkit-scrollbar { display: none; }
+
+    .nav-pill {
+      padding: 8px 13px;
+      border-radius: 12px;
+      font-size: 0.82rem;
+      font-weight: 800;
+      background: var(--indigo-soft);
+      color: var(--indigo-dark);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      position: relative;
+    }
+    .nav-pill:hover { background: #e0e7ff; }
+    .nav-pill.active {
+      background: linear-gradient(135deg, var(--indigo), var(--purple));
+      color: white;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.28);
+    }
+
+    .badge-count {
+      background: var(--coral);
+      color: white;
+      font-size: 0.7rem;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-weight: 800;
+    }
+
+    /* Main Layout */
+    .container {
+      max-width: 1180px;
+      margin: 22px auto 0;
+      padding: 0 16px;
+    }
+
+    .card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      box-shadow: var(--shadow);
+      border: 1.5px solid #e0e7ff;
+      margin-bottom: 20px;
+    }
+
+    .section-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .tag-pill {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: var(--indigo-soft);
+      color: var(--indigo);
+    }
+
+    .sub-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 18px;
+      background: var(--slate-100);
+      padding: 6px;
+      border-radius: 16px;
+    }
+    .sub-tab-btn {
+      flex: 1;
+      min-width: 130px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 800;
+      font-size: 0.88rem;
+      background: transparent;
+      color: var(--slate-700);
+    }
+    .sub-tab-btn.active {
+      background: var(--white);
+      color: var(--indigo);
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .hidden { display: none !important; }
+
+    /* Grid Helpers */
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 14px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)); gap: 12px; }
+
+    /* Roadmap Cards */
+    .day-card {
+      background: var(--white);
+      border-radius: var(--radius-lg);
+      padding: 18px;
+      border: 2px solid #e0e7ff;
+      box-shadow: var(--shadow);
+    }
+    .day-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 2px dashed #e0e7ff;
+    }
+    .sprint-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: #f8fafc;
+      border: 1.5px solid var(--slate-200);
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+    }
+    .sprint-item:hover { border-color: var(--indigo); background: var(--indigo-soft); }
+    .sprint-item.done { background: var(--emerald-soft); border-color: #6ee7b7; }
+    .sprint-check {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--emerald);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .sprint-info { flex: 1; cursor: pointer; }
+    .sprint-subj { font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: var(--indigo); }
+    .sprint-name { font-size: 0.88rem; font-weight: 800; color: var(--slate-900); }
+    .sprint-go {
+      padding: 5px 10px;
+      border-radius: 9px;
+      background: var(--indigo);
+      color: white;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+
+    /* Interactive Concept Lab Boxes */
+    .lab-box {
+      background: #f8fafc;
+      border: 2px solid #e0e7ff;
+      border-radius: 18px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+    .lab-box h3 { font-size: 1.2rem; color: var(--indigo-dark); margin-bottom: 6px; }
+    .lab-input {
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 2px solid #c7d2fe;
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      outline: none;
+      width: 170px;
+    }
+    .lab-input:focus { border-color: var(--indigo); }
+
+    .pill-btn {
+      padding: 8px 13px;
+      border-radius: 11px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      background: white;
+      color: var(--indigo-dark);
+      border: 2px solid #c7d2fe;
+    }
+    .pill-btn:hover { background: var(--indigo-soft); }
+    .pill-btn.active { background: var(--indigo); color: white; border-color: var(--indigo); }
+
+    .result-banner {
+      margin-top: 14px;
+      padding: 14px 16px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--indigo), var(--purple));
+      color: white;
+      font-weight: 700;
+    }
+
+    /* Visual Fraction Bar */
+    .frac-bar {
+      display: flex;
+      height: 34px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 2px solid var(--indigo-dark);
+      background: white;
+      margin-top: 6px;
+    }
+    .frac-seg {
+      flex: 1;
+      border-right: 1.5px solid var(--indigo-dark);
+    }
+    .frac-seg:last-child { border-right: none; }
+    .frac-seg.filled { background: linear-gradient(135deg, #38bdf8, #6366f1); }
+
+    /* Atmosphere Stack */
+    .atmo-layer {
+      padding: 12px 16px;
+      border-radius: 14px;
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+      transition: transform 0.15s ease;
+    }
+    .atmo-layer:hover { transform: translateX(4px); }
+
+    /* Drill Runner */
+    .drill-card {
+      background: white;
+      border-radius: 22px;
+      padding: 24px;
+      border: 2px solid #e0e7ff;
+      box-shadow: var(--shadow);
+    }
+    .progress-track {
+      width: 100%;
+      height: 11px;
+      background: #e0e7ff;
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 18px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--indigo), var(--teal));
+      transition: width 0.3s ease;
+    }
+    .q-text {
+      font-size: 1.18rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      margin-bottom: 16px;
+      line-height: 1.45;
+    }
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 11px;
+    }
+    .opt-btn {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 13px 15px;
+      border-radius: 15px;
+      border: 2px solid #e0e7ff;
+      background: #f8fafc;
+      text-align: left;
+      font-weight: 700;
+      font-size: 0.96rem;
+      color: var(--slate-900);
+    }
+    .opt-btn:hover:not(:disabled) { border-color: var(--indigo); background: var(--indigo-soft); }
+    .opt-letter {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: white;
+      border: 1.5px solid #c7d2fe;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      color: var(--indigo);
+      flex-shrink: 0;
+    }
+    .opt-btn.correct { border-color: var(--emerald); background: var(--emerald-soft); color: #065f46; }
+    .opt-btn.wrong { border-color: var(--coral); background: var(--coral-soft); color: #9f1239; }
+    .opt-btn.selected { border-color: var(--indigo); background: var(--indigo-soft); box-shadow: 0 0 0 3px #c7d2fe; }
+
+    .hint-box {
+      margin-bottom: 14px;
+      padding: 12px 14px;
+      border-radius: 13px;
+      background: var(--amber-soft);
+      border: 1.5px solid #fcd34d;
+      color: #92400e;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .feedback-box {
+      margin-top: 16px;
+      padding: 15px 18px;
+      border-radius: 16px;
+      border: 2px solid;
+    }
+    .feedback-box.ok { background: var(--emerald-soft); border-color: #34d399; color: #065f46; }
+    .feedback-box.no { background: var(--coral-soft); border-color: #fb7185; color: #9f1239; }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--indigo), var(--purple));
+      color: white;
+      padding: 10px 18px;
+      border-radius: 13px;
+      font-weight: 800;
+      font-size: 0.9rem;
+      box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
+    }
+    .btn-teal {
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+      color: white;
+      padding: 10px 18px;
+      border-radius: 13px;
+      font-weight: 800;
+      font-size: 0.9rem;
+    }
+    .btn-amber {
+      background: var(--amber-soft);
+      color: #92400e;
+      border: 1.5px solid #fcd34d;
+      padding: 8px 14px;
+      border-radius: 11px;
+      font-weight: 800;
+      font-size: 0.82rem;
+    }
+
+    /* Writing Studio */
+    .finger-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+      gap: 10px;
+      margin: 14px 0;
+    }
+    .finger-card {
+      background: #f8fafc;
+      border: 2px solid #e0e7ff;
+      border-radius: 14px;
+      padding: 12px;
+    }
+    .finger-card input, .writing-area {
+      width: 100%;
+      margin-top: 6px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      font-family: inherit;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .writing-area { min-height: 150px; resize: vertical; line-height: 1.6; }
+
+    /* Mock Palette */
+    .mock-layout {
+      display: grid;
+      grid-template-columns: 1fr 270px;
+      gap: 18px;
+    }
+    @media (max-width: 860px) {
+      .mock-layout { grid-template-columns: 1fr; }
+    }
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      max-height: 330px;
+      overflow-y: auto;
+      padding-right: 4px;
+    }
+    .pal-btn {
+      height: 36px;
+      border-radius: 9px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      background: var(--slate-100);
+      color: var(--slate-700);
+      border: 1.5px solid var(--slate-200);
+    }
+    .pal-btn.answered { background: var(--emerald); color: white; border-color: var(--emerald); }
+    .pal-btn.current { background: var(--indigo); color: white; border-color: var(--indigo-dark); box-shadow: 0 0 0 2px #c7d2fe; }
+
+    /* Modals & Scratchpad */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(30, 27, 75, 0.55);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-card {
+      background: white;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 720px;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+      border: 2px solid #c7d2fe;
+    }
+    .modal-head {
+      background: linear-gradient(135deg, var(--indigo), var(--purple));
+      color: white;
+      padding: 13px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .scratch-canvas {
+      width: 100%;
+      height: 380px;
+      border-radius: 16px;
+      border: 2px solid #c7d2fe;
+      background-color: white;
+      touch-action: none;
+      cursor: crosshair;
+      display: block;
+    }
+    .scratch-canvas.grid-on {
+      background-image:
+        linear-gradient(to right, rgba(99, 102, 241, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(99, 102, 241, 0.14) 1px, transparent 1px);
+      background-size: 24px 24px;
+    }
+    .color-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    /* Break Banner */
+    .break-banner {
+      max-width: 900px;
+      margin: 14px auto 0;
+      padding: 0 16px;
+    }
+    .break-inner {
+      background: linear-gradient(135deg, var(--teal), var(--emerald));
+      color: white;
+      border-radius: 18px;
+      padding: 14px 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: 0 8px 20px rgba(13, 148, 136, 0.28);
+    }
+
+    /* Place Value & Cheat Tables */
+    .pv-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 0.86rem;
+    }
+    .pv-table th, .pv-table td {
+      border: 1.5px solid #c7d2fe;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .pv-table th { background: var(--indigo-soft); color: var(--indigo-dark); font-weight: 800; }
+
+    .train-car {
+      display: inline-block;
+      padding: 7px 11px;
+      border-radius: 11px;
+      font-weight: 800;
+      font-size: 0.82rem;
+      color: white;
+      margin: 4px;
+    }
+
+    .alpha-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 10px;
+    }
+    .alpha-cell {
+      width: 38px;
+      padding: 5px 2px;
+      border-radius: 9px;
+      background: white;
+      border: 1.5px solid #c7d2fe;
+      text-align: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+    }
+    .alpha-cell span { display: block; font-size: 0.68rem; color: var(--indigo); }
+  </style>
+</head>
+<body>
+  <canvas id="confetti-canvas"></canvas>
+  <div class="home-link"><a href="index.html">&larr; All quests</a></div>
+
+  <!-- ==================== TOP HUD BAR ==================== -->
+  <header class="hud-header">
+    <div class="hud-inner">
+      <div class="hud-top-row">
+        <div class="brand-box">
+          <div class="brand-icon">🕵️‍♀️</div>
+          <div>
+            <div class="brand-title font-display">Special Ops Academy: Mission Nov 28</div>
+            <div class="xp-row">
+              <span id="hud-rank" class="rank-pill">Rookie Agent</span>
+              <div class="xp-track"><div id="hud-xp-fill" class="xp-fill"></div></div>
+              <span id="hud-xp-text" class="xp-text">0 XP</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hud-controls">
+          <div class="stat-chip chip-stars">⭐ <span id="hud-stars">0</span></div>
+          <div class="stat-chip chip-streak">🔥 <span id="hud-streak">0</span></div>
+
+          <!-- 20-Min Sprint Timer -->
+          <div class="sprint-widget" title="20-Minute Focused Study Sprint">
+            <span>⏱️</span>
+            <span id="sprint-display" class="sprint-time">20:00</span>
+            <button id="sprint-toggle-btn" class="sprint-btn" onclick="toggleSprintTimer()">Start</button>
+            <button class="sprint-btn secondary" onclick="resetSprintTimer()">Reset</button>
+          </div>
+
+          <button class="hud-btn btn-scratch" onclick="toggleScratchpad()">✏️ Scratchpad</button>
+          <button id="btn-sound" class="hud-btn btn-icon" onclick="toggleSound()" title="Toggle Sound">🔊</button>
+          <button class="hud-btn btn-icon" onclick="openResetModal()" title="Reset Progress">↺</button>
+        </div>
+      </div>
+
+      <!-- Main Navigation -->
+      <nav class="main-nav">
+        <button class="nav-pill active" id="nav-roadmap" onclick="switchView('roadmap')">🗺️ 4-Day Roadmap</button>
+        <button class="nav-pill" id="nav-maths" onclick="switchView('maths')">🧮 Maths (40Q)</button>
+        <button class="nav-pill" id="nav-science" onclick="switchView('science')">🧬 Science (20Q)</button>
+        <button class="nav-pill" id="nav-english" onclick="switchView('english')">✍️ English (20M)</button>
+        <button class="nav-pill" id="nav-reasoning" onclick="switchView('reasoning')">🧩 Reasoning (10Q)</button>
+        <button class="nav-pill" id="nav-icso" onclick="switchView('icso')">💻 ICSO (10Q)</button>
+        <button class="nav-pill" id="nav-mock" onclick="switchView('mock')">🏆 Mock Arena</button>
+        <button class="nav-pill" id="nav-vault" onclick="switchView('vault')">
+          🛡️ Mistake Vault <span id="vault-badge" class="badge-count hidden">0</span>
+        </button>
+      </nav>
+    </div>
+  </header>
+
+  <!-- 20-Min Sprint Complete Break Banner -->
+  <div id="break-banner" class="break-banner hidden">
+    <div class="break-inner">
+      <div>
+        <h3 style="font-size:1.1rem;">🎉 20-Minute Sprint Complete! Time for a 5-Minute Stretch Break!</h3>
+        <p style="font-size:0.86rem; opacity:0.95;">Drink some water, roll your shoulders, and rest your eyes before starting the next mission slot.</p>
+      </div>
+      <button onclick="dismissBreakBanner()" style="background:white;color:#0f766e;padding:8px 14px;border-radius:11px;font-weight:800;">Ready for Next Sprint! ✨</button>
+    </div>
+  </div>
+
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <main class="container">
+
+    <!-- ==================== 1. 4-DAY ROADMAP ==================== -->
+    <section id="view-roadmap">
+      <div class="card" style="background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; border: none;">
+        <div class="section-header" style="margin-bottom: 6px;">
+          <div>
+            <span style="background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 999px; font-size: 0.75rem; font-weight: 800;">EXAM DATE: SATURDAY, 28 NOV • 2 HRS 15 MINS</span>
+            <h2 style="font-size: 1.7rem; margin-top: 8px;">Welcome, Agent! Your 4-Day Mission Plan 🚀</h2>
+            <p style="font-size: 0.92rem; opacity: 0.95; margin-top: 4px;">Complete 6 fun 20-minute sprints each day (5 min Visual Lab + 12 min Drill + 3 min Review). Click any sprint to teleport straight there!</p>
+          </div>
+          <div style="background: rgba(255,255,255,0.16); padding: 12px 18px; border-radius: 16px; text-align: center;">
+            <div style="font-size: 0.74rem; font-weight: 800; text-transform: uppercase;">Mission Progress</div>
+            <div id="roadmap-progress-text" class="font-display" style="font-size: 1.6rem;">0 / 24 Sprints</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="roadmap-grid" class="grid-2"></div>
+    </section>
+
+    <!-- ==================== 2. MATHS HUB ==================== -->
+    <section id="view-maths" class="hidden">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <span class="tag-pill">40 MCQs in Exam • Highest Weightage</span>
+            <h2 style="font-size: 1.6rem; margin-top: 4px;">🧮 Maths Operations HQ</h2>
+          </div>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="maths-tab-lab" onclick="switchSubTab('maths','lab')">🔬 Visual Concept Lab</button>
+          <button class="sub-tab-btn" id="maths-tab-drill" onclick="switchSubTab('maths','drill')">🎯 Gamified Drill (32Q + Generator)</button>
+        </div>
+
+        <!-- Maths Concept Lab -->
+        <div id="maths-pane-lab">
+          <!-- a) Divisibility Detective -->
+          <div class="lab-box">
+            <h3>🔍 Divisibility Detective Tester</h3>
+            <p style="font-size:0.88rem; color:var(--slate-700); margin-bottom:10px;">Type any number and tap a divisor (2–11) to see the exact rule in action!</p>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <input id="div-input" class="lab-input" type="number" value="616" min="1" oninput="runDivisibility()" />
+              <div id="div-buttons" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+            </div>
+            <div id="div-result" class="result-banner"></div>
+          </div>
+
+          <!-- b) Number Lab & HCF/LCM -->
+          <div class="lab-box">
+            <h3>🔢 Number Lab &amp; HCF × LCM Balance Scale</h3>
+            <div class="grid-3" style="margin-top:10px;">
+              <div style="background:white; padding:12px; border-radius:14px; border:1.5px solid #c7d2fe;">
+                <div style="font-weight:800; color:var(--indigo);">Prime &amp; Composite</div>
+                <p style="font-size:0.82rem; margin-top:4px;"><strong>Prime:</strong> Exactly 2 factors (1 &amp; itself). Ex: 2, 3, 5, 7, 11, 13, 17, 19.<br/><strong>2</strong> is the ONLY even prime! <strong>1</strong> is neither prime nor composite. <strong>9</strong> is the smallest odd composite.</p>
+              </div>
+              <div style="background:white; padding:12px; border-radius:14px; border:1.5px solid #c7d2fe;">
+                <div style="font-weight:800; color:var(--teal);">Special Pairs &amp; Perfect</div>
+                <p style="font-size:0.82rem; margin-top:4px;"><strong>Twin Primes:</strong> Primes differing by 2 → (3,5), (5,7), (11,13).<br/><strong>Prime Triplet:</strong> Only (3, 5, 7).<br/><strong>Perfect Number:</strong> Sum of factors = 2×number. Ex: 6 (1+2+3+6=12).</p>
+              </div>
+              <div style="background:white; padding:12px; border-radius:14px; border:1.5px solid #c7d2fe;">
+                <div style="font-weight:800; color:var(--coral);">Coprimes &amp; Golden Rule</div>
+                <p style="font-size:0.82rem; margin-top:4px;"><strong>Coprimes:</strong> Only common factor is 1 (HCF = 1). Ex: (8,15), (13,15).<br/><strong>Golden Balance:</strong><br/><span style="color:var(--indigo-dark); font-weight:800;">HCF × LCM = Number 1 × Number 2</span></p>
+              </div>
+            </div>
+            <!-- Mini HCF/LCM interactive calculator -->
+            <div style="margin-top:12px; background:white; padding:12px; border-radius:14px; border:1.5px solid #c7d2fe; display:flex; flex-wrap:wrap; align-items:center; gap:10px;">
+              <strong style="font-size:0.86rem;">Try the Balance Rule:</strong>
+              <input id="hcf-n1" class="lab-input" style="width:85px; padding:6px 10px;" type="number" value="12" min="1" max="500" oninput="calcHcfLcm()" />
+              <span>&amp;</span>
+              <input id="hcf-n2" class="lab-input" style="width:85px; padding:6px 10px;" type="number" value="18" min="1" max="500" oninput="calcHcfLcm()" />
+              <div id="hcf-out" style="font-size:0.88rem; font-weight:800; color:var(--indigo-dark);"></div>
+            </div>
+          </div>
+
+          <!-- c) Fraction Kitchen -->
+          <div class="lab-box">
+            <h3>🍕 Fraction Kitchen (Compare &amp; Convert)</h3>
+            <div class="grid-2" style="margin-top:10px;">
+              <div style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe;">
+                <div style="font-weight:800; margin-bottom:8px;">Cross-Multiply Duel!</div>
+                <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                  <div>
+                    <input id="f1n" type="number" value="2" min="1" max="12" style="width:52px; padding:5px; border-radius:8px; border:1.5px solid #c7d2fe; font-weight:800;" oninput="renderFractionKitchen()" /> /
+                    <input id="f1d" type="number" value="3" min="1" max="12" style="width:52px; padding:5px; border-radius:8px; border:1.5px solid #c7d2fe; font-weight:800;" oninput="renderFractionKitchen()" />
+                  </div>
+                  <strong style="color:var(--coral);">VS</strong>
+                  <div>
+                    <input id="f2n" type="number" value="3" min="1" max="12" style="width:52px; padding:5px; border-radius:8px; border:1.5px solid #c7d2fe; font-weight:800;" oninput="renderFractionKitchen()" /> /
+                    <input id="f2d" type="number" value="5" min="1" max="12" style="width:52px; padding:5px; border-radius:8px; border:1.5px solid #c7d2fe; font-weight:800;" oninput="renderFractionKitchen()" />
+                  </div>
+                </div>
+                <div id="frac-bars-wrap" style="margin-top:10px;"></div>
+                <div id="frac-compare-out" style="margin-top:10px; font-weight:800; font-size:0.88rem; color:var(--indigo-dark);"></div>
+              </div>
+              <div style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe; font-size:0.84rem;">
+                <div style="font-weight:800; color:var(--purple); margin-bottom:6px;">4 Super Fraction Rules</div>
+                <ul style="padding-left:18px; display:grid; gap:6px;">
+                  <li><strong>Proper vs Improper:</strong> Proper has top &lt; bottom (3/5). Improper has top &ge; bottom (14/3 = 4 2/3).</li>
+                  <li><strong>Mixed → Improper:</strong> (Whole × Bottom + Top) / Bottom. Ex: 4 1/2 = (4×2+1)/2 = 9/2.</li>
+                  <li><strong>Simplest Form:</strong> Divide top &amp; bottom by their HCF. Ex: 48/54 ÷ 6 = 8/9.</li>
+                  <li><strong>Division (Keep-Change-Flip):</strong> 5 ÷ 1/3 = 5 × 3/1 = 15. (Reciprocal of 0 does NOT exist!)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- d) Decimal Point Jumper -->
+          <div class="lab-box">
+            <h3>🦘 Decimal Point Jumper</h3>
+            <p style="font-size:0.86rem; color:var(--slate-700); margin-bottom:10px;">Watch the decimal point jump <strong>RIGHT</strong> when multiplying (×) and <strong>LEFT</strong> when dividing (÷)!</p>
+            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center;">
+              <input id="dec-base" class="lab-input" style="width:120px;" type="number" step="0.001" value="4.625" oninput="jumpDecimal(1,'none')" />
+              <button class="pill-btn" onclick="jumpDecimal(10,'mul')">× 10</button>
+              <button class="pill-btn" onclick="jumpDecimal(100,'mul')">× 100</button>
+              <button class="pill-btn" onclick="jumpDecimal(1000,'mul')">× 1000</button>
+              <button class="pill-btn" onclick="jumpDecimal(10,'div')">÷ 10</button>
+              <button class="pill-btn" onclick="jumpDecimal(100,'div')">÷ 100</button>
+              <button class="pill-btn" onclick="jumpDecimal(1000,'div')">÷ 1000</button>
+            </div>
+            <div id="dec-jump-out" class="result-banner">4.625 × 10 = 46.25 (Decimal jumped 1 place RIGHT ➡️)</div>
+
+            <table class="pv-table">
+              <thead>
+                <tr>
+                  <th>Thousands</th><th>Hundreds</th><th>Tens</th><th>Ones</th><th>•</th><th>Tenths (1/10)</th><th>Hundredths (1/100)</th><th>Thousandths (1/1000)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>4000</td><td>200</td><td>50</td><td>2</td><td><strong>.</strong></td><td>3/10 (0.3)</td><td>6/100 (0.06)</td><td>4/1000 (0.004)</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:0.82rem; color:var(--slate-700); margin-top:8px;"><strong>Rounding Rule:</strong> Look at the digit to the right. If it is <strong>0–4</strong>, stay the same. If it is <strong>5–9</strong>, add 1! (Ex: 67.437 → 67; 79.49 to 1 dec place → 79.5)</p>
+          </div>
+        </div>
+
+        <!-- Maths Drill Pane -->
+        <div id="maths-pane-drill" class="hidden">
+          <div id="drill-host-maths"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 3. SCIENCE HUB ==================== -->
+    <section id="view-science" class="hidden">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <span class="tag-pill" style="background:var(--teal-soft); color:#0f766e;">20 MCQs in Exam • Food &amp; Digestion + Air &amp; Water</span>
+            <h2 style="font-size: 1.6rem; margin-top: 4px;">🧬 Science Discovery Lab</h2>
+          </div>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="science-tab-lab" onclick="switchSubTab('science','lab')">🔬 Visual Concept Lab</button>
+          <button class="sub-tab-btn" id="science-tab-drill" onclick="switchSubTab('science','drill')">🎯 Gamified Drill (26Q)</button>
+        </div>
+
+        <div id="science-pane-lab">
+          <!-- a) Nutrient & Deficiency Doctor -->
+          <div class="lab-box">
+            <h3>🩺 Nutrient &amp; Deficiency Doctor</h3>
+            <p style="font-size:0.86rem; color:var(--slate-700); margin-bottom:10px;">Tap any nutrient or microbe card to inspect its symptoms, food sources, and science facts!</p>
+            <div id="sci-nutrient-btns" style="display:flex; flex-wrap:wrap; gap:7px;"></div>
+            <div id="sci-nutrient-detail" class="result-banner" style="background:linear-gradient(135deg,#0d9488,#0284c7);"></div>
+          </div>
+
+          <!-- b) Digestive System Journey -->
+          <div class="lab-box">
+            <h3>🍎 Digestive System Journey (9-Metre Alimentary Canal)</h3>
+            <p style="font-size:0.86rem; color:var(--slate-700); margin-bottom:10px;">Follow a bite of roti! Click each organ in order from Mouth to Large Intestine:</p>
+            <div id="sci-organ-btns" style="display:flex; flex-wrap:wrap; gap:7px;"></div>
+            <div id="sci-organ-detail" class="result-banner" style="background:linear-gradient(135deg,#f59e0b,#ea580c);"></div>
+          </div>
+
+          <!-- c) Atmosphere Rocket Explorer -->
+          <div class="lab-box">
+            <h3>🚀 Atmosphere Rocket Explorer &amp; Air Composition</h3>
+            <div class="grid-2" style="margin-top:10px;">
+              <div id="sci-atmo-stack"></div>
+              <div style="background:white; padding:15px; border-radius:16px; border:1.5px solid #c7d2fe;">
+                <h4 id="atmo-title" style="color:var(--indigo); font-size:1.1rem;">Troposphere (0–15 km)</h4>
+                <p id="atmo-desc" style="font-size:0.88rem; margin-top:6px; color:var(--slate-700);"></p>
+                <hr style="margin:12px 0; border:none; border-top:1.5px dashed #e0e7ff;" />
+                <div style="font-weight:800; font-size:0.9rem; color:var(--indigo-dark); margin-bottom:6px;">🌬️ What is Air Made Of?</div>
+                <div style="display:grid; gap:6px; font-size:0.82rem; font-weight:700;">
+                  <div style="background:#e0e7ff; padding:6px 10px; border-radius:9px;">🟦 Nitrogen (78%): Helps plants make protein; flushes chips packets!</div>
+                  <div style="background:#d1fae5; padding:6px 10px; border-radius:9px;">🟩 Oxygen (21%): Needed for breathing &amp; burning (combustion).</div>
+                  <div style="background:#fef3c7; padding:6px 10px; border-radius:9px;">🟨 Noble Gases (0.94%): Helium (balloons), Argon (bulbs), Neon (glow signs).</div>
+                  <div style="background:#ffe4e6; padding:6px 10px; border-radius:9px;">🟥 Carbon Dioxide (0.03–0.04%): Photosynthesis &amp; fire extinguishers (excess = Greenhouse Effect!).</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- d) Water Cycle & City Purification -->
+          <div class="lab-box">
+            <h3>💧 Water Cycle &amp; City Purification Plant</h3>
+            <div id="sci-water-btns" style="display:flex; flex-wrap:wrap; gap:7px;"></div>
+            <div id="sci-water-detail" class="result-banner" style="background:linear-gradient(135deg,#0284c7,#4f46e5);"></div>
+          </div>
+        </div>
+
+        <div id="science-pane-drill" class="hidden">
+          <div id="drill-host-science"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 4. ENGLISH HUB ==================== -->
+    <section id="view-english" class="hidden">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <span class="tag-pill" style="background:var(--purple-soft); color:var(--purple);">20 Marks Subjective Paper • Grammar + Writing</span>
+            <h2 style="font-size: 1.6rem; margin-top: 4px;">✍️ English Command Center</h2>
+          </div>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="english-tab-lab" onclick="switchSubTab('english','lab')">📚 Grammar Toolkit</button>
+          <button class="sub-tab-btn" id="english-tab-drill" onclick="switchSubTab('english','drill')">🩺 Grammar Surgeon (22Q)</button>
+          <button class="sub-tab-btn" id="english-tab-write" onclick="switchSubTab('english','write')">🖐️ 5-Finger Writing Studio</button>
+        </div>
+
+        <!-- English Grammar Toolkit -->
+        <div id="english-pane-lab">
+          <div style="display:flex; flex-wrap:wrap; gap:7px; margin-bottom:14px;" id="eng-topic-btns"></div>
+          <div id="eng-topic-stage" class="lab-box"></div>
+        </div>
+
+        <!-- English Drill -->
+        <div id="english-pane-drill" class="hidden">
+          <div id="drill-host-english"></div>
+        </div>
+
+        <!-- English Subjective Writing Studio -->
+        <div id="english-pane-write" class="hidden">
+          <div class="lab-box">
+            <h3>🖐️ 5-Finger Story &amp; Paragraph Builder (20 Marks Practice)</h3>
+            <p style="font-size:0.86rem; color:var(--slate-700); margin-bottom:12px;">Pick an exam topic, plan your 5 fingers, write your paragraph, and check the Self-Check Rubric to earn <strong>+40 XP</strong>!</p>
+
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;" id="writing-prompt-btns"></div>
+
+            <div id="writing-prompt-box" style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe; margin-bottom:12px;"></div>
+
+            <div class="finger-grid">
+              <div class="finger-card"><strong>👍 Thumb: Characters</strong><input id="f-char" placeholder="Who is in it?" oninput="saveWritingDraft()" /></div>
+              <div class="finger-card"><strong>☝️ Index: Setting</strong><input id="f-set" placeholder="Where & when?" oninput="saveWritingDraft()" /></div>
+              <div class="finger-card"><strong>🖕 Middle: Problem / Topic</strong><input id="f-prob" placeholder="Main idea or problem?" oninput="saveWritingDraft()" /></div>
+              <div class="finger-card"><strong>💍 Ring: Events (B-M-E)</strong><input id="f-ev" placeholder="What happens?" oninput="saveWritingDraft()" /></div>
+              <div class="finger-card"><strong>🤙 Pinky: Ending / Moral</strong><input id="f-end" placeholder="How does it end?" oninput="saveWritingDraft()" /></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; margin:8px 0 4px;">
+              <strong style="font-size:0.9rem;">Your Title &amp; Paragraph:</strong>
+              <span id="word-counter" class="tag-pill">0 words (Goal: 60–120 words)</span>
+            </div>
+            <textarea id="writing-text" class="writing-area" placeholder="Start with a catchy title, then write your paragraph using the hint words..." oninput="saveWritingDraft()"></textarea>
+
+            <!-- Self-Check Rubric -->
+            <div style="margin-top:14px; background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe;">
+              <strong style="font-size:0.9rem; color:var(--indigo-dark);">✅ Agent Self-Check Rubric:</strong>
+              <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:8px; margin-top:8px; font-size:0.86rem; font-weight:700;">
+                <label><input type="checkbox" class="rubric-cb" /> Catchy Title included</label>
+                <label><input type="checkbox" class="rubric-cb" /> Capital letters for Proper Nouns &amp; starts</label>
+                <label><input type="checkbox" class="rubric-cb" /> Used 3+ descriptive Adjectives</label>
+                <label><input type="checkbox" class="rubric-cb" /> Full stops &amp; punctuation checked</label>
+              </div>
+              <div style="margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <button class="btn-teal" onclick="claimWritingXP()">Claim Writing Badge (+40 XP) 🌟</button>
+                <span id="writing-msg" style="font-size:0.86rem; font-weight:800; color:var(--teal);"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 5. REASONING HUB ==================== -->
+    <section id="view-reasoning" class="hidden">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <span class="tag-pill" style="background:var(--amber-soft); color:#b45309;">10 MCQs in Exam • Mental Ability &amp; Logic</span>
+            <h2 style="font-size: 1.6rem; margin-top: 4px;">🧩 Secret Code &amp; Logic Lab</h2>
+          </div>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="reasoning-tab-lab" onclick="switchSubTab('reasoning','lab')">🔬 Logic Toolkit</button>
+          <button class="sub-tab-btn" id="reasoning-tab-drill" onclick="switchSubTab('reasoning','drill')">🎯 Gamified Drill (18Q)</button>
+        </div>
+
+        <div id="reasoning-pane-lab">
+          <!-- Odd-One-Out Checklist -->
+          <div class="lab-box">
+            <h3>🔍 Odd-One-Out: 3-Step Pattern Checklist</h3>
+            <div class="grid-3" style="margin-top:10px;">
+              <div style="background:white; padding:12px; border-radius:14px; border:1.5px solid #fde68a;">
+                <div style="font-weight:800; color:#b45309;">Step 1: Check Difference</div>
+                <p style="font-size:0.83rem; margin-top:4px;">Ex: 50–66 (+16), 22–38 (+16), <strong>63–77 (+14 ❌)</strong>, 64–80 (+16).</p>
+              </div>
+              <div style="background:white; padding:12px; border-radius:14px; border:1.5px solid #fde68a;">
+                <div style="font-weight:800; color:#b45309;">Step 2: Check Multiples / Ratio</div>
+                <p style="font-size:0.83rem; margin-top:4px;">Ex: 12:96 (×8), <strong>13:117 (×9 ❌)</strong>, 15:120 (×8), 16:128 (×8).</p>
+              </div>
+              <div style="background:white; padding:12px; border-radius:14px; border:1.5px solid #fde68a;">
+                <div style="font-weight:800; color:#b45309;">Step 3: Check Squares / Cubes</div>
+                <p style="font-size:0.83rem; margin-top:4px;">Ex: (3,9,27), (5,25,125), (7,49,343) are n, n², n³ — watch for 9³=729 not 512!</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Coding-Decoding Strip -->
+          <div class="lab-box">
+            <h3>🔐 Coding-Decoding A=1 to Z=26 Helper</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+              <input id="code-word" class="lab-input" style="width:150px; text-transform:uppercase;" value="CAT" maxlength="8" oninput="runCipher()" />
+              <label style="font-weight:800; font-size:0.86rem;">Shift:
+                <select id="code-shift" onchange="runCipher()" style="padding:7px 10px; border-radius:10px; border:1.5px solid #c7d2fe; font-weight:800;">
+                  <option value="1">+1 Forward</option>
+                  <option value="2">+2 Forward</option>
+                  <option value="-1">-1 Backward</option>
+                </select>
+              </label>
+              <div id="code-out" style="font-weight:800; color:var(--indigo-dark); font-size:1rem;"></div>
+            </div>
+            <div id="alpha-strip" class="alpha-strip"></div>
+          </div>
+
+          <!-- Direction Compass Simulator -->
+          <div class="lab-box">
+            <h3>🧭 Direction Compass &amp; Turn Helper</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:center;">
+              <div id="compass-box" style="width:120px; height:120px; border-radius:50%; background:white; border:3px solid var(--indigo); display:flex; flex-direction:column; align-items:center; justify-content:center; font-weight:800; position:relative;">
+                <span style="position:absolute; top:4px; font-size:0.75rem; color:var(--coral);">N</span>
+                <span style="position:absolute; bottom:4px; font-size:0.75rem;">S</span>
+                <span style="position:absolute; right:7px; font-size:0.75rem;">E</span>
+                <span style="position:absolute; left:7px; font-size:0.75rem;">W</span>
+                <div id="compass-arrow" style="font-size:2rem; transition:transform 0.3s ease;">⬆️</div>
+              </div>
+              <div>
+                <div id="compass-facing" style="font-size:1.1rem; font-weight:800; color:var(--indigo-dark); margin-bottom:8px;">Facing: NORTH</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <button class="pill-btn" onclick="turnCompass(-90)">↺ Turn Left (90°)</button>
+                  <button class="pill-btn" onclick="turnCompass(90)">↻ Turn Right (90°)</button>
+                  <button class="pill-btn" onclick="turnCompass(180)">🔄 About Turn (180°)</button>
+                </div>
+                <p style="font-size:0.8rem; color:var(--slate-500); margin-top:8px;">Remember: <strong>N → E → S → W</strong> is Clockwise (Right turns)!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="reasoning-pane-drill" class="hidden">
+          <div id="drill-host-reasoning"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 6. ICSO HUB ==================== -->
+    <section id="view-icso" class="hidden">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <span class="tag-pill" style="background:var(--coral-soft); color:var(--coral);">10 MCQs in Exam • Cyber &amp; Computers</span>
+            <h2 style="font-size: 1.6rem; margin-top: 4px;">💻 ICSO Cyber Deck</h2>
+          </div>
+        </div>
+        <div class="sub-tabs">
+          <button class="sub-tab-btn active" id="icso-tab-lab" onclick="switchSubTab('icso','lab')">🔬 Cyber Concept Lab</button>
+          <button class="sub-tab-btn" id="icso-tab-drill" onclick="switchSubTab('icso','drill')">🎯 Gamified Drill (18Q)</button>
+        </div>
+
+        <div id="icso-pane-lab">
+          <!-- Hardware Sorter -->
+          <div class="lab-box">
+            <h3>🖥️ Hardware Sorter: Input, Processing &amp; Output</h3>
+            <div class="grid-3" style="margin-top:10px;">
+              <div style="background:white; padding:14px; border-radius:14px; border:2px solid #99f6e4;">
+                <div style="font-weight:800; color:var(--teal);">⌨️ Input Devices (Send data IN)</div>
+                <p style="font-size:0.84rem; margin-top:5px;">Keyboard, Mouse, Scanner, Microphone, Webcam, Joystick, Barcode Reader, Light Pen.</p>
+              </div>
+              <div style="background:white; padding:14px; border-radius:14px; border:2px solid #c7d2fe;">
+                <div style="font-weight:800; color:var(--indigo);">🧠 Processing (CPU = Brain)</div>
+                <p style="font-size:0.84rem; margin-top:5px;"><strong>ALU</strong> (Arithmetic &amp; Logic Unit: does maths), <strong>CU</strong> (Control Unit: traffic cop), <strong>MU</strong> (Memory Unit).</p>
+              </div>
+              <div style="background:white; padding:14px; border-radius:14px; border:2px solid #fecdd3;">
+                <div style="font-weight:800; color:var(--coral);">🖨️ Output Devices (Show result OUT)</div>
+                <p style="font-size:0.84rem; margin-top:5px;">Monitor (Soft copy), Printer (Hard copy), Speakers, Headphones, Projector, Plotter (big maps/blueprints).</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Memory Ladder -->
+          <div class="lab-box">
+            <h3>💾 Memory Ladder (RAM vs ROM &amp; Storage Units)</h3>
+            <div class="grid-2" style="margin-top:10px;">
+              <div style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe; font-size:0.85rem;">
+                <p><strong>⚡ RAM (Random Access Memory):</strong> Temporary / Volatile memory. Loses data when power goes off!</p>
+                <p style="margin-top:6px;"><strong>🔒 ROM (Read Only Memory):</strong> Permanent / Non-volatile memory. Stores startup instructions.</p>
+                <p style="margin-top:6px;"><strong>💿 Secondary Storage:</strong> Hard Disk, SSD, Pen Drive, CD/DVD, Cloud Storage.</p>
+              </div>
+              <div style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe; font-size:0.85rem;">
+                <div style="font-weight:800; color:var(--purple); margin-bottom:5px;">Smallest → Largest Storage Units:</div>
+                <div style="display:flex; flex-wrap:wrap; gap:6px; font-weight:800;">
+                  <span class="tag-pill">1 Bit (0 or 1)</span> →
+                  <span class="tag-pill">1 Byte = 8 Bits</span> →
+                  <span class="tag-pill">1 KB = 1024 B</span> →
+                  <span class="tag-pill">1 MB = 1024 KB</span> →
+                  <span class="tag-pill">1 GB = 1024 MB</span> →
+                  <span class="tag-pill">1 TB = 1024 GB</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shortcuts & Cyber Safety -->
+          <div class="lab-box">
+            <h3>⌨️ Super Shortcuts &amp; Cyber Safety Shield</h3>
+            <div class="grid-2" style="margin-top:10px; font-size:0.85rem;">
+              <div style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe;">
+                <div style="font-weight:800; color:var(--indigo); margin-bottom:6px;">Must-Know Keyboard Shortcuts:</div>
+                <ul style="padding-left:18px; display:grid; gap:4px;">
+                  <li><strong>Ctrl + C</strong> = Copy &nbsp;|&nbsp; <strong>Ctrl + V</strong> = Paste</li>
+                  <li><strong>Ctrl + X</strong> = Cut &nbsp;|&nbsp; <strong>Ctrl + Z</strong> = Undo</li>
+                  <li><strong>Ctrl + S</strong> = Save &nbsp;|&nbsp; <strong>Ctrl + P</strong> = Print</li>
+                  <li><strong>Ctrl + B / I / U</strong> = Bold / Italic / Underline</li>
+                </ul>
+              </div>
+              <div style="background:white; padding:14px; border-radius:14px; border:1.5px solid #c7d2fe;">
+                <div style="font-weight:800; color:var(--teal); margin-bottom:6px;">🌐 Internet &amp; Safety Rules:</div>
+                <ul style="padding-left:18px; display:grid; gap:4px;">
+                  <li><strong>Web Browser:</strong> App to open websites (Chrome, Edge, Safari).</li>
+                  <li><strong>Search Engine:</strong> Website to search info (Google, Bing).</li>
+                  <li><strong>URL:</strong> Unique address of a webpage (e.g., https://...).</li>
+                  <li><strong>Cyber Safety:</strong> Never share passwords, home address, or OTPs with strangers!</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="icso-pane-drill" class="hidden">
+          <div id="drill-host-icso"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 7. MOCK EXAM ARENA ==================== -->
+    <section id="view-mock" class="hidden">
+      <div id="mock-menu">
+        <div class="card">
+          <span class="tag-pill">Exam Pattern Simulator • Nov 28</span>
+          <h2 style="font-size:1.65rem; margin-top:4px;">🏆 Mock Exam Arena</h2>
+          <p style="font-size:0.9rem; color:var(--slate-700); margin-top:4px;">Practice under real exam timing with a clickable Question Palette, subject-wise score breakdown, and full explanation review.</p>
+
+          <div class="grid-3" style="margin-top:18px;">
+            <div class="lab-box" style="margin-bottom:0; background:white;">
+              <div style="font-size:2rem;">⚡</div>
+              <h3>Mini Sprint Mock</h3>
+              <p style="font-size:0.84rem; color:var(--slate-700); margin:6px 0 12px;"><strong>16 MCQs • 15 Mins</strong><br/>Balanced mix: 2 Reasoning, 8 Maths, 4 Science, 2 ICSO. Perfect for Days 1–3!</p>
+              <button class="btn-teal" style="width:100%;" onclick="startMock('mini')">Start Mini Mock</button>
+            </div>
+            <div class="lab-box" style="margin-bottom:0; background:white;">
+              <div style="font-size:2rem;">🥈</div>
+              <h3>Express Paper Mock</h3>
+              <p style="font-size:0.84rem; color:var(--slate-700); margin:6px 0 12px;"><strong>40 MCQs • 45 Mins</strong><br/>Half-length exam: 5 Reasoning, 20 Maths, 10 Science, 5 ICSO + Subjective prompt.</p>
+              <button class="btn-primary" style="width:100%;" onclick="startMock('express')">Start Express Mock</button>
+            </div>
+            <div class="lab-box" style="margin-bottom:0; background:white; border-color:var(--amber);">
+              <div style="font-size:2rem;">🥇</div>
+              <h3>Full Nov 28 Simulator</h3>
+              <p style="font-size:0.84rem; color:var(--slate-700); margin:6px 0 12px;"><strong>80 MCQs • 90 Mins</strong><br/>Exact paper pattern: 10 Reasoning, 40 Maths, 20 Science, 10 ICSO + English prompt!</p>
+              <button class="btn-primary" style="width:100%; background:linear-gradient(135deg,#f59e0b,#ea580c);" onclick="startMock('full')">Start Full 80Q Exam</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Active Mock Runner -->
+      <div id="mock-runner" class="hidden">
+        <div class="card" style="padding:14px 20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:10px;">
+          <div>
+            <h3 id="mock-title" style="font-size:1.15rem;">Mock Test</h3>
+            <div id="mock-status" style="font-size:0.8rem; font-weight:700; color:var(--slate-500);">Answered: 0 / 16</div>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="background:var(--coral-soft); color:#be123c; padding:7px 14px; border-radius:12px; font-weight:800; font-family:'Fredoka',sans-serif;">
+              ⏳ <span id="mock-timer">15:00</span>
+            </div>
+            <button class="btn-teal" onclick="submitMock()">Submit Exam ✓</button>
+          </div>
+        </div>
+
+        <div class="mock-layout">
+          <div class="drill-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <span id="mock-q-num" class="tag-pill">Question 1</span>
+              <span id="mock-q-subj" style="font-size:0.8rem; font-weight:800; color:var(--purple);">Maths</span>
+            </div>
+            <div id="mock-q-text" class="q-text"></div>
+            <div id="mock-q-options" class="options-grid"></div>
+            <div style="display:flex; justify-content:space-between; margin-top:20px; padding-top:14px; border-top:1.5px solid var(--slate-100);">
+              <button class="pill-btn" id="mock-prev" onclick="moveMock(-1)">← Previous</button>
+              <button class="btn-primary" id="mock-next" onclick="moveMock(1)">Next →</button>
+            </div>
+          </div>
+
+          <div class="card" style="height:fit-content; margin-bottom:0;">
+            <h4 style="margin-bottom:10px;">Question Navigator</h4>
+            <div id="mock-palette" class="palette-grid"></div>
+            <div style="margin-top:12px; font-size:0.75rem; font-weight:700; color:var(--slate-500); display:flex; gap:10px; flex-wrap:wrap;">
+              <span>🟦 Current</span><span>🟩 Answered</span><span>⬜ Unanswered</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mock Results -->
+      <div id="mock-results" class="hidden">
+        <div class="card" style="text-align:center;">
+          <div style="font-size:3.2rem;">🏆</div>
+          <h2 id="mock-res-heading" style="font-size:1.8rem;">Mission Report</h2>
+          <div id="mock-res-overall" style="font-size:1.25rem; font-weight:800; color:var(--indigo); margin:8px 0;"></div>
+          <div id="mock-res-breakdown" class="grid-4" style="margin:16px 0;"></div>
+          <div id="mock-english-bonus" class="hidden lab-box" style="text-align:left; margin-top:14px;"></div>
+          <button class="btn-primary" onclick="exitMock()">Back to Mock Arena</button>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:14px;">📝 Full Question Review &amp; Explanations</h3>
+          <div id="mock-review-list" style="display:grid; gap:12px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== 8. MISTAKE VAULT ==================== -->
+    <section id="view-vault" class="hidden">
+      <div class="card">
+        <div class="section-header">
+          <div>
+            <h2 style="font-size:1.65rem;">🛡️ Mistake Vault</h2>
+            <p style="font-size:0.9rem; color:var(--slate-700);">Missed questions from Drills and Mock Tests land here. Solve them right to clear them and earn <strong>+25 Bonus XP</strong>!</p>
+          </div>
+          <span id="vault-pill" class="tag-pill" style="background:var(--coral-soft); color:var(--coral);">0 Mistakes</span>
+        </div>
+        <div id="vault-empty" style="text-align:center; padding:36px 10px;">
+          <div style="font-size:3.5rem;">🌟</div>
+          <h3 style="margin-top:8px;">Your Vault is 100% Clean!</h3>
+          <p style="font-size:0.9rem; color:var(--slate-500);">Any tricky questions you miss will automatically appear here for smart practice.</p>
+        </div>
+        <div id="vault-list" style="display:grid; gap:14px;"></div>
+      </div>
+    </section>
+  </main>
+
+  <div class="sync-row" id="syncRow">
+    <span id="syncCodeLabel"></span>
+    <button id="syncChangeBtn">Use a different code</button>
+  </div>
+
+  <!-- ==================== SCRATCHPAD MODAL ==================== -->
+  <div id="scratchpad-modal" class="modal-backdrop hidden">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div class="font-display" style="font-size:1.1rem; font-weight:700;">✏️ Rough Work Scratchpad</div>
+        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <button class="color-dot" style="background:#1e1b4b;" onclick="setPen('#1e1b4b')" title="Dark Pen"></button>
+          <button class="color-dot" style="background:#dc2626;" onclick="setPen('#dc2626')" title="Red Pen"></button>
+          <button class="color-dot" style="background:#0d9488;" onclick="setPen('#0d9488')" title="Teal Pen"></button>
+          <button id="sp-eraser" class="sprint-btn secondary" onclick="toggleEraser()">Eraser</button>
+          <button id="sp-grid" class="sprint-btn secondary" onclick="toggleGrid()">Grid: ON</button>
+          <button class="sprint-btn" style="background:var(--coral);" onclick="clearScratch()">Clear</button>
+          <button class="sprint-btn" style="background:white; color:var(--indigo-dark);" onclick="toggleScratchpad()">Close ✕</button>
+        </div>
+      </div>
+      <div style="padding:14px; background:#f8fafc;">
+        <canvas id="scratch-canvas" class="scratch-canvas grid-on"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== RESET CONFIRMATION MODAL ==================== -->
+  <div id="reset-modal" class="modal-backdrop hidden">
+    <div class="modal-card" style="max-width:380px; padding:24px; text-align:center;">
+      <div style="font-size:2.8rem;">⚠️</div>
+      <h3 style="margin-top:6px;">Reset All Progress?</h3>
+      <p style="font-size:0.88rem; color:var(--slate-700); margin:8px 0 18px;">This will clear your XP, stars, streak, roadmap checkboxes, writing draft, and Mistake Vault.</p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="pill-btn" onclick="closeResetModal()">Cancel</button>
+        <button class="btn-primary" style="background:var(--coral);" onclick="confirmReset()">Yes, Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* =========================================================================
+       1. PERSISTENT STATE & SOUND / CONFETTI ENGINE
+       ========================================================================= */
+    const STORE_KEY = 'diksha_special_ops_nov28_v1';
+    const DEFAULT_STATE = {
+      xp: 0,
+      stars: 0,
+      streak: 0,
+      sound: true,
+      completedSprints: [],
+      mistakes: [],
+      sprintXpGiven: [],
+      updatedAt: 0,
+      writingClaimed: [],
+      writingDraft: { promptIdx: 0, char: '', set: '', prob: '', ev: '', end: '', text: '' }
+    };
+
+    let _initialBoot = true;
+    function normalizeState(p) {
+      p = p || {};
+      return { ...JSON.parse(JSON.stringify(DEFAULT_STATE)), ...p, writingDraft: { ...DEFAULT_STATE.writingDraft, ...(p.writingDraft || {}) } };
+    }
+    let state = loadState();
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (!raw) return JSON.parse(JSON.stringify(DEFAULT_STATE));
+        return normalizeState(JSON.parse(raw));
+      } catch (e) { return JSON.parse(JSON.stringify(DEFAULT_STATE)); }
+    }
+    function saveState() {
+      if (!_initialBoot) state.updatedAt = Date.now();
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+      updateHUD();
+      try { if (typeof DikshaSync !== 'undefined') DikshaSync.push(STORE_KEY, state); } catch (e) {}
+    }
+
+    // Audio Chimes (Web Audio API)
+    let actx = null;
+    function playTone(kind) {
+      if (!state.sound) return;
+      try {
+        if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+        if (actx.state === 'suspended') actx.resume();
+        const now = actx.currentTime;
+        const beep = (freq, start, dur, type = 'sine') => {
+          const o = actx.createOscillator(), g = actx.createGain();
+          o.type = type; o.frequency.setValueAtTime(freq, now + start);
+          g.gain.setValueAtTime(0.12, now + start);
+          g.gain.exponentialRampToValueAtTime(0.001, now + start + dur);
+          o.connect(g); g.connect(actx.destination);
+          o.start(now + start); o.stop(now + start + dur);
+        };
+        if (kind === 'ok') { beep(523, 0, 0.12); beep(659, 0.08, 0.14); beep(784, 0.16, 0.22); }
+        else if (kind === 'no') { beep(240, 0, 0.15, 'triangle'); beep(180, 0.1, 0.2, 'triangle'); }
+        else if (kind === 'win') { beep(523, 0, 0.15, 'triangle'); beep(659, 0.1, 0.15, 'triangle'); beep(784, 0.2, 0.15, 'triangle'); beep(1046, 0.3, 0.35, 'triangle'); }
+      } catch (e) {}
+    }
+
+    function launchConfetti() {
+      const c = document.getElementById('confetti-canvas');
+      const ctx = c.getContext('2d');
+      c.width = window.innerWidth; c.height = window.innerHeight;
+      const cols = ['#4f46e5', '#0d9488', '#f59e0b', '#f43f5e', '#7c3aed', '#10b981'];
+      const pts = Array.from({ length: 80 }, () => ({
+        x: Math.random() * c.width, y: -10 - Math.random() * 80,
+        r: 4 + Math.random() * 5, col: cols[Math.floor(Math.random() * cols.length)],
+        vx: (Math.random() - 0.5) * 5, vy: 3 + Math.random() * 4, rot: Math.random() * 360
+      }));
+      let f = 0;
+      (function loop() {
+        ctx.clearRect(0, 0, c.width, c.height);
+        pts.forEach(p => {
+          p.x += p.vx; p.y += p.vy; p.rot += 6;
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot * Math.PI / 180);
+          ctx.fillStyle = p.col; ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r); ctx.restore();
+        });
+        if (++f < 105) requestAnimationFrame(loop);
+        else ctx.clearRect(0, 0, c.width, c.height);
+      })();
+    }
+
+    /* =========================================================================
+       2. HUD, RANKS & 20-MINUTE SPRINT TIMER
+       ========================================================================= */
+    const RANKS = [
+      { name: 'Rookie Agent', min: 0 },
+      { name: 'Junior Detective', min: 200 },
+      { name: 'Special Ops Specialist', min: 550 },
+      { name: 'Master Agent', min: 1000 }
+    ];
+
+    function updateHUD() {
+      let rIdx = 0;
+      RANKS.forEach((r, i) => { if (state.xp >= r.min) rIdx = i; });
+      const cur = RANKS[rIdx], nxt = RANKS[rIdx + 1];
+      const pct = nxt ? Math.min(100, Math.round(((state.xp - cur.min) / (nxt.min - cur.min)) * 100)) : 100;
+      document.getElementById('hud-rank').textContent = cur.name;
+      document.getElementById('hud-xp-fill').style.width = pct + '%';
+      document.getElementById('hud-xp-text').textContent = state.xp + ' XP';
+      document.getElementById('hud-stars').textContent = state.stars;
+      document.getElementById('hud-streak').textContent = state.streak;
+      document.getElementById('btn-sound').textContent = state.sound ? '🔊' : '🔇';
+
+      const vb = document.getElementById('vault-badge');
+      if (state.mistakes.length > 0) { vb.textContent = state.mistakes.length; vb.classList.remove('hidden'); }
+      else vb.classList.add('hidden');
+    }
+
+    function awardXP(pts) {
+      const oldRank = RANKS.filter(r => state.xp >= r.min).length;
+      state.xp += pts;
+      const newRank = RANKS.filter(r => state.xp >= r.min).length;
+      saveState();
+      if (newRank > oldRank) { playTone('win'); launchConfetti(); }
+    }
+
+    function toggleSound() { state.sound = !state.sound; saveState(); }
+
+    // 20-Min Sprint Timer
+    let sprintSecs = 20 * 60;
+    let sprintInterval = null;
+    function renderSprintTime() {
+      const m = String(Math.floor(sprintSecs / 60)).padStart(2, '0');
+      const s = String(sprintSecs % 60).padStart(2, '0');
+      document.getElementById('sprint-display').textContent = `${m}:${s}`;
+    }
+    function toggleSprintTimer() {
+      const btn = document.getElementById('sprint-toggle-btn');
+      if (sprintInterval) {
+        clearInterval(sprintInterval); sprintInterval = null;
+        btn.textContent = 'Start';
+      } else {
+        btn.textContent = 'Pause';
+        sprintInterval = setInterval(() => {
+          sprintSecs--;
+          renderSprintTime();
+          if (sprintSecs <= 0) {
+            clearInterval(sprintInterval); sprintInterval = null;
+            btn.textContent = 'Start';
+            document.getElementById('break-banner').classList.remove('hidden');
+            playTone('win'); launchConfetti();
+          }
+        }, 1000);
+      }
+    }
+    function resetSprintTimer() {
+      if (sprintInterval) { clearInterval(sprintInterval); sprintInterval = null; }
+      sprintSecs = 20 * 60;
+      document.getElementById('sprint-toggle-btn').textContent = 'Start';
+      renderSprintTime();
+    }
+    function dismissBreakBanner() {
+      document.getElementById('break-banner').classList.add('hidden');
+      resetSprintTimer();
+    }
+
+    /* =========================================================================
+       3. NAVIGATION & 4-DAY ROADMAP
+       ========================================================================= */
+    const VIEWS = ['roadmap', 'maths', 'science', 'english', 'reasoning', 'icso', 'mock', 'vault'];
+    function switchView(v) {
+      VIEWS.forEach(id => {
+        document.getElementById('view-' + id).classList.toggle('hidden', id !== v);
+        document.getElementById('nav-' + id).classList.toggle('active', id === v);
+      });
+      if (v === 'roadmap') renderRoadmap();
+      if (v === 'vault') renderVault();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function switchSubTab(subj, pane) {
+      const panes = subj === 'english' ? ['lab', 'drill', 'write'] : ['lab', 'drill'];
+      panes.forEach(p => {
+        document.getElementById(`${subj}-pane-${p}`).classList.toggle('hidden', p !== pane);
+        document.getElementById(`${subj}-tab-${p}`).classList.toggle('active', p === pane);
+      });
+      if (pane === 'drill') initDrill(subj);
+    }
+
+    const ROADMAP_DAYS = [
+      {
+        day: 'Day 1 • Nov 24', sub: 'Core Foundations', emoji: '🧭',
+        sprints: [
+          { id: 'd1s1', subj: 'Maths', name: 'Divisibility Detective & Prime Numbers', target: 'maths', tab: 'lab' },
+          { id: 'd1s2', subj: 'Science', name: 'Nutrients & Deficiency Doctor', target: 'science', tab: 'lab' },
+          { id: 'd1s3', subj: 'English', name: 'Parts of Speech & Noun Types', target: 'english', tab: 'lab' },
+          { id: 'd1s4', subj: 'Maths', name: 'Factors, HCF & LCM Drill', target: 'maths', tab: 'drill' },
+          { id: 'd1s5', subj: 'Reasoning', name: 'Odd-One-Out Pattern Checklist', target: 'reasoning', tab: 'lab' },
+          { id: 'd1s6', subj: 'ICSO', name: 'Hardware Sorter & Memory Ladder', target: 'icso', tab: 'lab' }
+        ]
+      },
+      {
+        day: 'Day 2 • Nov 25', sub: 'Deep Dive & Connections', emoji: '🔬',
+        sprints: [
+          { id: 'd2s1', subj: 'Maths', name: 'Fraction Kitchen & Operations', target: 'maths', tab: 'lab' },
+          { id: 'd2s2', subj: 'Science', name: 'Digestive System Journey', target: 'science', tab: 'lab' },
+          { id: 'd2s3', subj: 'English', name: 'Adjective Order & Tricky Scales', target: 'english', tab: 'drill' },
+          { id: 'd2s4', subj: 'Science', name: 'Food & Digestion Drill', target: 'science', tab: 'drill' },
+          { id: 'd2s5', subj: 'Reasoning', name: 'Mental Ability & Coding Drill', target: 'reasoning', tab: 'drill' },
+          { id: 'd2s6', subj: 'Mock', name: 'Mini Sprint Mock #1 (15m)', target: 'mock', tab: 'lab' }
+        ]
+      },
+      {
+        day: 'Day 3 • Nov 26', sub: 'Decimals, Air/Water & Writing', emoji: '🚀',
+        sprints: [
+          { id: 'd3s1', subj: 'Maths', name: 'Decimal Point Jumper & Rounding', target: 'maths', tab: 'lab' },
+          { id: 'd3s2', subj: 'Science', name: 'Atmosphere Rocket & Water Cycle', target: 'science', tab: 'lab' },
+          { id: 'd3s3', subj: 'English', name: '5-Finger Writing Studio (1 Paragraph)', target: 'english', tab: 'write' },
+          { id: 'd3s4', subj: 'Maths', name: 'Fractions & Decimals Practice', target: 'maths', tab: 'drill' },
+          { id: 'd3s5', subj: 'ICSO', name: 'Shortcuts, Cyber Safety & ICSO Drill', target: 'icso', tab: 'drill' },
+          { id: 'd3s6', subj: 'Mock', name: 'Express 40Q Paper Mock', target: 'mock', tab: 'lab' }
+        ]
+      },
+      {
+        day: 'Day 4 • Nov 27', sub: 'Final Boss & Confidence Boost', emoji: '🏆',
+        sprints: [
+          { id: 'd4s1', subj: 'Vault', name: 'Clear Your Mistake Vault!', target: 'vault', tab: 'lab' },
+          { id: 'd4s2', subj: 'Science', name: 'Air, Water & Purification Drill', target: 'science', tab: 'drill' },
+          { id: 'd4s3', subj: 'English', name: '5-Finger Writing Studio (2nd Prompt)', target: 'english', tab: 'write' },
+          { id: 'd4s4', subj: 'Reasoning', name: 'Direction & Olympiad Speed Drill', target: 'reasoning', tab: 'drill' },
+          { id: 'd4s5', subj: 'Mock', name: 'Full Nov 28 Simulator (80Q)', target: 'mock', tab: 'lab' },
+          { id: 'd4s6', subj: 'Vault', name: 'Final Light Review & Early Sleep 😴', target: 'vault', tab: 'lab' }
+        ]
+      }
+    ];
+
+    function renderRoadmap() {
+      const doneSet = new Set(state.completedSprints);
+      document.getElementById('roadmap-progress-text').textContent = `${doneSet.size} / 24 Sprints`;
+      document.getElementById('roadmap-grid').innerHTML = ROADMAP_DAYS.map(d => `
+        <div class="day-card">
+          <div class="day-title">
+            <div>
+              <h3 style="font-size:1.15rem; color:var(--indigo-dark);">${d.emoji} ${d.day}</h3>
+              <div style="font-size:0.78rem; font-weight:700; color:var(--slate-500);">${d.sub} • 6 × 20-min slots</div>
+            </div>
+            <span class="tag-pill">${d.sprints.filter(s => doneSet.has(s.id)).length}/6 Done</span>
+          </div>
+          ${d.sprints.map(s => {
+            const isDone = doneSet.has(s.id);
+            return `
+              <div class="sprint-item ${isDone ? 'done' : ''}">
+                <input type="checkbox" class="sprint-check" ${isDone ? 'checked' : ''} onchange="toggleSprintDone('${s.id}')" />
+                <div class="sprint-info" onclick="jumpToSprint('${s.target}','${s.tab}')">
+                  <div class="sprint-subj">${s.subj} • 20 min</div>
+                  <div class="sprint-name">${s.name}</div>
+                </div>
+                <button class="sprint-go" onclick="jumpToSprint('${s.target}','${s.tab}')">Go →</button>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `).join('');
+    }
+
+    function toggleSprintDone(id) {
+      const idx = state.completedSprints.indexOf(id);
+      if (idx >= 0) state.completedSprints.splice(idx, 1);
+      else {
+        state.completedSprints.push(id);
+        if (!state.sprintXpGiven.includes(id)) { state.sprintXpGiven.push(id); awardXP(20); }
+        playTone('ok');
+      }
+      saveState(); renderRoadmap();
+    }
+
+    function jumpToSprint(target, tab) {
+      switchView(target);
+      if (['maths', 'science', 'english', 'reasoning', 'icso'].includes(target)) {
+        switchSubTab(target, tab);
+      }
+    }
+
+    /* =========================================================================
+       4. MATHS CONCEPT LAB TOOLS
+       ========================================================================= */
+    let activeDivisor = 7;
+    function initMathsLab() {
+      const divs = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+      document.getElementById('div-buttons').innerHTML = divs.map(d =>
+        `<button class="pill-btn ${d === activeDivisor ? 'active' : ''}" id="div-btn-${d}" onclick="setDivisor(${d})">÷ ${d}</button>`
+      ).join('');
+      runDivisibility();
+      calcHcfLcm();
+      renderFractionKitchen();
+      jumpDecimal(10, 'mul');
+    }
+
+    function setDivisor(d) {
+      activeDivisor = d;
+      [2,3,4,5,6,7,8,9,10,11].forEach(x => document.getElementById('div-btn-' + x).classList.toggle('active', x === d));
+      runDivisibility();
+    }
+
+    function runDivisibility() {
+      const raw = document.getElementById('div-input').value.trim();
+      const n = Math.abs(parseInt(raw, 10));
+      const box = document.getElementById('div-result');
+      if (!n || isNaN(n)) { box.innerHTML = 'Enter a whole number above to test!'; return; }
+      const str = String(n);
+      const digits = str.split('').map(Number);
+      const sum = digits.reduce((a, b) => a + b, 0);
+      const ok = n % activeDivisor === 0;
+      let step = '';
+
+      if (activeDivisor === 2) step = `Ones digit is <strong>${digits[digits.length - 1]}</strong> (must be 0, 2, 4, 6, or 8).`;
+      else if (activeDivisor === 3) step = `Sum of digits = ${digits.join(' + ')} = <strong>${sum}</strong>. Is ${sum} divisible by 3? ${sum % 3 === 0 ? 'YES' : 'NO'}.`;
+      else if (activeDivisor === 4) {
+        const last2 = parseInt(str.slice(-2), 10);
+        step = `Last 2 digits form <strong>${last2}</strong>. Is ${last2} divisible by 4? ${last2 % 4 === 0 ? 'YES' : 'NO'}.`;
+      }
+      else if (activeDivisor === 5) step = `Ones digit is <strong>${digits[digits.length - 1]}</strong> (must be 0 or 5).`;
+      else if (activeDivisor === 6) step = `Must be divisible by BOTH 2 (${n % 2 === 0 ? 'YES' : 'NO'}) and 3 (sum ${sum} → ${sum % 3 === 0 ? 'YES' : 'NO'}).`;
+      else if (activeDivisor === 7) {
+        const last = n % 10, rest = Math.floor(n / 10), diff = rest - last * 2;
+        step = `Double last digit (${last} × 2 = ${last * 2}). Subtract from rest: ${rest} − ${last * 2} = <strong>${diff}</strong>. Is ${diff} divisible by 7? ${diff % 7 === 0 ? 'YES' : 'NO'}.`;
+      }
+      else if (activeDivisor === 8) {
+        const last3 = parseInt(str.slice(-3), 10);
+        step = `Last 3 digits form <strong>${last3}</strong>. Is ${last3} divisible by 8? ${last3 % 8 === 0 ? 'YES' : 'NO'}.`;
+      }
+      else if (activeDivisor === 9) step = `Sum of digits = ${digits.join(' + ')} = <strong>${sum}</strong>. Is ${sum} divisible by 9? ${sum % 9 === 0 ? 'YES' : 'NO'}.`;
+      else if (activeDivisor === 10) step = `Ones digit is <strong>${digits[digits.length - 1]}</strong> (must be 0).`;
+      else if (activeDivisor === 11) {
+        let oddSum = 0, evenSum = 0;
+        digits.forEach((dg, i) => { if (i % 2 === 0) oddSum += dg; else evenSum += dg; });
+        const diff = Math.abs(oddSum - evenSum);
+        step = `Odd places sum = ${oddSum}, Even places sum = ${evenSum}. Difference = |${oddSum} − ${evenSum}| = <strong>${diff}</strong> (must be 0 or multiple of 11).`;
+      }
+      box.innerHTML = `<div style="font-size:1.05rem;">${ok ? '✅ YES!' : '❌ NO!'} ${n} is ${ok ? '' : 'NOT '}divisible by ${activeDivisor}.</div><div style="font-size:0.88rem; margin-top:4px; opacity:0.95;">${step}</div>`;
+    }
+
+    function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+    function calcHcfLcm() {
+      const a = Math.max(1, parseInt(document.getElementById('hcf-n1').value, 10) || 12);
+      const b = Math.max(1, parseInt(document.getElementById('hcf-n2').value, 10) || 18);
+      const h = gcd(a, b), l = (a * b) / h;
+      document.getElementById('hcf-out').innerHTML = `HCF = ${h}, LCM = ${l} &nbsp;|&nbsp; Check: ${h} × ${l} = <strong>${h * l}</strong> &amp; ${a} × ${b} = <strong>${a * b}</strong> ✅`;
+    }
+
+    function renderFractionKitchen() {
+      const n1 = Math.max(1, parseInt(document.getElementById('f1n').value, 10) || 1);
+      const d1 = Math.max(1, parseInt(document.getElementById('f1d').value, 10) || 2);
+      const n2 = Math.max(1, parseInt(document.getElementById('f2n').value, 10) || 1);
+      const d2 = Math.max(1, parseInt(document.getElementById('f2d').value, 10) || 2);
+      const makeBar = (n, d) => {
+        const cap = Math.min(d, 12);
+        return `<div class="frac-bar">${Array.from({ length: cap }, (_, i) => `<div class="frac-seg ${i < n ? 'filled' : ''}"></div>`).join('')}</div>`;
+      };
+      document.getElementById('frac-bars-wrap').innerHTML = `
+        <div style="font-size:0.78rem; font-weight:800;">${n1}/${d1}</div>${makeBar(n1, d1)}
+        <div style="font-size:0.78rem; font-weight:800; margin-top:6px;">${n2}/${d2}</div>${makeBar(n2, d2)}
+      `;
+      const p1 = n1 * d2, p2 = n2 * d1;
+      const sym = p1 > p2 ? '>' : p1 < p2 ? '<' : '=';
+      document.getElementById('frac-compare-out').innerHTML = `Cross products: ${n1}×${d2} = <strong>${p1}</strong> vs ${n2}×${d1} = <strong>${p2}</strong> → <span style="color:var(--coral);">${n1}/${d1} ${sym} ${n2}/${d2}</span>`;
+    }
+
+    let lastDec = { f: 10, op: 'mul' };
+    function jumpDecimal(factor, op) {
+      const base = parseFloat(document.getElementById('dec-base').value) || 4.625;
+      if (op === 'none') { factor = lastDec.f; op = lastDec.op; } else { lastDec = { f: factor, op }; }
+      const hops = factor === 10 ? 1 : factor === 100 ? 2 : 3;
+      const ans = op === 'mul' ? +(base * factor).toFixed(6) : +(base / factor).toFixed(6);
+      const dir = op === 'mul' ? 'RIGHT ➡️' : 'LEFT ⬅️';
+      const sym = op === 'mul' ? '×' : '÷';
+      document.getElementById('dec-jump-out').innerHTML = `${base} ${sym} ${factor} = <strong style="font-size:1.25rem;">${ans}</strong> &nbsp; (Decimal jumped ${hops} place${hops > 1 ? 's' : ''} ${dir})`;
+    }
+
+    /* =========================================================================
+       5. SCIENCE CONCEPT LAB TOOLS
+       ========================================================================= */
+    const SCI_NUTRIENTS = [
+      { name: 'Vitamin A', icon: '🥕', info: '<strong>Deficiency:</strong> Night Blindness (cannot see in the dark).<br/><strong>Sources:</strong> Carrot, papaya, mango, leafy veggies, milk, egg yolk.' },
+      { name: 'Vitamin B', icon: '🌾', info: '<strong>Deficiency:</strong> Beri-beri (weak muscles & nerves, cramps, tiredness).<br/><strong>Sources:</strong> Sprouts, unpolished rice, cereals, nuts, milk.' },
+      { name: 'Vitamin C', icon: '🍊', info: '<strong>Deficiency:</strong> Scurvy (bleeding gums & swollen joints). Helps absorb iron!<br/><strong>Sources:</strong> Oranges, lemon, amla, tomato, cabbage.' },
+      { name: 'Vitamin D', icon: '☀️', info: '<strong>Deficiency:</strong> Rickets (pigeon chest & bow legs).<br/><strong>Sources:</strong> Sunlight helps skin make Vitamin D; fish oil, vegetable oil.' },
+      { name: 'Iron', icon: '🥬', info: '<strong>Deficiency:</strong> Anaemia (pale, tired easily). Builds red blood cells (haemoglobin)!<br/><strong>Sources:</strong> Spinach, jaggery (gur), dates, banana, grapes.' },
+      { name: 'Iodine', icon: '🧂', info: '<strong>Deficiency:</strong> Goitre (swollen neck gland).<br/><strong>Sources:</strong> Iodised salt, seafood, vegetables.' },
+      { name: 'Calcium', icon: '🥛', info: '<strong>Deficiency:</strong> Weak & soft bones/teeth.<br/><strong>Sources:</strong> Milk, eggs, fish, leafy vegetables.' },
+      { name: '4 Microbe Groups', icon: '🦠', info: '<strong>Bacteria:</strong> Typhoid, Cholera, TB, Pneumonia, Diarrhoea.<br/><strong>Virus:</strong> Common cold, Flu, Polio, Measles, Chickenpox.<br/><strong>Protozoa:</strong> Malaria (female Anopheles mosquito), Kala-azar.<br/><strong>Fungi:</strong> Ringworm & skin/hair infections. (Good microbes are in Curd!)' }
+    ];
+
+    const SCI_ORGANS = [
+      { name: '1. Mouth & Teeth', info: '<strong>Chewing = Mastication.</strong> Adults have <strong>32 permanent teeth</strong> (8 Incisors for cutting, 4 Canines for tearing, 8 Premolars & 12 Molars for grinding); young kids have <strong>20 milk teeth</strong>. Saliva has enzyme <strong>Amylase</strong> which turns starch (roti/rice) into sweet sugar!' },
+      { name: '2. Pharynx & Epiglottis', info: 'The <strong>Epiglottis</strong> is a tiny flap that closes the windpipe (trachea) when you swallow so food goes safely into the food pipe and does NOT choke you!' },
+      { name: '3. Oesophagus', info: 'The food pipe pushes food down in wave-like muscle contractions called <strong>Peristalsis</strong>.' },
+      { name: '4. Stomach', info: 'A J-shaped muscular bag. Its walls secrete <strong>Hydrochloric acid (HCl)</strong> to kill germs, and enzyme <strong>Pepsin</strong> to break down proteins.' },
+      { name: '5. Small Intestine (6 m)', info: 'Longest part! <strong>Liver</strong> makes <strong>Bile</strong> (stored in Gall Bladder) to break fats into droplets; <strong>Pancreas</strong> sends pancreatic juice. Digestion completes here! Finger-like folds called <strong>Villi</strong> absorb liquid food into the blood.' },
+      { name: '6. Large Intestine', info: 'Absorbs extra <strong>water</strong> from undigested food. Remaining waste (faeces) leaves through the Anus (Egestion).' }
+    ];
+
+    const SCI_ATMO = [
+      { name: 'Exosphere', tag: 'Outermost', col: '#1e1b4b', desc: 'Outermost layer where air is super thin and slowly fades into empty outer space.' },
+      { name: 'Thermosphere (+ Ionosphere)', tag: 'Hot Layer', col: '#4338ca', desc: 'Very high temperatures! Space shuttles orbit here. The <strong>Ionosphere</strong> reflects radio signals back to Earth for long-distance communication.' },
+      { name: 'Mesosphere', tag: 'Cold Layer', col: '#0369a1', desc: 'Temperature drops sharply as you go higher — known as the Cold Layer.' },
+      { name: 'Stratosphere', tag: 'Ozone & Jets', col: '#0d9488', desc: 'Extends ~15–50 km. Contains the <strong>Ozone Layer</strong> which absorbs harmful UV rays from the sun. Jet planes fly smoothly here!' },
+      { name: 'Troposphere', tag: 'Weather Layer (0–15 km)', col: '#059669', desc: 'Lowest layer closest to Earth. All weather changes (clouds, rain, wind, storms) happen right here!' }
+    ];
+
+    const SCI_WATER = [
+      { name: 'Evaporation & Transpiration', info: '<strong>Evaporation:</strong> Liquid water heats up into water vapour (faster with more heat, wind, or surface area).<br/><strong>Transpiration:</strong> Plants release unused water vapour through tiny leaf pores called <strong>stomata</strong>!' },
+      { name: 'Condensation & Weather', info: '<strong>Condensation:</strong> Cooling water vapour back into liquid droplets (makes clouds & chilled-glass droplets).<br/><strong>Dew:</strong> Drops on cool grass. <strong>Frost:</strong> Frozen dew (damages crops). <strong>Fog:</strong> Cloud near ground on dust. <strong>Hail:</strong> Falling ice-balls.' },
+      { name: 'City Purification (3 Steps)', info: '<strong>1. Sedimentation:</strong> Heavy mud settles at bottom.<br/><strong>2. Filtration:</strong> Water passes through sand & gravel (and charcoal at home).<br/><strong>3. Chlorination:</strong> Adding chlorine/bleaching powder kills harmful germs → Safe <strong>Potable Water</strong>!' },
+      { name: 'Pollution & Conservation', info: '<strong>Eutrophication:</strong> Excess fertilizers cause huge algae growth, using up dissolved oxygen so fish die.<br/><strong>Bio-concentration:</strong> Pesticides building up in living bodies.<br/><strong>Rainwater Harvesting:</strong> Collecting rooftop/drain rain to recharge groundwater!' }
+    ];
+
+    function initScienceLab() {
+      document.getElementById('sci-nutrient-btns').innerHTML = SCI_NUTRIENTS.map((n, i) =>
+        `<button class="pill-btn ${i === 0 ? 'active' : ''}" id="nut-btn-${i}" onclick="showNutrient(${i})">${n.icon} ${n.name}</button>`
+      ).join('');
+      showNutrient(0);
+
+      document.getElementById('sci-organ-btns').innerHTML = SCI_ORGANS.map((o, i) =>
+        `<button class="pill-btn ${i === 0 ? 'active' : ''}" id="org-btn-${i}" onclick="showOrgan(${i})">${o.name}</button>`
+      ).join('');
+      showOrgan(0);
+
+      document.getElementById('sci-atmo-stack').innerHTML = SCI_ATMO.map((a, i) =>
+        `<div class="atmo-layer" style="background:${a.col};" onclick="showAtmo(${i})"><span>${a.name}</span><span style="font-size:0.74rem; opacity:0.9;">${a.tag}</span></div>`
+      ).join('');
+      showAtmo(4);
+
+      document.getElementById('sci-water-btns').innerHTML = SCI_WATER.map((w, i) =>
+        `<button class="pill-btn ${i === 0 ? 'active' : ''}" id="wat-btn-${i}" onclick="showWater(${i})">${w.name}</button>`
+      ).join('');
+      showWater(0);
+    }
+    function showNutrient(i) {
+      SCI_NUTRIENTS.forEach((_, idx) => document.getElementById('nut-btn-' + idx).classList.toggle('active', idx === i));
+      document.getElementById('sci-nutrient-detail').innerHTML = SCI_NUTRIENTS[i].info;
+    }
+    function showOrgan(i) {
+      SCI_ORGANS.forEach((_, idx) => document.getElementById('org-btn-' + idx).classList.toggle('active', idx === i));
+      document.getElementById('sci-organ-detail').innerHTML = SCI_ORGANS[i].info;
+    }
+    function showAtmo(i) {
+      document.getElementById('atmo-title').textContent = `${SCI_ATMO[i].name} — ${SCI_ATMO[i].tag}`;
+      document.getElementById('atmo-desc').innerHTML = SCI_ATMO[i].desc;
+    }
+    function showWater(i) {
+      SCI_WATER.forEach((_, idx) => document.getElementById('wat-btn-' + idx).classList.toggle('active', idx === i));
+      document.getElementById('sci-water-detail').innerHTML = SCI_WATER[i].info;
+    }
+
+    /* =========================================================================
+       6. ENGLISH GRAMMAR TOOLKIT & 5-FINGER WRITING STUDIO
+       ========================================================================= */
+    const ENG_TOPICS = [
+      {
+        title: '🚂 Adjective Order Train',
+        html: `<p style="font-size:0.9rem; margin-bottom:10px;">When using 2 or more adjectives before a noun, line them up in this exact train order:</p>
+        <div>
+          <span class="train-car" style="background:#4f46e5;">1. Number (two)</span>→
+          <span class="train-car" style="background:#7c3aed;">2. Opinion (beautiful)</span>→
+          <span class="train-car" style="background:#0d9488;">3. Size/Shape (small, round)</span>→
+          <span class="train-car" style="background:#d97706;">4. Age (old, new)</span>→
+          <span class="train-car" style="background:#e11d48;">5. Colour (red, white)</span>→
+          <span class="train-car" style="background:#0284c7;">6. Origin/Material (Indian, silk)</span>→
+          <span class="train-car" style="background:#1e1b4b;">NOUN</span>
+        </div>
+        <div class="result-banner" style="margin-top:12px;">✅ "a <strong>small white</strong> car" (NOT white small car)<br/>✅ "a <strong>beautiful old Russian</strong> mirror" (NOT old beautiful Russian mirror)</div>`
+      },
+      {
+        title: '⚖️ Tricky Adjective Scales',
+        html: `<div class="grid-2" style="font-size:0.86rem;">
+          <div style="background:white; padding:12px; border-radius:12px; border:1.5px solid #c7d2fe;">
+            <strong>Little (Uncountable) vs Few (Countable):</strong><br/>
+            • <strong>Little / Few</strong> = hardly any (negative).<br/>
+            • <strong>A little / A few</strong> = some at least (positive).<br/>
+            • <strong>The little / The few</strong> = ALL of that small amount!<br/>
+            <em>Ex: "I drank <u>a little</u> milk." / "<u>The few</u> friends I have are gentle."</em>
+          </div>
+          <div style="background:white; padding:12px; border-radius:12px; border:1.5px solid #c7d2fe;">
+            <strong>More Exam Pairs:</strong><br/>
+            • <strong>Some</strong> (affirmative) vs <strong>Any</strong> (negative &amp; questions).<br/>
+            • <strong>Elder/Eldest</strong> (family only, no 'than') vs <strong>Older/Oldest</strong> (people &amp; things, uses 'than').<br/>
+            • <strong>Farther</strong> (distance) vs <strong>Further</strong> (additional).<br/>
+            • <strong>Much</strong> (uncountable) vs <strong>Many</strong> (countable).
+          </div>
+        </div>`
+      },
+      {
+        title: '👑 Nouns & Apostrophes',
+        html: `<div class="grid-2" style="font-size:0.86rem;">
+          <div style="background:white; padding:12px; border-radius:12px; border:1.5px solid #c7d2fe;">
+            <strong>4 Noun Types + Partitives:</strong><br/>
+            • <strong>Collective:</strong> pride of lions, flock of birds, fleet of ships, troupe of dancers, litter of puppies, clump of trees, gaggle of geese.<br/>
+            • <strong>Abstract:</strong> feelings/ideas you can't touch (bravery, honesty, forgiveness, childhood, laughter).<br/>
+            • <strong>Partitives:</strong> a <em>loaf</em> of bread, a <em>bar</em> of soap, a <em>jar</em> of honey, a <em>grain</em> of rice, a <em>piece</em> of advice.
+          </div>
+          <div style="background:white; padding:12px; border-radius:12px; border:1.5px solid #c7d2fe;">
+            <strong>Apostrophe Rules (Possession):</strong><br/>
+            • Singular: <strong>Astha's</strong> cat.<br/>
+            • Ends in 's' / Plural ending in 's': <strong>Harris'</strong> skates, <strong>girls'</strong> school, <strong>teachers'</strong> day.<br/>
+            • Irregular plural (no 's'): <strong>children's</strong> films, <strong>women's</strong> match.<br/>
+            • <strong>⚠️ Non-living things:</strong> NEVER use 's! Say "the legs of the table" (NOT table's legs).
+          </div>
+        </div>`
+      },
+      {
+        title: '💥 Phrases, Sounds & Prefixes',
+        html: `<div class="grid-2" style="font-size:0.86rem;">
+          <div style="background:white; padding:12px; border-radius:12px; border:1.5px solid #c7d2fe;">
+            <strong>Phrase vs Sentence:</strong><br/>
+            A <strong>Phrase</strong> is a group of words without a full verb/complete thought (<em>in the nest</em>). Place phrases close to what they describe! (✅ "The girl <u>with spectacles</u> ate an ice-cream", NOT "ate an ice-cream with spectacles"!)<br/>
+            <strong>Onomatopoeia (Sound words):</strong> lamb <em>bleats</em>, snake <em>hisses</em>, horse <em>neighs</em>, owl <em>hoots</em>, leaves <em>crunch</em>.
+          </div>
+          <div style="background:white; padding:12px; border-radius:12px; border:1.5px solid #c7d2fe;">
+            <strong>Diminutives (Small/Baby versions):</strong><br/>
+            book → booklet, duck → duckling, owl → owlet, goose → gosling, swan → cygnet, tree → sapling, kitchen → kitchenette.<br/>
+            <strong>Prefix Antonyms:</strong> un- (untidy), dis- (dishonest), in- (invisible), im- (immature), ir- (irregular), il- (illogical), mis- (misuse).
+          </div>
+        </div>`
+      }
+    ];
+
+    const WRITING_PROMPTS = [
+      { title: '🐾 Your Favourite Pet', desc: 'You finally convinced your parents to get a pet! Write a descriptive paragraph about your favourite pet.', hints: ['fluffy', 'cute', 'feeding & walking', 'new responsibilities', 'joy and happiness', 'loyal companion'] },
+      { title: '🌍 Save Mother Earth (Earth Day)', desc: 'Earth Day is celebrated on 22nd April. Write a paragraph on how you can help protect Mother Earth.', hints: ['plant more trees', 'recycled paper', 'say no to plastic bags', 'keep surroundings clean', 'switch off lights & fans'] },
+      { title: '🏰 My Favourite Place to Visit', desc: 'Describe your favourite holiday place, where it is, what you saw/ate there, and why it is special to you.', hints: ['scenery', 'family memories', 'famous food', 'excited & relaxed', 'unforgettable trip'] },
+      { title: '☔ A Rainy Day Picture Story', desc: 'A girl gets caught in a sudden thunderstorm without an umbrella and stands under a tree. Her friend helps her. Write the story with a moral!', hints: ['raining heavily', 'thunderstorm', 'shared umbrella', 'warned about dangers under trees', 'learnt a lesson'] }
+    ];
+
+    function initEnglishHub() {
+      document.getElementById('eng-topic-btns').innerHTML = ENG_TOPICS.map((t, i) =>
+        `<button class="pill-btn ${i === 0 ? 'active' : ''}" id="eng-top-${i}" onclick="showEngTopic(${i})">${t.title}</button>`
+      ).join('');
+      showEngTopic(0);
+
+      document.getElementById('writing-prompt-btns').innerHTML = WRITING_PROMPTS.map((p, i) =>
+        `<button class="pill-btn" id="wp-btn-${i}" onclick="selectWritingPrompt(${i})">${p.title}</button>`
+      ).join('');
+      const d = state.writingDraft;
+      document.getElementById('f-char').value = d.char || '';
+      document.getElementById('f-set').value = d.set || '';
+      document.getElementById('f-prob').value = d.prob || '';
+      document.getElementById('f-ev').value = d.ev || '';
+      document.getElementById('f-end').value = d.end || '';
+      document.getElementById('writing-text').value = d.text || '';
+      selectWritingPrompt(d.promptIdx || 0, false);
+      updateWordCount();
+    }
+
+    function showEngTopic(i) {
+      ENG_TOPICS.forEach((_, idx) => document.getElementById('eng-top-' + idx).classList.toggle('active', idx === i));
+      document.getElementById('eng-topic-stage').innerHTML = `<h3>${ENG_TOPICS[i].title}</h3>${ENG_TOPICS[i].html}`;
+    }
+
+    function selectWritingPrompt(i, save = true) {
+      WRITING_PROMPTS.forEach((_, idx) => document.getElementById('wp-btn-' + idx).classList.toggle('active', idx === i));
+      const p = WRITING_PROMPTS[i];
+      document.getElementById('writing-prompt-box').innerHTML = `
+        <div style="font-weight:800; color:var(--indigo-dark); font-size:1rem;">${p.title}</div>
+        <p style="font-size:0.86rem; margin:4px 0 8px;">${p.desc}</p>
+        <div style="font-size:0.78rem; font-weight:800; color:var(--purple);">💡 Hint Word Bank: ${p.hints.map(h => `<span class="tag-pill" style="margin:2px;">${h}</span>`).join(' ')}</div>
+      `;
+      if (save) { state.writingDraft.promptIdx = i; saveState(); }
+    }
+
+    function updateWordCount() {
+      const txt = document.getElementById('writing-text').value.trim();
+      const words = txt ? txt.split(/\s+/).length : 0;
+      document.getElementById('word-counter').textContent = `${words} words (Goal: 60–120 words)`;
+    }
+
+    function saveWritingDraft() {
+      state.writingDraft.char = document.getElementById('f-char').value;
+      state.writingDraft.set = document.getElementById('f-set').value;
+      state.writingDraft.prob = document.getElementById('f-prob').value;
+      state.writingDraft.ev = document.getElementById('f-ev').value;
+      state.writingDraft.end = document.getElementById('f-end').value;
+      state.writingDraft.text = document.getElementById('writing-text').value;
+      updateWordCount();
+      saveState();
+    }
+
+    function claimWritingXP() {
+      const words = document.getElementById('writing-text').value.trim().split(/\s+/).filter(Boolean).length;
+      const checked = Array.from(document.querySelectorAll('.rubric-cb')).filter(c => c.checked).length;
+      const msg = document.getElementById('writing-msg');
+      if (words < 25) { msg.style.color = '#e11d48'; msg.textContent = 'Write at least 25 words first!'; return; }
+      if (checked < 4) { msg.style.color = '#d97706'; msg.textContent = 'Check all 4 rubric boxes after proofreading!'; return; }
+      const pKey = 'wp_' + (state.writingDraft.promptIdx || 0);
+      if (!state.writingClaimed.includes(pKey)) {
+        state.writingClaimed.push(pKey);
+        state.stars += 3;
+        awardXP(40);
+        playTone('win'); launchConfetti();
+        msg.style.color = '#059669';
+        msg.textContent = '🎉 Fantastic writing! +40 XP & +3 ⭐ earned!';
+      } else {
+        msg.style.color = '#0d9488';
+        msg.textContent = '✅ Great revision! Try another prompt to earn more XP!';
+      }
+    }
+
+    /* =========================================================================
+       7. REASONING LAB TOOLS
+       ========================================================================= */
+    let compassDeg = 0;
+    function initReasoningLab() {
+      document.getElementById('alpha-strip').innerHTML = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map((ch, i) =>
+        `<div class="alpha-cell">${ch}<span>${i + 1}</span></div>`
+      ).join('');
+      runCipher();
+    }
+
+    function runCipher() {
+      const w = (document.getElementById('code-word').value || '').toUpperCase().replace(/[^A-Z]/g, '');
+      const sh = parseInt(document.getElementById('code-shift').value, 10) || 1;
+      const coded = w.split('').map(ch => String.fromCharCode(((ch.charCodeAt(0) - 65 + sh + 26) % 26) + 65)).join('');
+      document.getElementById('code-out').textContent = w ? `${w} → ${coded}` : '';
+    }
+
+    function turnCompass(delta) {
+      compassDeg = (compassDeg + delta + 360) % 360;
+      document.getElementById('compass-arrow').style.transform = `rotate(${compassDeg}deg)`;
+      const dirs = { 0: 'NORTH ⬆️', 90: 'EAST ➡️', 180: 'SOUTH ⬇️', 270: 'WEST ⬅️' };
+      document.getElementById('compass-facing').textContent = 'Facing: ' + (dirs[compassDeg] || 'NORTH');
+      playTone('ok');
+    }
+
+    /* =========================================================================
+       8. MASTER QUESTION BANKS (ALL 5 SUBJECTS)
+       ========================================================================= */
+    const BANKS = {
+      maths: [
+        { id:'m1', tag:'Primes', q:'Which list contains ALL the prime numbers between 1 and 20?', opts:['1, 2, 3, 5, 7, 11, 13, 17, 19','2, 3, 5, 7, 11, 13, 17, 19','2, 3, 5, 7, 9, 11, 13, 17, 19','3, 5, 7, 11, 13, 17, 19'], ans:1, hint:'1 is NOT prime, 9 is composite (3×3), and 2 IS prime!', exp:'The primes between 1 and 20 are 2, 3, 5, 7, 11, 13, 17, 19 (8 numbers).' },
+        { id:'m2', tag:'Composite', q:'What is the smallest ODD composite number?', opts:['1','5','9','15'], ans:2, hint:'Check odd numbers: 1 (neither), 3 (prime), 5 (prime), 7 (prime), 9 = 3×3!', exp:'9 is the smallest odd number with more than 2 factors (1, 3, 9).' },
+        { id:'m3', tag:'Primes', q:'What is the largest 2-digit prime number?', opts:['89','93','97','99'], ans:2, hint:'99 is divisible by 3; 98 is even; check 97!', exp:'97 is only divisible by 1 and 97, making it the largest 2-digit prime.' },
+        { id:'m4', tag:'Coprimes', q:'Which pair of numbers is CO-PRIME (HCF = 1)?', opts:['15 and 21','13 and 15','27 and 72','14 and 52'], ans:1, hint:'Find the pair that shares NO common factor other than 1.', exp:'13 (1,13) and 15 (1,3,5,15) only share 1, so they are coprime.' },
+        { id:'m5', tag:'Prime Factors', q:'What is the prime factorisation of 60?', opts:['10 × 6','2 × 2 × 3 × 5','20 × 3','2 × 3 × 10'], ans:1, hint:'Every single factor in the product must be a prime number!', exp:'60 = 2 × 30 = 2 × 2 × 15 = 2 × 2 × 3 × 5.' },
+        { id:'m6', tag:'Prime Factors', q:'What is the prime factorisation of 375?', opts:['25 × 15','5 × 5 × 5 × 3','5 × 2 × 7 × 3','7 × 5 × 5 × 3'], ans:1, hint:'Split 375 into 25 × 15, then split 25 = 5×5 and 15 = 5×3.', exp:'375 = 5 × 5 × 5 × 3.' },
+        { id:'m7', tag:'Divisibility', q:'If 4567m is divisible by 3, what are the possible values of digit m?', opts:['1, 3, 6, 9','2, 5, 8','0, 3, 6, 9','2, 6, 3'], ans:1, hint:'Sum known digits: 4+5+6+7 = 22. What single digits make 22+m a multiple of 3?', exp:'22+2=24, 22+5=27, 22+8=30 are all divisible by 3. So m = 2, 5, 8.' },
+        { id:'m8', tag:'Divisibility', q:'A number is divisible by 36 if it is divisible by which coprime pair?', opts:['2 and 18','3 and 12','4 and 9','6 and 6'], ans:2, hint:'Pick two factors of 36 whose HCF is 1 (coprime)!', exp:'4 and 9 are coprime and 4 × 9 = 36.' },
+        { id:'m9', tag:'Divisibility', q:'Which number is divisible by 2, but NOT by 4?', opts:['28','324','2356','8026'], ans:3, hint:'Check the last two digits of each even number for divisibility by 4.', exp:'26 is NOT divisible by 4, so 8026 is divisible by 2 but not 4.' },
+        { id:'m10', tag:'Divisibility', q:'What smallest number should be subtracted from 642 to make it divisible by 8?', opts:['2','6','4','8'], ans:0, hint:'640 is 8 × 80!', exp:'642 − 2 = 640, and 640 ÷ 8 = 80.' },
+        { id:'m11', tag:'HCF × LCM', q:'The HCF of two numbers is 5 and their LCM is 280. If one number is 35, find the other.', opts:['30','40','45','50'], ans:1, hint:'Use: Other number = (HCF × LCM) ÷ Given number.', exp:'(5 × 280) ÷ 35 = 1400 ÷ 35 = 40.' },
+        { id:'m12', tag:'HCF × LCM', q:'The product of two numbers is 432 and their HCF is 6. What is their LCM?', opts:['62','72','84','36'], ans:1, hint:'LCM = Product ÷ HCF.', exp:'432 ÷ 6 = 72.' },
+        { id:'m13', tag:'HCF & LCM', q:'Divide the LCM of 18 and 12 by their HCF.', opts:['4','6','9','12'], ans:1, hint:'LCM(18,12) = 36; HCF(18,12) = 6.', exp:'36 ÷ 6 = 6.' },
+        { id:'m14', tag:'Number Facts', q:'How many composite numbers are there from 1 to 100?', opts:['25','74','75','76'], ans:1, hint:'Out of 100 numbers: 25 are prime, and 1 is neither prime nor composite!', exp:'100 − 25 (primes) − 1 (the number 1) = 74 composite numbers.' },
+        { id:'m15', tag:'Number Facts', q:'How many factors does 20 have?', opts:['4','5','6','8'], ans:2, hint:'List pairs: 1×20, 2×10, 4×5.', exp:'Factors of 20 are 1, 2, 4, 5, 10, 20 → 6 factors.' },
+        { id:'m16', tag:'Number Puzzle', q:'A 3-digit number is a multiple of 9, has 5 and 10 as factors, and its tens digit is a factor of 16 but not 4. Who am I?', opts:['999','180','980','380'], ans:1, hint:'Factors 5 & 10 mean it ends in 0. Factor of 16 not 4 is 8! Check sum of digits for 9.', exp:'180 ends in 0, tens digit is 8, and 1+8+0=9 (multiple of 9)!' },
+        { id:'m17', tag:'Fractions', q:'Convert the improper fraction 27/5 into a mixed fraction.', opts:['5 2/5','4 7/5','5 1/5','6 2/5'], ans:0, hint:'Divide 27 by 5: Quotient is 5, Remainder is 2.', exp:'27 ÷ 5 = 5 R 2 → 5 2/5.' },
+        { id:'m18', tag:'Fractions', q:'Reduce 57/95 to its simplest (lowest) form.', opts:['3/5','7/9','19/35','3/7'], ans:0, hint:'Both 57 and 95 are in the 19 times table!', exp:'57 ÷ 19 = 3 and 95 ÷ 19 = 5 → 3/5.' },
+        { id:'m19', tag:'Fractions', q:'Which fraction is GREATER: 2/3 or 3/5?', opts:['2/3','3/5','Both are equal','Cannot compare'], ans:0, hint:'Cross multiply: 2×5 vs 3×3!', exp:'2×5 = 10 and 3×3 = 9. Since 10 > 9, 2/3 > 3/5.' },
+        { id:'m20', tag:'Fractions', q:'Find the sum: 2/3 + 3/4', opts:['5/7','17/12','11/12','1 1/4'], ans:1, hint:'Common denominator is 12: 8/12 + 9/12.', exp:'8/12 + 9/12 = 17/12 (or 1 5/12).' },
+        { id:'m21', tag:'Fractions', q:'Find the reciprocal of the mixed fraction 2 1/2.', opts:['5/2','2/5','1/2','2/3'], ans:1, hint:'First convert 2 1/2 to improper (5/2), then flip!', exp:'2 1/2 = 5/2. Its reciprocal is 2/5.' },
+        { id:'m22', tag:'Fractions', q:'How many pieces measuring 3/4 m can be cut from a 12 m ribbon?', opts:['9','12','16','18'], ans:2, hint:'Divide 12 ÷ (3/4) using Keep-Change-Flip!', exp:'12 × 4/3 = 48/3 = 16 pieces.' },
+        { id:'m23', tag:'Fractions', q:'3/5 of a class of 45 students are girls. How many BOYS are in the class?', opts:['27','18','15','20'], ans:1, hint:'Girls = (3/5)×45 = 27. Subtract from 45!', exp:'Boys = 45 − 27 = 18 boys (or 2/5 of 45 = 18).' },
+        { id:'m24', tag:'Fractions', q:'A frog jumps 1/3 m each time. How many jumps to cross a 2 m stream?', opts:['3','5','6','9'], ans:2, hint:'Divide 2 ÷ (1/3).', exp:'2 × 3 = 6 jumps.' },
+        { id:'m25', tag:'Decimals', q:'Write "Three and five hundredths" as a decimal.', opts:['3.005','3.50','3.05','0.35'], ans:2, hint:'Hundredths is the 2nd place after the decimal point!', exp:'3 + 5/100 = 3.05.' },
+        { id:'m26', tag:'Decimals', q:'What is the place value of 3 in 27.638?', opts:['3/10','3/100','3/1000','3'], ans:1, hint:'6 is tenths, 3 is hundredths, 8 is thousandths.', exp:'3 is in the hundredths place → 3/100.' },
+        { id:'m27', tag:'Decimals', q:'Find the sum: 0.2 + 0.22 + 0.222', opts:['0.444','0.246','0.642','2.222'], ans:2, hint:'Make them like decimals: 0.200 + 0.220 + 0.222!', exp:'0.200 + 0.220 + 0.222 = 0.642.' },
+        { id:'m28', tag:'Decimals', q:'Calculate: 4 − 0.4', opts:['4.4','3.6','3.4','0.36'], ans:1, hint:'Write 4 as 4.0 and subtract 0.4.', exp:'4.0 − 0.4 = 3.6.' },
+        { id:'m29', tag:'Decimals', q:'Express 32 kg 5 g in kilograms.', opts:['32.5 kg','32.05 kg','32.005 kg','325 kg'], ans:2, hint:'1 kg = 1000 g, so 5 g = 5/1000 kg = 0.005 kg.', exp:'32 kg + 0.005 kg = 32.005 kg.' },
+        { id:'m30', tag:'Decimals', q:'Which decimal is equivalent to the fraction 3/25?', opts:['0.12','0.75','3.25','0.012'], ans:0, hint:'Multiply top and bottom by 4 to make denominator 100!', exp:'(3×4)/(25×4) = 12/100 = 0.12.' },
+        { id:'m31', tag:'Decimals', q:'Multiply: 7.845 × 100', opts:['78.45','784.5','7845','0.07845'], ans:1, hint:'Multiplying by 100 shifts the decimal 2 places RIGHT.', exp:'7.845 × 100 = 784.5.' },
+        { id:'m32', tag:'Rounding', q:'Round 79.49 to ONE decimal place.', opts:['79.4','79.5','80.0','79.0'], ans:1, hint:'Look at the 2nd decimal digit (9). Since 9 ≥ 5, round up!', exp:'79.49 rounds up to 79.5.' }
+      ],
+
+      science: [
+        { id:'s1', tag:'Nutrients', q:'Which nutrients are called "energy-giving foods"?', opts:['Proteins only','Carbohydrates and Fats','Vitamins and Minerals','Water and Roughage'], ans:1, hint:'We need quick energy from rice/bread and stored energy from oils/butter.', exp:'Carbohydrates and fats are the main energy-giving nutrients.' },
+        { id:'s2', tag:'Nutrients', q:'Which of the following does NOT provide energy, yet makes up ~60–70% of our body?', opts:['Potato','Water','Rice','Butter'], ans:1, hint:'It helps chemical reactions and removes wastes as sweat & urine.', exp:'Water provides 0 energy/calories, but is vital for every cell.' },
+        { id:'s3', tag:'Deficiency', q:'Deficiency of Vitamin A causes which disease?', opts:['Scurvy','Rickets','Night blindness','Goitre'], ans:2, hint:'Carrots and papayas keep your eyes sharp in the dark!', exp:'Lack of Vitamin A causes Night Blindness (inability to see in dim light).' },
+        { id:'s4', tag:'Deficiency', q:'Swollen joints and bleeding gums are symptoms of Scurvy, caused by lack of:', opts:['Vitamin A','Vitamin B','Vitamin C','Vitamin D'], ans:2, hint:'Found in sour citrus fruits like lemon, orange, and amla.', exp:'Lack of Vitamin C causes Scurvy.' },
+        { id:'s5', tag:'Deficiency', q:'Rickets (pigeon chest and bow legs) is caused by a deficiency of:', opts:['Vitamin D','Vitamin B','Iron','Iodine'], ans:0, hint:'Morning sunlight helps our body make this vitamin!', exp:'Lack of Vitamin D causes Rickets.' },
+        { id:'s6', tag:'Minerals', q:'Which mineral is needed to make haemoglobin in red blood cells? (Lack causes Anaemia)', opts:['Calcium','Iron','Iodine','Sodium'], ans:1, hint:'Found in spinach, jaggery (gur), dates, and bananas.', exp:'Iron builds red blood cells; its lack causes Anaemia.' },
+        { id:'s7', tag:'Minerals', q:'Lack of Iodine in our diet causes which deficiency disease?', opts:['Beri-beri','Goitre','Scurvy','Anaemia'], ans:1, hint:'That is why we eat iodised salt!', exp:'Deficiency of Iodine causes Goitre.' },
+        { id:'s8', tag:'Microbes', q:'Malaria is caused by Protozoa and spread by the bite of:', opts:['Housefly','Female Anopheles mosquito','Rat flea','Honeybee'], ans:1, hint:'It breeds in stagnant water!', exp:'Female Anopheles mosquitoes carry malaria protozoa into the blood.' },
+        { id:'s9', tag:'Microbes', q:'Ringworm and most skin infections are caused by:', opts:['Worms','Fungi','Viruses','Bacteria'], ans:1, hint:'Do not get tricked by the word "worm" in Ringworm!', exp:'Ringworm is a skin disease caused by a fungus, NOT a worm.' },
+        { id:'s10', tag:'Microbes', q:'Which of these diseases is caused by a VIRUS?', opts:['Cholera','Typhoid','Common cold & Polio','Malaria'], ans:2, hint:'Cholera and typhoid are bacterial.', exp:'Common cold, flu, polio, measles, and chickenpox are viral diseases.' },
+        { id:'s11', tag:'Digestion', q:'How many permanent teeth does an adult have, and how many milk teeth do young children have?', opts:['28 and 16','32 and 20','30 and 20','32 and 24'], ans:1, hint:'16 teeth in each jaw for an adult!', exp:'Adults have 32 permanent teeth; young children have 20 milk teeth.' },
+        { id:'s12', tag:'Digestion', q:'Which enzyme in saliva turns starch in roti/rice into sweet sugar?', opts:['Pepsin','Amylase','Bile','Hydrochloric acid'], ans:1, hint:'Starts with "A" and works right in the mouth!', exp:'Salivary amylase breaks down starch into sugar.' },
+        { id:'s13', tag:'Digestion', q:'Which flap-like structure closes the windpipe while swallowing so we do not choke?', opts:['Villi','Epiglottis','Pancreas','Gall bladder'], ans:1, hint:'It sits at the junction in the pharynx.', exp:'The epiglottis closes the windpipe (trachea) whenever we swallow.' },
+        { id:'s14', tag:'Digestion', q:'What is the wave-like muscle movement that pushes food down the oesophagus?', opts:['Mastication','Peristalsis','Assimilation','Egestion'], ans:1, hint:'Starts with "P" — contractions and relaxations.', exp:'Peristalsis pushes food along the alimentary canal.' },
+        { id:'s15', tag:'Digestion', q:'The finger-like folds in the small intestine that absorb digested food into the blood are:', opts:['Villi','Ducts','Pharynx','Canines'], ans:0, hint:'They increase the surface area 5×!', exp:'Villi absorb digested nutrients into tiny blood capillaries.' },
+        { id:'s16', tag:'Digestion', q:'Where is Bile produced, and where is it stored?', opts:['Stomach; Pancreas','Liver; Gall bladder','Pancreas; Liver','Small intestine; Stomach'], ans:1, hint:'Bile breaks down fats into tiny droplets.', exp:'The Liver secretes bile, and the Gall bladder stores it.' },
+        { id:'s17', tag:'Digestion', q:'What is the main job of the Large Intestine?', opts:['Digesting proteins','Absorbing water from undigested food','Making bile','Chewing food'], ans:1, hint:'Digestion finishes in the small intestine.', exp:'The walls of the large intestine absorb water from undigested waste.' },
+        { id:'s18', tag:'Atmosphere', q:'In which layer of the atmosphere do all weather changes (clouds, rain, wind) happen?', opts:['Stratosphere','Troposphere','Mesosphere','Exosphere'], ans:1, hint:'It is the lowest layer (0–15 km).', exp:'All weather changes happen in the Troposphere.' },
+        { id:'s19', tag:'Atmosphere', q:'The Ozone layer (which blocks harmful UV rays) and jet planes are found in the:', opts:['Troposphere','Stratosphere','Mesosphere','Thermosphere'], ans:1, hint:'It is the 2nd layer above the Troposphere.', exp:'The Stratosphere contains the ozone layer and smooth air for jets.' },
+        { id:'s20', tag:'Atmosphere', q:'Which part of the Thermosphere reflects radio signals back to Earth?', opts:['Ozone layer','Ionosphere','Exosphere','Hydrosphere'], ans:1, hint:'Makes long-distance radio communication possible!', exp:'The Ionosphere reflects radio waves back to Earth.' },
+        { id:'s21', tag:'Air Gases', q:'What is the approximate percentage of Nitrogen and Oxygen in air?', opts:['Nitrogen 21%, Oxygen 78%','Nitrogen 78%, Oxygen 21%','Nitrogen 50%, Oxygen 50%','Nitrogen 70%, Oxygen 28%'], ans:1, hint:'Nitrogen is the most abundant gas in air!', exp:'Air is ~78% Nitrogen, ~21% Oxygen, and ~1% other gases.' },
+        { id:'s22', tag:'Air Gases', q:'Which gas is flushed into potato chip packets to keep them fresh and prevent bacteria?', opts:['Oxygen','Carbon dioxide','Nitrogen','Neon'], ans:2, hint:'It pushes oxygen out so food stays crisp.', exp:'Nitrogen is used to flush food packets to preserve freshness.' },
+        { id:'s23', tag:'Air Gases', q:'Which noble gas is used in bright advertising glow signboards at night?', opts:['Helium','Argon','Neon','Oxygen'], ans:2, hint:'Think of bright "____ lights"!', exp:'Neon is used in glow signs (Helium in balloons, Argon in bulbs).' },
+        { id:'s24', tag:'Water Cycle', q:'Plants release unused water vapour into the air through stomata. This is called:', opts:['Condensation','Transpiration','Sedimentation','Chlorination'], ans:1, hint:'It is a physiological process in plants!', exp:'Transpiration is water loss through leaf stomata.' },
+        { id:'s25', tag:'Water', q:'What are the 3 main steps in City Water Purification?', opts:['Evaporation, Condensation, Freezing','Sedimentation, Filtration, Chlorination','Boiling, Freezing, Melting','Transpiration, Rain, Runoff'], ans:1, hint:'Settle mud → Filter through sand → Kill germs with chlorine!', exp:'City plants use Sedimentation → Filtration → Chlorination.' },
+        { id:'s26', tag:'Water', q:'Excessive algae growth in lakes caused by fertilizers (which kills fish) is called:', opts:['Chlorination','Eutrophication','Transpiration','Condensation'], ans:1, hint:'Starts with "Eu-"!', exp:'Eutrophication depletes dissolved oxygen in water, killing aquatic life.' }
+      ],
+
+      english: [
+        { id:'e1', tag:'Parts of Speech', q:'Identify the part of speech of the word in CAPS: "He drove his car very SLOWLY down the road."', opts:['Adjective','Adverb','Verb','Noun'], ans:1, hint:'It describes HOW he drove (describes a verb).', exp:'"Slowly" describes the verb "drove", so it is an Adverb.' },
+        { id:'e2', tag:'Parts of Speech', q:'Identify the part of speech of the word in CAPS: "Dinosaurs were huge AND they lived long ago."', opts:['Preposition','Interjection','Conjunction','Pronoun'], ans:2, hint:'It joins two parts of the sentence together!', exp:'"And" joins two clauses, so it is a Conjunction.' },
+        { id:'e3', tag:'Collective Nouns', q:'Choose the correct collective noun: "A ________ of geese near the pond."', opts:['flock','gaggle','pride','litter'], ans:1, hint:'Geese have their own funny-sounding group name!', exp:'A group of geese is called a gaggle.' },
+        { id:'e4', tag:'Collective Nouns', q:'Choose the correct collective noun: "A ________ of dancers performed on stage."', opts:['troupe','fleet','clump','wad'], ans:0, hint:'Soldiers = army, ships = fleet, dancers = ?', exp:'A group of dancers is a troupe.' },
+        { id:'e5', tag:'Abstract Nouns', q:'Form the abstract noun from the verb "forgive":', opts:['forgiving','forgiveness','forgave','forgiver'], ans:1, hint:'Add the suffix -ness!', exp:'The abstract noun of forgive is forgiveness.' },
+        { id:'e6', tag:'Abstract Nouns', q:'Form the abstract noun from the adjective "obedient":', opts:['obey','obedience','obediently','obeying'], ans:1, hint:'Ends with -ence!', exp:'Sheena shows obedience to her elders.' },
+        { id:'e7', tag:'Partitives', q:'Match the correct partitive: "a ________ of advice"', opts:['can','piece','bar','loaf'], ans:1, hint:'Advice is uncountable — we give one ____ of advice.', exp:'We say "a piece of advice".' },
+        { id:'e8', tag:'Possession', q:'Which possessive form is CORRECT for "a cricket match played by women"?', opts:["womens' cricket match","women's cricket match","womans' cricket match","woman's cricket match"], ans:1, hint:'"Women" is a plural noun that does NOT end in s, so add \'s!', exp:'Plural nouns not ending in s take \'s → women\'s cricket match.' },
+        { id:'e9', tag:'Possession', q:'Which sentence follows the rule for NON-LIVING things?', opts:["The table's legs are broken.","The legs of the table are broken.","The tables' legs are broken.","Both A and B"], ans:1, hint:'We do NOT use apostrophe-s for non-living things!', exp:'For non-living things, use "of": "the legs of the table".' },
+        { id:'e10', tag:'Adjective Order', q:'Choose the sentence with the CORRECT order of adjectives:', opts:['Saira bought a blue big balloon.','Saira bought a big blue balloon.','Saira bought a blue and big balloon.','Saira bought a balloon big blue.'], ans:1, hint:'Train rule: Size comes BEFORE Colour!', exp:'Size (big) → Colour (blue) → Noun (balloon).' },
+        { id:'e11', tag:'Adjective Order', q:'Fix the adjective order: "This is an old beautiful Russian mirror."', opts:['This is a Russian old beautiful mirror.','This is a beautiful old Russian mirror.','This is an old Russian beautiful mirror.','It is already correct.'], ans:1, hint:'Train rule: Opinion → Age → Origin!', exp:'Opinion (beautiful) → Age (old) → Origin (Russian).' },
+        { id:'e12', tag:'Tricky Adjectives', q:'Fill in the blank: "I used ________ milk I had to make a cup of tea."', opts:['little','a little','the little','few'], ans:2, hint:'It means ALL of the small amount of milk I had!', exp:'"The little" means the whole amount, though very little.' },
+        { id:'e13', tag:'Tricky Adjectives', q:'Fill in the blank: "There isn\'t ________ water left in the jug."', opts:['some','any','many','few'], ans:1, hint:'Negative sentences use "any"!', exp:'In negative sentences ("isn\'t"), we use "any".' },
+        { id:'e14', tag:'Tricky Adjectives', q:'Fill in the blank: "My ________ sister is a doctor." (close family)', opts:['elder','older','oldest','farther'], ans:0, hint:'For close family members before a noun (without "than"), use...', exp:'"Elder" is used for close family relations.' },
+        { id:'e15', tag:'Tricky Adjectives', q:'Fill in the blank: "Shimla is ________ from Delhi than Mussoorie."', opts:['further','farther','eldest','more far'], ans:1, hint:'Which word means greater physical DISTANCE?', exp:'"Farther" refers to distance; "further" means additional.' },
+        { id:'e16', tag:'Degrees', q:'Spot & fix the error: "Janice is the more important person in the company."', opts:['most important','importantest','more importantly','No error'], ans:0, hint:'"The" signals Superlative degree (comparing 3 or more)!', exp:'Superlative of important is "the most important".' },
+        { id:'e17', tag:'Degrees', q:'Spot & fix the error: "Your handwriting is worst than mine."', opts:['bad','worse','badder','most bad'], ans:1, hint:'"Than" signals Comparative degree of bad!', exp:'Bad → Worse (comparative) → Worst (superlative).' },
+        { id:'e18', tag:'Phrases', q:'Fix the misplaced phrase: "The girl ate an ice-cream with spectacles."', opts:['The girl with spectacles ate an ice-cream.','With spectacles ate an ice-cream the girl.','The girl ate with spectacles an ice-cream.','It is already correct.'], ans:0, hint:'Did the ice-cream wear spectacles, or the girl?!', exp:'Place "with spectacles" right next to "The girl"!' },
+        { id:'e19', tag:'Context Clues', q:'"The spies went behind the wall for their CLANDESTINE meeting." Clandestine means:', opts:['noisy','secret','first','dangerous'], ans:1, hint:'Spies hiding behind walls want to stay hidden!', exp:'Clandestine means secret.' },
+        { id:'e20', tag:'Context Clues', q:'"After Jason cut the ropes, the horse was UNFETTERED." Unfettered means:', opts:['sold','freed','tired','scared'], ans:1, hint:'Cutting the ropes lets the horse go free!', exp:'Unfettered means freed / unrestrained.' },
+        { id:'e21', tag:'Onomatopoeia', q:'Choose the correct sound word: "The lamb ________ when it sees its mother."', opts:['chirps','grunts','bleats','hisses'], ans:2, hint:'Sheep and lambs make a "baa" sound called...', exp:'A lamb bleats!' },
+        { id:'e22', tag:'Diminutives', q:'What is a young swan called?', opts:['gosling','cygnet','owlet','fawn'], ans:1, hint:'Gosling = goose, owlet = owl, fawn = deer.', exp:'A baby swan is called a cygnet.' }
+      ],
+
+      reasoning: [
+        { id:'r1', tag:'Odd-One-Out', q:'Find the odd number pair out: (a) 50–66  (b) 22–38  (c) 63–77  (d) 64–80', opts:['50 – 66','22 – 38','63 – 77','64 – 80'], ans:2, hint:'Step 1: Subtract the first number from the second in each pair!', exp:'66−50=16, 38−22=16, 80−64=16, but 77−63 = 14!' },
+        { id:'r2', tag:'Odd-One-Out', q:'Find the odd number pair out: (a) 34–43  (b) 55–62  (c) 62–71  (d) 83–92', opts:['34 – 43','55 – 62','62 – 71','83 – 92'], ans:1, hint:'Check the difference between the two numbers!', exp:'43−34=9, 71−62=9, 92−83=9, but 62−55 = 7!' },
+        { id:'r3', tag:'Odd-One-Out', q:'Find the odd pair out: (a) 12:96  (b) 13:117  (c) 15:120  (d) 16:128', opts:['12 : 96','13 : 117','15 : 120','16 : 128'], ans:1, hint:'Step 2: Divide the second number by the first!', exp:'12×8=96, 15×8=120, 16×8=128, but 13×9 = 117!' },
+        { id:'r4', tag:'Odd-One-Out', q:'Find the odd pair out: (a) 80–9  (b) 64–8  (c) 36–6  (d) 49–7', opts:['80 – 9','64 – 8','36 – 6','49 – 7'], ans:0, hint:'Step 3: Check squares of the smaller number!', exp:'8²=64, 6²=36, 7²=49, but 9²=81 (not 80)!' },
+        { id:'r5', tag:'Odd-One-Out', q:'Find the odd pair out: (a) 18:108  (b) 23:138  (c) 20:80  (d) 26:156', opts:['18 : 108','23 : 138','20 : 80','26 : 156'], ans:2, hint:'Check what each first number is multiplied by!', exp:'18×6=108, 23×6=138, 26×6=156, but 20×4 = 80!' },
+        { id:'r6', tag:'Odd-One-Out', q:'Find the odd group out: (a) 3,9,27  (b) 5,25,125  (c) 7,49,343  (d) 9,81,512', opts:['3, 9, 27','5, 25, 125','7, 49, 343','9, 81, 512'], ans:3, hint:'Multiply by the first number twice (n, n², n³)!', exp:'9×9=81, 81×9 = 729 (not 512)!' },
+        { id:'r7', tag:'Odd-One-Out', q:'Find the odd pair out: (a) 62–37  (b) 74–40  (c) 85–60  (d) 103–78', opts:['62 – 37','74 – 40','85 – 60','103 – 78'], ans:1, hint:'Find the difference in each pair!', exp:'62−37=25, 85−60=25, 103−78=25, but 74−40 = 34!' },
+        { id:'r8', tag:'Odd-One-Out', q:'Find the odd group out: (a) 2,3,6  (b) 6,1,6  (c) 3,3,9  (d) 6,2,15', opts:['2, 3, 6','6, 1, 6','3, 3, 9','6, 2, 15'], ans:3, hint:'Multiply the first two numbers!', exp:'2×3=6, 6×1=6, 3×3=9, but 6×2=12 (not 15)!' },
+        { id:'r9', tag:'Coding-Decoding', q:'If CAT is coded as DBU, how is DOG coded?', opts:['EPH','EPG','CPF','FOH'], ans:0, hint:'Each letter shifts +1 forward (C→D, A→B, T→U).', exp:'D→E, O→P, G→H → EPH.' },
+        { id:'r10', tag:'Coding-Decoding', q:'If A=1, B=2, C=3..., what is the sum of the letters in BED?', opts:['9','11','12','14'], ans:1, hint:'B=2, E=5, D=4. Add them up!', exp:'2 + 5 + 4 = 11.' },
+        { id:'r11', tag:'Coding-Decoding', q:'If SUN is coded as TVO, how is STAR coded?', opts:['TUBS','TUBR','RSZQ','TVBS'], ans:0, hint:'Every letter moves +1 step forward!', exp:'S→T, T→U, A→B, R→S → TUBS.' },
+        { id:'r12', tag:'Direction Sense', q:'Riya is facing NORTH. She turns 90° to her RIGHT, then turns 90° to her RIGHT again. Which direction is she facing now?', opts:['East','South','West','North'], ans:1, hint:'Use the Compass: North → Right (East) → Right (South)!', exp:'Two 90° right turns = 180° turn → South.' },
+        { id:'r13', tag:'Direction Sense', q:'Aarav walks 5 m East, then turns LEFT and walks 3 m. Which direction is he walking now?', opts:['North','South','East','West'], ans:0, hint:'Face East, then turn Left (counter-clockwise)!', exp:'Turning left from East points you North.' },
+        { id:'r14', tag:'Direction Sense', q:'If you face WEST and make an about-turn (180°), which direction do you face?', opts:['North','South','East','West'], ans:2, hint:'180° always points to the exact opposite direction.', exp:'Opposite of West is East.' },
+        { id:'r15', tag:'Mirror Images', q:'Which capital word looks EXACTLY the same in a vertical mirror?', opts:['DOG','MOM','CAT','SUN'], ans:1, hint:'Every letter must have vertical symmetry (M and O do, and it reads same backwards!).', exp:'M, O, M are all vertically symmetrical and palindromic → MOM!' },
+        { id:'r16', tag:'Mirror Images', q:'Which of these capital letters looks DIFFERENT in a vertical mirror?', opts:['A','H','J','T'], ans:2, hint:'A, H, and T are symmetrical left-to-right.', exp:'J flips backwards in a mirror!' },
+        { id:'r17', tag:'Ranking', q:'In a row of 15 students, Meera is 6th from the left. What is her position from the right?', opts:['9th','10th','11th','8th'], ans:1, hint:'Formula: Total − Position + 1!', exp:'15 − 6 + 1 = 10th from the right.' },
+        { id:'r18', tag:'Ranking', q:'Aman is taller than Kabir. Dev is taller than Aman. Who is the SHORTEST?', opts:['Aman','Kabir','Dev','Cannot tell'], ans:1, hint:'Order them tallest to shortest: Dev > Aman > Kabir.', exp:'Kabir is the shortest.' }
+      ],
+
+      icso: [
+        { id:'i1', tag:'Hardware', q:'Which of the following is an INPUT device used at supermarket billing counters?', opts:['Plotter','Barcode Reader','Speaker','Projector'], ans:1, hint:'It scans black-and-white stripes to send product data INTO the computer.', exp:'A Barcode Reader inputs product codes into the computer.' },
+        { id:'i2', tag:'Hardware', q:'Which OUTPUT device is used by architects to print huge maps and building blueprints?', opts:['Scanner','Plotter','Microphone','Joystick'], ans:1, hint:'It draws large high-precision graphics on big sheets.', exp:'A Plotter is an output device for large engineering drawings.' },
+        { id:'i3', tag:'Hardware', q:'What is the "Soft Copy" output device of a computer?', opts:['Printer','Monitor','Keyboard','Pen Drive'], ans:1, hint:'Paper printout = Hard copy; Screen display = Soft copy.', exp:'A Monitor displays the soft copy.' },
+        { id:'i4', tag:'CPU', q:'Which part of the CPU performs all mathematical calculations and logical comparisons?', opts:['CU (Control Unit)','ALU (Arithmetic Logic Unit)','RAM','ROM'], ans:1, hint:'"Arithmetic" means maths!', exp:'The ALU performs all arithmetic and logical operations.' },
+        { id:'i5', tag:'Memory', q:'Which memory is VOLATILE (loses all its data when the computer is switched off)?', opts:['ROM','RAM','Hard Disk','Pen Drive'], ans:1, hint:'Think of temporary workspace while you work!', exp:'RAM (Random Access Memory) is volatile/temporary memory.' },
+        { id:'i6', tag:'Memory', q:'How many BITS make 1 BYTE?', opts:['4 bits','8 bits','16 bits','1024 bits'], ans:1, hint:'A nibble is 4 bits; a byte is double a nibble!', exp:'1 Byte = 8 Bits.' },
+        { id:'i7', tag:'Storage', q:'Arrange these storage units from SMALLEST to LARGEST:', opts:['KB, MB, GB, TB','TB, GB, MB, KB','MB, KB, GB, TB','KB, GB, MB, TB'], ans:0, hint:'Kilo → Mega → Giga → Tera!', exp:'Smallest to largest: KB < MB < GB < TB.' },
+        { id:'i8', tag:'Memory', q:'1 Kilobyte (KB) is equal to how many Bytes?', opts:['100 Bytes','1000 Bytes','1024 Bytes','512 Bytes'], ans:2, hint:'Computers count in powers of 2 (2¹⁰)!', exp:'1 KB = 1024 Bytes.' },
+        { id:'i9', tag:'Shortcuts', q:'Which keyboard shortcut is used to UNDO your last mistake in MS Word or Paint?', opts:['Ctrl + C','Ctrl + X','Ctrl + Z','Ctrl + S'], ans:2, hint:'Z is the last letter — go back one step!', exp:'Ctrl + Z undoes the last action.' },
+        { id:'i10', tag:'Shortcuts', q:'Which shortcut key is used to SAVE a document?', opts:['Ctrl + S','Ctrl + P','Ctrl + V','Ctrl + B'], ans:0, hint:'S for Save!', exp:'Ctrl + S saves your file.' },
+        { id:'i11', tag:'Shortcuts', q:'What does Ctrl + X do to selected text?', opts:['Copies it','Cuts (removes) it to clipboard','Underlines it','Prints it'], ans:1, hint:'X looks like a pair of scissors!', exp:'Ctrl + X cuts the selected text so you can paste it elsewhere.' },
+        { id:'i12', tag:'Software', q:'Which of the following is an example of an Operating System (System Software)?', opts:['MS Paint','Windows 11','Tux Paint','Calculator'], ans:1, hint:'It manages the whole computer when you turn it on.', exp:'Windows 11 (like macOS, Android, Linux) is an Operating System.' },
+        { id:'i13', tag:'Internet', q:'Which of the following is a WEB BROWSER (not a search engine)?', opts:['Google Chrome','Bing','Yahoo Search','DuckDuckGo'], ans:0, hint:'A browser is the app installed on your computer to open websites.', exp:'Google Chrome is a web browser; Bing/Yahoo are search engines.' },
+        { id:'i14', tag:'Internet', q:'What does URL stand for?', opts:['Uniform Resource Locator','Universal Radio Link','User Read Line','Unified Ram Loader'], ans:0, hint:'It is the web address of a page!', exp:'URL stands for Uniform Resource Locator.' },
+        { id:'i15', tag:'Cyber Safety', q:'What makes a STRONG password?', opts:['Your name and birthday','12345678','A mix of capital/small letters, numbers & symbols','The word "password"'], ans:2, hint:'Hard for strangers to guess!', exp:'Mixing uppercase, lowercase, numbers, and symbols creates a strong password.' },
+        { id:'i16', tag:'Cyber Safety', q:'If a stranger online asks for your home address or school name, you should:', opts:['Reply politely with your address','Ignore and tell your parents immediately','Send a photo instead','Share only your phone number'], ans:1, hint:'Always protect personal information!', exp:'Never share personal info online — inform a trusted adult right away.' },
+        { id:'i17', tag:'MS Word', q:'In MS Word, which shortcut makes selected text BOLD?', opts:['Ctrl + I','Ctrl + U','Ctrl + B','Ctrl + A'], ans:2, hint:'B for Bold!', exp:'Ctrl + B toggles Bold formatting.' },
+        { id:'i18', tag:'Hardware', q:'Which device is BOTH an Input and an Output device?', opts:['Touchscreen','Mouse','Laser Printer','Microphone'], ans:0, hint:'You tap it to give input AND see pictures on it!', exp:'A Touchscreen takes touch input and shows visual output.' }
+      ]
+    };
+
+    // Procedural Maths Generator (for Unlimited Practice & Full 80Q Mock)
+    function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+    function shuffle(arr) { const a = [...arr]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+
+    function generateMathsPractice(count = 10) {
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        const t = i % 4, uid = `gm_${Date.now()}_${i}`;
+        if (t === 0) {
+          const d = [3, 4, 9][i % 3];
+          const base = randInt(12, 95) * d;
+          const wrong1 = base + 1, wrong2 = base + 2, wrong3 = base + (d === 4 ? 3 : 4);
+          const opts = shuffle([String(base), String(wrong1), String(wrong2), String(wrong3)]);
+          out.push({ id: uid, tag: 'Generated Divisibility', q: `Which of these numbers is exactly divisible by ${d}?`, opts, ans: opts.indexOf(String(base)), hint: `Apply the divisibility rule of ${d}!`, exp: `${base} ÷ ${d} = ${base / d} with 0 remainder.` });
+        } else if (t === 1) {
+          const h = randInt(3, 9), m1 = randInt(2, 5), m2 = m1 + 1;
+          const n1 = h * m1, n2 = h * m2, l = h * m1 * m2;
+          const wrongs = [...new Set([n2 + h, n2 - 1, n1 + 2, n2 + 2 * h, n2 + 1])].filter(v => v !== n2).slice(0, 3);
+          const opts = shuffle([String(n2), ...wrongs.map(String)]);
+          out.push({ id: uid, tag: 'Generated HCF×LCM', q: `The HCF of two numbers is ${h} and their LCM is ${l}. If one number is ${n1}, find the other.`, opts, ans: opts.indexOf(String(n2)), hint: 'Other number = (HCF × LCM) ÷ Given number.', exp: `(${h} × ${l}) ÷ ${n1} = ${n2}.` });
+        } else if (t === 2) {
+          const w = randInt(2, 7), den = randInt(3, 8), num = randInt(1, den - 1);
+          const imp = w * den + num;
+          const correct = `${imp}/${den}`;
+          const opts = shuffle([correct, `${imp + 1}/${den}`, `${w + num}/${den}`, `${imp - 1}/${den}`]);
+          out.push({ id: uid, tag: 'Generated Fractions', q: `Convert the mixed fraction ${w} ${num}/${den} into an improper fraction.`, opts, ans: opts.indexOf(correct), hint: `(Whole × Bottom + Top) / Bottom.`, exp: `(${w} × ${den} + ${num}) / ${den} = ${correct}.` });
+        } else {
+          const base = +(randInt(112, 895) / 100).toFixed(2);
+          const mult = [10, 100, 1000][i % 3];
+          const isMul = Math.random() < 0.5;
+          const ansVal = isMul ? +(base * mult).toFixed(4) : +(base / mult).toFixed(5);
+          const opts = shuffle([String(ansVal), String(+(ansVal * 10).toFixed(4)), String(+(ansVal / 10).toFixed(5)), String(+(base + 1).toFixed(2))]);
+          out.push({ id: uid, tag: 'Generated Decimals', q: `Calculate: ${base} ${isMul ? '×' : '÷'} ${mult}`, opts, ans: opts.indexOf(String(ansVal)), hint: `Shift decimal ${mult === 10 ? 1 : mult === 100 ? 2 : 3} place(s) ${isMul ? 'RIGHT' : 'LEFT'}.`, exp: `${base} ${isMul ? '×' : '÷'} ${mult} = ${ansVal}.` });
+        }
+      }
+      return out;
+    }
+
+    /* =========================================================================
+       9. UNIFIED SUBJECT DRILL RUNNER
+       ========================================================================= */
+    const drillState = {};
+
+    function initDrill(subj, customList = null, gen = !!customList) {
+      if (!drillState[subj] || customList) {
+        drillState[subj] = {
+          list: customList || shuffle(BANKS[subj]),
+          idx: 0,
+          correct: 0,
+          answered: false,
+          isGen: gen
+        };
+      }
+      renderDrill(subj);
+    }
+
+    function renderDrill(subj) {
+      const host = document.getElementById('drill-host-' + subj);
+      const ds = drillState[subj];
+      if (ds.idx >= ds.list.length) {
+        const pct = Math.round((ds.correct / ds.list.length) * 100);
+        playTone('win'); if (pct >= 70) launchConfetti();
+        host.innerHTML = `
+          <div class="drill-card" style="text-align:center;">
+            <div style="font-size:3.2rem;">🎉🏆</div>
+            <h3 style="font-size:1.6rem; margin-top:6px;">Drill Complete!</h3>
+            <p style="font-size:1.1rem; font-weight:800; color:var(--indigo); margin:8px 0;">Score: ${ds.correct} / ${ds.list.length} (${pct}%)</p>
+            <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px;">
+              <button class="btn-primary" onclick="initDrill('${subj}', shuffle(BANKS['${subj}']), false)">🔄 Replay Shuffled Drill</button>
+              ${subj === 'maths' ? `<button class="btn-teal" onclick="initDrill('maths', generateMathsPractice(10))">⚡ Generate More Practice (10Q)</button>` : ''}
+            </div>
+          </div>`;
+        return;
+      }
+
+      const q = ds.list[ds.idx];
+      const pct = Math.round(((ds.idx + 1) / ds.list.length) * 100);
+      host.innerHTML = `
+        <div class="drill-card">
+          <div style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px;">
+            <span class="tag-pill">${q.tag} ${ds.isGen ? '⚡ Bonus' : ''}</span>
+            <span style="font-weight:800; font-size:0.85rem; color:var(--slate-700);">Question ${ds.idx + 1} / ${ds.list.length}</span>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-amber" onclick="document.getElementById('dhint-${subj}').classList.remove('hidden')">💡 Hint</button>
+              ${subj === 'maths' ? `<button class="pill-btn" style="font-size:0.76rem; padding:6px 10px;" onclick="initDrill('maths', generateMathsPractice(10))">⚡ New Generated Set</button>` : ''}
+            </div>
+          </div>
+          <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+          <div class="q-text">${q.q}</div>
+          <div id="dhint-${subj}" class="hint-box hidden">💡 Hint: ${q.hint}</div>
+          <div class="options-grid">
+            ${q.opts.map((o, i) => `
+              <button class="opt-btn" id="dopt-${subj}-${i}" onclick="answerDrill('${subj}', ${i})">
+                <span class="opt-letter">${String.fromCharCode(65 + i)}</span>
+                <span>${o}</span>
+              </button>
+            `).join('')}
+          </div>
+          <div id="dfb-${subj}" class="feedback-box hidden"></div>
+        </div>
+      `;
+    }
+
+    function answerDrill(subj, chosen) {
+      const ds = drillState[subj];
+      if (ds.answered) return;
+      ds.answered = true;
+      const q = ds.list[ds.idx];
+      const ok = chosen === q.ans;
+
+      q.opts.forEach((_, i) => {
+        const b = document.getElementById(`dopt-${subj}-${i}`);
+        b.disabled = true;
+        if (i === q.ans) b.classList.add('correct');
+        else if (i === chosen && !ok) b.classList.add('wrong');
+      });
+
+      const fb = document.getElementById(`dfb-${subj}`);
+      fb.classList.remove('hidden');
+      if (ok) {
+        ds.correct++;
+        state.streak++;
+        state.stars++;
+        awardXP(15);
+        playTone('ok');
+        if (state.streak > 0 && state.streak % 5 === 0) launchConfetti();
+        fb.className = 'feedback-box ok';
+        fb.innerHTML = `<div style="font-weight:800; font-size:1rem;">🎉 Spot on! +15 XP &amp; +1 ⭐</div><div style="font-size:0.88rem; margin-top:4px;">${q.exp}</div><div style="margin-top:12px; text-align:right;"><button class="btn-primary" onclick="nextDrill('${subj}')">Next Question →</button></div>`;
+      } else {
+        state.streak = 0;
+        logMistake(q, subj);
+        saveState();
+        playTone('no');
+        fb.className = 'feedback-box no';
+        fb.innerHTML = `<div style="font-weight:800; font-size:1rem;">🤔 Tricky one! Logged to your Mistake Vault.</div><div style="font-size:0.88rem; margin-top:4px;"><strong>Explanation:</strong> ${q.exp}</div><div style="margin-top:12px; text-align:right;"><button class="btn-primary" onclick="nextDrill('${subj}')">Next Question →</button></div>`;
+      }
+    }
+
+    function nextDrill(subj) {
+      drillState[subj].idx++;
+      drillState[subj].answered = false;
+      renderDrill(subj);
+    }
+
+    /* =========================================================================
+       10. MOCK EXAM ARENA (MINI 16Q / EXPRESS 40Q / FULL 80Q)
+       ========================================================================= */
+    let mockData = null;
+    let mockTimerInt = null;
+
+    function buildMockPool(mode) {
+      const pick = (subj, n) => {
+        let pool = shuffle(BANKS[subj]).map(x => ({ ...x, subj }));
+        if (subj === 'maths' && n > pool.length) {
+          pool = pool.concat(generateMathsPractice(n - pool.length).map(x => ({ ...x, subj: 'maths' })));
+        }
+        return pool.slice(0, n);
+      };
+      if (mode === 'mini') return { title: '⚡ Mini Sprint Mock (16Q)', mins: 15, qs: [...pick('reasoning', 2), ...pick('maths', 8), ...pick('science', 4), ...pick('icso', 2)], hasSubj: false };
+      if (mode === 'express') return { title: '🥈 Express Paper Mock (40Q)', mins: 45, qs: [...pick('reasoning', 5), ...pick('maths', 20), ...pick('science', 10), ...pick('icso', 5)], hasSubj: true };
+      return { title: '🥇 Full Nov 28 Simulator (80Q)', mins: 90, qs: [...pick('reasoning', 10), ...pick('maths', 40), ...pick('science', 20), ...pick('icso', 10)], hasSubj: true };
+    }
+
+    function startMock(mode) {
+      const cfg = buildMockPool(mode);
+      mockData = { ...cfg, ans: new Array(cfg.qs.length).fill(null), idx: 0, secs: cfg.mins * 60 };
+      document.getElementById('mock-menu').classList.add('hidden');
+      document.getElementById('mock-results').classList.add('hidden');
+      document.getElementById('mock-runner').classList.remove('hidden');
+      document.getElementById('mock-title').textContent = cfg.title;
+
+      if (mockTimerInt) clearInterval(mockTimerInt);
+      updateMockClock();
+      mockTimerInt = setInterval(() => {
+        mockData.secs--;
+        updateMockClock();
+        if (mockData.secs <= 0) submitMock();
+      }, 1000);
+      renderMockQ();
+      renderMockPalette();
+    }
+
+    function updateMockClock() {
+      const m = String(Math.floor(Math.max(0, mockData.secs) / 60)).padStart(2, '0');
+      const s = String(Math.max(0, mockData.secs) % 60).padStart(2, '0');
+      document.getElementById('mock-timer').textContent = `${m}:${s}`;
+    }
+
+    function renderMockQ() {
+      const q = mockData.qs[mockData.idx];
+      const done = mockData.ans.filter(a => a !== null).length;
+      document.getElementById('mock-status').textContent = `Answered: ${done} / ${mockData.qs.length}`;
+      document.getElementById('mock-q-num').textContent = `Question ${mockData.idx + 1} of ${mockData.qs.length}`;
+      document.getElementById('mock-q-subj').textContent = q.subj.toUpperCase() + ' • ' + q.tag;
+      document.getElementById('mock-q-text').textContent = q.q;
+      document.getElementById('mock-q-options').innerHTML = q.opts.map((o, i) => `
+        <button class="opt-btn ${mockData.ans[mockData.idx] === i ? 'selected' : ''}" onclick="selectMockAns(${i})">
+          <span class="opt-letter">${String.fromCharCode(65 + i)}</span>
+          <span>${o}</span>
+        </button>
+      `).join('');
+      document.getElementById('mock-prev').disabled = mockData.idx === 0;
+      document.getElementById('mock-next').textContent = mockData.idx === mockData.qs.length - 1 ? 'Review Palette' : 'Next →';
+    }
+
+    function selectMockAns(i) {
+      mockData.ans[mockData.idx] = i;
+      renderMockQ(); renderMockPalette();
+    }
+    function moveMock(d) {
+      const n = mockData.idx + d;
+      if (n >= 0 && n < mockData.qs.length) { mockData.idx = n; renderMockQ(); renderMockPalette(); }
+    }
+    function jumpMock(i) { mockData.idx = i; renderMockQ(); renderMockPalette(); }
+
+    function renderMockPalette() {
+      document.getElementById('mock-palette').innerHTML = mockData.qs.map((_, i) => {
+        let cls = '';
+        if (i === mockData.idx) cls = 'current';
+        else if (mockData.ans[i] !== null) cls = 'answered';
+        return `<button class="pal-btn ${cls}" onclick="jumpMock(${i})">${i + 1}</button>`;
+      }).join('');
+    }
+
+    function submitMock() {
+      if (mockTimerInt) clearInterval(mockTimerInt);
+      const subScores = { reasoning: [0,0], maths: [0,0], science: [0,0], icso: [0,0] };
+      let totalRight = 0;
+
+      const revHtml = mockData.qs.map((q, i) => {
+        const u = mockData.ans[i], ok = u === q.ans;
+        subScores[q.subj][1]++;
+        if (ok) { totalRight++; subScores[q.subj][0]++; }
+        else logMistake(q, q.subj);
+
+        return `
+          <div style="padding:14px; border-radius:14px; border:2px solid ${ok ? '#6ee7b7' : '#fda4af'}; background:${ok ? '#ecfdf5' : '#fff1f2'};">
+            <div style="display:flex; justify-content:space-between; gap:8px; font-weight:800; font-size:0.92rem;">
+              <span>Q${i + 1} [${q.subj.toUpperCase()}]: ${q.q}</span>
+              <span>${ok ? '✅' : '❌'}</span>
+            </div>
+            <div style="font-size:0.84rem; margin-top:6px;">
+              <strong>Your answer:</strong> ${u !== null ? q.opts[u] : '<em>Skipped</em>'} &nbsp;|&nbsp;
+              <strong>Correct:</strong> <span style="color:#065f46; font-weight:800;">${q.opts[q.ans]}</span><br/>
+              <span style="color:var(--slate-700);"><strong>Why:</strong> ${q.exp}</span>
+            </div>
+          </div>`;
+      }).join('');
+
+      const pct = Math.round((totalRight / mockData.qs.length) * 100);
+      state.stars += pct >= 85 ? 5 : pct >= 65 ? 3 : 1;
+      awardXP(totalRight * 5 + 30);
+      saveState();
+
+      document.getElementById('mock-runner').classList.add('hidden');
+      document.getElementById('mock-results').classList.remove('hidden');
+      document.getElementById('mock-res-heading').textContent = mockData.title + ' — Complete!';
+      document.getElementById('mock-res-overall').textContent = `Total Score: ${totalRight} / ${mockData.qs.length} (${pct}%)`;
+      document.getElementById('mock-res-breakdown').innerHTML = Object.entries(subScores).map(([k, [r, t]]) => `
+        <div style="background:var(--indigo-soft); padding:12px; border-radius:14px;">
+          <div style="font-size:0.75rem; font-weight:800; text-transform:uppercase; color:var(--indigo);">${k}</div>
+          <div class="font-display" style="font-size:1.3rem;">${r} / ${t}</div>
+        </div>
+      `).join('');
+
+      const engBonus = document.getElementById('mock-english-bonus');
+      if (mockData.hasSubj) {
+        engBonus.classList.remove('hidden');
+        engBonus.innerHTML = `<h3>✍️ Part B: English Subjective Challenge (20 Marks)</h3>
+          <p style="font-size:0.86rem; margin:6px 0 10px;">To finish your full Nov 28 paper, hop into the <strong>5-Finger Writing Studio</strong> and write a 80–100 word paragraph on <em>"Save Mother Earth"</em> or <em>"Your Favourite Pet"</em>!</p>
+          <button class="btn-teal" onclick="jumpToSprint('english','write')">Open Writing Studio →</button>`;
+      } else engBonus.classList.add('hidden');
+
+      document.getElementById('mock-review-list').innerHTML = revHtml;
+      playTone('win'); if (pct >= 65) launchConfetti();
+    }
+
+    function exitMock() {
+      document.getElementById('mock-results').classList.add('hidden');
+      document.getElementById('mock-menu').classList.remove('hidden');
+    }
+
+    /* =========================================================================
+       11. MISTAKE VAULT
+       ========================================================================= */
+    function logMistake(q, subj) {
+      if (!state.mistakes.some(m => m.q === q.q)) {
+        state.mistakes.push({ ...q, subj });
+      }
+    }
+
+    function renderVault() {
+      const list = document.getElementById('vault-list');
+      const empty = document.getElementById('vault-empty');
+      const n = state.mistakes.length;
+      document.getElementById('vault-pill').textContent = `${n} Mistake${n === 1 ? '' : 's'} to Master`;
+      if (n === 0) { empty.classList.remove('hidden'); list.innerHTML = ''; return; }
+      empty.classList.add('hidden');
+      list.innerHTML = state.mistakes.map((q, vIdx) => `
+        <div class="lab-box" style="margin-bottom:0; background:white;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+            <span class="tag-pill" style="background:var(--coral-soft); color:var(--coral);">${(q.subj || 'Review').toUpperCase()} • ${q.tag}</span>
+            <span style="font-size:0.78rem; font-weight:800; color:var(--teal);">+25 Bonus XP to Clear</span>
+          </div>
+          <div style="font-weight:800; margin-bottom:10px;">${q.q}</div>
+          <div class="options-grid">
+            ${q.opts.map((o, oIdx) => `
+              <button class="opt-btn" style="padding:10px 12px; font-size:0.88rem;" onclick="tryVault(${vIdx},${oIdx})">
+                <span class="opt-letter">${String.fromCharCode(65 + oIdx)}</span><span>${o}</span>
+              </button>
+            `).join('')}
+          </div>
+          <div id="vmsg-${vIdx}" class="hidden" style="margin-top:10px; font-size:0.86rem; font-weight:800; padding:10px; border-radius:10px;"></div>
+        </div>
+      `).join('');
+    }
+
+    const vaultClearing = new Set();
+    function tryVault(vIdx, oIdx) {
+      const q = state.mistakes[vIdx];
+      const msg = document.getElementById('vmsg-' + vIdx);
+      msg.classList.remove('hidden');
+      if (oIdx === q.ans) {
+        if (vaultClearing.has(q.q)) return;
+        vaultClearing.add(q.q);
+        playTone('ok');
+        msg.style.background = '#d1fae5'; msg.style.color = '#065f46';
+        msg.textContent = `🎉 Mastered! +25 Bonus XP! (${q.exp})`;
+        setTimeout(() => {
+          vaultClearing.delete(q.q);
+          const at = state.mistakes.findIndex(m => m.q === q.q);
+          if (at >= 0) { state.mistakes.splice(at, 1); awardXP(25); }
+          saveState(); renderVault();
+        }, 1100);
+      } else {
+        playTone('no');
+        msg.style.background = '#fef3c7'; msg.style.color = '#92400e';
+        msg.textContent = `💡 Hint: ${q.hint} Try again!`;
+      }
+    }
+
+    /* =========================================================================
+       12. ROUGH WORK SCRATCHPAD & RESET MODAL
+       ========================================================================= */
+    let spOpen = false, spDrawing = false, spColor = '#1e1b4b', spEraser = false, spGrid = true, spCtx = null;
+
+    function toggleScratchpad() {
+      spOpen = !spOpen;
+      document.getElementById('scratchpad-modal').classList.toggle('hidden', !spOpen);
+      if (spOpen) setTimeout(resizeScratch, 30);
+    }
+    function resizeScratch() {
+      const c = document.getElementById('scratch-canvas');
+      const r = c.getBoundingClientRect();
+      if (c.width !== Math.floor(r.width) || c.height !== Math.floor(r.height)) {
+        c.width = Math.floor(r.width); c.height = Math.floor(r.height);
+      }
+      spCtx = c.getContext('2d'); spCtx.lineCap = 'round'; spCtx.lineJoin = 'round';
+    }
+    function initScratchEvents() {
+      const c = document.getElementById('scratch-canvas');
+      const pos = e => {
+        const r = c.getBoundingClientRect();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
+        const cy = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: cx - r.left, y: cy - r.top };
+      };
+      const down = e => { e.preventDefault(); spDrawing = true; const p = pos(e); spCtx.beginPath(); spCtx.moveTo(p.x, p.y); };
+      const move = e => {
+        if (!spDrawing) return; e.preventDefault();
+        const p = pos(e);
+        spCtx.globalCompositeOperation = spEraser ? 'destination-out' : 'source-over';
+        spCtx.strokeStyle = spColor; spCtx.lineWidth = spEraser ? 22 : 3.2;
+        spCtx.lineTo(p.x, p.y); spCtx.stroke();
+      };
+      const up = () => { spDrawing = false; };
+      c.addEventListener('mousedown', down); c.addEventListener('mousemove', move); window.addEventListener('mouseup', up);
+      c.addEventListener('touchstart', down, { passive: false }); c.addEventListener('touchmove', move, { passive: false }); c.addEventListener('touchend', up);
+    }
+    function setPen(col) { spColor = col; spEraser = false; document.getElementById('sp-eraser').style.background = '#ccfbf1'; }
+    function toggleEraser() { spEraser = !spEraser; document.getElementById('sp-eraser').style.background = spEraser ? '#fde68a' : '#ccfbf1'; }
+    function toggleGrid() {
+      spGrid = !spGrid;
+      document.getElementById('scratch-canvas').classList.toggle('grid-on', spGrid);
+      document.getElementById('sp-grid').textContent = `Grid: ${spGrid ? 'ON' : 'OFF'}`;
+    }
+    function clearScratch() { const c = document.getElementById('scratch-canvas'); if (spCtx) spCtx.clearRect(0, 0, c.width, c.height); }
+
+    function openResetModal() { document.getElementById('reset-modal').classList.remove('hidden'); }
+    function closeResetModal() { document.getElementById('reset-modal').classList.add('hidden'); }
+    function confirmReset() {
+      state = JSON.parse(JSON.stringify(DEFAULT_STATE));
+      saveState(); closeResetModal(); renderRoadmap(); renderVault(); initEnglishHub();
+    }
+
+    /* =========================================================================
+       13. BOOTSTRAP
+       ========================================================================= */
+    window.onload = function () {
+      updateHUD();
+      renderSprintTime();
+      renderRoadmap();
+      initMathsLab();
+      initScienceLab();
+      initEnglishHub();
+      initReasoningLab();
+      initScratchEvents();
+      _initialBoot = false;
+
+      /* cross-device sync (no-op until firebase-config.js is filled in) */
+      if (typeof DikshaSync !== 'undefined' && DikshaSync.init()) {
+        DikshaSync.attachUI();
+        DikshaSync.pull(STORE_KEY).then(function (remote) {
+          if (remote && (remote.updatedAt || 0) > (state.updatedAt || 0)) {
+            state = normalizeState(remote);
+            try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {}
+            updateHUD(); renderRoadmap(); renderVault(); initEnglishHub();
+          }
+          DikshaSync.arm();
+          DikshaSync.push(STORE_KEY, state);
+        });
+      }
+    };
+  </script>
+</body>
+</html>
