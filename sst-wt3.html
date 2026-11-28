@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SST Quest: Water & Mineral Champion</title>
+  <meta name="author" content="Rakesh Kumar" />
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="sync.js"></script>
+  <style>*,:after,:before{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgba(59,130,246,.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/*! tailwindcss v3.4.19 | MIT License | https://tailwindcss.com*/*,:after,:before{box-sizing:border-box;border:0 solid #e5e7eb}:after,:before{--tw-content:""}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;-o-tab-size:4;tab-size:4;font-family:ui-sans-serif,system-ui,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji;font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,Liberation Mono,Courier New,monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0}fieldset,legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::-moz-placeholder,textarea::-moz-placeholder{opacity:1;color:#9ca3af}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.container{width:100%}@media (min-width:640px){.container{max-width:640px}}@media (min-width:768px){.container{max-width:768px}}@media (min-width:1024px){.container{max-width:1024px}}@media (min-width:1280px){.container{max-width:1280px}}@media (min-width:1536px){.container{max-width:1536px}}.pointer-events-none{pointer-events:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0}.bottom-5{bottom:1.25rem}.left-4{left:1rem}.right-4{right:1rem}.right-5{right:1.25rem}.top-4{top:1rem}.z-50{z-index:50}.col-span-2{grid-column:span 2/span 2}.mx-auto{margin-left:auto;margin-right:auto}.mb-1{margin-bottom:.25rem}.mb-1\.5{margin-bottom:.375rem}.mb-2{margin-bottom:.5rem}.mb-3{margin-bottom:.75rem}.mb-4{margin-bottom:1rem}.mb-5{margin-bottom:1.25rem}.mb-6{margin-bottom:1.5rem}.mt-0{margin-top:0}.mt-0\.5{margin-top:.125rem}.mt-3{margin-top:.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.block{display:block}.inline-block{display:inline-block}.flex{display:flex}.inline-flex{display:inline-flex}.table{display:table}.grid{display:grid}.hidden{display:none}.h-14{height:3.5rem}.h-2{height:.5rem}.h-2\.5{height:.625rem}.h-3{height:.75rem}.h-3\.5{height:.875rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-7{height:1.75rem}.h-8{height:2rem}.h-auto{height:auto}.h-full{height:100%}.min-h-\[270px\]{min-height:270px}.min-h-\[450px\]{min-height:450px}.min-h-\[60px\]{min-height:60px}.w-1{width:.25rem}.w-1\/2{width:50%}.w-14{width:3.5rem}.w-4{width:1rem}.w-5{width:1.25rem}.w-7{width:1.75rem}.w-8{width:2rem}.w-full{width:100%}.min-w-0{min-width:0}.max-w-2xl{max-width:42rem}.max-w-5xl{max-width:64rem}.max-w-sm{max-width:24rem}.flex-1{flex:1 1 0%}.shrink-0{flex-shrink:0}.border-collapse{border-collapse:collapse}.-translate-y-0{--tw-translate-y:-0px}.-translate-y-0,.-translate-y-0\.5{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.-translate-y-0\.5{--tw-translate-y:-0.125rem}.scale-105{--tw-scale-x:1.05;--tw-scale-y:1.05}.scale-105,.scale-110{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.scale-110{--tw-scale-x:1.1;--tw-scale-y:1.1}.scale-\[1\.03\]{--tw-scale-x:1.03;--tw-scale-y:1.03}.scale-\[1\.03\],.transform{transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.cursor-default{cursor:default}.cursor-pointer{cursor:pointer}.resize{resize:both}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:.25rem}.gap-1\.5{gap:.375rem}.gap-2{gap:.5rem}.gap-2\.5{gap:.625rem}.gap-3{gap:.75rem}.gap-4{gap:1rem}.space-y-2>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.5rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.5rem*var(--tw-space-y-reverse))}.space-y-2\.5>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(.625rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(.625rem*var(--tw-space-y-reverse))}.space-y-8>:not([hidden])~:not([hidden]){--tw-space-y-reverse:0;margin-top:calc(2rem*(1 - var(--tw-space-y-reverse)));margin-bottom:calc(2rem*var(--tw-space-y-reverse))}.divide-y>:not([hidden])~:not([hidden]){--tw-divide-y-reverse:0;border-top-width:calc(1px*(1 - var(--tw-divide-y-reverse)));border-bottom-width:calc(1px*var(--tw-divide-y-reverse))}.divide-amber-50>:not([hidden])~:not([hidden]){--tw-divide-opacity:1;border-color:rgb(255 251 235/var(--tw-divide-opacity,1))}.divide-sky-50>:not([hidden])~:not([hidden]){--tw-divide-opacity:1;border-color:rgb(240 249 255/var(--tw-divide-opacity,1))}.overflow-hidden{overflow:hidden}.overflow-x-auto{overflow-x:auto}.overflow-y-auto{overflow-y:auto}.whitespace-pre-line{white-space:pre-line}.rounded-2xl{border-radius:1rem}.rounded-3xl{border-radius:1.5rem}.rounded-full{border-radius:9999px}.rounded-lg{border-radius:.5rem}.rounded-xl{border-radius:.75rem}.rounded-tl-xl{border-top-left-radius:.75rem}.rounded-tr-xl{border-top-right-radius:.75rem}.border{border-width:1px}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.\!border-emerald-500{--tw-border-opacity:1!important;border-color:rgb(16 185 129/var(--tw-border-opacity,1))!important}.\!border-rose-500{--tw-border-opacity:1!important;border-color:rgb(244 63 94/var(--tw-border-opacity,1))!important}.border-amber-100{--tw-border-opacity:1;border-color:rgb(254 243 199/var(--tw-border-opacity,1))}.border-amber-200{--tw-border-opacity:1;border-color:rgb(253 230 138/var(--tw-border-opacity,1))}.border-amber-300{--tw-border-opacity:1;border-color:rgb(252 211 77/var(--tw-border-opacity,1))}.border-emerald-100{--tw-border-opacity:1;border-color:rgb(209 250 229/var(--tw-border-opacity,1))}.border-emerald-200{--tw-border-opacity:1;border-color:rgb(167 243 208/var(--tw-border-opacity,1))}.border-emerald-300{--tw-border-opacity:1;border-color:rgb(110 231 183/var(--tw-border-opacity,1))}.border-emerald-400{--tw-border-opacity:1;border-color:rgb(52 211 153/var(--tw-border-opacity,1))}.border-indigo-100{--tw-border-opacity:1;border-color:rgb(224 231 255/var(--tw-border-opacity,1))}.border-indigo-200{--tw-border-opacity:1;border-color:rgb(199 210 254/var(--tw-border-opacity,1))}.border-indigo-300{--tw-border-opacity:1;border-color:rgb(165 180 252/var(--tw-border-opacity,1))}.border-indigo-700{--tw-border-opacity:1;border-color:rgb(67 56 202/var(--tw-border-opacity,1))}.border-orange-200{--tw-border-opacity:1;border-color:rgb(254 215 170/var(--tw-border-opacity,1))}.border-purple-100{--tw-border-opacity:1;border-color:rgb(243 232 255/var(--tw-border-opacity,1))}.border-purple-200{--tw-border-opacity:1;border-color:rgb(233 213 255/var(--tw-border-opacity,1))}.border-rose-200{--tw-border-opacity:1;border-color:rgb(254 205 211/var(--tw-border-opacity,1))}.border-rose-300{--tw-border-opacity:1;border-color:rgb(253 164 175/var(--tw-border-opacity,1))}.border-rose-500{--tw-border-opacity:1;border-color:rgb(244 63 94/var(--tw-border-opacity,1))}.border-sky-100{--tw-border-opacity:1;border-color:rgb(224 242 254/var(--tw-border-opacity,1))}.border-sky-200{--tw-border-opacity:1;border-color:rgb(186 230 253/var(--tw-border-opacity,1))}.border-sky-300{--tw-border-opacity:1;border-color:rgb(125 211 252/var(--tw-border-opacity,1))}.border-slate-100{--tw-border-opacity:1;border-color:rgb(241 245 249/var(--tw-border-opacity,1))}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240/var(--tw-border-opacity,1))}.border-slate-600{--tw-border-opacity:1;border-color:rgb(71 85 105/var(--tw-border-opacity,1))}.border-teal-100{--tw-border-opacity:1;border-color:rgb(204 251 241/var(--tw-border-opacity,1))}.border-white{--tw-border-opacity:1;border-color:rgb(255 255 255/var(--tw-border-opacity,1))}.border-yellow-200{--tw-border-opacity:1;border-color:rgb(254 240 138/var(--tw-border-opacity,1))}.\!bg-emerald-100{--tw-bg-opacity:1!important;background-color:rgb(209 250 229/var(--tw-bg-opacity,1))!important}.\!bg-rose-100{--tw-bg-opacity:1!important;background-color:rgb(255 228 230/var(--tw-bg-opacity,1))!important}.bg-amber-100{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.bg-amber-200{--tw-bg-opacity:1;background-color:rgb(253 230 138/var(--tw-bg-opacity,1))}.bg-amber-400{--tw-bg-opacity:1;background-color:rgb(251 191 36/var(--tw-bg-opacity,1))}.bg-amber-50{--tw-bg-opacity:1;background-color:rgb(255 251 235/var(--tw-bg-opacity,1))}.bg-amber-50\/40{background-color:rgba(255,251,235,.4)}.bg-black{--tw-bg-opacity:1;background-color:rgb(0 0 0/var(--tw-bg-opacity,1))}.bg-black\/15{background-color:rgba(0,0,0,.15)}.bg-emerald-100{--tw-bg-opacity:1;background-color:rgb(209 250 229/var(--tw-bg-opacity,1))}.bg-emerald-400{--tw-bg-opacity:1;background-color:rgb(52 211 153/var(--tw-bg-opacity,1))}.bg-emerald-50{--tw-bg-opacity:1;background-color:rgb(236 253 245/var(--tw-bg-opacity,1))}.bg-emerald-50\/50{background-color:rgba(236,253,245,.5)}.bg-emerald-500{--tw-bg-opacity:1;background-color:rgb(16 185 129/var(--tw-bg-opacity,1))}.bg-indigo-100{--tw-bg-opacity:1;background-color:rgb(224 231 255/var(--tw-bg-opacity,1))}.bg-indigo-50{--tw-bg-opacity:1;background-color:rgb(238 242 255/var(--tw-bg-opacity,1))}.bg-indigo-50\/50{background-color:rgba(238,242,255,.5)}.bg-indigo-500{--tw-bg-opacity:1;background-color:rgb(99 102 241/var(--tw-bg-opacity,1))}.bg-indigo-600{--tw-bg-opacity:1;background-color:rgb(79 70 229/var(--tw-bg-opacity,1))}.bg-orange-50{--tw-bg-opacity:1;background-color:rgb(255 247 237/var(--tw-bg-opacity,1))}.bg-purple-100{--tw-bg-opacity:1;background-color:rgb(243 232 255/var(--tw-bg-opacity,1))}.bg-purple-50{--tw-bg-opacity:1;background-color:rgb(250 245 255/var(--tw-bg-opacity,1))}.bg-purple-50\/50{background-color:rgba(250,245,255,.5)}.bg-purple-600{--tw-bg-opacity:1;background-color:rgb(147 51 234/var(--tw-bg-opacity,1))}.bg-rose-100{--tw-bg-opacity:1;background-color:rgb(255 228 230/var(--tw-bg-opacity,1))}.bg-rose-50{--tw-bg-opacity:1;background-color:rgb(255 241 242/var(--tw-bg-opacity,1))}.bg-rose-500{--tw-bg-opacity:1;background-color:rgb(244 63 94/var(--tw-bg-opacity,1))}.bg-sky-100{--tw-bg-opacity:1;background-color:rgb(224 242 254/var(--tw-bg-opacity,1))}.bg-sky-50{--tw-bg-opacity:1;background-color:rgb(240 249 255/var(--tw-bg-opacity,1))}.bg-sky-50\/40{background-color:rgba(240,249,255,.4)}.bg-sky-500{--tw-bg-opacity:1;background-color:rgb(14 165 233/var(--tw-bg-opacity,1))}.bg-sky-600{--tw-bg-opacity:1;background-color:rgb(2 132 199/var(--tw-bg-opacity,1))}.bg-slate-100{--tw-bg-opacity:1;background-color:rgb(241 245 249/var(--tw-bg-opacity,1))}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252/var(--tw-bg-opacity,1))}.bg-slate-700{--tw-bg-opacity:1;background-color:rgb(51 65 85/var(--tw-bg-opacity,1))}.bg-slate-900{--tw-bg-opacity:1;background-color:rgb(15 23 42/var(--tw-bg-opacity,1))}.bg-slate-900\/50{background-color:rgba(15,23,42,.5)}.bg-teal-100{--tw-bg-opacity:1;background-color:rgb(204 251 241/var(--tw-bg-opacity,1))}.bg-teal-50{--tw-bg-opacity:1;background-color:rgb(240 253 250/var(--tw-bg-opacity,1))}.bg-teal-50\/50{background-color:rgba(240,253,250,.5)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.bg-white\/15{background-color:hsla(0,0%,100%,.15)}.bg-white\/20{background-color:hsla(0,0%,100%,.2)}.bg-white\/80{background-color:hsla(0,0%,100%,.8)}.bg-white\/90{background-color:hsla(0,0%,100%,.9)}.bg-white\/95{background-color:hsla(0,0%,100%,.95)}.bg-yellow-50{--tw-bg-opacity:1;background-color:rgb(254 252 232/var(--tw-bg-opacity,1))}.bg-gradient-to-b{background-image:linear-gradient(to bottom,var(--tw-gradient-stops))}.bg-gradient-to-br{background-image:linear-gradient(to bottom right,var(--tw-gradient-stops))}.bg-gradient-to-r{background-image:linear-gradient(to right,var(--tw-gradient-stops))}.from-amber-400{--tw-gradient-from:#fbbf24 var(--tw-gradient-from-position);--tw-gradient-to:rgba(251,191,36,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-amber-50{--tw-gradient-from:#fffbeb var(--tw-gradient-from-position);--tw-gradient-to:rgba(255,251,235,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-emerald-400{--tw-gradient-from:#34d399 var(--tw-gradient-from-position);--tw-gradient-to:rgba(52,211,153,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-indigo-500{--tw-gradient-from:#6366f1 var(--tw-gradient-from-position);--tw-gradient-to:rgba(99,102,241,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-rose-50{--tw-gradient-from:#fff1f2 var(--tw-gradient-from-position);--tw-gradient-to:rgba(255,241,242,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-rose-50\/60{--tw-gradient-from:rgba(255,241,242,.6) var(--tw-gradient-from-position);--tw-gradient-to:rgba(255,241,242,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-rose-500{--tw-gradient-from:#f43f5e var(--tw-gradient-from-position);--tw-gradient-to:rgba(244,63,94,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-sky-400{--tw-gradient-from:#38bdf8 var(--tw-gradient-from-position);--tw-gradient-to:rgba(56,189,248,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-sky-50{--tw-gradient-from:#f0f9ff var(--tw-gradient-from-position);--tw-gradient-to:rgba(240,249,255,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-sky-50\/70{--tw-gradient-from:rgba(240,249,255,.7) var(--tw-gradient-from-position);--tw-gradient-to:rgba(240,249,255,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-sky-500{--tw-gradient-from:#0ea5e9 var(--tw-gradient-from-position);--tw-gradient-to:rgba(14,165,233,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-sky-600{--tw-gradient-from:#0284c7 var(--tw-gradient-from-position);--tw-gradient-to:rgba(2,132,199,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-slate-800{--tw-gradient-from:#1e293b var(--tw-gradient-from-position);--tw-gradient-to:rgba(30,41,59,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.from-white{--tw-gradient-from:#fff var(--tw-gradient-from-position);--tw-gradient-to:hsla(0,0%,100%,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.via-indigo-500{--tw-gradient-to:rgba(99,102,241,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#6366f1 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-indigo-600{--tw-gradient-to:rgba(79,70,229,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#4f46e5 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-indigo-900{--tw-gradient-to:rgba(49,46,129,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#312e81 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-orange-500{--tw-gradient-to:rgba(249,115,22,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#f97316 var(--tw-gradient-via-position),var(--tw-gradient-to)}.via-purple-500{--tw-gradient-to:rgba(168,85,247,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),#a855f7 var(--tw-gradient-via-position),var(--tw-gradient-to)}.to-amber-400{--tw-gradient-to:#fbbf24 var(--tw-gradient-to-position)}.to-amber-50{--tw-gradient-to:#fffbeb var(--tw-gradient-to-position)}.to-amber-50\/60{--tw-gradient-to:rgba(255,251,235,.6) var(--tw-gradient-to-position)}.to-indigo-50{--tw-gradient-to:#eef2ff var(--tw-gradient-to-position)}.to-indigo-50\/70{--tw-gradient-to:rgba(238,242,255,.7) var(--tw-gradient-to-position)}.to-indigo-500{--tw-gradient-to:#6366f1 var(--tw-gradient-to-position)}.to-indigo-600{--tw-gradient-to:#4f46e5 var(--tw-gradient-to-position)}.to-orange-500{--tw-gradient-to:#f97316 var(--tw-gradient-to-position)}.to-pink-500{--tw-gradient-to:#ec4899 var(--tw-gradient-to-position)}.to-purple-500{--tw-gradient-to:#a855f7 var(--tw-gradient-to-position)}.to-purple-600{--tw-gradient-to:#9333ea var(--tw-gradient-to-position)}.to-purple-900{--tw-gradient-to:#581c87 var(--tw-gradient-to-position)}.to-sky-50{--tw-gradient-to:#f0f9ff var(--tw-gradient-to-position)}.to-sky-500{--tw-gradient-to:#0ea5e9 var(--tw-gradient-to-position)}.to-yellow-50{--tw-gradient-to:#fefce8 var(--tw-gradient-to-position)}.bg-clip-text{-webkit-background-clip:text;background-clip:text}.p-2{padding:.5rem}.p-2\.5{padding:.625rem}.p-3{padding:.75rem}.p-3\.5{padding:.875rem}.p-4{padding:1rem}.p-5{padding:1.25rem}.p-6{padding:1.5rem}.px-1{padding-left:.25rem;padding-right:.25rem}.px-1\.5{padding-left:.375rem;padding-right:.375rem}.px-2{padding-left:.5rem;padding-right:.5rem}.px-2\.5{padding-left:.625rem;padding-right:.625rem}.px-3{padding-left:.75rem;padding-right:.75rem}.px-3\.5{padding-left:.875rem;padding-right:.875rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.px-6{padding-left:1.5rem;padding-right:1.5rem}.px-7{padding-left:1.75rem;padding-right:1.75rem}.py-0{padding-top:0;padding-bottom:0}.py-0\.5{padding-top:.125rem;padding-bottom:.125rem}.py-1{padding-top:.25rem;padding-bottom:.25rem}.py-1\.5{padding-top:.375rem;padding-bottom:.375rem}.py-12{padding-top:3rem;padding-bottom:3rem}.py-2{padding-top:.5rem;padding-bottom:.5rem}.py-2\.5{padding-top:.625rem;padding-bottom:.625rem}.py-3{padding-top:.75rem;padding-bottom:.75rem}.py-3\.5{padding-top:.875rem;padding-bottom:.875rem}.py-8{padding-top:2rem;padding-bottom:2rem}.pb-16{padding-bottom:4rem}.pb-3{padding-bottom:.75rem}.pb-4{padding-bottom:1rem}.pt-3{padding-top:.75rem}.pt-4{padding-top:1rem}.text-left{text-align:left}.text-center{text-align:center}.text-right{text-align:right}.text-2xl{font-size:1.5rem;line-height:2rem}.text-3xl{font-size:1.875rem;line-height:2.25rem}.text-4xl{font-size:2.25rem;line-height:2.5rem}.text-5xl{font-size:3rem;line-height:1}.text-6xl{font-size:3.75rem;line-height:1}.text-\[10px\]{font-size:10px}.text-base{font-size:1rem;line-height:1.5rem}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:.75rem;line-height:1rem}.font-bold{font-weight:700}.font-extrabold{font-weight:800}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.leading-none{line-height:1}.leading-relaxed{line-height:1.625}.leading-snug{line-height:1.375}.leading-tight{line-height:1.25}.tracking-wide{letter-spacing:.025em}.tracking-wider{letter-spacing:.05em}.\!text-emerald-900{--tw-text-opacity:1!important;color:rgb(6 78 59/var(--tw-text-opacity,1))!important}.\!text-rose-900{--tw-text-opacity:1!important;color:rgb(136 19 55/var(--tw-text-opacity,1))!important}.text-amber-700{--tw-text-opacity:1;color:rgb(180 83 9/var(--tw-text-opacity,1))}.text-amber-800{--tw-text-opacity:1;color:rgb(146 64 14/var(--tw-text-opacity,1))}.text-amber-900{--tw-text-opacity:1;color:rgb(120 53 15/var(--tw-text-opacity,1))}.text-emerald-600{--tw-text-opacity:1;color:rgb(5 150 105/var(--tw-text-opacity,1))}.text-emerald-700{--tw-text-opacity:1;color:rgb(4 120 87/var(--tw-text-opacity,1))}.text-emerald-800{--tw-text-opacity:1;color:rgb(6 95 70/var(--tw-text-opacity,1))}.text-emerald-900{--tw-text-opacity:1;color:rgb(6 78 59/var(--tw-text-opacity,1))}.text-emerald-950{--tw-text-opacity:1;color:rgb(2 44 34/var(--tw-text-opacity,1))}.text-indigo-200{--tw-text-opacity:1;color:rgb(199 210 254/var(--tw-text-opacity,1))}.text-indigo-500{--tw-text-opacity:1;color:rgb(99 102 241/var(--tw-text-opacity,1))}.text-indigo-600{--tw-text-opacity:1;color:rgb(79 70 229/var(--tw-text-opacity,1))}.text-indigo-700{--tw-text-opacity:1;color:rgb(67 56 202/var(--tw-text-opacity,1))}.text-indigo-800{--tw-text-opacity:1;color:rgb(55 48 163/var(--tw-text-opacity,1))}.text-indigo-900{--tw-text-opacity:1;color:rgb(49 46 129/var(--tw-text-opacity,1))}.text-orange-500{--tw-text-opacity:1;color:rgb(249 115 22/var(--tw-text-opacity,1))}.text-orange-700{--tw-text-opacity:1;color:rgb(194 65 12/var(--tw-text-opacity,1))}.text-purple-600{--tw-text-opacity:1;color:rgb(147 51 234/var(--tw-text-opacity,1))}.text-purple-700{--tw-text-opacity:1;color:rgb(126 34 206/var(--tw-text-opacity,1))}.text-purple-800{--tw-text-opacity:1;color:rgb(107 33 168/var(--tw-text-opacity,1))}.text-purple-900{--tw-text-opacity:1;color:rgb(88 28 135/var(--tw-text-opacity,1))}.text-rose-300{--tw-text-opacity:1;color:rgb(253 164 175/var(--tw-text-opacity,1))}.text-rose-700{--tw-text-opacity:1;color:rgb(190 18 60/var(--tw-text-opacity,1))}.text-rose-800{--tw-text-opacity:1;color:rgb(159 18 57/var(--tw-text-opacity,1))}.text-rose-900{--tw-text-opacity:1;color:rgb(136 19 55/var(--tw-text-opacity,1))}.text-sky-700{--tw-text-opacity:1;color:rgb(3 105 161/var(--tw-text-opacity,1))}.text-sky-900{--tw-text-opacity:1;color:rgb(12 74 110/var(--tw-text-opacity,1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184/var(--tw-text-opacity,1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139/var(--tw-text-opacity,1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105/var(--tw-text-opacity,1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85/var(--tw-text-opacity,1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59/var(--tw-text-opacity,1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42/var(--tw-text-opacity,1))}.text-teal-900{--tw-text-opacity:1;color:rgb(19 78 74/var(--tw-text-opacity,1))}.text-transparent{color:transparent}.text-white{--tw-text-opacity:1;color:rgb(255 255 255/var(--tw-text-opacity,1))}.text-white\/80{color:hsla(0,0%,100%,.8)}.text-yellow-600{--tw-text-opacity:1;color:rgb(202 138 4/var(--tw-text-opacity,1))}.text-yellow-800{--tw-text-opacity:1;color:rgb(133 77 14/var(--tw-text-opacity,1))}.underline{text-decoration-line:underline}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.accent-emerald-600{accent-color:#059669}.accent-purple-600{accent-color:#9333ea}.opacity-60{opacity:.6}.shadow{--tw-shadow:0 1px 3px 0 rgba(0,0,0,.1),0 1px 2px -1px rgba(0,0,0,.1);--tw-shadow-colored:0 1px 3px 0 var(--tw-shadow-color),0 1px 2px -1px var(--tw-shadow-color)}.shadow,.shadow-2xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-2xl{--tw-shadow:0 25px 50px -12px rgba(0,0,0,.25);--tw-shadow-colored:0 25px 50px -12px var(--tw-shadow-color)}.shadow-lg{--tw-shadow:0 10px 15px -3px rgba(0,0,0,.1),0 4px 6px -4px rgba(0,0,0,.1);--tw-shadow-colored:0 10px 15px -3px var(--tw-shadow-color),0 4px 6px -4px var(--tw-shadow-color)}.shadow-lg,.shadow-md{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-md{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color)}.shadow-sm{--tw-shadow:0 1px 2px 0 rgba(0,0,0,.05);--tw-shadow-colored:0 1px 2px 0 var(--tw-shadow-color)}.shadow-sm,.shadow-xl{box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.shadow-xl{--tw-shadow:0 20px 25px -5px rgba(0,0,0,.1),0 8px 10px -6px rgba(0,0,0,.1);--tw-shadow-colored:0 20px 25px -5px var(--tw-shadow-color),0 8px 10px -6px var(--tw-shadow-color)}.outline-none{outline:2px solid transparent;outline-offset:2px}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow),var(--tw-ring-shadow),var(--tw-shadow,0 0 #0000)}.ring-white{--tw-ring-opacity:1;--tw-ring-color:rgb(255 255 255/var(--tw-ring-opacity,1))}.filter{filter:var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow)}.backdrop-blur{--tw-backdrop-blur:blur(8px)}.backdrop-blur,.backdrop-blur-sm{-webkit-backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);backdrop-filter:var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia)}.backdrop-blur-sm{--tw-backdrop-blur:blur(4px)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,-webkit-backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter;transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,opacity,box-shadow,transform,filter,backdrop-filter,-webkit-backdrop-filter;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.transition-all{transition-property:all;transition-timing-function:cubic-bezier(.4,0,.2,1);transition-duration:.15s}.duration-300{transition-duration:.3s}.duration-500{transition-duration:.5s}.ease-in-out{transition-timing-function:cubic-bezier(.4,0,.2,1)}.hover\:scale-105:hover{--tw-scale-x:1.05;--tw-scale-y:1.05;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}.hover\:border-emerald-400:hover{--tw-border-opacity:1;border-color:rgb(52 211 153/var(--tw-border-opacity,1))}.hover\:border-indigo-400:hover{--tw-border-opacity:1;border-color:rgb(129 140 248/var(--tw-border-opacity,1))}.hover\:border-indigo-500:hover{--tw-border-opacity:1;border-color:rgb(99 102 241/var(--tw-border-opacity,1))}.hover\:border-rose-400:hover{--tw-border-opacity:1;border-color:rgb(251 113 133/var(--tw-border-opacity,1))}.hover\:border-sky-400:hover{--tw-border-opacity:1;border-color:rgb(56 189 248/var(--tw-border-opacity,1))}.hover\:bg-amber-100:hover{--tw-bg-opacity:1;background-color:rgb(254 243 199/var(--tw-bg-opacity,1))}.hover\:bg-amber-200:hover{--tw-bg-opacity:1;background-color:rgb(253 230 138/var(--tw-bg-opacity,1))}.hover\:bg-emerald-50:hover{--tw-bg-opacity:1;background-color:rgb(236 253 245/var(--tw-bg-opacity,1))}.hover\:bg-emerald-600:hover{--tw-bg-opacity:1;background-color:rgb(5 150 105/var(--tw-bg-opacity,1))}.hover\:bg-indigo-50:hover{--tw-bg-opacity:1;background-color:rgb(238 242 255/var(--tw-bg-opacity,1))}.hover\:bg-indigo-600:hover{--tw-bg-opacity:1;background-color:rgb(79 70 229/var(--tw-bg-opacity,1))}.hover\:bg-indigo-700:hover{--tw-bg-opacity:1;background-color:rgb(67 56 202/var(--tw-bg-opacity,1))}.hover\:bg-rose-100:hover{--tw-bg-opacity:1;background-color:rgb(255 228 230/var(--tw-bg-opacity,1))}.hover\:bg-rose-50:hover{--tw-bg-opacity:1;background-color:rgb(255 241 242/var(--tw-bg-opacity,1))}.hover\:bg-rose-600:hover{--tw-bg-opacity:1;background-color:rgb(225 29 72/var(--tw-bg-opacity,1))}.hover\:bg-sky-100:hover{--tw-bg-opacity:1;background-color:rgb(224 242 254/var(--tw-bg-opacity,1))}.hover\:bg-sky-50:hover{--tw-bg-opacity:1;background-color:rgb(240 249 255/var(--tw-bg-opacity,1))}.hover\:bg-sky-600:hover{--tw-bg-opacity:1;background-color:rgb(2 132 199/var(--tw-bg-opacity,1))}.hover\:bg-slate-200:hover{--tw-bg-opacity:1;background-color:rgb(226 232 240/var(--tw-bg-opacity,1))}.hover\:bg-white:hover{--tw-bg-opacity:1;background-color:rgb(255 255 255/var(--tw-bg-opacity,1))}.hover\:bg-white\/30:hover{background-color:hsla(0,0%,100%,.3)}.hover\:from-sky-50:hover{--tw-gradient-from:#f0f9ff var(--tw-gradient-from-position);--tw-gradient-to:rgba(240,249,255,0) var(--tw-gradient-to-position);--tw-gradient-stops:var(--tw-gradient-from),var(--tw-gradient-to)}.hover\:to-indigo-50:hover{--tw-gradient-to:#eef2ff var(--tw-gradient-to-position)}.hover\:text-rose-700:hover{--tw-text-opacity:1;color:rgb(190 18 60/var(--tw-text-opacity,1))}.hover\:opacity-95:hover{opacity:.95}.hover\:shadow-md:hover{--tw-shadow:0 4px 6px -1px rgba(0,0,0,.1),0 2px 4px -2px rgba(0,0,0,.1);--tw-shadow-colored:0 4px 6px -1px var(--tw-shadow-color),0 2px 4px -2px var(--tw-shadow-color);box-shadow:var(--tw-ring-offset-shadow,0 0 #0000),var(--tw-ring-shadow,0 0 #0000),var(--tw-shadow)}.focus\:border-indigo-400:focus{--tw-border-opacity:1;border-color:rgb(129 140 248/var(--tw-border-opacity,1))}.group:hover .group-hover\:scale-110{--tw-scale-x:1.1;--tw-scale-y:1.1;transform:translate(var(--tw-translate-x),var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y))}@media (min-width:640px){.sm\:col-span-1{grid-column:span 1/span 1}.sm\:inline{display:inline}.sm\:min-h-\[300px\]{min-height:300px}.sm\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.sm\:grid-cols-5{grid-template-columns:repeat(5,minmax(0,1fr))}.sm\:justify-start{justify-content:flex-start}.sm\:gap-3{gap:.75rem}.sm\:gap-6{gap:1.5rem}.sm\:p-4{padding:1rem}.sm\:p-5{padding:1.25rem}.sm\:p-6{padding:1.5rem}.sm\:p-7{padding:1.75rem}.sm\:p-8{padding:2rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:text-2xl{font-size:1.5rem;line-height:2rem}.sm\:text-3xl{font-size:1.875rem;line-height:2.25rem}.sm\:text-base{font-size:1rem;line-height:1.5rem}.sm\:text-sm{font-size:.875rem;line-height:1.25rem}.sm\:text-xl{font-size:1.25rem;line-height:1.75rem}}@media (min-width:768px){.md\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\:flex-row{flex-direction:row}.md\:items-center{align-items:center}}@media (min-width:1024px){.lg\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}</style>
+  <!-- Kid-friendly Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@500;600;700;800&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Custom Typography & Base Styling */
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #e0f2fe 0%, #fef3c7 50%, #ede9fe 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    h1, h2, h3, .font-display {
+      font-family: 'Fredoka', sans-serif;
+    }
+
+    /* 3D Flashcard Flip Mechanics */
+    .perspective-1000 {
+      perspective: 1000px;
+    }
+    .transform-style-3d {
+      transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.4, 0.2, 0.2, 1);
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+    }
+
+    /* Both faces share one grid cell, so the card grows to fit the longer side */
+    #flashcard-inner { display: grid; }
+    #flashcard-inner > div { position: relative; grid-area: 1 / 1; }
+
+    /* Micro-animations */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    .animate-shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0.92); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .animate-pop {
+      animation: pop 0.35s ease-out;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    .animate-float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    /* Confetti Canvas Overlay */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    /* Print styling for Quick Cheat Sheet */
+    @media print {
+      body {
+        background: white !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .print-full {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+      }
+    }
+  </style>
+</head>
+<body class="text-slate-800 antialiased pb-16">
+  <!-- Confetti Overlay -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <!-- Floating Toast Notification -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+  <!-- Custom Reset Confirmation Modal (No browser confirm/alert) -->
+  <div id="reset-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border-4 border-rose-200 animate-pop">
+      <div class="text-center">
+        <div class="text-5xl mb-3">🔄</div>
+        <h3 class="text-2xl font-bold text-slate-800 mb-2">Start Fresh?</h3>
+        <p class="text-slate-600 mb-6 text-sm">This will reset your XP, stars, combo, mastered flashcards, and defeated bosses back to zero.</p>
+        <div class="flex gap-3 justify-center">
+          <button onclick="closeResetModal()" class="flex-1 py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 transition">
+            Cancel
+          </button>
+          <button onclick="confirmResetProgress()" class="flex-1 py-3 px-4 rounded-2xl bg-rose-500 hover:bg-rose-600 font-bold text-white shadow-md transition">
+            Yes, Reset
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main App Wrapper -->
+  <div class="max-w-5xl mx-auto px-3 sm:px-6 pt-4">
+    <a href="index.html" class="inline-block mb-2 text-sm font-bold text-indigo-700 no-print">&larr; All quests</a>
+
+    <!-- ================= TOP GAMIFICATION HUD ================= -->
+    <header class="bg-white/95 backdrop-blur rounded-3xl shadow-xl border-2 border-sky-200 p-4 sm:p-5 mb-4 no-print">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Title & Level Badge -->
+        <div class="flex items-center gap-3">
+          <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-400 to-indigo-500 flex items-center justify-center text-3xl shadow-lg text-white shrink-0 animate-float">
+            🏆
+          </div>
+          <div>
+            <div class="flex items-center flex-wrap gap-2">
+              <h1 class="text-xl sm:text-2xl font-bold bg-gradient-to-r from-sky-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                SST Quest: Water & Mineral Champion
+              </h1>
+            </div>
+            <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+              <span id="hud-level-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300">
+                🌊 Level 1: Water Explorer
+              </span>
+              <span class="text-xs font-semibold text-slate-500">Class 4 • Monday W.T. - III Prep</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats & Controls -->
+        <div class="flex items-center flex-wrap gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-2xl">
+            <span class="text-lg">🔥</span>
+            <div>
+              <div class="text-[10px] uppercase font-bold text-orange-500 leading-none">Combo</div>
+              <div id="hud-streak" class="text-sm font-extrabold text-orange-700 leading-tight">0</div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-1.5 bg-yellow-50 border border-yellow-200 px-3 py-1.5 rounded-2xl">
+            <span class="text-lg">⭐</span>
+            <div>
+              <div class="text-[10px] uppercase font-bold text-yellow-600 leading-none">Stars</div>
+              <div id="hud-stars" class="text-sm font-extrabold text-yellow-800 leading-tight">0</div>
+            </div>
+          </div>
+
+          <button id="sound-toggle-btn" onclick="toggleSound()" class="px-3 py-2 rounded-2xl bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 font-bold text-xs sm:text-sm transition flex items-center gap-1.5" title="Toggle Sound Effects">
+            <span id="sound-icon">🔊</span>
+            <span class="hidden sm:inline" id="sound-label">Sound ON</span>
+          </button>
+
+          <button onclick="openResetModal()" class="px-3 py-2 rounded-2xl bg-slate-100 hover:bg-rose-100 hover:text-rose-700 border border-slate-200 text-slate-600 font-bold text-xs sm:text-sm transition" title="Reset Progress">
+            ↺ Reset
+          </button>
+        </div>
+      </div>
+
+      <!-- XP Progress Bar -->
+      <div class="mt-4">
+        <div class="flex justify-between text-xs font-bold text-slate-600 mb-1">
+          <span id="hud-xp-text">0 XP</span>
+          <span id="hud-next-level">Next Level at 150 XP</span>
+        </div>
+        <div class="w-full h-3.5 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
+          <div id="hud-xp-bar" class="h-full bg-gradient-to-r from-sky-400 via-indigo-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%;"></div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ================= CHAPTER FILTER TABS ================= -->
+    <section class="mb-4 no-print">
+      <div class="flex flex-wrap gap-2 justify-center sm:justify-start" id="chapter-tabs">
+        <button onclick="setChapter('wt3')" data-chapter="wt3" class="chapter-tab px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition shadow-sm border-2">
+          🎯 W.T.-III Focus (Ch 7 & 8)
+        </button>
+        <button onclick="setChapter('ch7')" data-chapter="ch7" class="chapter-tab px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition shadow-sm border-2">
+          💧 Ch 7: Water Resources
+        </button>
+        <button onclick="setChapter('ch8')" data-chapter="ch8" class="chapter-tab px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition shadow-sm border-2">
+          ⛏️ Ch 8: Mineral Resources
+        </button>
+        <button onclick="setChapter('ch9')" data-chapter="ch9" class="chapter-tab px-4 py-2 rounded-2xl font-bold text-xs sm:text-sm transition shadow-sm border-2 flex items-center gap-1.5">
+          🌾 Bonus: Ch 9 Agriculture
+          <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">In notebook, bonus</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ================= 5 MODE NAVIGATION TABS ================= -->
+    <nav class="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-6 no-print" id="mode-tabs">
+      <button onclick="setMode('quiz')" data-mode="quiz" class="mode-tab p-3 rounded-2xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition border-2 shadow-sm">
+        <span class="text-2xl">⚡</span>
+        <span>Quiz Arena</span>
+      </button>
+      <button onclick="setMode('match')" data-mode="match" class="mode-tab p-3 rounded-2xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition border-2 shadow-sm">
+        <span class="text-2xl">🧩</span>
+        <span>Match Master</span>
+      </button>
+      <button onclick="setMode('flashcards')" data-mode="flashcards" class="mode-tab p-3 rounded-2xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition border-2 shadow-sm">
+        <span class="text-2xl">🃏</span>
+        <span>Flashcard Flip</span>
+      </button>
+      <button onclick="setMode('boss')" data-mode="boss" class="mode-tab p-3 rounded-2xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition border-2 shadow-sm">
+        <span class="text-2xl">🐉</span>
+        <span>Exam Boss Battle</span>
+      </button>
+      <button onclick="setMode('cheatsheet')" data-mode="cheatsheet" class="mode-tab col-span-2 sm:col-span-1 p-3 rounded-2xl font-bold text-xs sm:text-sm flex flex-col items-center justify-center gap-1 transition border-2 shadow-sm">
+        <span class="text-2xl">📋</span>
+        <span>Quick Cheat Sheet</span>
+      </button>
+    </nav>
+
+    <!-- ================= DYNAMIC MODE CONTENT AREA ================= -->
+    <main id="app-content" class="min-h-[450px]">
+      <!-- Rendered dynamically by JavaScript -->
+    </main>
+
+    <div id="syncRow" class="no-print mt-5 flex-wrap justify-center items-center gap-3 text-xs font-bold text-slate-500" style="display:none">
+      <button id="syncCodeLabel" class="underline"></button>
+      <button id="syncChangeBtn" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200">Change code</button>
+    </div>
+  </div>
+
+  <!-- ================= APPLICATION JAVASCRIPT ================= -->
+  <script>
+    /*****************************************************************
+     * 1. SOUND EFFECTS ENGINE (Web Audio API - Zero External Files)
+     *****************************************************************/
+    let audioCtx = null;
+
+    function getAudioCtx() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    function playSound(type) {
+      if (!state.soundOn) return;
+      try {
+        const ctx = getAudioCtx();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+
+        if (type === 'correct') {
+          // Bright rising 2-note chime
+          playTone(ctx, 523.25, now, 0.12, 'sine', 0.18);
+          playTone(ctx, 659.25, now + 0.1, 0.22, 'sine', 0.18);
+        } else if (type === 'wrong') {
+          // Gentle low boop
+          playTone(ctx, 260, now, 0.15, 'triangle', 0.16);
+          playTone(ctx, 210, now + 0.12, 0.2, 'triangle', 0.14);
+        } else if (type === 'flip') {
+          playTone(ctx, 420, now, 0.06, 'sine', 0.08);
+        } else if (type === 'fanfare') {
+          // Celebratory arpeggio
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            playTone(ctx, freq, now + idx * 0.09, 0.24, 'triangle', 0.18);
+          });
+        } else if (type === 'hit') {
+          playTone(ctx, 320, now, 0.08, 'sawtooth', 0.12);
+          playTone(ctx, 587.33, now + 0.07, 0.18, 'sine', 0.15);
+        }
+      } catch (e) {
+        // Ignore audio errors gracefully
+      }
+    }
+
+    function playTone(ctx, freq, startTime, duration, waveType, volume) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = waveType;
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(volume, startTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + duration);
+    }
+
+    /*****************************************************************
+     * 2. CONFETTI CELEBRATION ENGINE
+     *****************************************************************/
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiParticles = [];
+    let confettiAnimId = null;
+
+    function resizeConfetti() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeConfetti);
+    resizeConfetti();
+
+    function launchConfetti(count = 70) {
+      const colors = ['#38bdf8', '#fbbf24', '#34d399', '#f472b6', '#a78bfa', '#fb7185'];
+      for (let i = 0; i < count; i++) {
+        confettiParticles.push({
+          x: Math.random() * confettiCanvas.width,
+          y: -10 - Math.random() * 60,
+          w: 7 + Math.random() * 6,
+          h: 5 + Math.random() * 6,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 6,
+          vy: 2.5 + Math.random() * 4.5,
+          rot: Math.random() * 360,
+          vrot: (Math.random() - 0.5) * 12,
+          life: 120 + Math.random() * 60
+        });
+      }
+      if (!confettiAnimId) animateConfetti();
+    }
+
+    function animateConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      confettiParticles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.08;
+        p.rot += p.vrot;
+        p.life--;
+
+        confettiCtx.save();
+        confettiCtx.translate(p.x, p.y);
+        confettiCtx.rotate((p.rot * Math.PI) / 180);
+        confettiCtx.fillStyle = p.color;
+        confettiCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        confettiCtx.restore();
+      });
+      confettiParticles = confettiParticles.filter(p => p.life > 0 && p.y < confettiCanvas.height + 20);
+      if (confettiParticles.length > 0) {
+        confettiAnimId = requestAnimationFrame(animateConfetti);
+      } else {
+        confettiAnimId = null;
+        confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      }
+    }
+
+    /*****************************************************************
+     * 3. CURRICULUM DATA (100% Aligned with Scanned Notes & Worksheets)
+     *****************************************************************/
+    const QUIZ_QUESTIONS = [
+      // --- CHAPTER 7: OUR WATER RESOURCES ---
+      { id: 'c7_q1', chapter: 'ch7', type: 'mcq', q: "Which process provides fresh water to the earth's surface?", options: ["Rainfall", "Evaporation", "Salt mines", "Ocean currents"], answer: "Rainfall", explanation: "Rainfall is the main process that brings fresh water back to the earth's surface." },
+      { id: 'c7_q2', chapter: 'ch7', type: 'mcq', q: "With which river is Wular Lake mainly associated?", options: ["Ganga", "Yamuna", "Jhelum", "Satluj"], answer: "Jhelum", explanation: "Wular Lake in Jammu & Kashmir is fed by the Jhelum river." },
+      { id: 'c7_q3', chapter: 'ch7', type: 'mcq', q: "Which state has the largest area under well irrigation?", options: ["Uttarakhand", "Punjab", "Uttar Pradesh", "Haryana"], answer: "Uttar Pradesh", explanation: "Uttar Pradesh has the largest area under well irrigation in India." },
+      { id: 'c7_q4', chapter: 'ch7', type: 'mcq', q: "Which unit is commonly used to measure the quantity of liquid such as water?", options: ["Kilometre", "Kilogram", "Metre", "Gallon"], answer: "Gallon", explanation: "Gallon (and litre) measures liquid volume, while km/m measure length and kg measures weight." },
+      { id: 'c7_q5', chapter: 'ch7', type: 'mcq', q: "What is the chemical formula of water?", options: ["H₂O", "CO₂", "O₂", "NaCl"], answer: "H₂O", explanation: "Water is made of 2 Hydrogen atoms and 1 Oxygen atom: H₂O!" },
+      { id: 'c7_q6', chapter: 'ch7', type: 'mcq', q: "What is the world's largest hydroelectric power station?", options: ["Three Gorges Dam in China", "Bhakra Nangal Dam", "Hirakud Dam", "Sardar Sarovar Dam"], answer: "Three Gorges Dam in China", explanation: "The Three Gorges Dam on the Yangtze river in China is the world's largest hydroelectric power station." },
+      { id: 'c7_q7', chapter: 'ch7', type: 'mcq', q: "Which gate in a dam regulates water level and directs a controlled volume of water into canals?", options: ["Sluice gate", "Tube well", "Persian wheel", "Johad"], answer: "Sluice gate", explanation: "A sluice gate in a dam controls water flow into canals and fields for farming." },
+      { id: 'c7_q8', chapter: 'ch7', type: 'mcq', q: "Most rainfall in India happens during which months?", options: ["July to September", "January to March", "October to December", "April to June"], answer: "July to September", explanation: "Monsoon rains in India mostly occur from July to September, which is why farmers need irrigation too." },
+
+      { id: 'c7_f1', chapter: 'ch7', type: 'fill', q: "________ rivers are rain-fed rivers.", answer: "Non-perennial", accept: ["Non-perennial rivers"], wordBank: ["Non-perennial", "Perennial", "Canals", "Reservoir"], explanation: "Non-perennial rivers depend on rain, swell during monsoon, and often dry up later." },
+      { id: 'c7_f2', chapter: 'ch7', type: 'fill', q: "The ________ is used to lift water from open wells for irrigation.", answer: "Persian wheel", wordBank: ["Persian wheel", "Sluice gate", "Tube well", "Johads"], explanation: "A Persian wheel lifts water from open wells to irrigate fields." },
+      { id: 'c7_f3', chapter: 'ch7', type: 'fill', q: "A ________ is an artificial lake formed behind a dam.", answer: "Reservoir", accept: ["Reservoirs"], wordBank: ["Reservoir", "Water table", "Canal", "Johads"], explanation: "When a dam blocks a river, the artificial lake formed behind it is called a reservoir." },
+      { id: 'c7_f4', chapter: 'ch7', type: 'fill', q: "People obtain underground water through wells and ________.", answer: "Tube wells", accept: ["Tube well"], wordBank: ["Tube wells", "Canals", "Tanks", "Dams"], explanation: "Wells and tube wells help draw out underground water." },
+      { id: 'c7_f5', chapter: 'ch7', type: 'fill', q: "Man-made rivers are called ________.", answer: "Canals", accept: ["Canal"], wordBank: ["Canals", "Johads", "Reservoir", "Sprinklers"], explanation: "Canals are man-made channels/rivers dug to carry water from rivers or dams to fields." },
+      { id: 'c7_f6', chapter: 'ch7', type: 'fill', q: "Small mud dams to collect rainwater are called ________.", answer: "Johads", accept: ["Johad"], wordBank: ["Johads", "Canals", "Tube wells", "Reservoir"], explanation: "Johads are traditional small mud dams built to collect and store rainwater." },
+      { id: 'c7_f7', chapter: 'ch7', type: 'fill', q: "Electricity generated from falling water is called ________.", answer: "Hydro-electricity", accept: ["Hydel power", "Hydro-electric power"], wordBank: ["Hydro-electricity", "Multi-cropping", "Cloud seeding", "Water table"], explanation: "In a dam, water falls from a great height and its force generates hydro-electricity (hydel power)." },
+      { id: 'c7_f8', chapter: 'ch7', type: 'fill', q: "Growing two or more crops in the same field is called ________.", answer: "Multi-cropping", wordBank: ["Multi-cropping", "Horticulture", "Irrigation", "Hydro-electricity"], explanation: "Multi-cropping means growing two or more crops in the same field, which increases water needs." },
+      { id: 'c7_f9', chapter: 'ch7', type: 'fill', q: "The level below the ground where you start to find water is the ________.", answer: "Water table", wordBank: ["Water table", "Reservoir", "Sluice gate", "Canal"], explanation: "The underground level where water is first found is called the water table." },
+      { id: 'c7_f10', chapter: 'ch7', type: 'fill', q: "________ is commonly used in cloud seeding to create artificial rain.", answer: "Silver iodide", wordBank: ["Silver iodide", "Sand", "Coal", "Haematite"], explanation: "Silver iodide and dry ice are the two substances commonly used in cloud seeding." },
+
+      { id: 'c7_t1', chapter: 'ch7', type: 'tf', q: "The construction of large dams may make some areas earthquake-prone.", answer: "True", explanation: "True! Huge dams hold massive amounts of water, which can make nearby areas earthquake-prone." },
+      { id: 'c7_t2', chapter: 'ch7', type: 'tf', q: "Multicropping increases the need for water to irrigate crops.", answer: "True", explanation: "True! Growing two or more crops in the same field requires more irrigation water." },
+      { id: 'c7_t3', chapter: 'ch7', type: 'tf', q: "Wular lake is named as 'Jewel in the crown of Kashmir'.", answer: "False", explanation: "False! Dal Lake is called the 'Jewel in the crown of Kashmir', not Wular Lake." },
+      { id: 'c7_t4', chapter: 'ch7', type: 'tf', q: "Cloud seeding is a method to create artificial rain.", answer: "True", explanation: "True! Cloud seeding uses substances like silver iodide or dry ice to create artificial rain." },
+
+      // --- CHAPTER 8: OUR MINERAL RESOURCES ---
+      { id: 'c8_q1', chapter: 'ch8', type: 'mcq', q: "Resources found under the Earth's surface are called ________.", options: ["Minerals", "Copper", "Haematite", "None of these"], answer: "Minerals", explanation: "Minerals are chemical substances / resources found buried under the Earth's surface." },
+      { id: 'c8_q2', chapter: 'ch8', type: 'mcq', q: "What is the process of taking out minerals from rocks buried under the earth called?", options: ["Mining", "Refining", "Drilling", "Quarrying"], answer: "Mining", explanation: "Digging a hole in the earth to take out minerals from buried rocks is called mining." },
+      { id: 'c8_q3', chapter: 'ch8', type: 'mcq', q: "Which of the following rocks contains a high percentage of iron?", options: ["Iron ore", "Limestone", "Granite", "Sandstone"], answer: "Iron ore", explanation: "Iron ore (like haematite) is a rock with a high percentage of iron." },
+      { id: 'c8_q4', chapter: 'ch8', type: 'mcq', q: "What type of rock is chalk made of?", options: ["Sedimentary rock", "Igneous rock", "Metamorphic rock", "Volcanic rock"], answer: "Sedimentary rock", explanation: "Chalk is made of sedimentary rock." },
+      { id: 'c8_q5', chapter: 'ch8', type: 'mcq', q: "Which metal is mainly used in electrical appliances because it is a good conductor of electricity?", options: ["Copper", "Iron", "Gold", "Mica"], answer: "Copper", explanation: "Copper is a great conductor of electricity, so it is widely used in electrical appliances." },
+      { id: 'c8_q6', chapter: 'ch8', type: 'mcq', q: "Which metal is used to make utensils, electric wires, and aeroplanes?", options: ["Aluminium", "Iron", "Gold", "Mica"], answer: "Aluminium", explanation: "Aluminium is lightweight and strong — perfect for aeroplanes, utensils, and electric wires!" },
+      { id: 'c8_q7', chapter: 'ch8', type: 'mcq', q: "Which metal is used to make bridges, machines, utensils, and railway engines?", options: ["Iron", "Copper", "Silver", "Mica"], answer: "Iron", explanation: "Iron is strong and durable, used to make bridges, machines, utensils, and railway engines." },
+      { id: 'c8_q8', chapter: 'ch8', type: 'mcq', q: "What is the main raw material used in an oil refinery?", options: ["Crude oil", "Coal", "Iron ore", "Natural gas"], answer: "Crude oil", explanation: "Oil refineries process crude oil into petrol, diesel, LPG, and kerosene." },
+      { id: 'c8_q9', chapter: 'ch8', type: 'mcq', q: "Which of these is a Non-Metallic mineral?", options: ["Mica", "Iron", "Copper", "Gold"], answer: "Mica", explanation: "Mica, coal, salt, and limestone are Non-Metallic minerals (they do not give us metals)." },
+      { id: 'c8_q10', chapter: 'ch8', type: 'mcq', q: "Which of these is a fossil fuel?", options: ["Coal and Petroleum", "Iron and Copper", "Gold and Silver", "Salt and Mica"], answer: "Coal and Petroleum", explanation: "Coal and petroleum are fossil fuels formed deep inside the earth that release energy when burned." },
+      { id: 'c8_q11', chapter: 'ch8', type: 'mcq', q: "In which type of mining are long tunnels dug deep underground to reach the coal bed?", options: ["Deep Mining", "Strip Mining", "Cloud Seeding", "Multi-cropping"], answer: "Deep Mining", explanation: "In Deep Mining, long tunnels are dug deep underground. Strip mining removes coal near the surface." },
+
+      { id: 'c8_f1', chapter: 'ch8', type: 'fill', q: "India is the ________ largest producer of iron-ore in the world.", answer: "3rd", accept: ["Third", "3"], wordBank: ["3rd", "1st", "2nd", "5th"], explanation: "India is the 3rd largest producer of iron-ore in the world." },
+      { id: 'c8_f2', chapter: 'ch8', type: 'fill', q: "Copper is obtained from an ore called ________.", answer: "Chalcopyrite", wordBank: ["Chalcopyrite", "Haematite", "Mica", "Limestone"], explanation: "Chalcopyrite is the ore from which copper is extracted!" },
+      { id: 'c8_f3', chapter: 'ch8', type: 'fill', q: "India is the world's largest producer of ________.", answer: "Mica", wordBank: ["Mica", "Gold", "Petroleum", "Copper"], explanation: "India is the world's #1 largest producer of Mica!" },
+      { id: 'c8_f4', chapter: 'ch8', type: 'fill', q: "Coal is referred to as ________.", answer: "Buried Sunshine", wordBank: ["Buried Sunshine", "Black Water", "Liquid Gold", "White Gold"], explanation: "Coal is nicknamed 'Buried Sunshine' because it stores ancient solar energy trapped in dead plants." },
+      { id: 'c8_f5', chapter: 'ch8', type: 'fill', q: "A naturally occurring material from which a metal is extracted is called an ________.", answer: "Ore", wordBank: ["Ore", "Fossil fuel", "Mineral", "Refinery"], explanation: "An ore is a naturally occurring material from which a metal or valuable material is extracted." },
+      { id: 'c8_f6', chapter: 'ch8', type: 'fill', q: "Haematite is an ore of ________.", answer: "Iron", wordBank: ["Iron", "Copper", "Aluminium", "Gold"], explanation: "Haematite is a famous ore of Iron (and Chalcopyrite is an ore of Copper)." },
+
+      { id: 'c8_t1', chapter: 'ch8', type: 'tf', q: "CNG is a pollution-free fuel.", answer: "True", explanation: "True! Your book calls CNG pollution-free: it burns much cleaner than petrol or diesel." },
+      { id: 'c8_t2', chapter: 'ch8', type: 'tf', q: "Copper is a good conductor of electricity.", answer: "True", explanation: "True! That's why copper is widely used in electrical appliances and wires." },
+      { id: 'c8_t3', chapter: 'ch8', type: 'tf', q: "Aluminium is used to make dry cell batteries.", answer: "False", explanation: "False! Zinc/manganese are used in dry cell batteries, not aluminium." },
+      { id: 'c8_t4', chapter: 'ch8', type: 'tf', q: "Minerals are of two types: Metallic and Non-metallic.", answer: "True", explanation: "True! Metallic minerals give us metals; Non-metallic minerals do not." },
+
+      // --- BONUS CHAPTER 9: OUR AGRICULTURE ---
+      { id: 'c9_q1', chapter: 'ch9', type: 'mcq', q: "Rabi cropping season is from ________.", options: ["October to March", "June to October", "April to August", "January to May"], answer: "October to March", explanation: "Rabi crops are winter crops grown from October to March (e.g., wheat, barley, oats, mustard)." },
+      { id: 'c9_q2', chapter: 'ch9', type: 'mcq', q: "Kharif crops are also called ________ crops.", options: ["Summer", "Winter", "Spring", "Desert"], answer: "Summer", explanation: "Kharif crops (rice, maize, cotton) are grown from June to October and are called Summer/Monsoon crops." },
+      { id: 'c9_q3', chapter: 'ch9', type: 'mcq', q: "Which climate does the wheat crop require?", options: ["Cool and moist", "Hot and dry", "Freezing cold", "Desert dry"], answer: "Cool and moist", explanation: "Wheat is a Rabi (winter) crop that requires a cool and moist climate." },
+      { id: 'c9_q4', chapter: 'ch9', type: 'mcq', q: "What was the result of Operation Flood (launched in 1970)?", options: ["India became the largest producer of milk in the world", "Largest producer of wheat", "Largest producer of mica", "Largest producer of cotton"], answer: "India became the largest producer of milk in the world", explanation: "Operation Flood (1970) made India the world's largest producer of milk!" },
+      { id: 'c9_q5', chapter: 'ch9', type: 'mcq', q: "Operation Flood is also known as the ________.", options: ["White Revolution", "Green Revolution", "Blue Revolution", "Golden Revolution"], answer: "White Revolution", explanation: "Because it boosted milk production, Operation Flood is called the White Revolution." },
+      { id: 'c9_q6', chapter: 'ch9', type: 'mcq', q: "When was the Green Revolution launched in India?", options: ["Early 1960s", "1970", "1990s", "1947"], answer: "Early 1960s", explanation: "The Green Revolution was launched in India in the early 1960s to increase agricultural production." },
+
+      { id: 'c9_f1', chapter: 'ch9', type: 'fill', q: "Cultivation of fruits, vegetables, flowers, and ornamental plants is called ________.", answer: "Horticulture", wordBank: ["Horticulture", "Plantation", "Livestock Rearing", "Multi-cropping"], explanation: "Horticulture is the cultivation of fruits, vegetables, flowers, and ornamental plants." },
+      { id: 'c9_f2', chapter: 'ch9', type: 'fill', q: "A large piece of land where crops like rubber, banana, and tea are grown is called a ________.", answer: "Plantation", wordBank: ["Plantation", "Horticulture", "Reservoir", "Canal"], explanation: "A plantation is a large estate where crops like tea, rubber, and banana are grown." },
+      { id: 'c9_f3', chapter: 'ch9', type: 'fill', q: "Raising domestic animals like cattle and sheep for profit is called ________.", answer: "Livestock Rearing", wordBank: ["Livestock Rearing", "Horticulture", "Plantation", "Mining"], explanation: "Livestock rearing is raising domestic animals like cattle and sheep for milk, wool, meat, and farming." }
+    ];
+
+    // Match Master Decks
+    const MATCH_DECKS = [
+      {
+        id: 'dams_states_1',
+        chapter: 'ch7',
+        title: 'Dams → States (Part 1)',
+        icon: '🏗️',
+        color: 'sky',
+        pairs: [
+          { left: 'Bhakra Nangal', right: 'Punjab' },
+          { left: 'Hirakud', right: 'Odisha' },
+          { left: 'Nagarjuna Sagar', right: 'Telangana' },
+          { left: 'Farakka', right: 'West Bengal' },
+          { left: 'Mettur', right: 'Tamil Nadu' }
+        ]
+      },
+      {
+        id: 'dams_states_2',
+        chapter: 'ch7',
+        title: 'Dams → States (Part 2)',
+        icon: '🗺️',
+        color: 'indigo',
+        pairs: [
+          { left: 'Nizam Sagar Dam', right: 'Telangana' },
+          { left: 'Srisailam Dam', right: 'Andhra Pradesh' },
+          { left: 'Sardar Sarovar', right: 'Gujarat' },
+          { left: 'Almatti', right: 'Karnataka' },
+          { left: 'Idukki', right: 'Kerala' }
+        ]
+      },
+      {
+        id: 'dams_rivers_1',
+        chapter: 'ch7',
+        title: 'Dams → Rivers (Part 1)',
+        icon: '🌊',
+        color: 'cyan',
+        pairs: [
+          { left: 'Bhakra Nangal', right: 'Satluj' },
+          { left: 'Hirakud', right: 'Mahanadi' },
+          { left: 'Nagarjuna Sagar', right: 'Krishna' },
+          { left: 'Farakka', right: 'Ganga' },
+          { left: 'Nizam Sagar Dam', right: 'Manjira' }
+        ]
+      },
+      {
+        id: 'dams_rivers_2',
+        chapter: 'ch7',
+        title: 'Dams → Rivers (Part 2)',
+        icon: '🏞️',
+        color: 'teal',
+        pairs: [
+          { left: 'Srisailam Dam', right: 'Krishna' },
+          { left: 'Mettur', right: 'Kaveri' },
+          { left: 'Sardar Sarovar', right: 'Narmada' },
+          { left: 'Almatti', right: 'Krishna' },
+          { left: 'Idukki', right: 'Periyar' }
+        ]
+      },
+      {
+        id: 'minerals_states',
+        chapter: 'ch8',
+        title: 'Minerals → Indian States',
+        icon: '⛏️',
+        color: 'amber',
+        pairs: [
+          { left: 'Iron', right: 'Jharkhand & Odisha' },
+          { left: 'Copper', right: 'Rajasthan & Madhya Pradesh' },
+          { left: 'Petroleum', right: 'Assam & Gujarat' },
+          { left: 'Aluminium', right: 'Odisha & Chhattisgarh' }
+        ]
+      },
+      {
+        id: 'terms_uses',
+        chapter: 'wt3',
+        title: 'Metals & Terms → Uses/Meanings',
+        icon: '⚙️',
+        color: 'purple',
+        pairs: [
+          { left: 'Iron', right: 'Bridges & railway engines' },
+          { left: 'Copper', right: 'Electrical appliances' },
+          { left: 'Aluminium', right: 'Aeroplanes & electric wires' },
+          { left: 'Johads', right: 'Small mud dams' },
+          { left: 'Persian wheel', right: 'Lifts water from open wells' },
+          { left: 'Reservoir', right: 'Artificial lake behind a dam' }
+        ]
+      }
+    ];
+
+    // Flashcards (Keywords, One-Word, Uses, Differences)
+    const FLASHCARDS = [
+      // Ch 7
+      { id: 'fc_1', chapter: 'ch7', tag: 'Keyword', front: 'Hydro-electricity', back: 'Electricity generated from falling water (also called hydel power). In a dam, water falls from a great height to generate electricity.' },
+      { id: 'fc_2', chapter: 'ch7', tag: 'Keyword', front: 'Multi-cropping', back: 'The practice of growing two or more crops in the same field. It increases the need for irrigation water.' },
+      { id: 'fc_3', chapter: 'ch7', tag: 'Keyword', front: 'Water Table', back: 'The level below the surface of the ground at which you start to find underground water.' },
+      { id: 'fc_4', chapter: 'ch7', tag: 'One Word', front: 'Man-made rivers?', back: 'Canals 🌊' },
+      { id: 'fc_5', chapter: 'ch7', tag: 'One Word', front: 'Small mud dams to collect rainwater?', back: 'Johads 💧' },
+      { id: 'fc_6', chapter: 'ch7', tag: 'One Word', front: 'Chemical formula of water & two cloud seeding substances?', back: 'Formula: H₂O\nCloud Seeding: Silver iodide & Dry ice ☁️' },
+      { id: 'fc_7', chapter: 'ch7', tag: 'Difference', front: 'Perennial vs Non-Perennial Rivers', isTable: true, tableHeaders: ['Perennial Rivers', 'Non-Perennial Rivers'], tableRows: [['Have water throughout the year', 'Rain-fed rivers; swell in rainy season & often dry later'], ['Arise from snow-capped mountains (e.g., Ganga)', 'Depend on monsoon rain (e.g., Krishna, Kaveri)']] },
+      { id: 'fc_8', chapter: 'ch7', tag: 'Difference', front: 'Natural vs Man-Made Water Resources', isTable: true, tableHeaders: ['Natural Water Resources', 'Man-Made Water Resources'], tableRows: [['Perennial rivers', 'Canals & Wells'], ['Non-perennial rivers, Rain, Lakes', 'Tube wells, Tanks, Dams (Multipurpose projects)']] },
+
+      // Ch 8
+      { id: 'fc_9', chapter: 'ch8', tag: 'Keyword', front: 'Mining', back: 'Digging a hole in the earth to take out minerals from buried rocks.' },
+      { id: 'fc_10', chapter: 'ch8', tag: 'Keyword', front: 'Ore (with 2 Examples)', back: 'A naturally occurring material from which a metal or valuable material is extracted.\nExamples: Haematite (Iron) & Chalcopyrite (Copper).' },
+      { id: 'fc_11', chapter: 'ch8', tag: 'Keyword', front: 'Fossil Fuels', back: 'A substance formed deep inside the earth that gives out energy upon burning.\nExamples: Coal ("Buried Sunshine") & Petroleum.' },
+      { id: 'fc_12', chapter: 'ch8', tag: 'Uses of Metals', front: 'Uses of Iron, Copper & Aluminium', back: '• Iron: Utensils, machines, bridges, railway engines\n• Copper: Electrical appliances (good conductor)\n• Aluminium: Utensils, electric wires, aeroplanes' },
+      { id: 'fc_13', chapter: 'ch8', tag: 'Difference', front: 'Metallic vs Non-Metallic Minerals', isTable: true, tableHeaders: ['Metallic Minerals', 'Non-Metallic Minerals'], tableRows: [['Contain metal in raw form (give us metals)', 'Do NOT contain metals'], ['Usually hard and have a shine of their own', 'Usually not hard and have no shine'], ['Eg: Iron, Copper, Gold, Silver', 'Eg: Coal, Petroleum, Salt, Mica, Limestone']] },
+      { id: 'fc_14', chapter: 'ch8', tag: 'Difference', front: 'Strip Mining vs Deep Mining', isTable: true, tableHeaders: ['Strip Mining', 'Deep Mining'], tableRows: [['Whole seam of coal is mined from the surface just below the soil layer', 'Long tunnels are dug deep underground to reach the desired coal bed']] },
+
+      // Ch 9 Bonus
+      { id: 'fc_15', chapter: 'ch9', tag: 'Bonus Keyword', front: 'Horticulture & Plantation', back: '• Horticulture: Cultivation of fruits, vegetables, flowers & ornamental plants.\n• Plantation: A large piece of land where crops like rubber, banana & tea are grown.' },
+      { id: 'fc_16', chapter: 'ch9', tag: 'Bonus Keyword', front: 'Livestock & Livestock Rearing', back: '• Livestock: Animals people keep on farms/houses (cow, goat, buffaloes, bullocks, camels).\n• Livestock Rearing: Raising domestic animals for profit.' },
+      { id: 'fc_17', chapter: 'ch9', tag: 'Bonus Difference', front: 'Rabi Crops vs Kharif Crops', isTable: true, tableHeaders: ['Rabi Crops (Winter)', 'Kharif Crops (Summer/Monsoon)'], tableRows: [['Season: October to March', 'Season: June to October'], ['Also called Winter crops', 'Also called Summer crops'], ['Eg: Wheat, barley, oats, mustard', 'Eg: Rice, maize, cotton']] }
+    ];
+
+    // Boss Battle Short Q&A + Picture Concepts
+    const BOSS_QUESTIONS = [
+      // Ch 7
+      {
+        id: 'b_c7_1', chapter: 'ch7', title: 'Uses of Water in Daily Life',
+        q: 'List the various uses of water in our daily life.',
+        points: [
+          'All living things need water to stay alive.',
+          'We need water for drinking, bathing, and cleaning.',
+          'Plants need water for growing and making food.'
+        ]
+      },
+      {
+        id: 'b_c7_2', chapter: 'ch7', title: 'Need for Irrigation',
+        q: 'Why has our government developed various means of irrigation?',
+        points: [
+          'Farmers in India depend on rain for agriculture.',
+          'Rains are sometimes more and sometimes less than required.',
+          'Most rainfall happens only in the months of July to September.',
+          'So farmers need man-made alternative means (irrigation) to water crops.'
+        ]
+      },
+      {
+        id: 'b_c7_3', chapter: 'ch7', title: 'Means of Irrigation in India',
+        q: 'What are the various means of irrigation in India?',
+        points: [
+          'Wells & Tube wells',
+          'Canals',
+          'Tanks',
+          'Dams and Multipurpose projects'
+        ]
+      },
+      {
+        id: 'b_c7_4', chapter: 'ch7', title: 'Hydroelectricity Power!',
+        q: 'What is hydroelectricity? How is it produced?',
+        points: [
+          'Electricity produced from water is called hydroelectricity or hydel power.',
+          'In a dam, water is made to fall from a great height.',
+          'The force of this falling water is used to generate electricity.'
+        ]
+      },
+      {
+        id: 'b_c7_5', chapter: 'ch7', title: 'Multipurpose Projects (4 Uses)',
+        q: 'Why are dams called multipurpose projects?',
+        points: [
+          'They generate hydro-electricity.',
+          'They help in controlling floods.',
+          'They are used for fish breeding.',
+          'Water from dams is used for irrigation of crops.'
+        ]
+      },
+      {
+        id: 'b_c7_6', chapter: 'ch7', title: 'Picture Puzzle A',
+        svgType: 'sluice',
+        q: 'Look at the picture: 1) Identify it. 2) How does it help in irrigation? 3) What happens when it is opened?',
+        points: [
+          'Identification: It is a Sluice gate in a dam.',
+          'How it helps: It regulates water levels and directs a controlled volume of water into canals for farming.',
+          'When opened: Water is allowed to flow through the gate into the canal or fields.'
+        ]
+      },
+      {
+        id: 'b_c7_7', chapter: 'ch7', title: 'Wells in Low-Rainfall Areas',
+        q: 'How do wells help farmers in areas with less rainfall?',
+        points: [
+          'Wells provide a regular supply of groundwater.',
+          'They help water/irrigate crops when there is little or no rainfall.'
+        ]
+      },
+      {
+        id: 'b_c7_8', chapter: 'ch7', title: 'Perennial vs Non-Perennial Rivers',
+        q: 'Differentiate between Perennial and Non-perennial rivers.',
+        points: [
+          'Perennial: Have water throughout the year; arise from snow-capped mountains.',
+          'Non-perennial: Rain-fed rivers; swell during the rainy season and often go dry later (e.g., Krishna).'
+        ]
+      },
+      // Ch 8
+      {
+        id: 'b_c8_1', chapter: 'ch8', title: 'What are Ores?',
+        q: 'What are ores? Give two examples.',
+        points: [
+          'An ore is a naturally occurring material from which a metal or valuable material is extracted.',
+          'Example 1: Haematite (iron ore).',
+          'Example 2: Chalcopyrite (copper ore).'
+        ]
+      },
+      {
+        id: 'b_c8_2', chapter: 'ch8', title: 'Uses of Iron, Copper & Aluminium',
+        q: 'Write the uses of Iron, Copper, and Aluminium.',
+        points: [
+          'Iron: Used to make utensils, machines, bridges, and railway engines.',
+          'Copper: Mainly used in electrical appliances because it is a good conductor of electricity.',
+          'Aluminium: Used to make utensils, electric wires, and aeroplanes.'
+        ]
+      },
+      {
+        id: 'b_c8_3', chapter: 'ch8', title: 'Fossil Fuels',
+        q: 'What are fossil fuels? Give examples.',
+        points: [
+          'A substance formed deep inside the earth that gives out energy upon burning.',
+          'Examples: Coal and Petroleum.'
+        ]
+      },
+      {
+        id: 'b_c8_4', chapter: 'ch8', title: 'Conserving Minerals & Fossil Fuels',
+        q: 'Why should we conserve mineral resources? How can we conserve fossil fuels?',
+        points: [
+          'Why: Mineral resources are limited and exhaustible.',
+          'How: Use alternative sources of energy like hydro, solar, and wind energy.',
+          'Benefit: Alternative sources are inexhaustible and non-polluting.'
+        ]
+      },
+      {
+        id: 'b_c8_5', chapter: 'ch8', title: 'Picture Puzzle B',
+        svgType: 'refinery',
+        q: 'Look at the picture: 1) Identify it. 2) Raw material? 3) Products? 4) Why away from residential areas?',
+        points: [
+          'Identification: Oil refinery.',
+          'Main raw material: Crude oil.',
+          'Products: Petrol, diesel, LPG, and kerosene.',
+          'Why away from homes: They cause pollution and fire hazards, so keeping them away keeps people safe.'
+        ]
+      },
+      {
+        id: 'b_c8_6', chapter: 'ch8', title: 'Metallic vs Non-Metallic Minerals',
+        q: 'Differentiate between Metallic and Non-Metallic minerals.',
+        points: [
+          'Metallic: Contain metal in raw form, usually hard, have shine (e.g., Iron, Copper, Gold).',
+          'Non-metallic: Do not contain metals, usually not hard, no shine (e.g., Coal, Petroleum, Salt, Mica).'
+        ]
+      },
+      {
+        id: 'b_c8_7', chapter: 'ch8', title: 'Strip Mining vs Deep Mining',
+        q: 'Differentiate between Strip Mining and Deep Mining.',
+        points: [
+          'Strip Mining: Whole seam of coal is mined from the surface just below the soil layer.',
+          'Deep Mining: Long tunnels are dug deep underground to reach the desired coal bed.'
+        ]
+      },
+      // Bonus Ch 9
+      {
+        id: 'b_c9_1', chapter: 'ch9', title: 'Bonus: Livestock & Uses',
+        q: 'What is livestock and how are they useful?',
+        points: [
+          'Livestock: Animals people keep in houses/farms (cow, goat, buffaloes, bullocks, camels).',
+          'Cows & buffaloes give milk; hens & ducks give eggs and meat.',
+          'Oxen and bullocks are used to plough fields.',
+          'Hair of sheep, goat, and camel is used to make wool.'
+        ]
+      },
+      {
+        id: 'b_c9_2', chapter: 'ch9', title: 'Bonus: Green Revolution',
+        q: 'What was the Green Revolution? Write its 4 objectives.',
+        points: [
+          'Launched in India in early 1960s to increase agricultural production.',
+          '1) Use of better quality seeds.',
+          '2) Use of manure, fertilizers, and pesticides.',
+          '3) Use of tractors and modern machines.',
+          '4) Bringing more land under irrigation.'
+        ]
+      }
+    ];
+
+    /*****************************************************************
+     * 4. STATE MANAGEMENT & LOCALSTORAGE PERSISTENCE
+     *****************************************************************/
+    const STORAGE_KEY = 'diksha_sst_wt3_v1';
+
+    // A factory, so reset never reuses arrays that were already filled.
+    function freshState() {
+      return {
+        xp: 0, stars: 0, combo: 0, soundOn: true,
+        chapter: 'wt3', // 'wt3' | 'ch7' | 'ch8' | 'ch9'
+        mode: 'quiz',   // 'quiz' | 'match' | 'flashcards' | 'boss' | 'cheatsheet'
+        // Field names below are what parent-dashboard.html reads.
+        mistakes: [], days: {}, lastDay: '', t: 0,
+        masteredFlashcards: [], rewardedCards: [], completedDecks: [],
+        defeatedBosses: [], bossClears: []
+      };
+    }
+
+    function normalizeState(raw) {
+      const base = freshState();
+      if (!raw || typeof raw !== 'object') return base;
+      const out = { ...base, ...raw };
+      Object.keys(base).forEach(k => {
+        if (Array.isArray(base[k]) && !Array.isArray(out[k])) out[k] = [];
+      });
+      if (!out.days || typeof out.days !== 'object') out.days = {};
+      return out;
+    }
+
+    let state = loadState();
+
+    // Runtime session states for modes
+    let quizSession = {
+      retryMissedOnly: false,
+      typeFilter: 'all',
+      queue: [],
+      index: 0,
+      score: 0,
+      answered: false,
+      typedInput: ''
+    };
+
+    let matchSession = {
+      deckId: null,
+      leftCards: [],
+      rightCards: [],
+      selectedLeft: null,
+      matchedLeftIds: [],
+      matchedRightIds: [],
+      moves: 0,
+      seconds: 0,
+      timerHandle: null,
+      wrongPair: null
+    };
+
+    let flashSession = {
+      index: 0,
+      flipped: false,
+      hideMastered: false
+    };
+
+    let bossSession = {
+      index: 0,
+      revealed: false,
+      checkedPoints: [],
+      scratchpad: ''
+    };
+
+    function loadState() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) return normalizeState(JSON.parse(saved));
+      } catch (e) {}
+      return freshState();
+    }
+
+    // Screen choices only (tab, chapter, sound): never marks progress as newer.
+    function savePrefs() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    }
+
+    // Real progress: stamp the day, then save and sync.
+    function saveState() {
+      const today = new Date().toLocaleDateString('en-CA');
+      state.lastDay = today;
+      state.days[today] = (state.days[today] || 0) + 1;
+      state.t = Date.now();
+      savePrefs();
+      if (typeof DikshaSync !== 'undefined') {
+        try { DikshaSync.push(STORAGE_KEY, state); } catch (e) {}
+      }
+    }
+
+    function initSync() {
+      if (typeof DikshaSync === 'undefined' || !DikshaSync.init()) return;
+      try { DikshaSync.attachUI(); } catch (e) {}
+      DikshaSync.pull(STORAGE_KEY).then(function (remote) {
+        if (remote && typeof remote === 'object' && (remote.t || 0) > (state.t || 0)) {
+          state = normalizeState(remote);
+          savePrefs();
+          initQuizQueue();
+          updateHUD();
+          renderCurrentMode();
+        }
+        DikshaSync.arm();
+        if (state.t) { try { DikshaSync.push(STORAGE_KEY, state); } catch (e) {} }
+      });
+    }
+
+    function getLevelInfo(xp) {
+      if (xp >= 600) return { level: 4, title: '🏆 Level 4: SST Champion', min: 600, next: null };
+      if (xp >= 350) return { level: 3, title: '⛏️ Level 3: Mineral Hunter', min: 350, next: 600 };
+      if (xp >= 150) return { level: 2, title: '🏗️ Level 2: Dam Builder', min: 150, next: 350 };
+      return { level: 1, title: '🌊 Level 1: Water Explorer', min: 0, next: 150 };
+    }
+
+    function addXP(amount, starBonus = 0, reason = '') {
+      const prevLevel = getLevelInfo(state.xp).level;
+      state.xp += amount;
+      if (starBonus > 0) state.stars += starBonus;
+      const newLevelInfo = getLevelInfo(state.xp);
+      saveState();
+      updateHUD();
+
+      if (reason) showToast(`+${amount} XP ${starBonus ? `& +${starBonus}⭐` : ''} — ${reason}`, 'success');
+
+      if (newLevelInfo.level > prevLevel) {
+        playSound('fanfare');
+        launchConfetti(120);
+        showToast(`🎉 LEVEL UP! You are now ${newLevelInfo.title}!`, 'levelup');
+      }
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const el = document.createElement('div');
+      const styles = {
+        success: 'bg-emerald-500 text-white border-emerald-300',
+        levelup: 'bg-gradient-to-r from-amber-400 via-orange-500 to-pink-500 text-white border-yellow-200 text-base',
+        info: 'bg-sky-600 text-white border-sky-300'
+      };
+      el.className = `px-4 py-2.5 rounded-2xl shadow-xl border-2 font-bold text-sm animate-pop ${styles[type] || styles.info}`;
+      el.textContent = message;
+      container.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = '0';
+        el.style.transition = 'opacity 0.3s';
+        setTimeout(() => el.remove(), 300);
+      }, 2800);
+    }
+
+    function updateHUD() {
+      const info = getLevelInfo(state.xp);
+      document.getElementById('hud-level-badge').textContent = info.title;
+      document.getElementById('hud-streak').textContent = state.combo;
+      document.getElementById('hud-stars').textContent = state.stars;
+      document.getElementById('hud-xp-text').textContent = `${state.xp} XP`;
+
+      if (info.next) {
+        const pct = Math.min(100, Math.round(((state.xp - info.min) / (info.next - info.min)) * 100));
+        document.getElementById('hud-xp-bar').style.width = `${pct}%`;
+        document.getElementById('hud-next-level').textContent = `${info.next - state.xp} XP to Level ${info.level + 1}`;
+      } else {
+        document.getElementById('hud-xp-bar').style.width = '100%';
+        document.getElementById('hud-next-level').textContent = 'Max Champion Rank Reached! 🌟';
+      }
+
+      // Sound toggle UI
+      document.getElementById('sound-icon').textContent = state.soundOn ? '🔊' : '🔇';
+      document.getElementById('sound-label').textContent = state.soundOn ? 'Sound ON' : 'Sound OFF';
+
+      // Active chapter tab styling
+      document.querySelectorAll('.chapter-tab').forEach(btn => {
+        const active = btn.dataset.chapter === state.chapter;
+        if (active) {
+          btn.classList.add('bg-indigo-600', 'text-white', 'border-indigo-700', 'scale-105');
+          btn.classList.remove('bg-white', 'text-slate-700', 'border-slate-200', 'hover:bg-sky-50');
+        } else {
+          btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-700', 'scale-105');
+          btn.classList.add('bg-white', 'text-slate-700', 'border-slate-200', 'hover:bg-sky-50');
+        }
+      });
+
+      // Active mode tab styling
+      document.querySelectorAll('.mode-tab').forEach(btn => {
+        const active = btn.dataset.mode === state.mode;
+        if (active) {
+          btn.classList.add('bg-gradient-to-b', 'from-sky-500', 'to-indigo-600', 'text-white', 'border-indigo-700', 'shadow-lg', '-translate-y-0.5');
+          btn.classList.remove('bg-white/90', 'text-slate-700', 'border-slate-200', 'hover:bg-white');
+        } else {
+          btn.classList.remove('bg-gradient-to-b', 'from-sky-500', 'to-indigo-600', 'text-white', 'border-indigo-700', 'shadow-lg', '-translate-y-0.5');
+          btn.classList.add('bg-white/90', 'text-slate-700', 'border-slate-200', 'hover:bg-white');
+        }
+      });
+    }
+
+    function toggleSound() {
+      state.soundOn = !state.soundOn;
+      savePrefs();
+      updateHUD();
+      if (state.soundOn) playSound('correct');
+    }
+
+    function openResetModal() {
+      const m = document.getElementById('reset-modal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function closeResetModal() {
+      const m = document.getElementById('reset-modal');
+      m.classList.add('hidden');
+      m.classList.remove('flex');
+    }
+
+    function confirmResetProgress() {
+      const soundOn = state.soundOn;
+      state = { ...freshState(), soundOn };
+      saveState();
+      quizSession.retryMissedOnly = false;
+      quizSession.typeFilter = 'all';
+      flashSession.flipped = false;
+      bossSession.revealed = false;
+      bossSession.checkedPoints = [];
+      closeResetModal();
+      clearMatchTimer();
+      matchSession.deckId = null;
+      initQuizQueue();
+      flashSession.index = 0;
+      bossSession.index = 0;
+      updateHUD();
+      renderCurrentMode();
+      showToast('Progress reset! Ready for a fresh adventure!', 'info');
+    }
+
+    function filterByChapter(items) {
+      if (state.chapter === 'wt3') return items.filter(i => i.chapter === 'ch7' || i.chapter === 'ch8' || i.chapter === 'wt3');
+      if (state.chapter === 'ch7') return items.filter(i => i.chapter === 'ch7');
+      if (state.chapter === 'ch8') return items.filter(i => i.chapter === 'ch8');
+      if (state.chapter === 'ch9') return items.filter(i => i.chapter === 'ch9');
+      return items;
+    }
+
+    function setChapter(chap) {
+      state.chapter = chap;
+      savePrefs();
+      clearMatchTimer();
+      matchSession.deckId = null;
+      flashSession.index = 0;
+      flashSession.flipped = false;
+      bossSession.index = 0;
+      bossSession.revealed = false;
+      bossSession.checkedPoints = [];
+      initQuizQueue();
+      updateHUD();
+      renderCurrentMode();
+    }
+
+    function setMode(mode) {
+      if (state.mode === 'match' && mode !== 'match') clearMatchTimer();
+      state.mode = mode;
+      savePrefs();
+      updateHUD();
+      if (mode === 'quiz' && quizSession.queue.length === 0) initQuizQueue();
+      renderCurrentMode();
+    }
+
+    function shuffle(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /*****************************************************************
+     * 5. MODE 1: QUIZ ARENA
+     *****************************************************************/
+    function initQuizQueue() {
+      let pool = filterByChapter(QUIZ_QUESTIONS);
+      if (quizSession.retryMissedOnly) {
+        pool = QUIZ_QUESTIONS.filter(q => state.mistakes.includes(q.id));
+      }
+      if (quizSession.typeFilter !== 'all') {
+        pool = pool.filter(q => q.type === quizSession.typeFilter);
+      }
+      quizSession.queue = shuffle(pool);
+      quizSession.index = 0;
+      quizSession.score = 0;
+      quizSession.answered = false;
+      quizSession.order = null;
+      quizSession.typedInput = '';
+    }
+
+    function setQuizFilter(type) {
+      quizSession.typeFilter = type;
+      quizSession.retryMissedOnly = false;
+      initQuizQueue();
+      renderQuizMode();
+    }
+
+    function toggleRetryMissed() {
+      quizSession.retryMissedOnly = !quizSession.retryMissedOnly;
+      quizSession.typeFilter = 'all';
+      initQuizQueue();
+      renderQuizMode();
+    }
+
+    function renderQuizMode() {
+      const container = document.getElementById('app-content');
+      const missedCount = state.mistakes.length;
+
+      // Top Controls Bar
+      let html = `
+        <div class="bg-white/95 rounded-3xl shadow-lg border-2 border-sky-200 p-4 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5 pb-4 border-b border-slate-100">
+            <div class="flex flex-wrap gap-1.5">
+              ${['all', 'mcq', 'fill', 'tf'].map(t => {
+                const labels = { all: 'All Types', mcq: 'MCQs', fill: 'Fill Blanks', tf: 'True / False' };
+                const active = !quizSession.retryMissedOnly && quizSession.typeFilter === t;
+                return `<button onclick="setQuizFilter('${t}')" class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${active ? 'bg-sky-500 text-white shadow' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}">${labels[t]}</button>`;
+              }).join('')}
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button onclick="toggleRetryMissed()" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 ${quizSession.retryMissedOnly ? 'bg-rose-500 text-white shadow' : 'bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100'}">
+                🔁 Retry Missed (${missedCount})
+              </button>
+              <button onclick="initQuizQueue(); renderQuizMode();" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition">
+                🔀 Shuffle
+              </button>
+            </div>
+          </div>
+      `;
+
+      // Empty state (e.g. 0 missed questions)
+      if (quizSession.queue.length === 0) {
+        html += `
+          <div class="text-center py-12">
+            <div class="text-6xl mb-3">🌟</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">${quizSession.retryMissedOnly ? 'Zero Missed Questions!' : 'No questions in this filter'}</h2>
+            <p class="text-slate-600 mb-5">${quizSession.retryMissedOnly ? 'Amazing job! You have no missed questions waiting to be retried.' : 'Try selecting "All Types" or switching chapters.'}</p>
+            <button onclick="setQuizFilter('all')" class="px-6 py-3 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold shadow-md transition">
+              Back to All Questions
+            </button>
+          </div>
+        </div>`;
+        container.innerHTML = html;
+        return;
+      }
+
+      // Finished Quiz Round Summary
+      if (quizSession.index >= quizSession.queue.length) {
+        const total = quizSession.queue.length;
+        const pct = Math.round((quizSession.score / total) * 100);
+        html += `
+          <div class="text-center py-8 animate-pop">
+            <div class="text-6xl mb-3">${pct >= 80 ? '🏆' : pct >= 50 ? '🎉' : '💪'}</div>
+            <h2 class="text-3xl font-bold text-slate-800 mb-2">Round Complete!</h2>
+            <p class="text-lg font-bold text-indigo-600 mb-2">You scored ${quizSession.score} out of ${total} (${pct}%)</p>
+            <p class="text-slate-600 mb-6 text-sm">${pct >= 80 ? 'Superstar! You are ready to crush Monday\'s test!' : 'Great practice! Try "Retry Missed" to master the tricky ones!'}</p>
+            <div class="flex flex-wrap justify-center gap-3">
+              <button onclick="initQuizQueue(); renderQuizMode();" class="px-6 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-indigo-600 text-white font-bold shadow-lg hover:opacity-95 transition">
+                🔄 Play Again
+              </button>
+              ${state.mistakes.length > 0 ? `<button onclick="quizSession.retryMissedOnly = true; initQuizQueue(); renderQuizMode();" class="px-6 py-3 rounded-2xl bg-rose-500 text-white font-bold shadow-lg hover:bg-rose-600 transition">🔁 Practice ${state.mistakes.length} Missed</button>` : ''}
+            </div>
+          </div>
+        </div>`;
+        container.innerHTML = html;
+        return;
+      }
+
+      // Active Question Card
+      const q = quizSession.queue[quizSession.index];
+      const progressPct = Math.round((quizSession.index / quizSession.queue.length) * 100);
+      const chapLabels = { ch7: '💧 Ch 7: Water', ch8: '⛏️ Ch 8: Minerals', ch9: '🌾 Bonus Ch 9' };
+      const typeLabels = { mcq: 'Multiple Choice', fill: 'Fill in the Blank', tf: 'True or False' };
+
+      html += `
+        <!-- Progress -->
+        <div class="mb-5">
+          <div class="flex justify-between items-center text-xs font-bold text-slate-500 mb-1.5">
+            <span>Question ${quizSession.index + 1} of ${quizSession.queue.length}</span>
+            <span class="text-emerald-600">Score: ${quizSession.score}</span>
+          </div>
+          <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+            <div class="h-full bg-gradient-to-r from-emerald-400 to-sky-500 transition-all duration-300" style="width: ${progressPct}%"></div>
+          </div>
+        </div>
+
+        <!-- Question Header -->
+        <div id="quiz-card-box" class="bg-gradient-to-br from-sky-50/70 to-indigo-50/70 rounded-3xl p-5 sm:p-7 border-2 border-indigo-100 mb-4">
+          <div class="flex flex-wrap gap-2 mb-3">
+            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-white text-indigo-700 border border-indigo-200">${chapLabels[q.chapter]}</span>
+            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">${typeLabels[q.type]}</span>
+          </div>
+
+          <h2 class="text-xl sm:text-2xl font-bold text-slate-800 leading-snug mb-6">${q.q}</h2>
+
+          <!-- Answer Area -->
+          <div id="quiz-options-area">
+            ${renderQuizInputArea(q)}
+          </div>
+
+          <!-- Feedback Box (hidden until answered) -->
+          <div id="quiz-feedback" class="hidden mt-5 p-4 rounded-2xl border-2"></div>
+        </div>
+
+        <!-- Next Button -->
+        <div class="flex justify-end">
+          <button id="quiz-next-btn" onclick="nextQuizQuestion()" class="hidden px-7 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-extrabold shadow-lg hover:scale-105 transition text-base">
+            Next Question ➜
+          </button>
+        </div>
+      </div>`;
+
+      container.innerHTML = html;
+      if (quizSession.answered) paintQuizAnswer();
+    }
+
+    // Same option order every time one question is redrawn.
+    function optionOrder(q, list) {
+      if (!quizSession.order || quizSession.order.id !== q.id) {
+        quizSession.order = { id: q.id, list: shuffle(list) };
+      }
+      return quizSession.order.list;
+    }
+
+    function isRightAnswer(q, text) {
+      return [q.answer, ...(q.accept || [])].some(a => normalizeText(a) === normalizeText(text));
+    }
+
+    function renderQuizInputArea(q) {
+      if (q.type === 'mcq') {
+        const opts = optionOrder(q, q.options);
+        return `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          ${opts.map((opt, idx) => `
+            <button onclick="submitQuizAnswer(this, '${escapeQuotes(opt)}')" data-val="${escapeQuotes(opt)}" class="quiz-opt-btn text-left p-4 rounded-2xl bg-white hover:bg-sky-50 border-2 border-slate-200 hover:border-sky-400 font-bold text-slate-700 shadow-sm transition flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 font-extrabold flex items-center justify-center shrink-0">${String.fromCharCode(65 + idx)}</span>
+              <span>${opt}</span>
+            </button>
+          `).join('')}
+        </div>`;
+      }
+
+      if (q.type === 'tf') {
+        return `<div class="grid grid-cols-2 gap-4">
+          <button onclick="submitQuizAnswer(this, 'True')" data-val="True" class="quiz-opt-btn p-5 rounded-2xl bg-white hover:bg-emerald-50 border-2 border-emerald-200 hover:border-emerald-400 font-extrabold text-lg text-emerald-700 shadow-sm transition flex flex-col items-center gap-1">
+            <span class="text-3xl">✅</span>
+            <span>TRUE</span>
+          </button>
+          <button onclick="submitQuizAnswer(this, 'False')" data-val="False" class="quiz-opt-btn p-5 rounded-2xl bg-white hover:bg-rose-50 border-2 border-rose-200 hover:border-rose-400 font-extrabold text-lg text-rose-700 shadow-sm transition flex flex-col items-center gap-1">
+            <span class="text-3xl">❌</span>
+            <span>FALSE</span>
+          </button>
+        </div>`;
+      }
+
+      if (q.type === 'fill') {
+        const bank = optionOrder(q, q.wordBank);
+        return `
+          <div class="mb-4">
+            <p class="text-xs font-extrabold uppercase tracking-wide text-indigo-600 mb-2">Tap a word from the Word Bank:</p>
+            <div class="flex flex-wrap gap-2.5">
+              ${bank.map(word => `
+                <button onclick="submitQuizAnswer(this, '${escapeQuotes(word)}')" data-val="${escapeQuotes(word)}" class="quiz-opt-btn px-4 py-3 rounded-2xl bg-white hover:bg-indigo-50 border-2 border-indigo-200 hover:border-indigo-500 font-extrabold text-indigo-800 shadow-sm transition text-sm sm:text-base">
+                  ${word}
+                </button>
+              `).join('')}
+            </div>
+          </div>
+          <div class="pt-3 border-t border-indigo-100">
+            <p class="text-xs font-bold text-slate-500 mb-2">Or type your answer (optional spelling practice!):</p>
+            <div class="flex gap-2">
+              <input id="fill-type-input" type="text" placeholder="Type answer here..." class="flex-1 min-w-0 px-4 py-2.5 rounded-xl border-2 border-slate-200 focus:border-indigo-400 outline-none font-bold text-slate-700 bg-white" onkeydown="if(event.key==='Enter') submitTypedFill()" />
+              <button onclick="submitTypedFill()" class="px-5 py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white font-bold shadow transition">Check</button>
+            </div>
+          </div>
+        `;
+      }
+      return '';
+    }
+
+    function escapeQuotes(str) {
+      return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function submitTypedFill() {
+      const inp = document.getElementById('fill-type-input');
+      if (!inp || !inp.value.trim()) return;
+      submitQuizAnswer(null, inp.value.trim());
+    }
+
+    function normalizeText(str) {
+      return str.toLowerCase().replace(/[^a-z0-9]/g, '');
+    }
+
+    function submitQuizAnswer(btnEl, chosen) {
+      if (quizSession.answered) return;
+      quizSession.answered = true;
+
+      const q = quizSession.queue[quizSession.index];
+      const isCorrect = isRightAnswer(q, chosen);
+      quizSession.chosen = chosen;
+      quizSession.correct = isCorrect;
+      quizSession.bonus = 0;
+
+      if (isCorrect) {
+        quizSession.score++;
+        state.combo++;
+        state.mistakes = state.mistakes.filter(id => id !== q.id);
+        quizSession.bonus = state.combo >= 3 ? 5 : 0;
+        playSound('correct');
+        if (state.combo % 5 === 0) launchConfetti(45);
+        addXP(10 + quizSession.bonus, 0, quizSession.bonus ? 'Correct! +5 Combo Bonus 🔥' : '');
+      } else {
+        state.combo = 0;
+        if (!state.mistakes.includes(q.id)) state.mistakes.push(q.id);
+        saveState();
+        updateHUD();
+        playSound('wrong');
+        const cardBox = document.getElementById('quiz-card-box');
+        cardBox.classList.add('animate-shake');
+        setTimeout(() => cardBox.classList.remove('animate-shake'), 450);
+      }
+      paintQuizAnswer();
+    }
+
+    function paintQuizAnswer() {
+      const q = quizSession.queue[quizSession.index];
+      const feedbackEl = document.getElementById('quiz-feedback');
+      if (!q || !feedbackEl) return;
+
+      document.querySelectorAll('.quiz-opt-btn').forEach(b => {
+        b.disabled = true;
+        if (isRightAnswer(q, b.dataset.val)) {
+          b.classList.add('!bg-emerald-100', '!border-emerald-500', '!text-emerald-900');
+        } else if (!quizSession.correct && normalizeText(b.dataset.val) === normalizeText(quizSession.chosen)) {
+          b.classList.add('!bg-rose-100', '!border-rose-500', '!text-rose-900');
+        }
+      });
+      const inp = document.getElementById('fill-type-input');
+      if (inp) inp.disabled = true;
+
+      if (quizSession.correct) {
+        feedbackEl.className = 'mt-5 p-4 rounded-2xl border-2 bg-emerald-50 border-emerald-300 text-emerald-900 animate-pop';
+        feedbackEl.innerHTML = `
+          <div class="font-extrabold text-base mb-1">🎉 Awesome! Correct Answer! ${quizSession.bonus ? '(+5 Combo Bonus 🔥)' : ''}</div>
+          <p class="text-sm font-semibold text-emerald-800">${q.explanation}</p>
+        `;
+      } else {
+        feedbackEl.className = 'mt-5 p-4 rounded-2xl border-2 bg-rose-50 border-rose-300 text-rose-900';
+        feedbackEl.innerHTML = `
+          <div class="font-extrabold text-base mb-1">💡 Nice try! The right answer is: <span class="underline">${q.answer}</span></div>
+          <p class="text-sm font-semibold text-rose-800">${q.explanation}</p>
+        `;
+      }
+      document.getElementById('quiz-next-btn').classList.remove('hidden');
+    }
+
+    function nextQuizQuestion() {
+      quizSession.index++;
+      quizSession.answered = false;
+      if (quizSession.index >= quizSession.queue.length) {
+        const pct = Math.round((quizSession.score / quizSession.queue.length) * 100);
+        if (pct >= 70 && quizSession.queue.length >= 5) {
+          playSound('fanfare');
+          launchConfetti(90);
+          addXP(20, 1, 'Quiz Round Completed!');
+        }
+      }
+      renderQuizMode();
+    }
+
+    /*****************************************************************
+     * 6. MODE 2: MATCH MASTER (Tap-to-Match Game)
+     *****************************************************************/
+    function clearMatchTimer() {
+      if (matchSession.timerHandle) {
+        clearInterval(matchSession.timerHandle);
+        matchSession.timerHandle = null;
+      }
+    }
+
+    function startMatchDeck(deckId) {
+      const deck = MATCH_DECKS.find(d => d.id === deckId);
+      if (!deck) return;
+      clearMatchTimer();
+
+      matchSession.deckId = deckId;
+      matchSession.leftCards = shuffle(deck.pairs.map((p, i) => ({ id: `L${i}`, text: p.left, answer: p.right })));
+      matchSession.rightCards = shuffle(deck.pairs.map((p, i) => ({ id: `R${i}`, text: p.right })));
+      matchSession.selectedLeft = null;
+      matchSession.matchedLeftIds = [];
+      matchSession.matchedRightIds = [];
+      matchSession.moves = 0;
+      matchSession.seconds = 0;
+      matchSession.wrongPair = null;
+
+      renderMatchMode();
+    }
+
+    function runMatchTimer() {
+      if (matchSession.timerHandle) return;
+      matchSession.timerHandle = setInterval(() => {
+        matchSession.seconds++;
+        const el = document.getElementById('match-timer');
+        if (el) el.textContent = formatTime(matchSession.seconds);
+      }, 1000);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = sec % 60;
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    function selectMatchLeft(id) {
+      if (matchSession.matchedLeftIds.includes(id)) return;
+      playSound('flip');
+      matchSession.selectedLeft = id;
+      matchSession.wrongPair = null;
+      renderMatchMode();
+    }
+
+    function selectMatchRight(id) {
+      if (matchSession.matchedRightIds.includes(id)) return;
+      if (!matchSession.selectedLeft) {
+        showToast('First tap a card on the LEFT side! 👈', 'info');
+        return;
+      }
+
+      matchSession.moves++;
+      const leftCard = matchSession.leftCards.find(c => c.id === matchSession.selectedLeft);
+      const rightCard = matchSession.rightCards.find(c => c.id === id);
+
+      // Value-based comparison cleanly handles duplicate rivers like Krishna!
+      if (leftCard.answer === rightCard.text) {
+        matchSession.matchedLeftIds.push(leftCard.id);
+        matchSession.matchedRightIds.push(rightCard.id);
+        matchSession.selectedLeft = null;
+        playSound('correct');
+
+        // Check win!
+        if (matchSession.matchedLeftIds.length === matchSession.leftCards.length) {
+          clearMatchTimer();
+          playSound('fanfare');
+          launchConfetti(100);
+          if (!state.completedDecks.includes(matchSession.deckId)) {
+            state.completedDecks.push(matchSession.deckId);
+          }
+          addXP(25, 1, 'Match Deck Mastered!');
+        }
+      } else {
+        playSound('wrong');
+        matchSession.wrongPair = { left: leftCard.id, right: rightCard.id };
+        matchSession.selectedLeft = null;
+        setTimeout(() => {
+          matchSession.wrongPair = null;
+          if (state.mode === 'match') renderMatchMode();
+        }, 600);
+      }
+
+      renderMatchMode();
+    }
+
+    function renderMatchMode() {
+      const container = document.getElementById('app-content');
+
+      // Deck Picker View
+      if (!matchSession.deckId) {
+        const decks = filterByChapter(MATCH_DECKS);
+        let html = `
+          <div class="bg-white/95 rounded-3xl shadow-lg border-2 border-indigo-200 p-5 sm:p-6">
+            <div class="mb-5">
+              <h2 class="text-2xl font-bold text-slate-800">🧩 Match Master Arena</h2>
+              <p class="text-sm text-slate-600">Pick a deck! Tap a card on the left, then tap its matching partner on the right.</p>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${decks.length ? '' : '<p class="font-bold text-slate-600">No match decks for the bonus chapter. Try its Quiz or Flashcards.</p>'}
+              ${decks.map(d => {
+                const done = state.completedDecks.includes(d.id);
+                return `
+                  <button onclick="startMatchDeck('${d.id}')" class="text-left p-5 rounded-3xl bg-gradient-to-br from-white to-sky-50 hover:from-sky-50 hover:to-indigo-50 border-2 ${done ? 'border-emerald-300' : 'border-slate-200'} hover:border-indigo-400 shadow-sm hover:shadow-md transition group">
+                    <div class="flex justify-between items-start mb-3">
+                      <span class="text-4xl group-hover:scale-110 transition">${d.icon}</span>
+                      ${done ? '<span class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-700">⭐ Mastered</span>' : '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-100 text-indigo-700">+25 XP</span>'}
+                    </div>
+                    <h3 class="font-bold text-lg text-slate-800 mb-1">${d.title}</h3>
+                    <p class="text-xs font-bold text-slate-500">${d.pairs.length} pairs to match</p>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+        container.innerHTML = html;
+        return;
+      }
+
+      // Active Match Board
+      const deck = MATCH_DECKS.find(d => d.id === matchSession.deckId);
+      const isWon = matchSession.matchedLeftIds.length === matchSession.leftCards.length;
+
+      if (!isWon) runMatchTimer();
+
+      let html = `
+        <div class="bg-white/95 rounded-3xl shadow-lg border-2 border-indigo-200 p-4 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2">
+              <button onclick="clearMatchTimer(); matchSession.deckId = null; renderMatchMode();" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-bold text-xs text-slate-700 transition">
+                ← All Decks
+              </button>
+              <h2 class="text-lg sm:text-xl font-bold text-slate-800">${deck.icon} ${deck.title}</h2>
+            </div>
+            <div class="flex items-center gap-3 text-xs sm:text-sm font-extrabold">
+              <span class="px-3 py-1 rounded-xl bg-sky-50 text-sky-700 border border-sky-200">⏱️ <span id="match-timer">${formatTime(matchSession.seconds)}</span></span>
+              <span class="px-3 py-1 rounded-xl bg-amber-50 text-amber-700 border border-amber-200">👆 Moves: ${matchSession.moves}</span>
+            </div>
+          </div>
+      `;
+
+      if (isWon) {
+        html += `
+          <div class="text-center py-8 animate-pop">
+            <div class="text-6xl mb-3">🏆</div>
+            <h3 class="text-3xl font-bold text-emerald-600 mb-2">Deck Cleared!</h3>
+            <p class="text-slate-600 font-bold mb-6">Finished in ${formatTime(matchSession.seconds)} with ${matchSession.moves} moves!</p>
+            <div class="flex flex-wrap justify-center gap-3">
+              <button onclick="startMatchDeck('${deck.id}')" class="px-6 py-3 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold shadow-md transition">🔄 Play Again</button>
+              <button onclick="matchSession.deckId = null; renderMatchMode();" class="px-6 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold shadow-md transition">🧩 Choose Another Deck</button>
+            </div>
+          </div>
+        </div>`;
+        container.innerHTML = html;
+        return;
+      }
+
+      html += `
+        <div class="grid grid-cols-2 gap-3 sm:gap-6">
+          <!-- Left Column -->
+          <div class="flex flex-col gap-3">
+            <div class="text-center text-xs font-extrabold uppercase tracking-wider text-indigo-500">1. Tap Left</div>
+            ${matchSession.leftCards.map(c => {
+              const matched = matchSession.matchedLeftIds.includes(c.id);
+              const selected = matchSession.selectedLeft === c.id;
+              const wrong = matchSession.wrongPair && matchSession.wrongPair.left === c.id;
+              let cls = 'bg-white border-slate-200 hover:border-indigo-400 text-slate-800';
+              if (matched) cls = 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-60 cursor-default';
+              else if (wrong) cls = 'bg-rose-100 border-rose-500 text-rose-800 animate-shake';
+              else if (selected) cls = 'bg-indigo-600 border-indigo-700 text-white shadow-lg scale-[1.03]';
+              return `
+                <button onclick="selectMatchLeft('${c.id}')" class="p-3.5 sm:p-4 rounded-2xl border-2 font-extrabold text-xs sm:text-base transition text-center min-h-[60px] flex items-center justify-center ${cls}">
+                  ${matched ? '✅ ' : ''}${c.text}
+                </button>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Right Column -->
+          <div class="flex flex-col gap-3">
+            <div class="text-center text-xs font-extrabold uppercase tracking-wider text-emerald-600">2. Tap Match</div>
+            ${matchSession.rightCards.map(c => {
+              const matched = matchSession.matchedRightIds.includes(c.id);
+              const wrong = matchSession.wrongPair && matchSession.wrongPair.right === c.id;
+              let cls = 'bg-white border-slate-200 hover:border-emerald-400 text-slate-800';
+              if (matched) cls = 'bg-emerald-100 border-emerald-400 text-emerald-800 opacity-60 cursor-default';
+              else if (wrong) cls = 'bg-rose-100 border-rose-500 text-rose-800 animate-shake';
+              return `
+                <button onclick="selectMatchRight('${c.id}')" class="p-3.5 sm:p-4 rounded-2xl border-2 font-extrabold text-xs sm:text-base transition text-center min-h-[60px] flex items-center justify-center ${cls}">
+                  ${matched ? '✅ ' : ''}${c.text}
+                </button>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      </div>`;
+
+      container.innerHTML = html;
+    }
+
+    /*****************************************************************
+     * 7. MODE 3: FLASHCARD FLIP (3D Active Recall & Differences)
+     *****************************************************************/
+    function getFilteredFlashcards() {
+      let cards = filterByChapter(FLASHCARDS);
+      if (flashSession.hideMastered) {
+        cards = cards.filter(c => !state.masteredFlashcards.includes(c.id));
+      }
+      return cards;
+    }
+
+    function flipCurrentCard() {
+      playSound('flip');
+      flashSession.flipped = !flashSession.flipped;
+      const inner = document.getElementById('flashcard-inner');
+      if (inner) inner.classList.toggle('rotate-y-180', flashSession.flipped);
+    }
+
+    function markFlashcard(gotIt) {
+      const cards = getFilteredFlashcards();
+      const card = cards[flashSession.index];
+      if (!card) return;
+
+      if (gotIt) {
+        if (!state.masteredFlashcards.includes(card.id)) state.masteredFlashcards.push(card.id);
+        playSound('correct');
+        if (!state.rewardedCards.includes(card.id)) {
+          state.rewardedCards.push(card.id);
+          addXP(5, 0, 'Flashcard Mastered!');
+        } else {
+          saveState();
+        }
+      } else {
+        state.masteredFlashcards = state.masteredFlashcards.filter(id => id !== card.id);
+        saveState();
+        playSound('flip');
+      }
+
+      flashSession.flipped = false;
+      const nextCards = getFilteredFlashcards();
+      if (nextCards.length > 0) {
+        const step = (gotIt && flashSession.hideMastered) ? 0 : 1;
+        flashSession.index = (flashSession.index + step) % nextCards.length;
+      } else {
+        flashSession.index = 0;
+      }
+      renderFlashcardsMode();
+    }
+
+    function stepFlashcard(delta) {
+      const cards = getFilteredFlashcards();
+      if (cards.length === 0) return;
+      flashSession.flipped = false;
+      flashSession.index = (flashSession.index + delta + cards.length) % cards.length;
+      renderFlashcardsMode();
+    }
+
+    function renderFlashcardsMode() {
+      const container = document.getElementById('app-content');
+      const allInChapter = filterByChapter(FLASHCARDS);
+      const masteredInChapter = allInChapter.filter(c => state.masteredFlashcards.includes(c.id)).length;
+      const cards = getFilteredFlashcards();
+
+      if (flashSession.index >= cards.length) flashSession.index = 0;
+
+      let html = `
+        <div class="bg-white/95 rounded-3xl shadow-lg border-2 border-purple-200 p-5 sm:p-6">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
+            <div>
+              <h2 class="text-2xl font-bold text-slate-800">🃏 Flashcard Flip</h2>
+              <p class="text-xs sm:text-sm font-bold text-purple-600">Mastered: ${masteredInChapter} / ${allInChapter.length} cards</p>
+            </div>
+            <label class="inline-flex items-center gap-2 cursor-pointer bg-purple-50 px-3.5 py-2 rounded-2xl border border-purple-200 text-xs font-bold text-purple-800">
+              <input type="checkbox" ${flashSession.hideMastered ? 'checked' : ''} onchange="flashSession.hideMastered = this.checked; flashSession.index = 0; flashSession.flipped = false; renderFlashcardsMode();" class="w-4 h-4 accent-purple-600" />
+              Hide Mastered Cards
+            </label>
+          </div>
+      `;
+
+      if (cards.length === 0) {
+        html += `
+          <div class="text-center py-12 animate-pop">
+            <div class="text-6xl mb-3">🎓</div>
+            <h3 class="text-2xl font-bold text-slate-800 mb-2">All Flashcards Mastered!</h3>
+            <p class="text-slate-600 mb-5">Uncheck "Hide Mastered Cards" to review them anytime.</p>
+            <button onclick="flashSession.hideMastered = false; renderFlashcardsMode();" class="px-6 py-3 rounded-2xl bg-purple-600 text-white font-bold shadow-md">Show All Cards</button>
+          </div>
+        </div>`;
+        container.innerHTML = html;
+        return;
+      }
+
+      const card = cards[flashSession.index];
+      const isMastered = state.masteredFlashcards.includes(card.id);
+
+      const backContent = card.isTable
+        ? `
+          <div class="w-full overflow-x-auto">
+            <table class="w-full text-left border-collapse text-xs sm:text-sm">
+              <thead>
+                <tr>
+                  <th class="p-2 bg-indigo-100 text-indigo-900 rounded-tl-xl border border-indigo-200">${card.tableHeaders[0]}</th>
+                  <th class="p-2 bg-amber-100 text-amber-900 rounded-tr-xl border border-amber-200">${card.tableHeaders[1]}</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${card.tableRows.map(r => `
+                  <tr class="bg-white">
+                    <td class="p-2 border border-slate-200 font-semibold text-slate-700">${r[0]}</td>
+                    <td class="p-2 border border-slate-200 font-semibold text-slate-700">${r[1]}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `
+        : `<p class="text-base sm:text-xl font-bold text-slate-800 whitespace-pre-line leading-relaxed text-center">${card.back}</p>`;
+
+      html += `
+        <div class="text-center text-xs font-bold text-slate-400 mb-2">Card ${flashSession.index + 1} of ${cards.length} • Tap card to flip!</div>
+
+        <!-- 3D Flip Card -->
+        <div class="perspective-1000 max-w-2xl mx-auto mb-6 cursor-pointer" onclick="flipCurrentCard()">
+          <div id="flashcard-inner" class="relative w-full min-h-[270px] sm:min-h-[300px] transform-style-3d ${flashSession.flipped ? 'rotate-y-180' : ''}">
+            <!-- Front -->
+            <div class="backface-hidden rounded-3xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 text-white p-6 sm:p-8 flex flex-col items-center justify-center shadow-xl border-4 border-white">
+              <div class="absolute top-4 left-4 px-3 py-1 rounded-full bg-white/20 backdrop-blur text-xs font-extrabold">${card.tag}</div>
+              ${isMastered ? '<div class="absolute top-4 right-4 px-3 py-1 rounded-full bg-emerald-400 text-emerald-950 text-xs font-extrabold">✅ Mastered</div>' : ''}
+              <h3 class="text-2xl sm:text-3xl font-bold text-center leading-snug">${card.front}</h3>
+              <p class="mt-6 text-xs font-bold text-white/80 bg-black/15 px-4 py-1.5 rounded-full">👆 Tap to reveal answer</p>
+            </div>
+
+            <!-- Back -->
+            <div class="backface-hidden rotate-y-180 rounded-3xl bg-gradient-to-br from-amber-50 to-sky-50 p-5 sm:p-7 flex flex-col items-center justify-center shadow-xl border-4 border-indigo-300 overflow-y-auto">
+              <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-500 mb-3">${card.front}</div>
+              ${backContent}
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="flex flex-wrap items-center justify-center gap-3">
+          <button onclick="stepFlashcard(-1)" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 transition">◀ Prev</button>
+          <button onclick="markFlashcard(false)" class="px-5 py-3 rounded-2xl bg-amber-100 hover:bg-amber-200 border-2 border-amber-300 font-extrabold text-amber-900 transition">🔁 Review Again</button>
+          <button onclick="markFlashcard(true)" class="px-6 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold shadow-md transition">✅ Got it!${state.rewardedCards.includes(card.id) ? '' : ' (+5 XP)'}</button>
+          <button onclick="stepFlashcard(1)" class="px-4 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 font-bold text-slate-700 transition">Next ▶</button>
+        </div>
+      </div>`;
+
+      container.innerHTML = html;
+    }
+
+    /*****************************************************************
+     * 8. MODE 4: EXAM BOSS BATTLE (Short Q&A + Picture Concepts)
+     *****************************************************************/
+    function getPictureSVG(type) {
+      if (type === 'sluice') {
+        return `
+          <div class="bg-sky-50 rounded-2xl p-3 border-2 border-sky-200 mb-4 flex flex-col items-center">
+            <svg viewBox="0 0 360 150" class="w-full max-w-sm h-auto rounded-xl">
+              <rect width="360" height="150" fill="#e0f2fe"/>
+              <!-- Reservoir Water -->
+              <rect x="0" y="45" width="145" height="105" fill="#0284c7"/>
+              <path d="M0 55 Q20 48 40 55 T80 55 T120 55 T145 55" stroke="#7dd3fc" stroke-width="3" fill="none"/>
+              <!-- Dam Wall -->
+              <polygon points="140,20 195,20 220,150 140,150" fill="#64748b"/>
+              <rect x="135" y="15" width="65" height="10" rx="3" fill="#475569"/>
+              <!-- Sluice Gate Mechanism -->
+              <rect x="158" y="25" width="22" height="58" fill="#cbd5e1" stroke="#334155" stroke-width="2"/>
+              <line x1="169" y1="15" x2="169" y2="83" stroke="#1e293b" stroke-width="3"/>
+              <!-- Flowing Water into Canal -->
+              <path d="M180 85 Q235 90 250 120 L360 120 L360 150 L215 150 Q205 115 180 105 Z" fill="#38bdf8"/>
+              <path d="M195 100 Q220 108 235 128" stroke="#ffffff" stroke-width="2.5" stroke-dasharray="5,4" fill="none"/>
+              <!-- Green Farm Bank -->
+              <path d="M250 120 L360 120 L360 105 L265 105 Z" fill="#22c55e"/>
+              <!-- Labels -->
+              <text x="18" y="38" fill="#0369a1" font-size="11" font-weight="bold">Reservoir</text>
+              <text x="260" y="98" fill="#15803d" font-size="11" font-weight="bold">Canal to Fields</text>
+              <circle cx="169" cy="54" r="16" stroke="#f59e0b" stroke-width="3" stroke-dasharray="4,3" fill="none"/>
+              <text x="208" y="45" fill="#b45309" font-size="12" font-weight="bold">← What is this?</text>
+            </svg>
+          </div>
+        `;
+      }
+      if (type === 'refinery') {
+        return `
+          <div class="bg-amber-50 rounded-2xl p-3 border-2 border-amber-200 mb-4 flex flex-col items-center">
+            <svg viewBox="0 0 360 150" class="w-full max-w-sm h-auto rounded-xl">
+              <rect width="360" height="150" fill="#fef3c7"/>
+              <!-- Ground -->
+              <rect x="0" y="125" width="360" height="25" fill="#94a3b8"/>
+              <!-- Distillation Towers -->
+              <rect x="50" y="35" width="26" height="90" rx="6" fill="#475569"/>
+              <rect x="92" y="20" width="22" height="105" rx="5" fill="#64748b"/>
+              <!-- Flame / Smoke Stack -->
+              <rect x="135" y="45" width="10" height="80" fill="#334155"/>
+              <path d="M140 42 Q134 30 140 22 Q147 30 140 42 Z" fill="#f97316"/>
+              <!-- Connecting Pipes -->
+              <path d="M76 65 L92 65 M114 85 L185 85 L185 100" stroke="#1e293b" stroke-width="4" fill="none"/>
+              <!-- Large Cylindrical Storage Tanks -->
+              <rect x="175" y="88" width="68" height="37" rx="4" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+              <ellipse cx="209" cy="88" rx="34" ry="7" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+              <rect x="260" y="95" width="62" height="30" rx="4" fill="#e2e8f0" stroke="#475569" stroke-width="2"/>
+              <ellipse cx="291" cy="95" rx="31" ry="6" fill="#f8fafc" stroke="#475569" stroke-width="2"/>
+              <text x="192" y="112" fill="#334155" font-size="10" font-weight="bold">TANKS</text>
+              <text x="180" y="36" fill="#b45309" font-size="12" font-weight="bold">Identify this facility!</text>
+            </svg>
+          </div>
+        `;
+      }
+      return '';
+    }
+
+    function toggleBossPoint(idx) {
+      if (bossSession.checkedPoints.includes(idx)) {
+        bossSession.checkedPoints = bossSession.checkedPoints.filter(i => i !== idx);
+      } else {
+        bossSession.checkedPoints.push(idx);
+      }
+      renderBossMode();
+    }
+
+    function strikeBoss() {
+      const list = filterByChapter(BOSS_QUESTIONS);
+      const bq = list[bossSession.index];
+      if (!bq) return;
+
+      const rememberedAll = bossSession.checkedPoints.length >= Math.max(1, bq.points.length - 1);
+      if (rememberedAll) {
+        if (!state.defeatedBosses.includes(bq.id)) {
+          state.defeatedBosses.push(bq.id);
+          playSound('hit');
+          addXP(15, 0, 'Boss Shield Shattered! ⚔️');
+        } else {
+          playSound('hit');
+        }
+      } else {
+        playSound('flip');
+        showToast('Good review! Try to remember all key points next time 💪', 'info');
+      }
+
+      // Check if all bosses in this chapter are defeated
+      const allDefeated = list.every(item => state.defeatedBosses.includes(item.id));
+      if (allDefeated && !state.bossClears.includes(state.chapter)) {
+        state.bossClears.push(state.chapter);
+        playSound('fanfare');
+        launchConfetti(110);
+        addXP(30, 2, 'Exam Boss Defeated! 🐉🏆');
+      }
+
+      bossSession.index = (bossSession.index + 1) % list.length;
+      bossSession.revealed = false;
+      bossSession.checkedPoints = [];
+      bossSession.scratchpad = '';
+      renderBossMode();
+    }
+
+    function renderBossMode() {
+      const container = document.getElementById('app-content');
+      const list = filterByChapter(BOSS_QUESTIONS);
+      if (bossSession.index >= list.length) bossSession.index = 0;
+
+      const defeatedCount = list.filter(b => state.defeatedBosses.includes(b.id)).length;
+      const bossHpPct = Math.max(0, Math.round(((list.length - defeatedCount) / list.length) * 100));
+      const bq = list[bossSession.index];
+      const isDefeated = state.defeatedBosses.includes(bq.id);
+
+      let html = `
+        <div class="bg-white/95 rounded-3xl shadow-lg border-2 border-rose-200 p-5 sm:p-6">
+          <!-- Boss HP Header -->
+          <div class="bg-gradient-to-r from-slate-800 via-indigo-900 to-purple-900 text-white rounded-3xl p-4 sm:p-5 mb-5 shadow-md">
+            <div class="flex items-center justify-between gap-3 mb-2">
+              <div class="flex items-center gap-3">
+                <span class="text-4xl">${bossHpPct === 0 ? '😵' : '🐉'}</span>
+                <div>
+                  <h2 class="text-lg sm:text-xl font-bold">${bossHpPct === 0 ? 'Monday Test Boss Defeated! 🎉' : 'Exam Boss: Monday Test Monster'}</h2>
+                  <p class="text-xs text-indigo-200 font-semibold">Break shields by recalling key points & ticking your checklist!</p>
+                </div>
+              </div>
+              <div class="text-right shrink-0">
+                <div class="text-xs font-bold text-rose-300">BOSS HP</div>
+                <div class="text-lg font-extrabold">${bossHpPct}%</div>
+              </div>
+            </div>
+            <div class="w-full h-3.5 bg-slate-700 rounded-full overflow-hidden border border-slate-600">
+              <div class="h-full bg-gradient-to-r from-rose-500 to-amber-400 transition-all duration-500" style="width: ${bossHpPct}%"></div>
+            </div>
+            <div class="flex flex-wrap gap-1.5 mt-3">
+              ${list.map((item, idx) => {
+                const done = state.defeatedBosses.includes(item.id);
+                const cur = idx === bossSession.index;
+                return `<button onclick="bossSession.index=${idx}; bossSession.revealed=false; bossSession.checkedPoints=[]; bossSession.scratchpad=''; renderBossMode();" class="w-7 h-7 rounded-lg text-xs font-extrabold transition ${cur ? 'bg-amber-400 text-slate-900 scale-110 ring-2 ring-white' : done ? 'bg-emerald-500 text-white' : 'bg-white/15 text-white hover:bg-white/30'}">${done ? '✓' : idx + 1}</button>`;
+              }).join('')}
+            </div>
+          </div>
+
+          <!-- Active Shield Question -->
+          <div class="bg-gradient-to-br from-rose-50/60 to-amber-50/60 rounded-3xl p-5 sm:p-6 border-2 border-amber-200">
+            <div class="flex items-center justify-between gap-2 mb-3">
+              <span class="px-3 py-1 rounded-full text-xs font-extrabold bg-amber-200 text-amber-900">🛡️ Shield ${bossSession.index + 1} of ${list.length}: ${bq.title}</span>
+              ${isDefeated ? '<span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-700">⚔️ Broken</span>' : ''}
+            </div>
+
+            ${bq.svgType ? getPictureSVG(bq.svgType) : ''}
+
+            <h3 class="text-xl sm:text-2xl font-bold text-slate-800 mb-4">${bq.q}</h3>
+
+            <!-- Optional Scratchpad -->
+            <div class="mb-4">
+              <label class="block text-xs font-bold text-slate-500 mb-1">Say your answer aloud (or jot quick keywords below):</label>
+              <textarea oninput="bossSession.scratchpad = this.value" rows="2" placeholder="Optional scratchpad..." class="w-full p-3 rounded-2xl border-2 border-slate-200 focus:border-indigo-400 outline-none text-sm font-semibold bg-white">${bossSession.scratchpad}</textarea>
+            </div>
+
+            ${!bossSession.revealed ? `
+              <button onclick="bossSession.revealed = true; playSound('flip'); renderBossMode();" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-extrabold text-base shadow-lg hover:opacity-95 transition">
+                👁️ Reveal Answer Checklist
+              </button>
+            ` : `
+              <div class="bg-white rounded-2xl p-4 sm:p-5 border-2 border-emerald-200 mb-4 animate-pop">
+                <p class="text-xs font-extrabold uppercase tracking-wide text-emerald-600 mb-3">Tick every key point you remembered:</p>
+                <div class="space-y-2.5">
+                  ${bq.points.map((pt, idx) => {
+                    const checked = bossSession.checkedPoints.includes(idx);
+                    return `
+                      <label class="flex items-start gap-3 p-3 rounded-xl border-2 cursor-pointer transition ${checked ? 'bg-emerald-50 border-emerald-400' : 'bg-slate-50 border-slate-200 hover:bg-sky-50'}">
+                        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleBossPoint(${idx})" class="w-5 h-5 mt-0.5 accent-emerald-600 shrink-0" />
+                        <span class="text-sm sm:text-base font-bold text-slate-800">${pt}</span>
+                      </label>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+
+              <div class="flex flex-wrap gap-3 justify-end items-center">
+                <button onclick="strikeBoss()" class="px-7 py-3.5 rounded-2xl bg-gradient-to-r from-rose-500 to-orange-500 text-white font-extrabold shadow-lg hover:scale-105 transition">
+                  ⚔️ Strike Boss & Next Shield!${isDefeated ? '' : ' (+15 XP)'}
+                </button>
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    /*****************************************************************
+     * 9. MODE 5: QUICK CHEAT SHEET (10-Minute Recap)
+     *****************************************************************/
+    function renderCheatSheetMode() {
+      const container = document.getElementById('app-content');
+
+      container.innerHTML = `
+        <div class="bg-white rounded-3xl shadow-lg border-2 border-emerald-200 p-5 sm:p-7 print-full space-y-8">
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-200">
+            <div>
+              <h2 class="text-2xl sm:text-3xl font-bold text-slate-800">📋 10-Minute Quick Cheat Sheet</h2>
+              <p class="text-sm font-semibold text-slate-500">Everything you need for Monday's W.T. - III in one super-clean place!</p>
+            </div>
+            <button onclick="window.print()" class="no-print px-5 py-2.5 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-white font-bold shadow transition flex items-center gap-2">
+              🖨️ Print Sheet
+            </button>
+          </div>
+
+          <!-- Quick Facts Box -->
+          <div class="bg-gradient-to-r from-amber-50 to-yellow-50 rounded-2xl p-5 border-2 border-amber-200">
+            <h3 class="text-lg font-bold text-amber-900 mb-3">⚡ Super-Quick One-Line Facts</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-sm font-bold text-slate-700">
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">🌍 <b>World's Largest Hydro Power Station:</b> Three Gorges Dam (China)</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">🏞️ <b>Wular Lake River:</b> Jhelum (Dal Lake = Jewel in the crown of Kashmir)</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">💧 <b>Water Formula:</b> H₂O • <b>Liquid Unit:</b> Gallon</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">☁️ <b>Cloud Seeding (Artificial Rain):</b> Silver iodide & Dry ice</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">☀️ <b>Coal Nickname:</b> Buried Sunshine • <b>Chalk:</b> Sedimentary rock</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">🏆 <b>India Ranks:</b> 3rd largest iron-ore producer • #1 largest Mica producer</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">⛏️ <b>Ores:</b> Haematite (Iron) • Chalcopyrite (Copper)</div>
+              <div class="bg-white/80 p-2.5 rounded-xl border border-amber-100">🚰 <b>Largest Well Irrigation State:</b> Uttar Pradesh • <b>Mud Dams:</b> Johads</div>
+            </div>
+          </div>
+
+          <!-- Complete 10 Dams Table -->
+          <div>
+            <h3 class="text-xl font-bold text-sky-700 mb-3">🏗️ Chapter 7: All 10 Dams, Rivers & States</h3>
+            <div class="overflow-x-auto rounded-2xl border-2 border-sky-100">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead class="bg-sky-100 text-sky-900">
+                  <tr>
+                    <th class="p-3 font-extrabold">#</th>
+                    <th class="p-3 font-extrabold">Dam / Project</th>
+                    <th class="p-3 font-extrabold">River</th>
+                    <th class="p-3 font-extrabold">State</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-sky-50 font-bold text-slate-700">
+                  ${[
+                    ['Bhakra Nangal', 'Satluj', 'Punjab'],
+                    ['Hirakud', 'Mahanadi', 'Odisha'],
+                    ['Nagarjuna Sagar', 'Krishna', 'Telangana'],
+                    ['Farakka', 'Ganga', 'West Bengal'],
+                    ['Nizam Sagar Dam', 'Manjira', 'Telangana'],
+                    ['Srisailam Dam', 'Krishna', 'Andhra Pradesh'],
+                    ['Mettur', 'Kaveri', 'Tamil Nadu'],
+                    ['Sardar Sarovar', 'Narmada', 'Gujarat'],
+                    ['Almatti', 'Krishna', 'Karnataka'],
+                    ['Idukki', 'Periyar', 'Kerala']
+                  ].map((r, i) => `
+                    <tr class="${i % 2 === 0 ? 'bg-white' : 'bg-sky-50/40'}">
+                      <td class="p-2.5 text-slate-400">${i + 1}</td>
+                      <td class="p-2.5 text-slate-800">${r[0]}</td>
+                      <td class="p-2.5 text-sky-700">${r[1]}</td>
+                      <td class="p-2.5 text-indigo-700">${r[2]}</td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Minerals & States Table -->
+          <div>
+            <h3 class="text-xl font-bold text-amber-700 mb-3">⛏️ Chapter 8: Minerals, States & Key Uses</h3>
+            <div class="overflow-x-auto rounded-2xl border-2 border-amber-100">
+              <table class="w-full text-left border-collapse text-sm">
+                <thead class="bg-amber-100 text-amber-900">
+                  <tr>
+                    <th class="p-3 font-extrabold">Mineral</th>
+                    <th class="p-3 font-extrabold">Main Indian States</th>
+                    <th class="p-3 font-extrabold">Key Uses / Facts</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-amber-50 font-bold text-slate-700">
+                  <tr class="bg-white">
+                    <td class="p-3 text-slate-900">Iron</td>
+                    <td class="p-3 text-amber-800">Jharkhand, Odisha</td>
+                    <td class="p-3">Utensils, machines, bridges, railway engines (Ore: Haematite)</td>
+                  </tr>
+                  <tr class="bg-amber-50/40">
+                    <td class="p-3 text-slate-900">Copper</td>
+                    <td class="p-3 text-amber-800">Rajasthan, Madhya Pradesh</td>
+                    <td class="p-3">Electrical appliances — good conductor (Ore: Chalcopyrite)</td>
+                  </tr>
+                  <tr class="bg-white">
+                    <td class="p-3 text-slate-900">Petroleum</td>
+                    <td class="p-3 text-amber-800">Assam, Gujarat</td>
+                    <td class="p-3">Fossil fuel; Crude oil refined into petrol, diesel, LPG, kerosene</td>
+                  </tr>
+                  <tr class="bg-amber-50/40">
+                    <td class="p-3 text-slate-900">Aluminium</td>
+                    <td class="p-3 text-amber-800">Odisha, Chhattisgarh</td>
+                    <td class="p-3">Utensils, electric wires, aeroplanes</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Differentiate Between Tables -->
+          <div>
+            <h3 class="text-xl font-bold text-purple-700 mb-3">⚖️ All "Differentiate Between" Tables</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Perennial vs Non-Perennial -->
+              <div class="rounded-2xl border-2 border-purple-100 overflow-hidden">
+                <div class="bg-purple-100 px-4 py-2 font-extrabold text-purple-900 text-sm">1. Perennial vs Non-Perennial Rivers</div>
+                <table class="w-full text-xs sm:text-sm border-collapse">
+                  <tr class="bg-purple-50/50 font-bold"><th class="p-2 border-r border-purple-100 w-1/2">Perennial</th><th class="p-2 w-1/2">Non-Perennial</th></tr>
+                  <tr class="border-t border-purple-100"><td class="p-2.5 border-r border-purple-100">Have water all year round.</td><td class="p-2.5">Rain-fed; swell in monsoon, often dry later.</td></tr>
+                  <tr class="border-t border-purple-100"><td class="p-2.5 border-r border-purple-100">Arise from snow-capped mountains.</td><td class="p-2.5">Depend on rainfall (e.g., Krishna).</td></tr>
+                </table>
+              </div>
+
+              <!-- Metallic vs Non-Metallic -->
+              <div class="rounded-2xl border-2 border-indigo-100 overflow-hidden">
+                <div class="bg-indigo-100 px-4 py-2 font-extrabold text-indigo-900 text-sm">2. Metallic vs Non-Metallic Minerals</div>
+                <table class="w-full text-xs sm:text-sm border-collapse">
+                  <tr class="bg-indigo-50/50 font-bold"><th class="p-2 border-r border-indigo-100 w-1/2">Metallic</th><th class="p-2 w-1/2">Non-Metallic</th></tr>
+                  <tr class="border-t border-indigo-100"><td class="p-2.5 border-r border-indigo-100">Contain metal in raw form; hard & shiny.</td><td class="p-2.5">No metal; usually not hard & no shine.</td></tr>
+                  <tr class="border-t border-indigo-100"><td class="p-2.5 border-r border-indigo-100">Eg: Iron, Copper, Gold, Silver.</td><td class="p-2.5">Eg: Coal, Petroleum, Salt, Mica, Limestone.</td></tr>
+                </table>
+              </div>
+
+              <!-- Strip vs Deep Mining -->
+              <div class="rounded-2xl border-2 border-teal-100 overflow-hidden">
+                <div class="bg-teal-100 px-4 py-2 font-extrabold text-teal-900 text-sm">3. Strip Mining vs Deep Mining</div>
+                <table class="w-full text-xs sm:text-sm border-collapse">
+                  <tr class="bg-teal-50/50 font-bold"><th class="p-2 border-r border-teal-100 w-1/2">Strip Mining</th><th class="p-2 w-1/2">Deep Mining</th></tr>
+                  <tr class="border-t border-teal-100"><td class="p-2.5 border-r border-teal-100">Whole seam of coal mined from the surface just below the soil layer.</td><td class="p-2.5">Long tunnels are dug deep underground to reach the desired coal bed.</td></tr>
+                </table>
+              </div>
+
+              <!-- Bonus Rabi vs Kharif -->
+              <div class="rounded-2xl border-2 border-emerald-100 overflow-hidden">
+                <div class="bg-emerald-100 px-4 py-2 font-extrabold text-emerald-900 text-sm">4. Bonus (Ch 9): Rabi vs Kharif Crops</div>
+                <table class="w-full text-xs sm:text-sm border-collapse">
+                  <tr class="bg-emerald-50/50 font-bold"><th class="p-2 border-r border-emerald-100 w-1/2">Rabi (Winter)</th><th class="p-2 w-1/2">Kharif (Summer)</th></tr>
+                  <tr class="border-t border-emerald-100"><td class="p-2.5 border-r border-emerald-100">October to March (Wheat, barley, oats, mustard).</td><td class="p-2.5">June to October (Rice, maize, cotton).</td></tr>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    /*****************************************************************
+     * 10. MAIN RENDER ROUTER & BOOTSTRAP
+     *****************************************************************/
+    function renderCurrentMode() {
+      if (state.mode === 'quiz') renderQuizMode();
+      else if (state.mode === 'match') renderMatchMode();
+      else if (state.mode === 'flashcards') renderFlashcardsMode();
+      else if (state.mode === 'boss') renderBossMode();
+      else if (state.mode === 'cheatsheet') renderCheatSheetMode();
+    }
+
+    // Initialize App
+    window.onload = function () {
+      initQuizQueue();
+      updateHUD();
+      renderCurrentMode();
+      initSync();
+    };
+  </script>
+</body>
+</html>
